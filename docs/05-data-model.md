@@ -55,8 +55,8 @@ interface KitchenEntity {
 interface Kitchen {
   id: string;
   name: string;                       // 「我家」「爸媽家」
-  timezone: string;                   // IANA 時區，例 'Asia/Taipei'、'America/Los_Angeles'；建立時取手機時區，可修改。到期日、「今天」、每日提醒、深夜判斷一律以它為準（2026-11-18 定案）
-  region: RegionCode;                 // 地區代碼，例 'TW'、'US'；對應 RegionProfile；決定季節分法、當季食材與節日料理。該地區還沒有當季資料時，只用依南北半球的四季（2026-11-18 定案）
+  timezone: string;                   // IANA 時區，例 'Asia/Taipei'、'America/Los_Angeles'；建立時取手機時區，可修改。到期日、「今天」、每日提醒、深夜判斷一律以它為準
+  region: RegionCode;                 // 地區代碼，例 'TW'、'US'；對應 RegionProfile；決定季節分法、當季食材與節日料理。該地區還沒有當季資料時，只用依南北半球的四季
   createdBy: string;
   updatedBy: string;
   // 邀請家人不在廚房上放共用連結：每一位家人各自一筆 Invite（type: 'household'，綁定 email、一次性），所有成員都可以發
@@ -1168,18 +1168,12 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 
 ## 設計備註
 
-- **為什麼 RecipeIngredient 內嵌？** 食譜的食材總是跟食譜一起讀寫，用 `jsonb` 內嵌較簡單；查詢用的 `ingredientIds` 另外存成陣列並建索引。
-- **衍生欄位一律標明來源**：見下方「衍生欄位」表。兩者不一致時以來源為準，衍生值可以隨時重算。
-- **只讀得到自己所屬廚房的資料**：由 RLS 保證；切換廚房時，食材與廚具畫面跟著換。
-- **不計次數**：沒有下廚次數、食材用量、廚具出場次數等統計欄位；社群上只顯示反應數，不顯示被收藏、被做過、記錄了幾道的次數；食譜的 `equipmentUsedIds` 只用來顯示裝備卡的拿手菜。
-- **語系與地區分開**（見 [15](15-regions-i18n.md)）：`Kitchen.region` 決定季節、節日與常見食材；`UserSettings.locale` 決定介面文字與 AI 回應的語言。住在日本、用中文介面的人是 `region: 'JP'`、`locale: 'zh-TW'`。
-- **三種文字，三種處理**：字典的顯示文字用 `LocalizedText`；介面文案、大廚的情境文案、通知與錯誤訊息放在語系檔，資料裡只存代碼與參數（例如通知只存 `type`、`actorId`，顯示時才組成句子）；使用者寫的內容（食譜、留言、對話）存原文、不翻譯，記下 `lang`。
-- **ID 一律用英文代碼**：字典、列舉值、事件名稱都用英文 kebab-case 或 snake_case，不用中文當代碼，換語系時不用動資料。
+- **為什麼 RecipeIngredient 內嵌？** 食譜的食材總是跟食譜一起讀寫，用 `jsonb` 內嵌較簡單；查詢用的 `ingredientIds` 另外存成陣列並建 GIN 索引。
+- **不計次數**：沒有下廚次數、食材用量、廚具出場次數等統計欄位；社群上只顯示反應數。食譜的 `equipmentUsedIds` 只用來顯示裝備卡的拿手菜。
 - **一筆資訊只放一個地方**：暱稱只在 `UserIdentity`、過敏原只在 `DietaryProfile`、照片的歸屬只記在 `Photo`、「照哪份食譜做」只用 `recipeId`。
-- **廚具字典與手法字典**：和食材字典一樣是全站共用、隨 App 版本發佈的靜態資料（放在 `packages/equipment`）。字典檔是唯一來源；每次部署時也匯入資料庫的唯讀表（`dict_*`），讓資料庫函式能用。內容與 JSON 格式見 [07 廚具與手法字典](07-equipment-techniques.md)。
-- **季節與當季資料依地區**：每個地區有自己的季節分法、當季食材與節日料理（台灣：3–5 春、6–8 夏、9–11 秋、12–2 冬，之後加 24 節氣；美國：依美國的節日如感恩節）。先做台灣與美國，其他地區沒有資料時只用依南北半球的四季、不推薦當季食材。季節在查詢時計算，不存在食譜上。
-- **Postgres 欄位**：`ingredients` / `steps` 等內嵌陣列用 `jsonb`；陣列欄位用 GIN 索引。
-- **Schema 演進**：只有 Supabase migration 一套，`shared-types` 是唯一事實來源。
+- **語系、地區與文字的存法**：見 [15](15-regions-i18n.md)。季節在查詢時依廚房地區計算，不存在食譜上。
+- **字典**：食材、廚具、手法等字典隨 App 版本發佈，字典檔是唯一來源；部署時也匯入資料庫的唯讀表（`dict_*`）。內容與格式見 [07](07-equipment-techniques.md)。
+- **資料庫結構的演進**：只用 Supabase migration 一套，TypeScript 型別由資料庫自動產生（見 [16](16-backend-implementation.md)）。
 
 ## 衍生欄位
 
