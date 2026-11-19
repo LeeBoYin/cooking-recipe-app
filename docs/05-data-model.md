@@ -786,7 +786,7 @@ interface AppConfig {                 // 後端設定，在管理後台的「系
     status: number;                   // 近況 60
     bio: number;                      // 自我介紹 100
   };
-  aiMonthlyBudgetUsd: number;         // AI 每月預算，預設 18（每月營運總額 US$20）；用到 80% 提醒管理員，100% 改用不用 AI 的推薦
+  aiMonthlyBudgetUsd: number;         // AI 每月預算，預設 18（每月營運總額 US$20）；用到 80% 提醒管理員並把首頁點子降級，100% 改用不用 AI 的推薦
   aiProtection: {                     // 用量保護；使用者看不到這些數值
     perMinute: number;                // 每人每分鐘呼叫上限，例 6
     perHour: number;                  // 每人每小時呼叫上限，例 60
@@ -803,9 +803,9 @@ interface AiRateCounter {             // 速率限制的計數，只存在後端
   count: number;                      // 原子遞增；(userId, window, windowStart) 唯一
 }
 
-interface BackgroundJob {             // 背景任務佇列（補標籤、食材正規化、難易度估計、照片清理…），只存在後端
+interface BackgroundJob {             // 背景任務佇列（發佈後整理、食材正規化、照片清理…），只存在後端
   id: string;
-  kind: 'tagging' | 'normalize' | 'difficulty' | 'import_retry' | 'storage_cleanup' | 'push';
+  kind: 'post_publish' | 'normalize' | 'import_retry' | 'storage_cleanup' | 'push';   // post_publish：補標籤、難易度、一句話一次做完
   payload: unknown;                   // 例：{ recipeId }、{ rawText }
   status: 'pending' | 'running' | 'done' | 'failed';
   attempts: number;                   // 失敗時退避重試，最多 5 次
@@ -843,7 +843,7 @@ interface AiUsageAlert {              // 異常使用紀錄，只存在後端；
 interface AiUsageRecord {             // 每次呼叫 AI 一筆，只存在後端；保留 13 個月，之後只留 AiSpendMonthly 的月加總
   id: string;
   userId: string;
-  task: string;                       // 'home' | 'chat' | 'dictation' | 'refine' | 'import' | 'tagging' | 'normalize' | ...
+  task: string;                       // 'home' | 'chat' | 'expand' | 'dictation' | 'refine' | 'import_url' | 'import_photo' | 'post_publish' | 'normalize' | 'easter_egg'
   model: string;                      // 'claude-opus-5-5' | 'claude-haiku-5-5'
   inputTokens: number;
   outputTokens: number;
