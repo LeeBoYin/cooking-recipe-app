@@ -1,7 +1,5 @@
 # 16 後端實作規格
 
-**日期**：2026-11-19
-**狀態**：✅ 已確認（決策 65），開始實作後端時依這份施工
 **用途**：把 [04 架構](04-architecture.md) 與 [05 資料模型](05-data-model.md) 的設計整理成可以照著做的清單：資料表、外鍵、權限、資料庫函式、Edge Functions、觸發器、排程、金鑰。設計的理由與欄位意義仍以 04、05 為準；兩邊有出入時，先回頭修正設計文件，再改這份。
 
 ---
@@ -26,10 +24,10 @@
 | 環境 | 用途 |
 |------|------|
 | 本機 | Supabase CLI，開發與寫 migration |
-| 測試 | 第二個 Supabase 免費專案；Netlify 預覽網址連到這裡；不放真實使用者資料（決策 63） |
+| 測試 | 第二個 Supabase 免費專案；Netlify 預覽網址連到這裡；不放真實使用者資料 |
 | 正式 | 第一個 Supabase 免費專案；Netlify 正式網址 |
 
-**擴充套件**（M0 前驗證免費方案都能啟用，見 [06 技術驗證](06-roadmap.md#開工前的技術驗證spikes)）
+**擴充套件**（M0 前驗證免費方案都能啟用，見 [06 技術驗證](06-roadmap.md#開工前的技術驗證)）
 
 | 套件 | 用途 |
 |------|------|
@@ -45,7 +43,7 @@
 |------|---------|------|
 | `ANTHROPIC_API_KEY` | Supabase 的秘密設定（正式、測試各一把） | 只有 `ai`、`mcp` 函式讀得到；Claude Console 另設每月上限 |
 | `VAPID_PRIVATE_KEY` | Supabase 的秘密設定 | 推播簽章；公開金鑰放前端的環境變數 |
-| Google 登入的用戶端 ID 與密鑰 | Supabase Auth 設定 | 只做 Google 與密碼登入（決策 64） |
+| Google 登入的用戶端 ID 與密鑰 | Supabase Auth 設定 | 只做 Google 與密碼登入 |
 | `FIRST_ADMIN_EMAIL` | Supabase 的秘密設定 | 第一位系統管理員 |
 | `SUPABASE_ACCESS_TOKEN`、專案 ID | GitHub 的秘密設定 | GitHub Actions 部署 migration 與 Edge Functions |
 | 資料庫連線字串（唯讀備份帳號） | GitHub 的秘密設定 | 每週備份用 |
@@ -115,7 +113,7 @@
 |-------|------|------|
 | `app_config` | M0 | 單列設定 |
 | `error_logs` | M0 | ADR-21 |
-| `ingredient_mappings` | M0 | 全站共用的食材對應快取（決策 65：只來自 AI 與你的審查） |
+| `ingredient_mappings` | M0 | 全站共用的食材對應快取（只來自 AI 與你的審查） |
 | `background_jobs` | M1a | 背景任務佇列 |
 | `ai_usage_records`、`ai_spend_monthly`、`ai_rate_counters`、`ai_usage_alerts` | M1a | AI 用量與保護 |
 | `admin_audit_logs` | M1a | 只能新增 |
@@ -123,9 +121,9 @@
 | `feedback`、`announcements` | M2 | |
 | `user_achievements`、`feature_flags` | M3 | |
 | `connected_ai_clients` | M4 | MCP |
-| `content_reports`、`blocks` | 公開上線前 | 決策 45、61 |
+| `content_reports`、`blocks` | 公開上線前 | 檢舉與封鎖 |
 
-### 字典（唯讀，決策 65）
+### 字典（唯讀）
 
 `dict_ingredients`、`dict_allergens`、`dict_dietary_restrictions`、`dict_techniques`、`dict_equipment_types`、`dict_preference_dimensions`、`dict_quiz_items`、`dict_regions`、`dict_base_dishes`，以及記錄目前版本的 `dict_version`。
 

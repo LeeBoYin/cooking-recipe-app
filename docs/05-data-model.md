@@ -2,9 +2,7 @@
 
 > 以 TypeScript 型別描述，對應後端 Postgres 的資料表。這份是**設計**：欄位的意義與理由；資料表清單、主鍵外鍵、權限表、資料庫函式等**實作細節**見 [16 後端實作規格](16-backend-implementation.md)。
 >
-> **命名**（決策 65）：這份文件用 camelCase 方便閱讀；資料庫與資料存取層一律用 snake_case（`cookedOn` → `cooked_on`），TypeScript 型別由 Supabase 從資料庫自動產生。
->
-> 2026-11-18（決策 46）：不做離線，資料一律存在雲端。原本的同步欄位（`rev`、`hlc`、`fieldClocks`）、同步佇列、同步游標、本地資料庫與食材事件都已拿掉。
+> **命名**：這份文件用 camelCase 方便閱讀；資料庫與資料存取層一律用 snake_case（`cookedOn` → `cooked_on`），TypeScript 型別由 Supabase 從資料庫自動產生。
 
 ## 共同欄位
 
@@ -14,18 +12,18 @@
 - **廚房資料**（食材、廚具）：用 `KitchenEntity`，屬於某個廚房，同廚房的成員共用。
 
 ```ts
-// ── 時間型別（D14）──
+// ── 時間型別──
 type Instant = string;     // 時間點，ISO 8601 含時區，例 '2026-11-18T18:30:00+08:00'
 type LocalDate = string;   // 某一天，'YYYY-MM-DD'，一律以「廚房的時區」解讀（到期日、購買日等）
 
-// ── 語系與地區（決策 59，見 15）──
+// ── 語系與地區（見 15）──
 type LanguageTag = string; // 任何語言代碼（BCP 47），例 'zh-TW'、'zh-CN'、'ja'、'en-US'；字典可以有任何語言的名稱與別名
 type UiLocale = 'zh-TW';   // App 介面實際支援的語言，是 LanguageTag 的一部分。目前只有繁中；加介面語言時擴充，例 'zh-TW' | 'ja'
 type RegionCode = string;  // 地區代碼（ISO 3166-1 alpha-2），例 'TW'、'US'、'JP'；和語系分開
 type LocalizedText = { 'zh-TW': string } & Record<LanguageTag, string>;     // 字典的顯示文字：繁中必填，其他語言選填；顯示時用使用者的介面語言，缺的退回繁中
 type LocalizedTerms = { 'zh-TW': string[] } & Record<LanguageTag, string[]>; // 別名與搜尋詞，可以放介面還不支援的語言（例：日文的「長ねぎ」、中國用語的「西紅柿」）；搜尋時比對所有語言
 
-type Visibility = 'private' | 'household' | 'friends';   // 只有自己／家人（和作者同屬任一廚房的人，決策 60）／家人＋好友
+type Visibility = 'private' | 'household' | 'friends';   // 只有自己／家人（和作者同屬任一廚房的人）／家人＋好友
 
 interface UserEntity {
   id: string;            // UUID v7，客戶端產生（樂觀更新時不用等伺服器）
@@ -61,7 +59,7 @@ interface Kitchen {
   region: RegionCode;                 // 地區代碼，例 'TW'、'US'；對應 RegionProfile；決定季節分法、當季食材與節日料理。該地區還沒有當季資料時，只用依南北半球的四季（2026-11-18 定案）
   createdBy: string;
   updatedBy: string;
-  // 邀請家人不在廚房上放共用連結：每一位家人各自一筆 Invite（type: 'household'，綁定 email、一次性），所有成員都可以發（決策 37）
+  // 邀請家人不在廚房上放共用連結：每一位家人各自一筆 Invite（type: 'household'，綁定 email、一次性），所有成員都可以發
   createdAt: Instant;
   updatedAt: Instant;
   deletedAt?: Instant;
@@ -74,7 +72,7 @@ interface KitchenMember {
   role: 'admin' | 'member';           // 管理者可以有多位；權限見 02「角色與權限」
   shareDietaryInfo: boolean;          // 讓同廚房的人讀取我的飲食限制檔案（加入時詢問，建議開啟）
   expiryAlerts: boolean;              // 這個廚房的到期提醒，預設 true
-  defaultDinersAll: boolean;          // 在這個廚房找點子時，預設「全家一起吃」；預設 false＝只有自己（決策 62）
+  defaultDinersAll: boolean;          // 在這個廚房找點子時，預設「全家一起吃」；預設 false＝只有自己
   joinedAt: Instant;
   leftAt?: Instant;                   // 離開或被移除；他加的食材顯示為「前成員」加的
   updatedAt: Instant;
@@ -86,9 +84,9 @@ interface HouseholdProfile extends KitchenEntity {   // 家人檔案：沒有帳
 ```
 
 - 同一位使用者在同一個廚房，同時間只會有一筆 `leftAt` 為空的成員紀錄（資料庫唯一性條件）。
-- 家人檔案的人之後有了自己的帳號時，**不自動轉換**（決策 61）：他用新帳號重新設定過敏原與飲食限制，管理者再手動刪除原本的家人檔案；舊食譜上「一起吃的人」仍指向原本的家人檔案。
+- 家人檔案的人之後有了自己的帳號時，**不自動轉換**：他用新帳號重新設定過敏原與飲食限制，管理者再手動刪除原本的家人檔案；舊食譜上「一起吃的人」仍指向原本的家人檔案。
 
-### DietaryProfile — 飲食限制檔案（D3）
+### DietaryProfile — 飲食限制檔案
 
 過敏原、不吃的食物、飲食限制獨立成一份，才能單獨分享給家人或好友，而不露出其他私人設定。
 
@@ -100,7 +98,7 @@ interface DietaryProfile {
   allergenIds: string[];              // 對應過敏原字典，硬性限制
   dislikeIngredientIds: string[];     // 對應食材字典，盡量避開
   dietaryRestrictionIds: string[];    // 對應飲食限制字典：飲食原則（素食、不吃牛…）、宗教與文化規則（清真、五辛素、印度教不吃牛…）
-  recurringRules?: { restrictionId: string; schedule: 'lunar_1_15' | 'weekly' | 'ramadan'; weekday?: number }[];   // 週期性規則，例：初一十五吃素；先維持這三種，有人需要別的再加（決策 61）
+  recurringRules?: { restrictionId: string; schedule: 'lunar_1_15' | 'weekly' | 'ramadan'; weekday?: number }[];   // 週期性規則，例：初一十五吃素；先維持這三種，有人需要別的再加
   noCookingAlcohol: boolean;          // 不用料理酒（米酒、紹興、味醂）
   updatedAt: Instant;
 }
@@ -108,7 +106,7 @@ interface DietaryProfile {
 
 - 誰能讀：本人；同廚房、且本人 `KitchenMember.shareDietaryInfo` 為真的成員；本人開啟「讓好友知道我的過敏原」時的好友（M4）。家人檔案的飲食限制，同廚房的成員都能讀。
 
-### UserIdentity — 公開身分（D4）
+### UserIdentity — 公開身分
 
 暱稱與頭像只存在這裡。家人、好友、通知、動態要顯示名字時都讀這一份。
 
@@ -176,7 +174,7 @@ interface Ingredient {
   name: LocalizedText;        // { 'zh-TW': '醬油' }
   aliases: LocalizedTerms;    // { 'zh-TW': ['生抽', '薄鹽醬油', '壺底油'] }
   family: string;             // 'soy-sauce-family'，統計與推薦時歸類用；不用來判斷能不能吃
-  traits: IngredientTrait[];  // 飲食特性，可以多個（決策 61），飲食限制依它排除；例：魚露 ['animal', 'seafood']、味醂 ['alcohol']、大蒜 ['allium']
+  traits: IngredientTrait[];  // 飲食特性，可以多個，飲食限制依它排除；例：魚露 ['animal', 'seafood']、味醂 ['alcohol']、大蒜 ['allium']
   category: IngredientCategory; // vegetable | meat | seafood | egg-dairy | tofu-bean | grain | seasoning | sauce | spice | ...
   defaultStorage: StorageZone;
   isPerishable: boolean;             // 是否為生鮮；決定「最近買的」標記
@@ -197,7 +195,7 @@ type IngredientCategory =
 
 type FlavorTag = 'salty' | 'sweet' | 'sour' | 'spicy' | 'umami' | 'aromatic' | 'bitter';
 
-type IngredientTrait =         // 飲食特性（決策 61）；新增特性只要擴充這份清單與字典資料
+type IngredientTrait =         // 飲食特性；新增特性只要擴充這份清單與字典資料
   | 'animal'                   // 任何動物來源（含魚露、柴魚、明膠、豬油）
   | 'meat' | 'pork' | 'beef' | 'lamb' | 'poultry'
   | 'seafood' | 'shellfish'
@@ -206,18 +204,18 @@ type IngredientTrait =         // 飲食特性（決策 61）；新增特性只�
   | 'allium';                  // 五辛：蔥、蒜、韭、洋蔥、蕗蕎
 ```
 
-### Allergen、DietaryRestriction — 過敏原與飲食限制字典（全站共用，唯讀；D13）
+### Allergen、DietaryRestriction — 過敏原與飲食限制字典（全站共用，唯讀）
 
 過敏原與飲食限制改成字典資料，不寫死在程式裡。新增一種（例如其他國家常見的過敏原、宗教飲食）只要更新字典。
 
-過敏原有上下層（決策 61）：使用者選「甲殼類（蝦蟹）」時，標了「蝦」或「蟹」的食材都會被排除；食材一律標最細的那一層，檢查時往上層比對。
+過敏原有上下層：使用者選「甲殼類（蝦蟹）」時，標了「蝦」或「蟹」的食材都會被排除；食材一律標最細的那一層，檢查時往上層比對。
 
 ```ts
 interface Allergen {
   id: string;                         // 例：'peanut'、'shellfish'、'sesame'
   name: LocalizedText;                // { 'zh-TW': '花生' }
   aliases: LocalizedTerms;
-  parentId?: string;                  // 上層（決策 61）：'shrimp'、'crab' → 'crustacean'；'walnut'、'almond' → 'tree-nut'。選上層就包含底下所有的；食材標最細的那層
+  parentId?: string;                  // 上層：'shrimp'、'crab' → 'crustacean'；'walnut'、'almond' → 'tree-nut'。選上層就包含底下所有的；食材標最細的那層
   regions?: RegionCode[];             // 哪些地區的標示規範列為主要過敏原；新手設定時依廚房地區排在前面
   displayLevelByRegion?: Partial<Record<RegionCode, 'self' | 'parent'>>;   // 這個地區的新手設定顯示這一層還是上層（例：台灣顯示「蝦蟹」、日本分開顯示「蝦」「蟹」）
 }
@@ -225,7 +223,7 @@ interface Allergen {
 interface DietaryRestriction {
   id: string;                         // 例：'vegetarian'、'vegan'、'pescatarian'、'no-beef'、'no-pork'
   name: LocalizedText;                // { 'zh-TW': '不吃牛' }
-  excludesTraits: IngredientTrait[];   // 排除有這些特性的食材（決策 61）；例：蛋奶素 ['meat', 'seafood']、五辛素 ['animal', 'allium']、清真 ['pork', 'alcohol']
+  excludesTraits: IngredientTrait[];   // 排除有這些特性的食材；例：蛋奶素 ['meat', 'seafood']、五辛素 ['animal', 'allium']、清真 ['pork', 'alcohol']
   excludesIngredientIds?: string[];    // 特性涵蓋不到的個別例外
 }
 ```
@@ -253,7 +251,7 @@ interface Temperature { value: number; unit: 'C' | 'F'; }
 - `cup` 代表美制杯與台灣量杯（237／240 毫升，視為相同）；`cup_jp`（200 毫升）與 `rice_cup`（約 180 毫升）分開記錄。
 - `tw_jin`（600 克）與 `cn_jin`（500 克）分開記錄。
 
-### RegionProfile — 地區設定字典（全站共用，唯讀；決策 59）
+### RegionProfile — 地區設定字典（全站共用，唯讀）
 
 一個地區的季節、節日與常見食材集中在這裡，隨 App 版本發佈。新增地區就是新增一筆 `RegionProfile` 並補上相關字典（步驟見 [15 地區與語系](15-regions-i18n.md)）。沒有 `RegionProfile` 的地區只用依南北半球的四季，不推薦當季食材與節日料理。
 
@@ -333,7 +331,7 @@ interface EquipmentType {
     default: OnboardingMode;
     byRegion?: Partial<Record<RegionCode, OnboardingMode>>;
   };
-  dishwasherSafe: 'yes' | 'partial' | 'no' | 'n/a';   // 能否進洗碗機；只在廚具卡上顯示清洗方式，不計算清洗負擔（決策 57）
+  dishwasherSafe: 'yes' | 'partial' | 'no' | 'n/a';   // 能否進洗碗機；只在廚具卡上顯示清洗方式，不計算清洗負擔
   iconKey: string;            // 新手盤點圖示牆、裝備圖鑑剪影
 }
 
@@ -361,7 +359,7 @@ interface KitchenEquipment extends KitchenEntity {   // 屬於廚房，同廚房
   status: 'active' | 'stored' | 'lent' | 'broken' | 'retired';   // lent、broken、retired 不列入推薦
   isHeirloom: boolean;        // 傳家寶
   story?: string;
-  // 不記使用次數與最後使用日（2026-11-18 願景調整：不讓使用者有使用次數的壓力）
+  // 不記使用次數與最後使用日：不讓使用者有使用次數的壓力
 }
 ```
 
@@ -388,13 +386,13 @@ interface PantryItem extends KitchenEntity {   // 屬於廚房，同廚房的成
 ```
 
 - 誰加的看 `createdBy`、誰移除的看 `removedBy`。兩位家人同時操作同一樣食材時，後送到的為準（只會是「有」或「沒有」，影響很小）。
-- 不記數量、用量、丟棄原因，也沒有購物清單與廚具使用事件（2026-11-18 願景調整）。食材事件 `PantryEvent` 在決策 46 不做離線後拿掉，改用上面幾個欄位。
+- 不記數量、用量、丟棄原因，也沒有購物清單與廚具使用事件。
 - 「最近買的」不存：由 `addedOn` 與字典的 `recentDays` 在查詢時判斷。
 
 
 ### Recipe — 食譜
 
-自己寫的內容只有這一種（決策 43）：**記錄一道菜就是新增一篇食譜**，像發一篇貼文。照片、心得、「值得記住的原因」與做法（食材、步驟）放在同一篇；做法選填。原本的料理收藏 `DishPost`（更早叫料理日誌 `CookLog`）已併入這裡。
+自己寫的內容只有這一種：**記錄一道菜就是新增一篇食譜**，像發一篇貼文。照片、心得、「值得記住的原因」與做法（食材、步驟）放在同一篇；做法選填。
 
 ```ts
 interface Recipe extends UserEntity {
@@ -408,13 +406,13 @@ interface Recipe extends UserEntity {
   cookedAt?: Instant;         // 記錄的那次料理的時間點（預設取第一張照片的拍攝時間）；匯入的食譜沒有
   cookedOn?: LocalDate;       // 衍生：依當時廚房時區算出的日期，建立後不變；時間軸、回顧用
   kitchenId?: string;         // 在哪個廚房做的
-  // 一起吃的人只有作者看得到（決策 60），放在 RecipePrivate.diners
+  // 一起吃的人只有作者看得到，放在 RecipePrivate.diners
   occasion?: 'solo' | 'family' | 'friends' | 'party';
   cookNotes: CookNote[];      // 又做了一次（P1）；不計次數、不顯示做過幾次
-  cookedDates: LocalDate[];   // 衍生：cookedOn 加上每一次「又做了一次」的日期；時間軸、季節回顧、一年前的今天都看它（決策 61）
+  cookedDates: LocalDate[];   // 衍生：cookedOn 加上每一次「又做了一次」的日期；時間軸、季節回顧、一年前的今天都看它
   // 做法（全部選填）
   servings?: number;
-  difficulty?: Difficulty;    // 難易度（決策 57）；不存烹煮分鐘數
+  difficulty?: Difficulty;    // 難易度；不存烹煮分鐘數
   ingredients: RecipeIngredient[];   // 內嵌陣列（Postgres 用 jsonb），不另開表；可以是空的
   steps: RecipeStep[];               // 可以是空的
   tips?: string;              // 料理筆記：心得以外的提醒與防雷（「培根很鹹，下次少放鹽」）
@@ -424,7 +422,7 @@ interface Recipe extends UserEntity {
   tags: string[];             // 自訂標籤（使用者自己的文字）
   equipmentTypeIds?: string[];  // 衍生：由步驟彙整，例：['rice-cooker']
   techniques?: TechniqueId[];   // 衍生：由步驟彙整
-  ingredientIds: string[];      // 衍生：這道菜用了哪些食材（D18），來源優先序見「衍生欄位」
+  ingredientIds: string[];      // 衍生：這道菜用了哪些食材，來源優先序見「衍生欄位」
   equipmentUsedIds?: string[];  // 這次用到的廚具（選填），裝備卡的「拿手菜」用；不計次數
   // AI 補的標籤，使用者可修正
   aiTags?: {
@@ -443,12 +441,12 @@ interface Recipe extends UserEntity {
   };
   safetyWarnings?: string[];  // 後端檢查未通過的項目（過敏原、舒肥組合不在表內等），App 中醒目顯示
   parentRecipeId?: string;    // 改編自哪一份（自己的或朋友的）；「記錄我做的版本」時填入
-  version: number;            // 做法每次修改加一；修訂紀錄見 10 的 D15
-  visibility: Visibility;     // 預設 'friends'（決策 42）；從網址匯入、拍照轉文字、外部 AI 建立的預設 'private'；草稿一律只有自己；household 進入家庭食譜本
-  // 季節不存：查詢時由 cookedOn 與廚房地區計算（D10）
+  version: number;            // 做法每次修改加一；舊版存在 RecipeRevision
+  visibility: Visibility;     // 預設 'friends'；從網址匯入、拍照轉文字、外部 AI 建立的預設 'private'；草稿一律只有自己；household 進入家庭食譜本
+  // 季節不存：查詢時由 cookedOn 與廚房地區計算
 }
 
-interface Difficulty {        // 難易度（決策 57），算法見 03
+interface Difficulty {        // 難易度，算法見 03
   ingredients: 1 | 2 | 3 | 4 | 5;   // 食材
   equipment: 1 | 2 | 3 | 4 | 5;     // 廚具
   time: 1 | 2 | 3 | 4 | 5;          // 時間（相對，不是分鐘）
@@ -469,19 +467,19 @@ interface CookNote {          // 又做了一次：日期＋一句話＋照片�
 type Highlight = 'first_time' | 'hosted_friends' | 'improved' | 'family_favorite' | 'festive' | 'make_again' | 'funny_flop';
 // 第一次做、招待朋友、改良成功、家人最愛、節日料理、值得再做、翻車也好笑
 
-type Diner =                  // 一起吃的人：一個清單、多種類型（D11）
+type Diner =                  // 一起吃的人：一個清單、多種類型
   | { type: 'member'; userId: string }                     // 同廚房的成員（M2），合併其飲食限制
   | { type: 'household'; householdProfileId: string }      // 家人檔案（M2），合併其飲食限制
   | { type: 'friend'; userId: string }                     // 一起吃的好友：只記在作者這裡，不通知對方、對方看不到
   | { type: 'text'; name: string };                        // 自由文字（M0）
 
 type RecipeSnapshot = Pick<Recipe, 'title' | 'story' | 'highlights' | 'cookedOn' | 'servings' | 'difficulty' | 'ingredients' | 'steps' | 'tips' | 'cuisineKeys' | 'tags' | 'equipmentTypeIds' | 'techniques'> & {
-  photoPaths: string[];       // 分享當下的公開照片副本：封面加最多 3 張，1080px（決策 64）；撤銷、管理員下架、食譜真正刪除時一起刪掉
+  photoPaths: string[];       // 分享當下的公開照片副本：封面加最多 3 張，1080px；撤銷、管理員下架、食譜真正刪除時一起刪掉
   authorName: string;         // 分享當下的作者名字
 };
 
 interface RecipeIngredient {
-  id: string;                 // 穩定 ID，調整順序也不會對錯（D12）
+  id: string;                 // 穩定 ID，調整順序也不會對錯
   rawText: string;            // 「醬油 2 大匙」原文
   ingredientId?: string;      // 解析後的標準食材
   amount?: number;
@@ -489,12 +487,12 @@ interface RecipeIngredient {
   unit?: UnitCode;            // 原始單位，顯示時依偏好換算
   optional: boolean;
   group?: string;             // 「醃料」「醬汁」分組
-  declaredAllergenIds?: string[];   // 對不到字典時，作者可以自己勾「含哪些過敏原」；勾過（可以是空的）就不再提醒成分不明（決策 61）
+  declaredAllergenIds?: string[];   // 對不到字典時，作者可以自己勾「含哪些過敏原」；勾過（可以是空的）就不再提醒成分不明
   declaredTraits?: IngredientTrait[];
 }
 
 interface RecipeStep {
-  id: string;                 // 穩定 ID：照片、烹飪模式進度、欄位合併都指向它（D12）
+  id: string;                 // 穩定 ID：照片、烹飪模式進度、欄位合併都指向它
   order: number;
   text: string;               // 文字中的溫度、份量轉成標記，例：「烤箱預熱 {{temp:180:C}}」，顯示時依偏好換算
   timerSeconds?: number;      // 烹飪模式的計時器；步驟照片是 Photo（ownerType: 'recipe_step'）
@@ -510,12 +508,12 @@ interface RecipeStep {
 interface RecipePrivate {             // 只有作者能讀寫（另開一張表，因為 RLS 以列為單位）
   recipeId: string;                   // 一對一
   userId: string;
-  dictation?: { text: string; lang: LanguageTag; at: Instant };   // 「用說的」口述原文（決策 58），重新整理、用說的改食譜時用
-  diners?: Diner[];                   // 一起吃的人（D11）；只有作者看得到，用來合併過敏原、提醒「上次請小美吃過這道了」（決策 60）
+  dictation?: { text: string; lang: LanguageTag; at: Instant };   // 「用說的」口述原文，重新整理、用說的改食譜時用
+  diners?: Diner[];                   // 一起吃的人；只有作者看得到，用來合併過敏原、提醒「上次請小美吃過這道了」
   updatedAt: Instant;
 }
 
-interface RecipeRevision {            // 做法的每一版（D15）；「用說的改食譜」與食譜版本（P1）都用它
+interface RecipeRevision {            // 做法的每一版；「用說的改食譜」與食譜版本（P1）都用它
   id: string;
   recipeId: string;
   version: number;                    // 對應 Recipe.version；(recipeId, version) 唯一
@@ -530,14 +528,14 @@ interface RecipeRevision {            // 做法的每一版（D15）；「用說
 
 ### Bookmark — 收藏
 
-朋友的食譜和大廚的點子都收在這裡（決策 54，取代原本的想做清單 `WishlistItem` 與 `RecipeBookmark`）。不分「想做、做過、只是喜歡」；做過的由 `cookedRecipeId` 自動判斷。
+朋友的食譜和大廚的點子都收在這裡。不分「想做、做過、只是喜歡」；做過的由 `cookedRecipeId` 自動判斷。
 
 ```ts
 interface Bookmark extends UserEntity {
   kind: 'friend_recipe' | 'chef_idea';
   recipeId?: string;          // friend_recipe：參照原作，不複製；原作改回只有自己或刪除時顯示「這道菜已收起來了」
   ownerId?: string;           // friend_recipe 的作者（刻意的重複，見衍生欄位）
-  titleSnapshot?: string;     // friend_recipe：收藏當下的菜名；原作看不到時只顯示這個與「這道菜已收起來了」，不保留做法（尊重作者，決策 60）
+  titleSnapshot?: string;     // friend_recipe：收藏當下的菜名；原作看不到時只顯示這個與「這道菜已收起來了」，不保留做法（尊重作者）
   idea?: {                    // chef_idea：點子當下的快照
     title: string;
     why?: string;
@@ -556,7 +554,7 @@ interface Bookmark extends UserEntity {
 interface ChefConversation extends UserEntity {   // 只有本人能讀；管理後台與產品數據都不讀內容；保留 30 天
   kitchenId: string;          // 對話時所在的廚房（決定用哪個廚房的食材與廚具）
   lang: UiLocale;             // 對話語言，大廚用這個語言回答
-  diners: Diner[];            // 這段對話「這餐誰一起吃」；預設只有自己（空的），說「今晚全家吃」或點選後才加人，之後的回合都沿用（決策 62）
+  diners: Diner[];            // 這段對話「這餐誰一起吃」；預設只有自己（空的），說「今晚全家吃」或點選後才加人，之後的回合都沿用
   summary?: string;           // 大廚整理的條件摘要，給之後的回合用（例：「想吃熱的；有筍子、半顆高麗菜」）
   turnCount: number;          // 最多 20 輪（用量保護）
   messages: ChefMessage[];    // 內嵌陣列（jsonb）；只由後端的 ai 函式在同一個動作中附加「使用者的話＋大廚的回應」，手機不直接改這個欄位，兩台裝置同時送也不會互相蓋掉
@@ -575,7 +573,7 @@ interface ChefMessage {
 
 ### PreferenceProfile — 口味地圖
 
-飲食偏好模型的完整設計見 [13 口味地圖](13-taste-preferences.md)（2026-11-18，取代原本的「口味小測驗」）。硬限制（過敏、宗教與文化、飲食原則、週期性規則）放在 `DietaryProfile`；這裡只放喜好與情境。
+飲食偏好模型的完整設計見 [13 口味地圖](13-taste-preferences.md)。硬限制（過敏、宗教與文化、飲食原則、週期性規則）放在 `DietaryProfile`；這裡只放喜好與情境。
 
 ```ts
 interface PreferenceProfile extends UserEntity {   // 只有本人能讀
@@ -587,7 +585,7 @@ interface PreferenceProfile extends UserEntity {   // 只有本人能讀
   }>;
   context: {
     cookingFrequency?: 'occasional' | 'weekly' | 'daily';   // 只用來調整點子難度，不顯示給任何人
-    timePreference?: 'quick' | 'normal' | 'relaxed';   // 願意花的時間：越快越好／普通／花時間也沒關係（決策 57，不用分鐘）
+    timePreference?: 'quick' | 'normal' | 'relaxed';   // 願意花的時間：越快越好／普通／花時間也沒關係（不用分鐘）
     cooksFor?: ('self' | 'partner' | 'family' | 'guests')[];
     adventure: number;                // 0–1，挑戰意願，「新挑戰」的冒險程度，預設 0.2（只存這裡）
     goals: string[];                  // 想學的方向
@@ -622,7 +620,7 @@ interface QuizItem {                  // 題庫，隨版本發佈
 ### Photo — 照片
 
 ```ts
-interface Photo extends UserEntity {   // 照片只記錄自己屬於誰；上層資料不存照片 ID（D5）。userId 是上傳的人；廚具照片（equipment）屬於廚房：同廚房成員都能管理，上傳的人刪除帳號時保留
+interface Photo extends UserEntity {   // 照片只記錄自己屬於誰；上層資料不存照片 ID。userId 是上傳的人；廚具照片（equipment）屬於廚房：同廚房成員都能管理，上傳的人刪除帳號時保留
   ownerType: 'recipe' | 'recipe_step' | 'recipe_source' | 'equipment' | 'avatar' | 'status';   // recipe_source：拍手寫食譜的原稿，原圖永遠保留，可見範圍跟著食譜
   ownerId: string;            // 對應的食譜、步驟、廚具、使用者、近況
   cookNoteId?: string;        // ownerType 為 recipe 時，屬於哪一次「又做了一次」
@@ -631,7 +629,7 @@ interface Photo extends UserEntity {   // 照片只記錄自己屬於誰；上�
   sortOrder: number;          // 同一個擁有者的照片順序
   isCover: boolean;           // 食譜的封面
   storagePath: string;        // Storage 路徑（原圖，已壓縮）；上傳完成才建立這筆資料
-  feedPath: string;           // 動態圖：長邊 1080px，動態與滿版顯示用（決策 64）
+  feedPath: string;           // 動態圖：長邊 1080px，動態與滿版顯示用
   thumbPath: string;          // 縮圖：長邊 400px，格子與清單用
   width: number;
   height: number;
@@ -649,7 +647,7 @@ interface ShareLink extends UserEntity {
   revokedAt?: string;         // 使用者自己撤銷
   takenDownAt?: string;       // 管理員下架
   ogImagePath?: string;       // LINE、FB 貼上時的預覽圖（public/{token}/og.webp），建立分享連結時產生
-  viewCount: number;          // 只給管理後台看，不顯示給作者（決策 62）
+  viewCount: number;          // 只給管理後台看，不顯示給作者
   saveCount: number;          // 被收藏或複製的次數；同上，只在後台
 }
 ```
@@ -659,7 +657,7 @@ interface ShareLink extends UserEntity {
 ```ts
 interface UserSettings extends UserEntity {   // 只有本人能讀
   // 暱稱在 UserIdentity；過敏原與飲食限制在 DietaryProfile；廚具在 KitchenEquipment
-  locale: UiLocale;           // 介面語言，預設 'zh-TW'（決策 59）；AI 的回應也用這個語言
+  locale: UiLocale;           // 介面語言，預設 'zh-TW'；AI 的回應也用這個語言
   chefPersona: 'warm' | 'coach' | 'punny' | 'minimal';   // 大廚模式：溫暖陪伴（預設）／熱血教練／冷笑話／簡潔
   currentKitchenId: string;   // 目前所在的廚房；食材、廚具、點子都以它為準
   householdSize: number;      // 預設份量（平常煮幾人份）；選了「這餐誰一起吃」時改用實際人數
@@ -669,19 +667,19 @@ interface UserSettings extends UserEntity {   // 只有本人能讀
   };
   notifications: {
     expiringAlert: boolean;     // 設了期限的食材到期提醒，預設 true
-    time: string;               // 到期提醒的時間，預設 '17:00'；每個廚房依它自己的時區，在那個時間各彙整一則（決策 61）
-    weekendInspiration: boolean;   // 週末靈感（每週六早上一則，預設 false，使用者自己開啟）；內容用最新的首頁點子或模板，不另外呼叫 AI（決策 64）
+    time: string;               // 到期提醒的時間，預設 '17:00'；每個廚房依它自己的時區，在那個時間各彙整一則
+    weekendInspiration: boolean;   // 週末靈感（每週六早上一則，預設 false，使用者自己開啟）；內容用最新的首頁點子或模板，不另外呼叫 AI
   };
   sound: boolean;
   haptics: boolean;
-  analyticsOptOut: boolean;   // 不參與使用統計（決策 47），預設 false；開啟後不記錄產品事件、不出現微問卷
+  analyticsOptOut: boolean;   // 不參與使用統計，預設 false；開啟後不記錄產品事件、不出現微問卷
   onboarding: {               // 新手引導進度（見 12），中途離開可以接著做
     completedSteps: string[];   // 例 ['vision', 'account', 'kitchen', 'taste']
     completedAt?: Instant;
   };
   seenHints: string[];        // 看過的一次性說明，例 'first_publish_visibility'（第一次發佈時的「這篇會出現在好友的首頁」）
   lastSurveyShownAt?: Instant;   // 上次出現微問卷的時間；每人每月最多一題（見 14）
-  social: {                   // M2 起（決策 36）
+  social: {                   // M2 起
     defaultVisibility: Visibility;              // 記錄食譜的預設可見範圍，預設 'friends'
     shareAchievementsToFeed: boolean;           // 成就是否出現在好友動態（M4）
     showAllergensToFriends: boolean;            // 讓好友知道我的過敏原（P2），預設 false
@@ -724,7 +722,7 @@ interface Entitlement {               // 只存在後端，前端唯讀
   userId: string;
   plan: 'free' | 'plus';
   validUntil?: string;
-  fairUseOverride?: { dailyUsd?: number; monthlyUsd?: number };   // 管理員個別調整時才有值，平常以 AppConfig 為準（D7）
+  fairUseOverride?: { dailyUsd?: number; monthlyUsd?: number };   // 管理員個別調整時才有值，平常以 AppConfig 為準
 }
 
 interface UserProfile {               // 帳號狀態，只存在後端（M1 起）
@@ -743,7 +741,7 @@ interface Invite {                    // 邀請（M1 起），只存在後端
   note?: string;                      // 例：「小美，大學同學」
   plan: 'free' | 'plus';              // 註冊後套用的方案；household 邀請固定 'free'
   tokenHash: string;                  // 邀請連結的雜湊值，不存原始值（連結只在產生當下顯示一次）
-  status: 'pending' | 'accepted' | 'revoked';   // 是否過期由 expiresAt 判斷，不存（D8）
+  status: 'pending' | 'accepted' | 'revoked';   // 是否過期由 expiresAt 判斷，不存
   type: 'system_admin' | 'household';   // system_admin：系統管理員（你）發出，建立自己的廚房；household：使用者邀請家人加入自己的廚房（不需核准）
   invitedBy: string;                  // 產生邀請的人（管理者或使用者）
   kitchenId?: string;                 // household 邀請要加入的廚房
@@ -752,7 +750,7 @@ interface Invite {                    // 邀請（M1 起），只存在後端
   linkRegeneratedAt?: string;         // 最近一次「重新產生連結」的時間；舊連結同時失效
   acceptedAt?: string;
   acceptedUserId?: string;
-  acceptedVia?: 'password' | 'google';   // 不做 Apple 登入（決策 64）
+  acceptedVia?: 'password' | 'google';   // 不做 Apple 登入
   createdAt: string;
 }
 
@@ -777,9 +775,9 @@ interface WaitlistEntry {             // 等候名單（P1），只存在後端
 interface AppConfig {                 // 後端設定，在管理後台的「系統設定」修改
   registrationMode: 'invite_only' | 'waitlist' | 'open';
   maxUsers: number;                   // 已註冊＋還沒過期的待接受邀請（expiresAt 在現在之後）合計上限，預設 30
-  softDeleteRetentionDays: number;    // 刪除的食譜與廚房保留多久可以復原，預設 30（決策 60）
-  photoLimits: { perRecipe: number; perCookNote: number };   // 每篇食譜最多 10 張（含步驟照）、每次又做了一次最多 3 張（決策 64）
-  textLimits: {                       // 使用者內容的長度上限（決策 61），資料庫與 API 都檢查
+  softDeleteRetentionDays: number;    // 刪除的食譜與廚房保留多久可以復原，預設 30
+  photoLimits: { perRecipe: number; perCookNote: number };   // 每篇食譜最多 10 張（含步驟照）、每次又做了一次最多 3 張
+  textLimits: {                       // 使用者內容的長度上限，資料庫與 API 都檢查
     title: number;                    // 80
     story: number;                    // 心得 2,000
     tips: number;                     // 料理筆記 1,000
@@ -788,8 +786,8 @@ interface AppConfig {                 // 後端設定，在管理後台的「系
     status: number;                   // 近況 60
     bio: number;                      // 自我介紹 100
   };
-  aiMonthlyBudgetUsd: number;         // AI 每月預算，預設 18（決策 48：每月營運總額 US$20）；用到 80% 提醒管理員，100% 改用不用 AI 的推薦
-  aiProtection: {                     // 用量保護（決策 44）；使用者看不到這些數值
+  aiMonthlyBudgetUsd: number;         // AI 每月預算，預設 18（每月營運總額 US$20）；用到 80% 提醒管理員，100% 改用不用 AI 的推薦
+  aiProtection: {                     // 用量保護；使用者看不到這些數值
     perMinute: number;                // 每人每分鐘呼叫上限，例 6
     perHour: number;                  // 每人每小時呼叫上限，例 60
     fairUse: Record<'free' | 'plus', { dailyUsd: number; monthlyUsd: number }>;   // 合理使用上限，依 M1 實測的每次成本訂
@@ -798,7 +796,7 @@ interface AppConfig {                 // 後端設定，在管理後台的「系
   };
 }
 
-interface AiRateCounter {             // 速率限制的計數（決策 44），只存在後端；每人每分鐘、每小時各一列，過期的由維護排程刪除
+interface AiRateCounter {             // 速率限制的計數，只存在後端；每人每分鐘、每小時各一列，過期的由維護排程刪除
   userId: string;
   window: 'minute' | 'hour';
   windowStart: Instant;               // 例：該分鐘或該小時的開始
@@ -824,7 +822,7 @@ interface IngredientMapping {         // 全站共用的食材對應快取（03 
   updatedAt: Instant;
 }
 
-interface UserIngredientMapping {     // 使用者自己的修正，只影響自己的資料（決策 65）；優先於全站對應
+interface UserIngredientMapping {     // 使用者自己的修正，只影響自己的資料；優先於全站對應
   userId: string;
   rawTextNormalized: string;
   ingredientId: string;
@@ -842,7 +840,7 @@ interface AiUsageAlert {              // 異常使用紀錄，只存在後端；
   resolution?: 'ok' | 'override_raised' | 'ai_paused';
 }
 
-interface AiUsageRecord {             // 每次呼叫 AI 一筆，只存在後端；保留 13 個月，之後只留 AiSpendMonthly 的月加總（決策 61）
+interface AiUsageRecord {             // 每次呼叫 AI 一筆，只存在後端；保留 13 個月，之後只留 AiSpendMonthly 的月加總
   id: string;
   userId: string;
   task: string;                       // 'home' | 'chat' | 'dictation' | 'refine' | 'import' | 'tagging' | 'normalize' | ...
@@ -856,7 +854,7 @@ interface AiUsageRecord {             // 每次呼叫 AI 一筆，只存在後�
   createdAt: string;
 }
 
-interface AiSpendMonthly {            // 本月累計（D20），每次 AI 呼叫時用原子更新加上去；預算與合理使用上限直接讀這張，不必加總明細
+interface AiSpendMonthly {            // 本月累計，每次 AI 呼叫時用原子更新加上去；預算與合理使用上限直接讀這張，不必加總明細
   month: string;                      // 'YYYY-MM'
   scope: 'global' | 'user';
   userId?: string;                    // scope 為 user 時
@@ -893,9 +891,9 @@ interface Announcement {              // 全站公告（M2）
   endsAt: string;
 }
 
-interface ProductEvent {              // 產品事件（M1a 起；決策 23、47），只存在自己的資料庫，不用第三方分析工具。事件清單見 14
+interface ProductEvent {              // 產品事件（M1a 起），只存在自己的資料庫，不用第三方分析工具。事件清單見 14
   id: string;
-  analyticsId: string;                // 每人一組隨機的分析 ID（決策 61），不是使用者 ID；對照表 AnalyticsIdentity 只有後端讀得到，刪除帳號時刪掉對照就等於匿名化
+  analyticsId: string;                // 每人一組隨機的分析 ID，不是使用者 ID；對照表 AnalyticsIdentity 只有後端讀得到，刪除帳號時刪掉對照就等於匿名化
   sessionId: string;                  // 一次打開 App（30 分鐘內算同一次）
   name: string;                       // 「區域.動作」，例 'record.publish'、'suggestion.dismissed'；只能用 14 的事件清單
   screen?: string;
@@ -919,7 +917,7 @@ interface PushSubscription {          // 推播訂閱，每台裝置一筆，只
   failureCount: number;               // 連續失敗次數；端點回應已失效或連續失敗 5 次就刪除
 }
 
-interface ErrorLog {                  // 錯誤紀錄（決策 63，ADR-21），只有後端與後台讀得到；保留 90 天
+interface ErrorLog {                  // 錯誤紀錄（ADR-21），只有後端與後台讀得到；保留 90 天
   id: string;
   source: 'client' | 'edge_function' | 'cron' | 'backup';
   kind: string;                       // 錯誤類型，例 'photo_upload_failed'、'ai_timeout'、'rls_denied'
@@ -959,8 +957,8 @@ interface PublicProfile {             // 個人料理頁；暱稱與頭像讀 Us
   userId: string;
   bio?: string;                       // 一句話自我介紹
   status?: { text: string; updatedAt: Instant };   // 近況
-  sections: Record<'status' | 'taste' | 'recipes' | 'signatures' | 'achievements' | 'highlights', boolean>;   // 不放廚具：廚具屬於廚房（決策 62）
-  signatureRecipeIds?: string[];      // 自己挑的拿手菜（M4，決策 62），最多 5 道
+  sections: Record<'status' | 'taste' | 'recipes' | 'signatures' | 'achievements' | 'highlights', boolean>;   // 不放廚具：廚具屬於廚房
+  signatureRecipeIds?: string[];      // 自己挑的拿手菜（M4），最多 5 道
   friendLinkTokenHash: string;        // 好友連結，可重新產生
 }
 
@@ -989,7 +987,7 @@ interface FriendPreference {          // 單方面的設定，對方看不到
   muteFeed: boolean;                  // 不看動態
 }
 
-interface Block {                     // 封鎖：公開上線前才做（決策 61），初期不建這張表
+interface Block {                     // 封鎖：公開上線前才做，初期不建這張表
   userId: string;
   blockedUserId: string;
   createdAt: string;
@@ -998,7 +996,7 @@ interface Block {                     // 封鎖：公開上線前才做（決策
 interface Reaction {                  // 料理反應
   id: string;
   userId: string;
-  recipeId: string;                   // 只有食譜一種對象，直接用外鍵（D16 因合併而解決）
+  recipeId: string;                   // 只有食譜一種對象，直接用外鍵
   kind: 'yummy' | 'want_to_learn' | 'amazing' | 'fire';   // 😋 🤩 👏 🔥
   createdAt: string;
 }
@@ -1007,13 +1005,13 @@ interface Comment {
   id: string;
   userId: string;
   recipeId: string;
-  parentCommentId?: string;           // 回覆哪一則留言；只有一層：回覆不能再被回覆（決策 60）
+  parentCommentId?: string;           // 回覆哪一則留言；只有一層：回覆不能再被回覆
   text: string;
   createdAt: Instant;
   deletedAt?: Instant;                // 留言者或內容擁有者都能刪除；被刪的留言如果有回覆，顯示「這則留言已刪除」並保留回覆
 }
 
-// 收藏見上方 Bookmark（決策 54，取代原本的 RecipeBookmark 與 WishlistItem）
+// 收藏見上方 Bookmark
 
 interface FriendShare {               // 分享給好友
   id: string;
@@ -1023,7 +1021,7 @@ interface FriendShare {               // 分享給好友
   message?: string;
   createdAt: Instant;
   readAt?: Instant;
-  revokedAt?: Instant;                // 作者收回（決策 61）；作者刪除食譜、移除好友時也自動填上
+  revokedAt?: Instant;                // 作者收回；作者刪除食譜、移除好友時也自動填上
 }
 
 type NotificationType =
@@ -1041,7 +1039,7 @@ interface Notification {
   readAt?: string;
 }
 
-interface ContentReport {             // 檢舉（公開上線前才做，決策 45），送到管理後台；同時在 Recipe 加 takenDownAt、通知加 content_taken_down
+interface ContentReport {             // 檢舉（公開上線前才做），送到管理後台；同時在 Recipe 加 takenDownAt、通知加 content_taken_down
   id: string;
   reporterId: string;
   target: { type: 'recipe' | 'comment' | 'profile'; id: string };
@@ -1118,7 +1116,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 
 **同時修改**
 
-- 修改只送有改的欄位（[04 ADR-02](04-architecture.md#adr-02雲端為唯一的資料來源不做離線決策-46)）。
+- 修改只送有改的欄位（[04 ADR-02](04-architecture.md#adr-02雲端為唯一的資料來源不做離線)）。
 - 食譜的做法是整包的 `jsonb`，兩台裝置同時改會互相蓋掉，所以儲存時帶上讀取時的 `updatedAt`；不一致就不儲存，請使用者看過最新版再改（「這篇在別的地方改過了」）。
 
 **刪除**
@@ -1137,7 +1135,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 
 - 字典的 ID 一旦發佈就不刪除、不改名。要合併或淘汰時，在字典裡標 `deprecated: true` 與 `replacedBy`，顯示與計算時自動對應到新的 ID。
 - 使用者資料中出現字典裡找不到的 ID 時（例如舊版 App 寫入），當成「對應不到」處理，保留原文，不讓畫面壞掉。
-- 字典隨 App 版本發佈，不放資料庫（決策 61）：修改經過程式碼審查，安全資料不會被隨手改動。App 與後端可能暫時用不同版本的字典，雙方遇到不認得的 ID 都照上一條處理；字典檔帶版本號，後端記錄每次請求用的版本，方便追查。
+- 字典隨 App 版本發佈，不放資料庫：修改經過程式碼審查，安全資料不會被隨手改動。App 與後端可能暫時用不同版本的字典，雙方遇到不認得的 ID 都照上一條處理；字典檔帶版本號，後端記錄每次請求用的版本，方便追查。
 
 **排程維護**
 
@@ -1151,17 +1149,17 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 最近買的 | 同上，依 `added_on` 與字典的 `recentDays` 判斷 |
 | 設了期限、快到期的 | 同上，篩有 `expires_at` 的，依比例計算提醒狀態；計算函式放在 `packages/core`，排程推播也用同一個 |
 | 最近移除（可復原） | `pantry_items (kitchen_id, removed_at)` |
-| 常買清單 | `pantry_items (kitchen_id, ingredient_id, added_on)`：過去 90 天加入過的食材依筆數排序（已移除的也算；再加入已有的食材只更新日期，所以一筆代表一段「有」的期間）；次數不顯示（決策 62）。新廚房用 `RegionProfile.commonPantryIngredientIds` |
+| 常買清單 | `pantry_items (kitchen_id, ingredient_id, added_on)`：過去 90 天加入過的食材依筆數排序（已移除的也算；再加入已有的食材只更新日期，所以一筆代表一段「有」的期間）；次數不顯示。新廚房用 `RegionProfile.commonPantryIngredientIds` |
 | 食譜時間軸 | `recipes.cooked_dates`（GIN 索引）展開成「食譜＋日期」，只取 published、未刪除；又做了一次的那天顯示那次的照片與一句話 |
 | 草稿匣 | `recipes (user_id, status)` 取 draft |
 | 依標籤瀏覽（第一次做的…） | `recipes.highlights`（GIN 索引） |
 | 季節回顧 | 依 `cooked_dates` 範圍取出後，用廚房地區的季節分法分組（不另存季節） |
-| 搜尋食譜（名稱、心得、食材原文、標籤） | PGroonga 全文索引（能斷中文、日文詞，決策 60），建在 `recipes` 的 `title`、`story`、`ingredients` 原文與 `tags`；收藏用 `Bookmark.titleSnapshot` 與原作一起查。食材名稱先用字典的別名（所有語言）對到 ID，再用 `ingredient_ids` 查 |
+| 搜尋食譜（名稱、心得、食材原文、標籤） | PGroonga 全文索引（能斷中文、日文詞），建在 `recipes` 的 `title`、`story`、`ingredients` 原文與 `tags`；收藏用 `Bookmark.titleSnapshot` 與原作一起查。食材名稱先用字典的別名（所有語言）對到 ID，再用 `ingredient_ids` 查 |
 | 手邊食材能做的食譜 | `recipes.ingredient_ids`（GIN 索引）比對手邊的食材 |
 | 收藏的材料齊了嗎 | `bookmarks.ingredient_ids`（GIN 索引）比對食材，只看還沒做過的（`cooked_recipe_id` 為空） |
 | 裝備卡的拿手菜 | `recipes.equipment_used_ids`（GIN 索引，只含自己的食譜） |
 | 朋友的動態 | `recipes (user_id, published_at DESC)`，部分索引只含 `status = 'published' AND deleted_at IS NULL`；搭配好友與同廚房的判斷函式。往下載入時用上一頁最後一篇的 `(published_at, id)` 當游標，不用頁碼：有人發新食譜時不會重複或漏掉 |
-| 是不是好友、是不是同廚房（RLS 每次都要判斷） | `friendships (user_low_id, user_high_id)` 唯一、`friendships (user_high_id)`；`kitchen_members (user_id) WHERE left_at IS NULL`；判斷寫成 `SECURITY DEFINER` 的資料庫函式（D21） |
+| 是不是好友、是不是同廚房（RLS 每次都要判斷） | `friendships (user_low_id, user_high_id)` 唯一、`friendships (user_high_id)`；`kitchen_members (user_id) WHERE left_at IS NULL`；判斷寫成 `SECURITY DEFINER` 的資料庫函式 |
 | 一篇食譜的反應與留言 | `reactions (recipe_id)`、`comments (recipe_id, created_at) WHERE deleted_at IS NULL` |
 | 我的收藏 | `bookmarks (user_id, created_at)`；被收藏次數用 `bookmarks (recipe_id)` |
 | 通知鈴鐺 | `notifications (user_id, created_at DESC)`，未讀數用 `WHERE read_at IS NULL` 的部分索引 |
@@ -1173,17 +1171,17 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 - **為什麼 RecipeIngredient 內嵌？** 食譜的食材總是跟食譜一起讀寫，用 `jsonb` 內嵌較簡單；查詢用的 `ingredientIds` 另外存成陣列並建索引。
 - **衍生欄位一律標明來源**：見下方「衍生欄位」表。兩者不一致時以來源為準，衍生值可以隨時重算。
 - **只讀得到自己所屬廚房的資料**：由 RLS 保證；切換廚房時，食材與廚具畫面跟著換。
-- **不計次數**（決策 62）：沒有下廚次數、食材用量、廚具出場次數等統計欄位；社群上只顯示反應數，不顯示被收藏、被做過、記錄了幾道的次數；食譜的 `equipmentUsedIds` 只用來顯示裝備卡的拿手菜。
-- **語系與地區分開**（決策 59，見 [15](15-regions-i18n.md)）：`Kitchen.region` 決定季節、節日與常見食材；`UserSettings.locale` 決定介面文字與 AI 回應的語言。住在日本、用中文介面的人是 `region: 'JP'`、`locale: 'zh-TW'`。
+- **不計次數**：沒有下廚次數、食材用量、廚具出場次數等統計欄位；社群上只顯示反應數，不顯示被收藏、被做過、記錄了幾道的次數；食譜的 `equipmentUsedIds` 只用來顯示裝備卡的拿手菜。
+- **語系與地區分開**（見 [15](15-regions-i18n.md)）：`Kitchen.region` 決定季節、節日與常見食材；`UserSettings.locale` 決定介面文字與 AI 回應的語言。住在日本、用中文介面的人是 `region: 'JP'`、`locale: 'zh-TW'`。
 - **三種文字，三種處理**：字典的顯示文字用 `LocalizedText`；介面文案、大廚的情境文案、通知與錯誤訊息放在語系檔，資料裡只存代碼與參數（例如通知只存 `type`、`actorId`，顯示時才組成句子）；使用者寫的內容（食譜、留言、對話）存原文、不翻譯，記下 `lang`。
 - **ID 一律用英文代碼**：字典、列舉值、事件名稱都用英文 kebab-case 或 snake_case，不用中文當代碼，換語系時不用動資料。
 - **一筆資訊只放一個地方**：暱稱只在 `UserIdentity`、過敏原只在 `DietaryProfile`、照片的歸屬只記在 `Photo`、「照哪份食譜做」只用 `recipeId`。
-- **廚具字典與手法字典**：和食材字典一樣是全站共用、隨 App 版本發佈的靜態資料（放在 `packages/equipment`）。字典檔是唯一來源；每次部署時也匯入資料庫的唯讀表（`dict_*`），讓資料庫函式能用（決策 65）。內容與 JSON 格式見 [07 廚具與手法字典](07-equipment-techniques.md)。
+- **廚具字典與手法字典**：和食材字典一樣是全站共用、隨 App 版本發佈的靜態資料（放在 `packages/equipment`）。字典檔是唯一來源；每次部署時也匯入資料庫的唯讀表（`dict_*`），讓資料庫函式能用。內容與 JSON 格式見 [07 廚具與手法字典](07-equipment-techniques.md)。
 - **季節與當季資料依地區**：每個地區有自己的季節分法、當季食材與節日料理（台灣：3–5 春、6–8 夏、9–11 秋、12–2 冬，之後加 24 節氣；美國：依美國的節日如感恩節）。先做台灣與美國，其他地區沒有資料時只用依南北半球的四季、不推薦當季食材。季節在查詢時計算，不存在食譜上。
 - **Postgres 欄位**：`ingredients` / `steps` 等內嵌陣列用 `jsonb`；陣列欄位用 GIN 索引。
 - **Schema 演進**：只有 Supabase migration 一套，`shared-types` 是唯一事實來源。
 
-## 衍生欄位（D10）
+## 衍生欄位
 
 為了查詢效率，下列欄位是由其他資料算出來後存下來的。規則：**不直接修改**；來源改變時重算；兩者不一致時以來源為準。**由儲存食譜等資料庫函式計算**，不信任手機送來的值；需要字典的計算讀資料庫裡的字典唯讀表（決策 65，見 16）。
 
@@ -1207,12 +1205,13 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 
 上線後依實際使用再看的事。類型：**擴充**＝之後可以加的功能；**優化**＝讓現有的更好；**檢討**＝回頭確認當初的決定還對不對。全部項目依時間整理在 [08 第四部分](08-open-items.md#四之後可以擴充優化或檢討)。
 
-| 項目 | 類型 | 什麼時候看 | 怎麼判斷 | 相關決策 |
-|------|------|-----------|---------|---------|
-| `Bookmark` 的分類 | 擴充 | 需要收藏分類時 | 加 `collectionIds`，另開 `BookmarkCollection` 表 | 54 |
-| 個人化的難易度 | 擴充 | 做「對你來說」的難易度時 | 不改 `Recipe.difficulty`，在讀取時依使用者的下廚經驗換算，或另存在 `TasteProfileSnapshot` | 57 |
-| 口述原文的保存期限 | 檢討 | 公開上線前 | `Recipe.dictation` 目前長期保存，評估整理完一段時間後刪除，只留結構化欄位 | 58 |
-| 食材的地區取得難易度 | 擴充 | AI 判斷不準時（見 03） | 加 `Ingredient.availability: Partial<Record<RegionCode, 'common' \| 'specialty' \| 'rare'>>` | 59 |
-| 手法的地區 | 擴充 | 少數地區手法常被推給不熟的人時 | 加選填的 `Technique.regions`，和廚具一樣 | 59 |
-| 地區的節氣 | 擴充 | 台灣的節氣靈感上線時 | `RegionProfile.usesSolarTerms` 打開，補 24 節氣的日期換算與對應菜色 | 59 |
-| P2 功能的資料結構 | 擴充 | 開始做靈感挑戰、共煮挑戰、年度代表作時 | 這三個功能還沒有資料結構（決策 62）：挑戰本身、誰參加、哪篇食譜是為它做的；年度代表作 AI 寫的文字存在哪裡、能不能重新產生 | 62 |
+| 項目 | 類型 | 什麼時候看 | 怎麼判斷 |
+|------|------|-----------|---------|
+| `Bookmark` 的分類 | 擴充 | 需要收藏分類時 | 加 `collectionIds`，另開 `BookmarkCollection` 表 |
+| 個人化的難易度 | 擴充 | 做「對你來說」的難易度時 | 不改 `Recipe.difficulty`，在讀取時依使用者的下廚經驗換算，或另存在 `TasteProfileSnapshot` |
+| 口述原文的保存期限 | 檢討 | 公開上線前 | `RecipePrivate.dictation` 目前長期保存，評估整理完一段時間後刪除，只留結構化欄位 |
+| 食材的地區取得難易度 | 擴充 | AI 判斷不準時（見 03） | 加 `Ingredient.availability: Partial<Record<RegionCode, 'common' \| 'rare'>>` |
+| 手法的地區 | 擴充 | 少數地區手法常被推給不熟的人時 | 加選填的 `Technique.regions`，和廚具一樣 |
+| 地區的節氣 | 擴充 | 台灣的節氣靈感上線時 | `RegionProfile.usesSolarTerms` 打開，補 24 節氣的日期換算與對應菜色 |
+| P2 功能的資料結構 | 擴充 | 開始做靈感挑戰、共煮挑戰、年度代表作時 | 這三個功能還沒有資料結構：挑戰本身、誰參加、哪篇食譜是為它做的；年度代表作 AI 寫的文字存在哪裡、能不能重新產生 |
+| `FeatureFlag.enabledUserIds` | 優化 | 開放註冊後 | 目前是陣列，人多了改成關聯表 |
