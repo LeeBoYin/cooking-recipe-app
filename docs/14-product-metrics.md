@@ -71,7 +71,7 @@
 |------|------|------|
 | App | `app.open`（回到前景；30 分鐘內算同一次）、`screen.view` | `screen`；`installed`（是否加到主畫面）、`platform` |
 | 記錄 | `record.start`、`record.dictation_used`、`record.ai_filled`、`record.publish`、`record.abandon`、`record.draft_saved`、`record.draft_published`、`recipe.cook_again`、`recipe.refine_by_voice` | `entry`（＋記錄、烹飪模式、收藏、點子、又做了一次）；`photoCount`、`hasSteps`、`visibility`、`highlightCount`；`fieldsEditedAfterAi`（作者改了哪幾類 AI 填的欄位，只記類別，不記內容）；放棄時的 `step` |
-| 食譜 | `recipe.cooking_mode_start`、`recipe.cooking_mode_finish`、`recipe.missing_shared`、`recipe.import` | `importType`（網址、拍照） |
+| 食譜 | `recipe.cooking_mode_start`、`recipe.cooking_mode_finish`、`recipe.shopping_list_shared`、`recipe.import` | `importType`（網址） |
 | 靈感 | `chat.start`、`chat.message_sent`、`chat.ingredients_added`、`suggestion.shown`、`suggestion.opened`、`suggestion.bookmarked`、`suggestion.recorded`、`suggestion.dismissed` | `starter`（快速開頭或自己打字）、`turn`、`count`、`source`（首頁、對話）、`slot`、`dismissReason`；**不記對話內容** |
 | 食材 | `pantry.add`、`pantry.remove`、`pantry.restore`、`pantry.expiry_set`、`pantry.stocktake` | `method`（快速新增、搜尋、盤點）、`count` |
 | 社群 | `friend.added`、`feed.end_reached`、`social.reaction`、`social.comment`、`social.bookmark`、`social.version_recorded`、`social.share_to_friend` | `via`（好友連結、QR Code、邀請） |
@@ -160,5 +160,5 @@
 | 從開始記錄到發佈的時間 | 檢討 | 「用說的」上線一個月後 | 目標是累的時候 30 秒內能發佈；比較用說的和自己打的差距 |
 | 有做法的食譜比例 | 檢討 | 「用說的」上線三個月後 | 「用說的」要解決「朋友的拿手菜學不到」：有做法的比例沒有提高，就要重新想 |
 | 難易度的調整率 | 檢討 | 難易度自動估上線三個月後 | 作者調整 AI 估的難易度的比例與方向 |
-| 你缺這幾樣的勾選修改 | 檢討 | M1 後 | 使用者常改預先勾選的項目，代表 App 記的食材和實際差很多，要檢討食材的維護方式 |
+| 列出要買的勾選修改 | 檢討 | M1 後 | 使用者常改預先勾選的項目，代表 App 記的食材和實際差很多；看要不要改成不預先勾選 |
 | 收藏變成「做過了」的比例 | 檢討 | M2 後 | 收藏很多、做過的很少時，檢討收藏提醒的設計 |

@@ -64,6 +64,7 @@
 | `kitchens` | `id` | `created_by` → 使用者（佔位） | M0 |
 | `kitchen_members` | `id` | `kitchen_id`（連動）；`user_id`（連動） | M0 |
 | `household_profiles` | `id` | `kitchen_id`（連動） | M2 |
+| `kitchen_join_codes` | `id` | `kitchen_id`（連動）；`created_by`、`used_by` → 使用者（空值） | M2 |
 | `dietary_profiles` | `id` | `user_id`（連動）或 `household_profile_id`（連動） | M0 |
 | `entitlements` | `user_id` | `auth.users`（連動） | M1a |
 | `invites` | `id` | `invited_by`（佔位）；`kitchen_id`（連動）；`accepted_user_id`（空值） | M1a |
@@ -119,7 +120,7 @@
 | `admin_audit_logs` | M1a | 只能新增 |
 | `product_events`、`analytics_identities`、`product_metrics_monthly` | M1a | 產品數據 |
 | `feedback`、`announcements` | M2 | |
-| `user_achievements`、`feature_flags` | M3 | |
+| `feature_flags` | M3 | |
 | `connected_ai_clients` | M4 | MCP |
 | `content_reports`、`blocks` | 公開上線前 | 檢舉與封鎖 |
 
@@ -141,6 +142,7 @@
 | `dietary_profiles` | 本人；家人（本人選擇分享時）；家人檔案的由同廚房成員 | 本人；家人檔案的由廚房管理者 | 同新增 | 同新增 |
 | `kitchens` | 成員 | 函式 | 管理者 | 函式（最後一位成員離開） |
 | `kitchen_members` | 同廚房成員 | 函式（接受邀請） | 管理者改角色；本人改自己的提醒設定 | 函式（離開、移除） |
+| `kitchen_join_codes` | 無（只經函式） | 函式 | 函式 | 函式 |
 | `household_profiles` | 成員 | 管理者 | 管理者 | 管理者 |
 | `pantry_items`、`kitchen_equipment` | 成員 | 成員（食材經 `add_pantry_items`） | 成員 | 成員 |
 | `recipes` | `can_view_recipe`：作者；家人（household、friends）；好友（friends）；分享給他且沒收回的人。草稿只有作者 | 作者 | 作者（經 `save_recipe`） | 作者（軟刪除） |
@@ -167,10 +169,12 @@
 | `record_cook_again` | 作者 | 新增一筆「又做了一次」，更新 `cooked_dates` |
 | `add_pantry_items` | 廚房成員 | 一次加入多樣食材：已經有的只更新日期（保留較早的期限），沒有的新增；套用使用者自己的對應優先、全站對應其次 |
 | `remove_pantry_item`、`restore_pantry_item` | 廚房成員 | 移除與復原 |
-| `merge_kitchen_into` | 兩邊都是管理者的人 | 把一個廚房的食材與廚具搬到另一個，同一種食材合併 |
+| `merge_kitchen_into` | 來源廚房的管理者，且是目標廚房的成員 | 把一個廚房的食材與廚具搬到另一個，同一種食材合併 |
 | `leave_kitchen` | 成員 | 離開；最後一位管理者要先指定接手者；最後一位成員離開時軟刪除廚房 |
+| `create_kitchen_join_code` | 廚房成員 | 產生 6 碼代碼（只回傳一次，資料庫存雜湊），10 分鐘後到期；同一個成員再產生時，舊的作廢 |
+| `join_kitchen_by_code` | 已登入的人 | 先回傳廚房名稱與成員給使用者確認，確認後加入（成員身分）、標記代碼已用、通知廚房成員；每人失敗 5 次暫停 15 分鐘（記在速率計數表）；自己的空廚房一併刪除 |
 | `set_member_role` | 廚房管理者 | 改角色；不能讓廚房沒有管理者 |
-| `create_household_invite` | 廚房成員 | 檢查人數上限（含還沒過期的邀請）後建立家人邀請 |
+| `create_invite` | 廚房成員（廚房邀請）；系統管理員經 `admin` 函式（兩種都能發） | 檢查人數上限（含還沒過期的邀請）後建立邀請；`type` 為 `kitchen` 時檢查邀請者是那個廚房的成員。對方已經是使用者時，改成產生一則加入廚房的通知 |
 | `delete_account` | 本人 | 依 04 的規則處理所有資料，參照改成「已刪除的使用者」，排入照片清理的背景任務 |
 | `search_recipes` | 已登入的人 | PGroonga 查詢，只回傳讀得到的食譜與收藏 |
 | `feed_page` | 已登入的人 | 朋友與家人的動態，用 `(published_at, id)` 游標分頁 |
@@ -185,8 +189,8 @@
 
 | 函式 | 誰能呼叫 | 做什麼 |
 |------|---------|-------|
-| `ai` | 已登入、啟用中的使用者 | 任務：首頁點子、對話、展開做法、口述整理、用說的改食譜、匯入（網址、手寫照片）、發佈後整理（標籤、難易度、一句話）、正規化、靈感彩蛋。每個任務的模型與 effort 讀設定檔（見 [03 模型選擇](03-ai-design.md#模型選擇)）。依序檢查帳號狀態、速率、合理使用上限、預算；口味檔案過期時先用 `core` 重算；組 prompt、呼叫 Claude、驗證輸出、過敏原與安全二次檢查、寫用量紀錄 |
-| `accept-invite` | 持有邀請連結的人 | 新註冊（密碼）或已有帳號的人接受家人邀請；建立帳號與初始資料（見第八節） |
+| `ai` | 已登入、啟用中的使用者 | 任務：首頁點子、對話、展開做法、口述整理、用說的改食譜、從網址匯入、發佈後整理（標籤、難易度、一句話）、正規化、靈感彩蛋。每個任務的模型與 effort 讀設定檔（見 [03 模型選擇](03-ai-design.md#模型選擇)）。依序檢查帳號狀態、速率、合理使用上限、預算；口味檔案過期時先用 `core` 重算；組 prompt、呼叫 Claude、驗證輸出、過敏原與安全二次檢查、寫用量紀錄 |
+| `accept-invite` | 持有邀請連結或邀請碼的人 | 新註冊（密碼）或已有帳號的人接受家人邀請；建立帳號與初始資料（見第八節）。另外兩個動作：打開邀請連結時產生 6 碼邀請碼（1 小時內有效）；在主畫面的 App 用邀請碼換回那筆邀請，錯誤 5 次暫停 15 分鐘 |
 | `share` | 任何人（公開頁）；作者（建立） | 輸出公開分享頁；建立分享連結時存公開照片副本與手機產生的預覽圖 |
 | `push` | 只有資料庫（`pg_net`）與排程 | 送 Web Push，清掉失效的訂閱 |
 | `track` | 已登入的人 | 收產品事件與手機的錯誤紀錄，由後端填分析 ID 後寫入 |
@@ -215,8 +219,8 @@ Supabase Auth 另設「建立使用者前」的 hook：Google 登入時檢查 em
 | 情況 | 建立的資料 |
 |------|-----------|
 | 所有人 | `user_profiles`（啟用中）、`user_identities`、`user_settings`（介面語言、預設值）、`preference_profiles`（空的）、`entitlements`（依邀請的方案）、`analytics_identities`、`dietary_profiles`（空的） |
-| 你發的邀請、或你自己（M0） | 一個自己的廚房，加上管理者身分；依邀請設定和邀請者成為好友 |
-| 家人邀請 | 加入邀請者的廚房（成員身分），不另外建自己的廚房；預設和邀請者成為好友 |
+| 一般邀請、或你自己（M0） | 一個自己的廚房（預設名稱與手機的時區、地區，新手引導 ⑥-2 再確認），加上管理者身分；依邀請設定和邀請者成為好友 |
+| 廚房邀請 | 新手引導 ⑥ 確認後加入邀請者的廚房（成員身分），不另外建自己的廚房；選了「建立自己的廚房」才建；預設和邀請者成為好友 |
 
 全部在 `accept-invite` 裡的同一個資料庫函式完成；M0 的第一個帳號由部署時的初始化腳本建立。
 

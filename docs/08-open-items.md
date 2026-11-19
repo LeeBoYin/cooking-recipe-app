@@ -10,7 +10,7 @@
 
 | # | 問題 | 何時需要 | 備註 |
 |---|------|---------|------|
-| 1 | **確認線框稿 v4** | M0 開發主要畫面前 | App 18 個畫面（A1–A18）、管理後台 6 個畫面（B1–B6），在 [設計總覽](https://claude.ai/artifact/GnLWGFy3yvruDHi9vTnD7t)。已依目前的規格更新，等你看過、提出修改後定案 |
+| 1 | **確認線框稿 v4** | M0 開發主要畫面前 | App 32 個畫面（A1–A32）、管理後台 6 個畫面（B1–B6），在 [設計總覽](https://claude.ai/artifact/GnLWGFy3yvruDHi9vTnD7t)。已依目前的規格更新，等你看過、提出修改後定案 |
 | 2 | **靈感大廚的視覺設計稿** | M0（靜態插圖）、M3（動畫） | 戴廚師帽的燈泡；基本造型與幾種燈光表情 |
 | 3 | **商標、App 商店、網域檢查** | 正式公開前 | 「今仔日煮啥」與短名稱「煮啥」 |
 | 4 | **訂閱定價、各方案的合理使用上限、照片空間、金流** | 正式公開前 | 目前全部使用者視為免費方案；不設每日次數，方案只差在看不到的合理使用上限 |
@@ -37,7 +37,7 @@
 | AI 每月預算、人數上限 | US$18（每月營運總額 US$20）、30 人（含使用者邀請的家人與朋友） | [06](06-roadmap.md#已確定的決定) |
 | 廚房上限 | 每人 5 個、每廚房 10 人 | [02](02-features.md#多個廚房的規則) |
 | 連結期限 | 邀請 14 天、重設密碼 24 小時 | [02](02-features.md#k-帳號與邀請制註冊) |
-| 照片尺寸與上限 | 原圖長邊 1600px、動態圖 1080px、縮圖 400px、送 AI 1024px；每篇最多 10 張、又做了一次最多 3 張；分享副本封面加最多 3 張 | [04](04-architecture.md) |
+| 照片尺寸與上限 | 原圖長邊 1600px、動態圖 1080px、縮圖 400px；每篇最多 10 張、又做了一次最多 3 張；分享副本封面加最多 3 張 | [04](04-architecture.md) |
 | 產品數據 | 主指標與輔助指標的目標值（前三個月累積基準後再訂）；分組最少 5 人；原始事件保留 13 個月；微問卷每人每月最多一題 | [14](14-product-metrics.md) |
 
 ---
@@ -104,7 +104,6 @@
 | M1a 上線一個月後 | 實際的 AI 費用和估計比對 | 檢討 | [03](03-ai-design.md#之後可以擴充與檢討) |
 |  | 對話的回合與長度上限 | 檢討 | [03](03-ai-design.md#之後可以擴充與檢討) |
 |  | 大廚反問的規則 | 檢討 | [03](03-ai-design.md#之後可以擴充與檢討) |
-|  | 離開對話時問要不要加食材 | 檢討 | [02](02-features.md#之後可以擴充與檢討) |
 | M1a 上線兩個月後 | 和大廚對話的使用率 | 檢討 | [14](14-product-metrics.md#七之後可以擴充與檢討) |
 |  | 「累了／要快」的快速開頭 | 擴充 | [02](02-features.md#之後可以擴充與檢討) |
 | 「用說的」上線後 | 口述整理的準確度、使用率與修改率 | 檢討 | [03](03-ai-design.md#之後可以擴充與檢討)、[14](14-product-metrics.md#七之後可以擴充與檢討) |
@@ -120,7 +119,9 @@
 |  | 對話後有沒有煮、收藏變成做過了的比例 | 檢討 | [14](14-product-metrics.md#七之後可以擴充與檢討) |
 | M3 後 | 跨對話的記憶 | 擴充 | [03](03-ai-design.md#之後可以擴充與檢討) |
 |  | 從瀏覽器直接收藏網頁、分享目標 | 擴充 | [02](02-features.md#之後可以擴充與檢討)、[04](04-architecture.md#之後可以擴充與檢討) |
-|  | 你缺這幾樣合併多道菜 | 擴充 | [02](02-features.md#之後可以擴充與檢討) |
+|  | 拍手寫食譜（有人想保存家傳食譜時） | 擴充 | [02](02-features.md#之後可以擴充與檢討) |
+|  | 解鎖類功能（料理護照、手法護照、稱號、徽章、社群成就）要不要做 | 擴充 | [02](02-features.md#之後可以擴充與檢討) |
+|  | 列出要買的合併多道菜 | 擴充 | [02](02-features.md#之後可以擴充與檢討) |
 |  | 洗碗機標記還要不要 | 檢討 | [07](07-equipment-techniques.md#七之後可以擴充與檢討) |
 | M4 | 和家人一起跟大廚聊 | 擴充 | [02](02-features.md#之後可以擴充與檢討) |
 |  | 靈感挑戰、共煮挑戰、年度代表作的資料結構（做到時再設計） | 擴充 | [05](05-data-model.md#之後可以擴充與檢討) |
@@ -144,20 +145,20 @@
 
 | 類別 | 功能 | 用到的資料 | 目前排在 |
 |------|------|-----------|---------|
-| 靈感與推薦 | 合併多道菜的「你缺這幾樣」 | 各篇食譜的 `ingredients` | M3 後 |
-|  | 收藏的材料齊了提醒、用手邊食材能做的食譜 | `recipes.ingredient_ids`、`bookmarks.idea_ingredient_ids` 的索引 | M3 |
+| 靈感與推薦 | 合併多道菜的「列出要買的」 | 各篇食譜的 `ingredients` | M3 後 |
+|  | 收藏的材料齊了提醒 | `recipes.ingredient_ids`、`bookmarks.idea_ingredient_ids` 的索引 | M3 |
 |  | 節日與節氣靈感 | `RegionProfile.holidays`、`BaseDish`（補資料） | M3 |
 |  | 「換手法」變奏、沒有某件廚具時的替代做法 | 廚具字典的手法、`TechniqueSubstitute` | M1b |
 |  | 從對話學口味 | `PreferenceProfile` 的 `learned` 來源 | M3 |
 |  | 「對你來說」的個人化難易度 | 讀取時換算，不改 `Recipe.difficulty` | 難易度上線半年後 |
-| 回顧 | 料理護照、手法護照、季節回顧、一年前的今天 | `cookedDates`、`cuisineKeys`、`techniques` | M3 |
+| 回顧 | 季節回顧、一年前的今天 | `cookedDates`、`cuisineKeys`、`techniques` | M3 |
 |  | 翻車博物館、家的味道 | 「值得記住的原因」標籤、評分、可見範圍「家人」 | M3、M4 |
 |  | 口味指紋、年度回顧的圖表 | `TasteProfileSnapshot`、食譜資料（年度代表作的 AI 文字除外） | M3、M4 |
 | 社群 | 我做了你的菜：原作者頁面列出誰做過 | `Recipe.parentRecipeId`、`source.fromUserId`、通知類型 `cooked_your_recipe` | M4 |
 |  | 好友拿手菜 | `PublicProfile.signatureRecipeIds` | M4 |
 |  | 口味相似度 | 兩人發佈的 `PublicTasteSummary` | M4 |
 |  | 你可能認識 | 好友關係、`allowFriendSuggestions` 設定 | M4 |
-|  | 成就動態、讓好友知道我的過敏原 | `UserAchievement`、`shareAchievementsToFeed`、`showAllergensToFriends` | M4 |
+|  | 讓好友知道我的過敏原 | `showAllergensToFriends` | M4 |
 |  | 宴客時提醒「上次請小美吃過這道了」 | `RecipePrivate.diners` | P1 |
 | 地區與語系 | 新地區、其他中文用語的別名、日文介面 | `RegionProfile`、`LocalizedText`、語系檔（補資料，見 [15](15-regions-i18n.md)） | 有需要時 |
 | 其他 | 烹飪模式 | 步驟的計時器、溫度、手法、器具 | M3 |

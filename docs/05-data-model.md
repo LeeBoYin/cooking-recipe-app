@@ -59,7 +59,7 @@ interface Kitchen {
   region: RegionCode;                 // 地區代碼，例 'TW'、'US'；對應 RegionProfile；決定季節分法、當季食材與節日料理。該地區還沒有當季資料時，只用依南北半球的四季
   createdBy: string;
   updatedBy: string;
-  // 邀請家人不在廚房上放共用連結：每一位家人各自一筆 Invite（type: 'household'，綁定 email、一次性），所有成員都可以發
+  // 不在廚房上放長期共用的連結：還沒有帳號的家人用 Invite（type: 'kitchen'，綁定 email、一次性）；已經有帳號、人在旁邊的用 KitchenJoinCode（10 分鐘、一次性）
   createdAt: Instant;
   updatedAt: Instant;
   deletedAt?: Instant;
@@ -76,6 +76,17 @@ interface KitchenMember {
   joinedAt: Instant;
   leftAt?: Instant;                   // 離開或被移除；他加的食材顯示為「前成員」加的
   updatedAt: Instant;
+}
+
+interface KitchenJoinCode {           // 讓家人加入的臨時代碼（M2）：成員在「廚房 → 成員 → 讓家人加入」產生，給旁邊已經有帳號的家人輸入
+  id: string;
+  kitchenId: string;
+  createdBy: string;                  // 產生代碼的成員
+  codeHash: string;                   // 6 碼代碼的雜湊，不存原始值
+  expiresAt: Instant;                 // 10 分鐘後
+  usedBy?: string;                    // 用掉的人；只能用一次
+  usedAt?: Instant;
+  createdAt: Instant;
 }
 
 interface HouseholdProfile extends KitchenEntity {   // 家人檔案：沒有帳號的家人（小孩、長輩）（M2）
@@ -324,7 +335,7 @@ interface EquipmentType {
   regions?: RegionCode[];     // 只在某些地區常見的廚具（例：日本的烤魚爐）；空的代表各地都有
   category: 'heat-source' | 'cookware' | 'appliance' | 'blending' | 'knife-prep' | 'special' | 'measuring' | 'baking';
   techniques: TechniqueId[];  // 能做的手法
-  optionalTechniques?: TechniqueId[];   // 部分機型才有，使用者可勾選（例：烤箱的熱風 → 近似氣炸）
+  optionalTechniques?: TechniqueId[];   // 部分機型才有（例：烤箱的熱風 → 近似氣炸）；編輯頁只問「有熱風功能嗎？」，不讓使用者勾選手法
   requiresHeatSource: boolean;// 鍋具類：要有可用的爐具才算做得到
   isHeatSource: boolean;      // 瓦斯爐、電磁爐、電陶爐、卡式爐
   assists?: TechniqueId[];    // 量測工具：不做手法，但讓手法更準更安全（溫度計 → 炸、烤、舒肥替代做法）
@@ -349,17 +360,15 @@ interface TechniqueSubstitute {        // 「沒有 X 器具時怎麼做」
 
 ```ts
 interface KitchenEquipment extends KitchenEntity {   // 屬於廚房，同廚房的成員共用
-  equipmentTypeId?: string;   // 對應到字典；自訂器具可為空
+  equipmentTypeId?: string;   // 對應到字典；自訂器具可為空，自訂的不參與推薦
   rawName: string;            // 使用者取的名字（「阿嬤的鐵鍋」）
   brand?: string;
   model?: string;
   capacity?: Quantity;        // 10 人份、5 公升、6 吋
-  extraTechniques?: TechniqueId[];  // 使用者補充的能力
+  enabledOptionalTechniques?: TechniqueId[];   // 類型有選配功能時，使用者回答「有」的（例：烤箱有熱風 → air-fry）；其他手法不能手動改
   dishwasherSafe?: boolean;   // 使用者修正自己這件能否進洗碗機；字典標 'partial' 又沒修正時視為要手洗
   acquiredAt?: LocalDate;     // 照片是 Photo（ownerType: 'equipment'），不在這裡存照片 ID
-  status: 'active' | 'stored' | 'lent' | 'broken' | 'retired';   // lent、broken、retired 不列入推薦
-  isHeirloom: boolean;        // 傳家寶
-  story?: string;
+  description?: string;       // 自由填寫的描述（「阿嬤從嫁妝帶來的鍋」）；所有廚具都視為可以使用，不記狀態
   // 不記使用次數與最後使用日：不讓使用者有使用次數的壓力
 }
 ```
@@ -379,7 +388,6 @@ interface PantryItem extends KitchenEntity {   // 屬於廚房，同廚房的成
   status: 'active' | 'removed';   // removed 不區分用掉或丟掉、不問原因
   removedAt?: Instant;        // 「最近移除」清單用，可復原（復原就改回 active）
   removedBy?: string;         // 哪位成員移除的
-  removedWithRecipeId?: string;   // 記錄食譜時「順手更新食材」移除的，連到那一篇
   alertNotified?: { tier: 'soon' | 'expiring' | 'expired' | 'past_best'; on: LocalDate };   // 到期提醒已經通知到哪一級（🟡🟠🔴⚪）；存在廚房層級，一人處理（移除或改日期）後所有成員的提醒一起消失；改日期時清空
   stillThereAskedOn?: LocalDate;  // 上次問「還在嗎？」的日期，避免重複問；使用者回答「還在」也記在這裡
   note?: string;
@@ -398,7 +406,7 @@ interface PantryItem extends KitchenEntity {   // 屬於廚房，同廚房的成
 ```ts
 interface Recipe extends UserEntity {
   lang: LanguageTag;          // 內容的語言（預設取作者的介面語言）；內容不翻譯，給 AI、字型與之後的顯示判斷用
-  status: 'draft' | 'published';   // draft：煮的時候先存的照片草稿，只有自己看得到（不論 visibility），不會提醒補完
+  status: 'draft' | 'published';   // draft：編輯頁自動存的草稿，只有自己看得到（不論 visibility），不會提醒補完
   publishedAt?: Instant;      // 第一次發佈的時間；朋友動態依它排序（草稿可能放很久才發佈，不能用 createdAt）
   title?: string;             // 照片或標題至少一項；只有照片時顯示記錄日期
   story?: string;             // 心得與故事（「阿嬤的味道」）；封面是 isCover 的那張 Photo
@@ -411,7 +419,7 @@ interface Recipe extends UserEntity {
   cookNotes: CookNote[];      // 又做了一次（P1）；不計次數、不顯示做過幾次
   cookedDates: LocalDate[];   // 衍生：cookedOn 加上每一次「又做了一次」的日期；時間軸、季節回顧、一年前的今天都看它
   // 做法（全部選填）
-  servings?: number;
+  servings?: number;          // 幾人份；記錄時預設 UserSettings.householdSize，食譜頁切換人數時依它換算食材數量
   difficulty?: Difficulty;    // 難易度；不存烹煮分鐘數
   ingredients: RecipeIngredient[];   // 內嵌陣列（Postgres 用 jsonb），不另開表；可以是空的
   steps: RecipeStep[];               // 可以是空的
@@ -434,7 +442,7 @@ interface Recipe extends UserEntity {
     confirmedByUser: boolean;
   };
   source?: {
-    type: 'original' | 'url' | 'handwritten' | 'friend' | 'share_link' | 'ai' | 'external_ai';
+    type: 'original' | 'url' | 'friend' | 'share_link' | 'ai' | 'external_ai';
     shareLinkId?: string;       // type 為 share_link 時，從哪一個分享連結複製的
     url?: string;
     fromUserId?: string;        // 改編自哪位朋友
@@ -443,7 +451,7 @@ interface Recipe extends UserEntity {
   safetyWarnings?: string[];  // 後端檢查未通過的項目（過敏原、舒肥組合不在表內等），App 中醒目顯示
   parentRecipeId?: string;    // 改編自哪一份（自己的或朋友的）；「記錄我做的版本」時填入
   version: number;            // 做法每次修改加一；舊版存在 RecipeRevision
-  visibility: Visibility;     // 預設 'friends'；從網址匯入、拍照轉文字、外部 AI 建立的預設 'private'；草稿一律只有自己；household 進入家庭食譜本
+  visibility: Visibility;     // 預設 'friends'；從網址匯入、外部 AI 建立的預設 'private'；草稿一律只有自己；household 進入家庭食譜本
   // 季節不存：查詢時由 cookedOn 與廚房地區計算
 }
 
@@ -559,7 +567,7 @@ interface ChefConversation extends UserEntity {   // 只有本人能讀；管理
   summary?: string;           // 大廚整理的條件摘要，給之後的回合用（例：「想吃熱的；有筍子、半顆高麗菜」）
   turnCount: number;          // 最多 20 輪（用量保護）
   messages: ChefMessage[];    // 內嵌陣列（jsonb）；只由後端的 ai 函式在同一個動作中附加「使用者的話＋大廚的回應」，手機不直接改這個欄位，兩台裝置同時送也不會互相蓋掉
-  mentionedIngredients: { text: string; ingredientId?: string; addedToPantry: boolean }[];   // 對話中說的、不在食材裡的
+  mentionedIngredients: { text: string; ingredientId?: string }[];   // 對話中說的、不在食材裡的；只用在這段對話，不寫進食材
   lastMessageAt: Instant;
 }
 
@@ -622,7 +630,7 @@ interface QuizItem {                  // 題庫，隨版本發佈
 
 ```ts
 interface Photo extends UserEntity {   // 照片只記錄自己屬於誰；上層資料不存照片 ID。userId 是上傳的人；廚具照片（equipment）屬於廚房：同廚房成員都能管理，上傳的人刪除帳號時保留
-  ownerType: 'recipe' | 'recipe_step' | 'recipe_source' | 'equipment' | 'avatar' | 'status';   // recipe_source：拍手寫食譜的原稿，原圖永遠保留，可見範圍跟著食譜
+  ownerType: 'recipe' | 'recipe_step' | 'equipment' | 'avatar' | 'status';
   ownerId: string;            // 對應的食譜、步驟、廚具、使用者、近況
   cookNoteId?: string;        // ownerType 為 recipe 時，屬於哪一次「又做了一次」
   recipeId?: string;          // ownerType 為 recipe_step 時，所屬的食譜（權限判斷用）
@@ -682,7 +690,6 @@ interface UserSettings extends UserEntity {   // 只有本人能讀
   lastSurveyShownAt?: Instant;   // 上次出現微問卷的時間；每人每月最多一題（見 14）
   social: {                   // M2 起
     defaultVisibility: Visibility;              // 記錄食譜的預設可見範圍，預設 'friends'
-    shareAchievementsToFeed: boolean;           // 成就是否出現在好友動態（M4）
     showAllergensToFriends: boolean;            // 讓好友知道我的過敏原（P2），預設 false
     allowFriendSuggestions: boolean;            // 出現在「你可能認識」（P2），預設 false
     notify: Partial<Record<NotificationType, boolean>>;   // 每一類通知的開關，代碼和 Notification.type 相同；沒設定的預設開啟
@@ -715,7 +722,7 @@ interface AiSuggestionCache {       // 存在後端，換手機也看得到上�
   feedback: { ideaId: string; action: 'bookmarked' | 'recorded' | 'dismissed'; reason?: string; at: Instant }[];   // 每個點子各自的回饋（一組最多 3 個點子），用來學口味
 }
 
-interface UserAchievement extends UserEntity {
+interface UserAchievement extends UserEntity {   // 解鎖類功能（徽章、護照）之後才做，初期不建這張表
   achievementId: string;              // 成就定義放在程式碼中；名稱與說明放在語系檔
   unlockedAt: string;
   progress?: number;
@@ -742,15 +749,21 @@ interface Invite {                    // 邀請（M1 起），只存在後端
   id: string;
   email: string;                      // 存小寫
   note?: string;                      // 例：「小美，大學同學」
-  plan: 'free' | 'plus';              // 註冊後套用的方案；household 邀請固定 'free'
+  plan: 'free' | 'plus';              // 註冊後套用的方案；使用者發的邀請固定 'free'
   tokenHash: string;                  // 邀請連結的雜湊值，不存原始值（連結只在產生當下顯示一次）
   status: 'pending' | 'accepted' | 'revoked';   // 是否過期由 expiresAt 判斷，不存
-  type: 'system_admin' | 'household';   // system_admin：系統管理員（你）發出，建立自己的廚房；household：使用者邀請家人加入自己的廚房（不需核准）
+  type: 'account' | 'kitchen';        // 同一個邀請表單：account＝一般邀請，受邀者建立自己的廚房；kitchen＝勾了「也邀請他加入我的廚房」，受邀者加入 kitchenId。系統管理員兩種都能發，使用者能發 kitchen（account 在 M4 開放）
   invitedBy: string;                  // 產生邀請的人（管理者或使用者）
-  kitchenId?: string;                 // household 邀請要加入的廚房
+  kitchenId?: string;                 // kitchen 邀請要加入的廚房
   befriendInviter: boolean;           // 預設 true：註冊後和邀請者成為好友
   expiresAt: string;                  // 預設 14 天後
   linkRegeneratedAt?: string;         // 最近一次「重新產生連結」的時間；舊連結同時失效
+  installCode?: {                     // iPhone 先安裝時用的 6 碼邀請碼：打開邀請連結時產生，在主畫面的 App 輸入
+    codeHash: string;                 // 只存雜湊
+    expiresAt: Instant;               // 1 小時後
+    failedAttempts: number;           // 輸入錯誤 5 次暫停 15 分鐘
+    lockedUntil?: Instant;
+  };
   acceptedAt?: string;
   acceptedUserId?: string;
   acceptedVia?: 'password' | 'google';   // 不做 Apple 登入
@@ -847,7 +860,7 @@ interface AiUsageAlert {              // 異常使用紀錄，只存在後端；
 interface AiUsageRecord {             // 每次呼叫 AI 一筆，只存在後端；保留 13 個月，之後只留 AiSpendMonthly 的月加總
   id: string;
   userId: string;
-  task: string;                       // 'home' | 'chat' | 'expand' | 'dictation' | 'refine' | 'import_url' | 'import_photo' | 'post_publish' | 'normalize' | 'easter_egg'
+  task: string;                       // 'home' | 'chat' | 'expand' | 'dictation' | 'refine' | 'import_url' | 'post_publish' | 'normalize' | 'easter_egg'
   model: string;                      // 'claude-haiku-5-5' | 'claude-sonnet-5-5' | 'claude-opus-5-5'（模型依任務，見 03）
   inputTokens: number;
   outputTokens: number;
@@ -961,7 +974,7 @@ interface PublicProfile {             // 個人料理頁；暱稱與頭像讀 Us
   userId: string;
   bio?: string;                       // 一句話自我介紹
   status?: { text: string; updatedAt: Instant };   // 近況
-  sections: Record<'status' | 'taste' | 'recipes' | 'signatures' | 'achievements' | 'highlights', boolean>;   // 不放廚具：廚具屬於廚房
+  sections: Record<'status' | 'taste' | 'recipes' | 'signatures', boolean>;   // 不放廚具，也不放任何數字或解鎖
   signatureRecipeIds?: string[];      // 自己挑的拿手菜（M4），最多 5 道
   friendLinkTokenHash: string;        // 好友連結，可重新產生
 }
@@ -1031,7 +1044,7 @@ interface FriendShare {               // 分享給好友
 type NotificationType =
   | 'friend_request' | 'friend_accepted' | 'friend_share' | 'reaction' | 'comment' | 'comment_reply' | 'recipe_bookmarked'
   | 'cooked_your_recipe'                                             // M4
-  | 'kitchen_member_joined' | 'kitchen_member_left' | 'kitchen_role_changed';   // 廚房相關（M2）；系統管理員指定管理者也用 kitchen_role_changed
+  | 'kitchen_invite' | 'kitchen_member_joined' | 'kitchen_member_left' | 'kitchen_role_changed';   // kitchen_invite：已經是使用者的人收到廚房邀請，按「加入」接受   // 廚房相關（M2）；系統管理員指定管理者也用 kitchen_role_changed
 
 interface Notification {
   id: string;
@@ -1159,7 +1172,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 依標籤瀏覽（第一次做的…） | `recipes.highlights`（GIN 索引） |
 | 季節回顧 | 依 `cooked_dates` 範圍取出後，用廚房地區的季節分法分組（不另存季節） |
 | 搜尋食譜（名稱、心得、食材原文、標籤） | PGroonga 全文索引（能斷中文、日文詞），建在 `recipes` 的 `title`、`story`、`ingredients` 原文與 `tags`；收藏用 `Bookmark.titleSnapshot` 與原作一起查。食材名稱先用字典的別名（所有語言）對到 ID，再用 `ingredient_ids` 查 |
-| 手邊食材能做的食譜 | `recipes.ingredient_ids`（GIN 索引）比對手邊的食材 |
+| 依手邊食材評分候選（L1） | `recipes.ingredient_ids`（GIN 索引）比對手邊的食材 |
 | 收藏的材料齊了嗎 | 大廚點子用 `bookmarks.idea_ingredient_ids`（GIN 索引），朋友的食譜接到原作的 `recipes.ingredient_ids`；只看還沒做過的（`cooked_recipe_id` 為空） |
 | 裝備卡的拿手菜 | `recipes.equipment_used_ids`（GIN 索引，只含自己的食譜） |
 | 朋友的動態 | `recipes (user_id, published_at DESC)`，部分索引只含 `status = 'published' AND deleted_at IS NULL`；搭配好友與同廚房的判斷函式。往下載入時用上一頁最後一篇的 `(published_at, id)` 當游標，不用頁碼：有人發新食譜時不會重複或漏掉 |
@@ -1186,7 +1199,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 欄位 | 來源 | 何時重算 |
 |------|------|---------|
 | `Recipe.equipmentTypeIds`、`techniques` | 各步驟的廚具與手法 | 儲存食譜時 |
-| `Recipe.ingredientIds` | 依序取第一個有值的來源：① 食材清單中對應到字典的項目 ② AI 補的標籤 ③ 「順手更新食材」移除的食材 | 儲存食譜、發佈後整理完成時 |
+| `Recipe.ingredientIds` | 依序取第一個有值的來源：① 食材清單中對應到字典的項目 ② AI 補的標籤 | 儲存食譜、發佈後整理完成時 |
 | `Bookmark.ideaIngredientIds` | 大廚點子的主要食材（只有 chef_idea） | 收藏時；之後不變 |
 | `Recipe.difficulty.overall` | 五個面向的平均換算成 1–10 | 面向改變時 |
 | `Recipe.cookedOn` | `cookedAt` 依**當時**廚房的時區換算 | 只在建立時計算一次，之後廚房改時區也不變 |
