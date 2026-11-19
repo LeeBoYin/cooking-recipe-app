@@ -137,3 +137,31 @@
 |  | 標示「大廚整理」或「作者已確認」（有過敏或做錯的回報時） | 檢討 | [02](02-features.md#之後可以擴充與檢討) |
 |  | 旅行或搬家時的廚房地區 | 檢討 | [15](15-regions-i18n.md#六之後可以擴充與檢討) |
 |  | 「最嚴格標準」造成的困擾 | 檢討 | [07](07-equipment-techniques.md#七之後可以擴充與檢討) |
+
+### 不改資料結構就能做的功能
+
+下面這些功能需要的資料都已經存在，只要寫程式、查詢、補字典資料或文案，不用改資料表。排功能時可以優先考慮。
+
+| 類別 | 功能 | 用到的資料 | 目前排在 |
+|------|------|-----------|---------|
+| 靈感與推薦 | 合併多道菜的「你缺這幾樣」 | 各篇食譜的 `ingredients` | M3 後 |
+|  | 收藏的材料齊了提醒、用手邊食材能做的食譜 | `recipes.ingredient_ids`、`bookmarks.idea_ingredient_ids` 的索引 | M3 |
+|  | 節日與節氣靈感 | `RegionProfile.holidays`、`BaseDish`（補資料） | M3 |
+|  | 「換手法」變奏、沒有某件廚具時的替代做法 | 廚具字典的手法、`TechniqueSubstitute` | M1b |
+|  | 從對話學口味 | `PreferenceProfile` 的 `learned` 來源 | M3 |
+|  | 「對你來說」的個人化難易度 | 讀取時換算，不改 `Recipe.difficulty` | 難易度上線半年後 |
+| 回顧 | 料理護照、手法護照、季節回顧、一年前的今天 | `cookedDates`、`cuisineKeys`、`techniques` | M3 |
+|  | 翻車博物館、家的味道 | 「值得記住的原因」標籤、評分、可見範圍「家人」 | M3、M4 |
+|  | 口味指紋、年度回顧的圖表 | `TasteProfileSnapshot`、食譜資料（年度代表作的 AI 文字除外） | M3、M4 |
+| 社群 | 我做了你的菜：原作者頁面列出誰做過 | `Recipe.parentRecipeId`、`source.fromUserId`、通知類型 `cooked_your_recipe` | M4 |
+|  | 好友拿手菜 | `PublicProfile.signatureRecipeIds` | M4 |
+|  | 口味相似度 | 兩人發佈的 `PublicTasteSummary` | M4 |
+|  | 你可能認識 | 好友關係、`allowFriendSuggestions` 設定 | M4 |
+|  | 成就動態、讓好友知道我的過敏原 | `UserAchievement`、`shareAchievementsToFeed`、`showAllergensToFriends` | M4 |
+|  | 宴客時提醒「上次請小美吃過這道了」 | `RecipePrivate.diners` | P1 |
+| 地區與語系 | 新地區、其他中文用語的別名、日文介面 | `RegionProfile`、`LocalizedText`、語系檔（補資料，見 [15](15-regions-i18n.md)） | 有需要時 |
+| 其他 | 烹飪模式 | 步驟的計時器、溫度、手法、器具 | M3 |
+|  | 食譜版本比較 | `RecipeRevision` | P1 |
+|  | 匯出我的資料 | 全部資料表 | 公開上線前 |
+|  | 後台新的匯總指標 | 在程式裡新增事件名稱（見 [14](14-product-metrics.md)） | 隨時 |
+|  | 新增一種反應或「值得記住的原因」 | 只改列舉的檢查條件 | 隨時 |

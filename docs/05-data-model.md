@@ -158,6 +158,7 @@ erDiagram
   User ||--o{ Friendship : "好友（雙向）"
   User ||--|| PublicProfile : "個人料理頁"
   User ||--o{ Bookmark : "收藏（朋友的食譜、大廚的點子）"
+  Recipe |o--o{ Bookmark : "參照原作（朋友的食譜）"
   Recipe ||--o{ FriendShare : "分享給好友"
   Recipe ||--o{ Reaction : "料理反應"
   Recipe ||--o{ Comment : "留言"
@@ -406,8 +407,7 @@ interface Recipe extends UserEntity {
   cookedAt?: Instant;         // 記錄的那次料理的時間點（預設取第一張照片的拍攝時間）；匯入的食譜沒有
   cookedOn?: LocalDate;       // 衍生：依當時廚房時區算出的日期，建立後不變；時間軸、回顧用
   kitchenId?: string;         // 在哪個廚房做的
-  // 一起吃的人只有作者看得到，放在 RecipePrivate.diners
-  occasion?: 'solo' | 'family' | 'friends' | 'party';
+  // 一起吃的人只有作者看得到，放在 RecipePrivate.diners；招待朋友用 highlights 的 'hosted_friends'
   cookNotes: CookNote[];      // 又做了一次（P1）；不計次數、不顯示做過幾次
   cookedDates: LocalDate[];   // 衍生：cookedOn 加上每一次「又做了一次」的日期；時間軸、季節回顧、一年前的今天都看它
   // 做法（全部選填）
@@ -429,6 +429,7 @@ interface Recipe extends UserEntity {
     cuisineKeys?: string[];
     mainIngredientIds?: string[];
     techniques?: TechniqueId[];   // 煎、炒、蒸、舒肥…
+    equipmentTypeIds?: string[];  // 可能用到的廚具
     flavors?: FlavorTag[];
     confirmedByUser: boolean;
   };
@@ -539,7 +540,7 @@ interface Bookmark extends UserEntity {
   idea?: {                    // chef_idea：點子當下的快照
     title: string;
     why?: string;
-    recipeDraft?: { ingredients: RecipeIngredient[]; steps: RecipeStep[] };
+    recipeDraft?: { ingredients: RecipeIngredient[]; steps: RecipeStep[] };   // 收藏前已經展開過就一起存；沒有的話，第一次打開收藏時才產生並存進來
     suggestionId?: string;
   };
   ideaIngredientIds?: string[];   // 衍生（只有 chef_idea）：點子的主要食材；friend_recipe 直接讀原作的 ingredientIds，不另存，原作更新也不用改別人的資料
@@ -668,7 +669,7 @@ interface UserSettings extends UserEntity {   // 只有本人能讀
   notifications: {
     expiringAlert: boolean;     // 設了期限的食材到期提醒，預設 true
     time: string;               // 到期提醒的時間，預設 '17:00'；每個廚房依它自己的時區，在那個時間各彙整一則
-    weekendInspiration: boolean;   // 週末靈感（每週六早上一則，預設 false，使用者自己開啟）；內容用最新的首頁點子或模板，不另外呼叫 AI
+    weekendInspiration: boolean;   // 週末靈感（每週六早上一則，依目前所在廚房的時區；預設 false，使用者自己開啟）；內容用最新的首頁點子或模板，不另外呼叫 AI
   };
   sound: boolean;
   haptics: boolean;
@@ -692,9 +693,10 @@ interface UserSettings extends UserEntity {   // 只有本人能讀
 ### 衍生／快取資料（由程式算出或後端產生）
 
 ```ts
-interface TasteProfileSnapshot {      // 由 core 套件計算，存在後端供 AI 代理使用；只有本人與 AI 代理能讀
+interface TasteProfileSnapshot {      // 由後端用 core 套件計算（不信任手機上傳的結果）；只有本人與 AI 代理能讀，手機只讀來顯示
   userId: string;
   computedAt: Instant;
+  stale: boolean;                     // 口味地圖、食譜、收藏、點子回饋、食材改變時由觸發器標記；下次呼叫 AI 或打開口味頁前重算
   period: 'last_30_days' | 'last_90_days' | 'all_time';
   data: TasteProfile;                 // 見 03 AI 設計
 }
@@ -708,7 +710,8 @@ interface AiSuggestionCache {       // 存在後端，換手機也看得到上�
   inputHash: string;                  // 食材狀態＋口味檔案＋介面語言的雜湊；沒變就不重算（換介面語言就重算）
   createdAt: string;
   expiresAt: string;
-  payload: unknown;                   // 結構化輸出
+  payload: unknown;                   // 結構化輸出（點子卡片，不含做法）
+  drafts?: Record<string, { ingredients: RecipeIngredient[]; steps: RecipeStep[]; tips?: string }>;   // 依點子 ID 存「展開做法」的結果；同一個點子不重算
   feedback: { ideaId: string; action: 'bookmarked' | 'recorded' | 'dismissed'; reason?: string; at: Instant }[];   // 每個點子各自的回饋（一組最多 3 個點子），用來學口味
 }
 
@@ -786,7 +789,8 @@ interface AppConfig {                 // 後端設定，在管理後台的「系
     status: number;                   // 近況 60
     bio: number;                      // 自我介紹 100
   };
-  aiMonthlyBudgetUsd: number;         // AI 每月預算，預設 18（每月營運總額 US$20）；用到 80% 提醒管理員並把首頁點子降級，100% 改用不用 AI 的推薦
+  aiMonthlyBudgetUsd: number;         // AI 每月預算，預設 18（每月營運總額 US$20）；100% 改用不用 AI 的推薦
+  aiBudgetAlertRatio: number;         // 提醒門檻，預設 0.8：提醒管理員，並把首頁點子降級成 Haiku 5.5、靈感彩蛋改用模板
   aiProtection: {                     // 用量保護；使用者看不到這些數值
     perMinute: number;                // 每人每分鐘呼叫上限，例 6
     perHour: number;                  // 每人每小時呼叫上限，例 60
@@ -805,7 +809,7 @@ interface AiRateCounter {             // 速率限制的計數，只存在後端
 
 interface BackgroundJob {             // 背景任務佇列（發佈後整理、食材正規化、照片清理…），只存在後端
   id: string;
-  kind: 'post_publish' | 'normalize' | 'import_retry' | 'storage_cleanup' | 'push';   // post_publish：補標籤、難易度、一句話一次做完
+  kind: 'post_publish' | 'normalize' | 'import_retry' | 'storage_cleanup' | 'push';   // post_publish：發佈當下的整理失敗時，在背景重試標籤與難易度
   payload: unknown;                   // 例：{ recipeId }、{ rawText }
   status: 'pending' | 'running' | 'done' | 'failed';
   attempts: number;                   // 失敗時退避重試，最多 5 次
@@ -844,7 +848,7 @@ interface AiUsageRecord {             // 每次呼叫 AI 一筆，只存在後�
   id: string;
   userId: string;
   task: string;                       // 'home' | 'chat' | 'expand' | 'dictation' | 'refine' | 'import_url' | 'import_photo' | 'post_publish' | 'normalize' | 'easter_egg'
-  model: string;                      // 'claude-opus-5-5' | 'claude-haiku-5-5'
+  model: string;                      // 'claude-haiku-5-5' | 'claude-sonnet-5-5' | 'claude-opus-5-5'（模型依任務，見 03）
   inputTokens: number;
   outputTokens: number;
   cacheReadTokens: number;
@@ -1156,12 +1160,12 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 季節回顧 | 依 `cooked_dates` 範圍取出後，用廚房地區的季節分法分組（不另存季節） |
 | 搜尋食譜（名稱、心得、食材原文、標籤） | PGroonga 全文索引（能斷中文、日文詞），建在 `recipes` 的 `title`、`story`、`ingredients` 原文與 `tags`；收藏用 `Bookmark.titleSnapshot` 與原作一起查。食材名稱先用字典的別名（所有語言）對到 ID，再用 `ingredient_ids` 查 |
 | 手邊食材能做的食譜 | `recipes.ingredient_ids`（GIN 索引）比對手邊的食材 |
-| 收藏的材料齊了嗎 | `bookmarks.ingredient_ids`（GIN 索引）比對食材，只看還沒做過的（`cooked_recipe_id` 為空） |
+| 收藏的材料齊了嗎 | 大廚點子用 `bookmarks.idea_ingredient_ids`（GIN 索引），朋友的食譜接到原作的 `recipes.ingredient_ids`；只看還沒做過的（`cooked_recipe_id` 為空） |
 | 裝備卡的拿手菜 | `recipes.equipment_used_ids`（GIN 索引，只含自己的食譜） |
 | 朋友的動態 | `recipes (user_id, published_at DESC)`，部分索引只含 `status = 'published' AND deleted_at IS NULL`；搭配好友與同廚房的判斷函式。往下載入時用上一頁最後一篇的 `(published_at, id)` 當游標，不用頁碼：有人發新食譜時不會重複或漏掉 |
 | 是不是好友、是不是同廚房（RLS 每次都要判斷） | `friendships (user_low_id, user_high_id)` 唯一、`friendships (user_high_id)`；`kitchen_members (user_id) WHERE left_at IS NULL`；判斷寫成 `SECURITY DEFINER` 的資料庫函式 |
 | 一篇食譜的反應與留言 | `reactions (recipe_id)`、`comments (recipe_id, created_at) WHERE deleted_at IS NULL` |
-| 我的收藏 | `bookmarks (user_id, created_at)`；被收藏次數用 `bookmarks (recipe_id)` |
+| 我的收藏 | `bookmarks (user_id, created_at)`；收藏了某篇食譜的人用 `bookmarks (recipe_id)`（原作收起時標示、發通知用；不顯示收藏次數） |
 | 通知鈴鐺 | `notifications (user_id, created_at DESC)`，未讀數用 `WHERE read_at IS NULL` 的部分索引 |
 | 對話紀錄 | `chef_conversations (user_id, last_message_at DESC)` |
 | 產品事件 | `product_events (at)`；每月匯總後刪除，量大時改成依月份分割資料表 |
@@ -1177,12 +1181,12 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 
 ## 衍生欄位
 
-為了查詢效率，下列欄位是由其他資料算出來後存下來的。規則：**不直接修改**；來源改變時重算；兩者不一致時以來源為準。**由儲存食譜等資料庫函式計算**，不信任手機送來的值；需要字典的計算讀資料庫裡的字典唯讀表（決策 65，見 16）。
+為了查詢效率，下列欄位是由其他資料算出來後存下來的。規則：**不直接修改**；來源改變時重算；兩者不一致時以來源為準。**由儲存食譜等資料庫函式計算**，不信任手機送來的值；需要字典的計算讀資料庫裡的字典唯讀表（見 16）。
 
 | 欄位 | 來源 | 何時重算 |
 |------|------|---------|
 | `Recipe.equipmentTypeIds`、`techniques` | 各步驟的廚具與手法 | 儲存食譜時 |
-| `Recipe.ingredientIds` | 依序取第一個有值的來源：① 食材清單中對應到字典的項目 ② AI 補的標籤 ③ 「順手更新食材」移除的食材 | 儲存食譜、AI 補標籤完成時 |
+| `Recipe.ingredientIds` | 依序取第一個有值的來源：① 食材清單中對應到字典的項目 ② AI 補的標籤 ③ 「順手更新食材」移除的食材 | 儲存食譜、發佈後整理完成時 |
 | `Bookmark.ideaIngredientIds` | 大廚點子的主要食材（只有 chef_idea） | 收藏時；之後不變 |
 | `Recipe.difficulty.overall` | 五個面向的平均換算成 1–10 | 面向改變時 |
 | `Recipe.cookedOn` | `cookedAt` 依**當時**廚房的時區換算 | 只在建立時計算一次，之後廚房改時區也不變 |
