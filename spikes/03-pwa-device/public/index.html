@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>煮啥實機測試</title>
+<script type="importmap">{ "imports": { "wasm-feature-detect": "./vendor/wasm-feature-detect.js" } }</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f0b400">
+<style>
+  :root { --ink:#1d2330; --muted:#5f6878; --line:#d5d9e0; --bg:#f3f4f6; --card:#fff; --acc:#f0b400; --ok:#2f8f5b; --bad:#c23b3b; }
+  @media (prefers-color-scheme: dark) { :root { --ink:#e8ebf1; --muted:#9aa3b2; --line:#343b48; --bg:#12151b; --card:#1b2029; --acc:#ffc928; --ok:#5cc28a; --bad:#ef6b6b; } }
+  * { box-sizing:border-box }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 -apple-system,"PingFang TC",sans-serif;
+         padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 40px max(16px, env(safe-area-inset-left)); }
+  h1 { font-size:22px; margin:8px 0 4px } h2 { font-size:17px; margin:0 0 8px }
+  section { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin:14px 0 }
+  p.note { color:var(--muted); font-size:14px; margin:4px 0 10px }
+  button, label.btn { display:inline-block; font:inherit; font-weight:700; padding:10px 14px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink); margin:4px 6px 4px 0 }
+  .pri { background:var(--acc); border-color:var(--acc); color:#2a1f00 }
+  input[type=file] { display:none }
+  table { width:100%; border-collapse:collapse; font-size:13px } td, th { border-bottom:1px solid var(--line); padding:4px; text-align:left }
+  .ok { color:var(--ok); font-weight:700 } .bad { color:var(--bad); font-weight:700 }
+  textarea { width:100%; height:150px; font:12px ui-monospace,Menlo,monospace; background:var(--bg); color:var(--ink); border:1px solid var(--line); border-radius:8px; padding:8px }
+  img.prev { max-width:100%; border-radius:8px; margin-top:8px }
+</style>
+</head>
+<body>
+<h1>煮啥實機測試</h1>
+<p class="note">每一段做完，最後按「複製全部結果」貼回給 Claude。</p>
+
+<section>
+  <h2>① 這台裝置支援什麼</h2>
+  <table id="env"></table>
+  <p class="note">在 Safari 先看一次，再「加入主畫面」後從主畫面打開看一次，「從主畫面打開」那列會不同。</p>
+</section>
+
+<section>
+  <h2>② 照片壓縮（含 HEIC）</h2>
+  <p class="note">選 2–3 張：至少一張相機拍的照片，一張截圖。每張轉成 1600／1080／400px，比較三種輸出：瀏覽器內建、JPEG、WebP 轉檔程式（WASM）。比較慢，請等表格跑完。</p>
+  <label class="btn pri" for="pick">從相簿選</label><input id="pick" type="file" accept="image/*" multiple>
+  <label class="btn" for="cam">拍一張</label><input id="cam" type="file" accept="image/*" capture="environment">
+  <table id="photos"><tr><th>尺寸</th><th>方式</th><th>格式</th><th>大小</th><th>耗時</th></tr></table>
+  <img id="preview" class="prev" alt="">
+</section>
+
+<section>
+  <h2>③ 螢幕不關（烹飪模式用）</h2>
+  <button id="wake">讓螢幕保持亮著</button> <span id="wakeState"></span>
+  <p class="note">開啟後放著不動 1 分鐘，看螢幕會不會自己變暗。</p>
+</section>
+
+<section>
+  <h2>④ 推播</h2>
+  <p class="note">iPhone 要先「加入主畫面」，從主畫面打開這頁才能開啟推播。</p>
+  <button id="push" class="pri">開啟通知</button> <span id="pushState"></span>
+  <textarea id="sub" placeholder="開啟後，這裡會出現一段訂閱資料；按下方按鈕複製給 Claude" readonly></textarea>
+</section>
+
+<section>
+  <h2>結果</h2>
+  <textarea id="log" readonly></textarea>
+  <button id="copy" class="pri">複製全部結果</button> <span id="copyState"></span>
+</section>
+
+<script>
+const VAPID_PUBLIC = 'BABM9x4Mb8QmXp6LPV08wS_tctgcQhfZQMgr7VVDB0MaYA4klmEZWV41KGZ5iXUNvnPk-Ze1DlOBU_yN3EqKe_U';
+const log = (s) => { const t = document.getElementById('log'); t.value += s + '\n'; };
+const yes = (b) => b ? '<span class="ok">可以</span>' : '<span class="bad">不行</span>';
+
+// ① 環境
+const standalone = navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+const c = document.createElement('canvas'); c.width = c.height = 2;
+const webpEncode = c.toDataURL('image/webp').startsWith('data:image/webp');
+const env = {
+  '裝置': navigator.userAgent.match(/\(([^)]+)\)/)?.[1] ?? navigator.userAgent,
+  '從主畫面打開': standalone,
+  'Service Worker': 'serviceWorker' in navigator,
+  '推播（PushManager）': 'PushManager' in window,
+  '通知（Notification）': 'Notification' in window,
+  '螢幕不關（Wake Lock）': 'wakeLock' in navigator,
+  'createImageBitmap': 'createImageBitmap' in window,
+  '能輸出 WebP': webpEncode,
+};
+document.getElementById('env').innerHTML = Object.entries(env)
+  .map(([k, v]) => '<tr><td>' + k + '</td><td>' + (typeof v === 'boolean' ? yes(v) : v) + '</td></tr>').join('');
+log('① ' + JSON.stringify(env));
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch((e) => log('SW 註冊失敗：' + e));
+
+// ② 照片
+async function decode(file) {
+  try { return await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch { const img = new Image(); img.src = URL.createObjectURL(file); await img.decode(); return img; }
+}
+const toBlob = (cv, type, q) => new Promise((r) => cv.toBlob(r, type, q));
+async function handle(files) {
+  const rows = document.getElementById('photos');
+  for (const f of files) {
+    const kb = (n) => (n / 1024).toFixed(0) + ' KB';
+    let bmp; const t0 = performance.now();
+    try { bmp = await decode(f); } catch (e) {
+      rows.insertAdjacentHTML('beforeend', '<tr><td>' + f.type + ' ' + kb(f.size) + '</td><td colspan="4" class="bad">讀不出來</td></tr>');
+      log('② ' + f.type + ' ' + kb(f.size) + ' 讀不出來：' + e); continue;
+    }
+    const tDecode = performance.now() - t0;
+    const w = bmp.width, h = bmp.height;
+    log('② 原檔 ' + (f.type || '未知格式') + ' ' + kb(f.size) + ' ' + w + '×' + h + '，解碼 ' + tDecode.toFixed(0) + 'ms');
+    for (const edge of [1600, 1080, 400]) {
+      const sc = Math.min(1, edge / Math.max(w, h));
+      const cv = document.createElement('canvas'); cv.width = Math.round(w * sc); cv.height = Math.round(h * sc);
+      const ctx = cv.getContext('2d'); ctx.drawImage(bmp, 0, 0, cv.width, cv.height);
+      const out = async (label, fn) => {
+        const t1 = performance.now(); const b = await fn(); const ms = performance.now() - t1;
+        rows.insertAdjacentHTML('beforeend', '<tr><td>' + cv.width + '×' + cv.height + '</td><td>' + label + '</td><td>' + b.type + '</td><td>' + kb(b.size) + '</td><td>' + ms.toFixed(0) + 'ms</td></tr>');
+        log('   ' + edge + 'px ' + label + ' → ' + b.type + ' ' + kb(b.size) + ' ' + ms.toFixed(0) + 'ms');
+        return b;
+      };
+      await out('內建 WebP', () => toBlob(cv, 'image/webp', 0.8));
+      const jpg = await out('JPEG 0.8', () => toBlob(cv, 'image/jpeg', 0.8));
+      const webp = await out('WASM WebP', async () => {
+        if (!encodeWebp) { const t = performance.now(); ({ default: encodeWebp } = await import('./vendor/jsquash-webp/encode.js')); log('   （載入 WebP 轉檔程式 ' + (performance.now() - t).toFixed(0) + 'ms）'); }
+        const buf = await encodeWebp(ctx.getImageData(0, 0, cv.width, cv.height), { quality: 80 });
+        return new Blob([buf], { type: 'image/webp' });
+      });
+      if (edge === 1080) document.getElementById('preview').src = URL.createObjectURL(webp);
+    }
+  }
+}
+let encodeWebp = null;
+for (const id of ['pick', 'cam']) document.getElementById(id).addEventListener('change', (e) => handle([...e.target.files]));
+
+// ③ Wake Lock
+let lock = null;
+document.getElementById('wake').onclick = async () => {
+  const st = document.getElementById('wakeState');
+  try { lock = await navigator.wakeLock.request('screen'); st.textContent = '已開啟'; log('③ Wake Lock 開啟成功');
+        lock.addEventListener('release', () => { st.textContent = '已釋放'; log('③ Wake Lock 被釋放'); }); }
+  catch (e) { st.textContent = '失敗：' + e.message; log('③ Wake Lock 失敗：' + e.message); }
+};
+
+// ④ 推播
+const b64 = (s) => { const p = '='.repeat((4 - s.length % 4) % 4); const r = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); return Uint8Array.from(r, (ch) => ch.charCodeAt(0)); };
+document.getElementById('push').onclick = async () => {
+  const st = document.getElementById('pushState');
+  try {
+    const perm = await Notification.requestPermission();
+    log('④ 通知權限：' + perm);
+    if (perm !== 'granted') { st.textContent = '沒有取得權限'; return; }
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(VAPID_PUBLIC) });
+    document.getElementById('sub').value = JSON.stringify(sub);
+    st.textContent = '已訂閱'; log('④ 推播訂閱成功');
+  } catch (e) { st.textContent = '失敗：' + e.message; log('④ 推播失敗：' + e.message); }
+};
+
+// 複製
+document.getElementById('copy').onclick = async () => {
+  const text = document.getElementById('log').value + '\n訂閱資料：' + document.getElementById('sub').value;
+  try { await navigator.clipboard.writeText(text); document.getElementById('copyState').textContent = '已複製'; }
+  catch { const t = document.getElementById('log'); t.select(); document.getElementById('copyState').textContent = '請手動複製'; }
+};
+</script>
+</body>
+</html>

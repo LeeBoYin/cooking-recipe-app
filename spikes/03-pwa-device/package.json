@@ -1,0 +1,1 @@
+{"name":"spike-pwa-device","private":true,"type":"module","devDependencies":{"web-push":"3.6.7"},"dependencies":{"@jsquash/webp":"^1.5.0"}}
