@@ -209,7 +209,7 @@ export function MePage() {
       </div>
 
       <div className="overflow-hidden rounded-card bg-surface">
-        <Row to="/taste" label={intl.formatMessage({ id: 'me.onboarding.redo' })} />
+        <Row to="/onboarding" label={intl.formatMessage({ id: 'me.onboarding.redo' })} />
         <Row label={intl.formatMessage({ id: 'me.account' })} value={session?.user.email ? maskEmail(session.user.email) : undefined} />
         <Row danger label={intl.formatMessage({ id: 'signOut' })} onClick={() => void signOut()} />
       </div>

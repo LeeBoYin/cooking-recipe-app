@@ -5,9 +5,11 @@ import { IntlProvider } from 'react-intl';
 import { App } from './App.tsx';
 import { installGlobalErrorReporting } from './data/errors.ts';
 import { locale, messages } from './i18n/index.ts';
+import { captureInstallPrompt } from './pwa/install.ts';
 import './styles.css';
 
 installGlobalErrorReporting();
+captureInstallPrompt();
 
 const root = document.getElementById('root');
 if (!root) throw new Error('找不到 #root');

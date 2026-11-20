@@ -20,7 +20,7 @@ function Row({ id, keys, names }: { id: string; keys?: string[]; names?: string[
 }
 
 // 口味名片：名稱、愛、口感、想學、不吃、過敏（過敏來自飲食限制，由呼叫的畫面傳入名稱）
-export function CardView({ card, allergens = [], onDone, onMore, saveState }: { card: TasteCard; allergens?: string[]; onDone: () => void; onMore: () => void; saveState: 'saving' | 'error' | 'saved' }) {
+export function CardView({ card, allergens = [], onDone, onMore, saveState, doneId = 'taste.card.start' }: { doneId?: string; card: TasteCard; allergens?: string[]; onDone: () => void; onMore: () => void; saveState: 'saving' | 'error' | 'saved' }) {
   const intl = useIntl();
   const name = parseCardTitle(card.titleCode);
   const cuisine = challengeCuisine(card);
@@ -56,7 +56,7 @@ export function CardView({ card, allergens = [], onDone, onMore, saveState }: { 
         <p role="alert" className="m-0 text-caption text-error"><FormattedMessage id="taste.saveError" /></p>
       )}
       <button type="button" onClick={onDone} disabled={saveState === 'saving'} className="h-12 w-full rounded-card border-0 bg-bulb font-[inherit] text-body font-bold text-ink disabled:opacity-50">
-        <FormattedMessage id={saveState === 'saving' ? 'taste.saving' : saveState === 'error' ? 'taste.retry' : 'taste.card.start'} />
+        <FormattedMessage id={saveState === 'saving' ? 'taste.saving' : saveState === 'error' ? 'taste.retry' : doneId} />
       </button>
       {saveState === 'saved' && (
         <button type="button" onClick={onMore} className="h-12 w-full rounded-card border-0 bg-surface font-[inherit] text-body text-ink">

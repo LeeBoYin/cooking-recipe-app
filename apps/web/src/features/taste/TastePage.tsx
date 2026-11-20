@@ -25,7 +25,7 @@ import { QuestionView } from './QuestionView.tsx';
 
 // 口味探索（12 ⑤、13 第四、五節）：快速模式約 2 分鐘，做完拿口味名片，可以「再多聊幾題」。
 // 按「結束」或「先這樣」時一次寫入；中途關掉不保留。
-export function TastePage() {
+export function TastePage({ onFinish, doneId }: { onFinish?: () => void; doneId?: string } = {}) {
   const stored = useMyTasteProfile();
   const limits = useMyHardLimits();
   const { kitchen, isPending: kitchenPending } = useCurrentKitchen();
@@ -42,14 +42,14 @@ export function TastePage() {
     allergenIds: limits.data.allergenIds,
     restrictionIds: limits.data.restrictionIds,
   };
-  return <Explore initial={stored.data.profile} allergenNames={limits.data.allergenIds.map((id) => getAllergen(id)?.name['zh-TW'] ?? id)} previousContext={stored.data.context} env={env} />;
+  return <Explore onFinish={onFinish} doneId={doneId} initial={stored.data.profile} allergenNames={limits.data.allergenIds.map((id) => getAllergen(id)?.name['zh-TW'] ?? id)} previousContext={stored.data.context} env={env} />;
 }
 
 const itemById = new Map(quizItems.map((q) => [q.id, q]));
 
 type Result = { profile: TasteProfile; card: TasteCard };
 
-function Explore({ initial: stored, allergenNames, previousContext, env }: { initial: TasteProfile; allergenNames: string[]; previousContext: Parameters<ReturnType<typeof useSaveTasteProfile>['mutate']>[0]['previousContext']; env: QuizEnv }) {
+function Explore({ onFinish, doneId, initial: stored, allergenNames, previousContext, env }: { onFinish?: () => void; doneId?: string; initial: TasteProfile; allergenNames: string[]; previousContext: Parameters<ReturnType<typeof useSaveTasteProfile>['mutate']>[0]['previousContext']; env: QuizEnv }) {
   const intl = useIntl();
   const navigate = useNavigate();
   const save = useSaveTasteProfile();
@@ -72,7 +72,8 @@ function Explore({ initial: stored, allergenNames, previousContext, env }: { ini
     const { profile } = finishSession(from, new Date().toISOString());
     const card = buildCard(profile, env.dimensions);
     if (from.profile.answeredItemIds.length === initial.answeredItemIds.length && !result) {
-      void navigate(-1); // 什麼都沒答，不存
+      if (onFinish) onFinish();
+      else void navigate(-1); // 什麼都沒答，不存
       return;
     }
     setResult({ profile, card });
@@ -109,9 +110,10 @@ function Explore({ initial: stored, allergenNames, previousContext, env }: { ini
         allergens={allergenNames}
         saveState={save.isPending ? 'saving' : save.isError ? 'error' : 'saved'}
         onDone={() =>
-          save.isError ? save.mutate({ profile: result.profile, cardTitle: result.card.titleCode ?? null, previousContext }) : void navigate('/')
+          save.isError ? save.mutate({ profile: result.profile, cardTitle: result.card.titleCode ?? null, previousContext }) : onFinish ? onFinish() : void navigate('/')
         }
         onMore={more}
+        doneId={doneId}
       />
     );
   }
