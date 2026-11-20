@@ -49,7 +49,7 @@
 | `VAPID_PRIVATE_KEY` | Supabase 的秘密設定 | 推播簽章；公開金鑰放前端的環境變數 |
 | Google 登入的用戶端 ID 與密鑰 | Supabase Auth 設定 | 只做 Google 與密碼登入 |
 | `SUPABASE_ACCESS_TOKEN`、專案 ID | GitHub 的秘密設定 | GitHub Actions 部署 migration 與 Edge Functions |
-| 唯讀備份帳號 `backup_ro` 的密碼（`BACKUP_DB_PASSWORD_PRODUCTION`） | GitHub 的秘密設定 | 每週備份用；只在正式專案建立，有 `pg_read_all_data` 權限 |
+| 唯讀備份帳號 `backup_ro` 的密碼（`BACKUP_DB_PASSWORD_PRODUCTION`） | GitHub 的秘密設定 | 每週備份用；只在正式專案建立，要有 `pg_read_all_data` 與 `BYPASSRLS`（資料表開了列級安全，沒有 `BYPASSRLS` 的話 `pg_dump` 會被擋） |
 | 備份庫的 deploy key 私鑰（`BACKUP_REPO_DEPLOY_KEY`）與備份庫名稱（變數 `BACKUP_REPO`） | GitHub 的秘密設定與變數 | 只能寫那一個私人備份儲存庫 |
 | `MAINTENANCE_TOKEN` | 各專案的 Edge Function Secrets；GitHub 的秘密設定 `MAINTENANCE_TOKEN_STAGING`、`MAINTENANCE_TOKEN_PRODUCTION` | 呼叫 `maintenance` 的通行證，測試與正式各一組 |
 | 備份加密的**公開**金鑰 | GitHub 的秘密設定 | 用非對稱加密：GitHub 只有公開金鑰、只能加密；解密的私密金鑰由你離線保管 |
