@@ -630,6 +630,11 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"search_my_recipes":
+{ Args: { "p_query": string }; Returns: {
+              "match_kind": string,"match_text": string,"recipe_id": string
+            }[]
+                           },
 "set_current_kitchen":
 { Args: { "p_kitchen_id": string }; Returns: undefined
                            },

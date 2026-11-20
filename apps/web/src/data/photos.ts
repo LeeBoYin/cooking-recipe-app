@@ -30,6 +30,20 @@ export async function listRecipePhotos(recipeId: string): Promise<Photo[]> {
   return data;
 }
 
+// 我的食譜時間軸用：自己所有食譜上方的照片（含又做了一次的），只取要的欄位
+export type RecipePhotoLite = Pick<Photo, 'id' | 'owner_id' | 'cook_note_id' | 'thumb_path' | 'sort_order'>;
+
+export async function listMyRecipePhotos(userId: string): Promise<RecipePhotoLite[]> {
+  const { data, error } = await supabase()
+    .from('photos')
+    .select('id, owner_id, cook_note_id, thumb_path, sort_order')
+    .eq('owner_type', 'recipe')
+    .eq('user_id', userId)
+    .order('sort_order', { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
 export type NewEquipmentPhotoRow = {
   id: string;
   kitchenId: string;

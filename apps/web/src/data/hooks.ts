@@ -10,9 +10,9 @@ import {
   onPhotoCommitted,
   subscribeUploads,
 } from '../photos/uploadQueue.ts';
-import { deletePhoto, listEquipmentPhotos, listRecipePhotos, signPhotoUrls, type Photo } from './photos.ts';
-import { deleteRecipe, getRecipe, restoreRecipe } from './recipes.ts';
-import { getMyIdentity, getMySettings } from './account.ts';
+import { deletePhoto, listEquipmentPhotos, listMyRecipePhotos, listRecipePhotos, signPhotoUrls, type Photo } from './photos.ts';
+import { deleteRecipe, getRecipe, listMyDeletedRecipes, listMyRecipes, restoreRecipe, searchMyRecipes } from './recipes.ts';
+import { currentUserId, getMyIdentity, getMySettings } from './account.ts';
 import { listMyKitchens, setCurrentKitchen } from './kitchens.ts';
 import {
   addPantryItems,
@@ -45,6 +45,10 @@ export const queryKeys = {
   equipment: (kitchenId: string) => ['kitchen', kitchenId, 'equipment'] as const,
   equipmentItem: (kitchenId: string, id: string) => ['kitchen', kitchenId, 'equipment', id] as const,
   equipmentPhotos: (kitchenId: string) => ['kitchen', kitchenId, 'photos', 'equipment'] as const,
+  myRecipes: (status: string) => ['recipes', 'mine', status] as const,
+  myRecipePhotos: ['recipes', 'mine', 'photos'] as const,
+  myDeleted: ['recipes', 'deleted'] as const,
+  recipeSearch: (q: string) => ['recipes', 'search', q] as const,
   recipe: (id: string) => ['recipe', id] as const,
   recipePhotos: (id: string) => ['recipe', id, 'photos'] as const,
   photoUrls: (paths: string[]) => ['photo-urls', ...paths] as const,
@@ -246,7 +250,7 @@ export function useDeleteRecipe() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteRecipe(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recipe'] }),
+    onSuccess: () => Promise.all([queryClient.invalidateQueries({ queryKey: ['recipe'] }), queryClient.invalidateQueries({ queryKey: ['recipes'] })]),
   });
 }
 
@@ -254,6 +258,29 @@ export function useRestoreRecipe() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => restoreRecipe(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recipe'] }),
+    onSuccess: () => Promise.all([queryClient.invalidateQueries({ queryKey: ['recipe'] }), queryClient.invalidateQueries({ queryKey: ['recipes'] })]),
   });
+}
+
+// 我的食譜：已發佈的（時間軸）與草稿
+export function useMyRecipes(status: 'published' | 'draft') {
+  return useQuery({ queryKey: queryKeys.myRecipes(status), queryFn: () => listMyRecipes(status) });
+}
+
+// 自己所有食譜上方的照片（封面與張數、又做了一次的照片）
+export function useMyRecipePhotos() {
+  return useQuery({
+    queryKey: queryKeys.myRecipePhotos,
+    queryFn: async () => listMyRecipePhotos(await currentUserId()),
+  });
+}
+
+export function useMyDeletedRecipes() {
+  return useQuery({ queryKey: queryKeys.myDeleted, queryFn: listMyDeletedRecipes });
+}
+
+// 關鍵字搜尋（名稱、食材）；空白不查
+export function useSearchMyRecipes(query: string) {
+  const q = query.trim();
+  return useQuery({ queryKey: queryKeys.recipeSearch(q), queryFn: () => searchMyRecipes(q), enabled: q !== '' });
 }

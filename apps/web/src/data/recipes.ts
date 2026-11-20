@@ -13,6 +13,7 @@ import type {
   RecipeVisibility,
 } from '@zhusha/shared-types';
 import { newId } from '@zhusha/core';
+import { currentUserId } from './account.ts';
 import { listRecipePhotos, type Photo } from './photos.ts';
 import { supabase } from './supabase.ts';
 import type { Row } from './types.ts';
@@ -44,7 +45,7 @@ export type RecipeFields = {
 export type RecipePatch = Partial<RecipeFields>;
 
 // 上限的預設值（和 app_config 的預設一致；後台改了數字，資料庫會拒絕、畫面顯示沒有成功）
-export const recipeLimits = { photos: 5, steps: 10, photosPerStep: 1 } as const;
+export const recipeLimits = { photos: 5, steps: 10, photosPerStep: 1, softDeleteDays: 30 } as const;
 
 // save_recipe 的 p_photos：這篇食譜上方照片與步驟照片的完整清單（依序）。不在清單裡的會被刪掉，第一張上方照片是封面。
 // 步驟照片的 owner_id 是步驟 ID；上方照片不用給。
@@ -96,9 +97,11 @@ export function parseTextTooLong(error: unknown): { field: string; limit: number
   return { field, limit: Number(limit), over: Number(over) };
 }
 
-// 我的食譜（不含已刪除的）。status 不給就是全部（草稿與已發佈）
+// 我的食譜（不含已刪除的）。status 不給就是全部（草稿與已發佈）。
+// 只取自己的：RLS 也放行同廚房家人的食譜，這裡要明確限定作者
 export async function listMyRecipes(status?: Recipe['status']): Promise<Recipe[]> {
-  let query = supabase().from('recipes').select('*').is('deleted_at', null);
+  const userId = await currentUserId();
+  let query = supabase().from('recipes').select('*').eq('user_id', userId).is('deleted_at', null);
   if (status) query = query.eq('status', status);
   const { data, error } = await query.order('updated_at', { ascending: false });
   if (error) throw error;
@@ -107,9 +110,11 @@ export async function listMyRecipes(status?: Recipe['status']): Promise<Recipe[]
 
 // 最近刪除的食譜（保留期限內可以復原）
 export async function listMyDeletedRecipes(): Promise<Recipe[]> {
+  const userId = await currentUserId();
   const { data, error } = await supabase()
     .from('recipes')
     .select('*')
+    .eq('user_id', userId)
     .not('deleted_at', 'is', null)
     .order('deleted_at', { ascending: false });
   if (error) throw error;
@@ -213,4 +218,14 @@ export async function restoreRecipe(id: string): Promise<Recipe> {
   const { data, error } = await supabase().rpc('restore_recipe', { p_id: id });
   if (error) throw error;
   return data;
+}
+
+export type RecipeMatch = { recipe_id: string; match_kind: 'title' | 'ingredient'; match_text: string };
+
+// 搜尋自己已發佈的食譜：名稱與食材原文的關鍵字（不含心得）。空白的關鍵字回傳空的
+export async function searchMyRecipes(query: string): Promise<RecipeMatch[]> {
+  if (query.trim() === '') return [];
+  const { data, error } = await supabase().rpc('search_my_recipes', { p_query: query });
+  if (error) throw error;
+  return data as RecipeMatch[];
 }
