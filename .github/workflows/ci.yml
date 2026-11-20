@@ -23,6 +23,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm test
       - run: pnpm check:deno
+      - run: pnpm check:functions
       - run: pnpm build
 
   database:
