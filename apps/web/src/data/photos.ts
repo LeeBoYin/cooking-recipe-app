@@ -17,6 +17,18 @@ export async function listEquipmentPhotos(kitchenId: string): Promise<Photo[]> {
   return data;
 }
 
+// 一篇食譜的照片（含步驟照片與又做了一次的照片）；封面排在最前面
+export async function listRecipePhotos(recipeId: string): Promise<Photo[]> {
+  const { data, error } = await supabase()
+    .from('photos')
+    .select('*')
+    .or(`and(owner_type.eq.recipe,owner_id.eq.${recipeId}),and(owner_type.eq.recipe_step,recipe_id.eq.${recipeId})`)
+    .order('is_cover', { ascending: false })
+    .order('sort_order', { ascending: true });
+  if (error) throw error;
+  return data;
+}
+
 export type NewEquipmentPhotoRow = {
   id: string;
   kitchenId: string;
