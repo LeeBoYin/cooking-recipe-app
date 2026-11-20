@@ -39,7 +39,7 @@
 - [x] M0-11 食譜畫面：編輯頁與食譜頁（#12）
 - [x] M0-12 我的食譜：時間軸、草稿匣、搜尋、最近刪除（#13）
 - [x] M0-13a 錯誤紀錄與每日維護：`error_logs`、`log_error`、每日維護排程、`app_config` 的註冊方式與人數上限、前端 `reportError`（#16）
-- [x] M0-13b 函式與備份：到期廚房清除、`maintenance` Edge Function（孤兒照片檔）、Edge Functions 部署、每週喚醒與加密備份（本 PR）
+- [x] M0-13b 函式與每週維護：到期廚房清除、`maintenance` Edge Function（孤兒照片檔）、Edge Functions 部署、每週喚醒與孤兒照片檔清理（#17～#21；資料庫備份暫不做）
 
 ### 待做（建議順序）
 
