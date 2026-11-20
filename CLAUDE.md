@@ -2,7 +2,7 @@
 
 朋友之間的料理社群，加上一位懂你的靈感大廚。可安裝到手機的 PWA，資料只存在雲端。
 
-目前狀態：規格完成，M0 進行中：登入、帳號與廚房、字典、食材、廚具、照片（廚具照片：資料表、轉檔、上傳）、食譜後端（資料表、權限、儲存與發佈函式、食譜照片權限）、食譜畫面（編輯頁與食譜頁）已完成、我的食譜（時間軸、草稿匣、搜尋、最近刪除）已完成，錯誤紀錄與每日維護（M0-13a）已完成，函式與備份（M0-13b）已完成，下一段是 M0-14（口味資料）；其他功能照 18 的順序往下做。收藏（`bookmarks`）從 M1a 才做。
+目前狀態：規格完成，M0 進行中：登入、帳號與廚房、字典、食材、廚具、照片（廚具照片：資料表、轉檔、上傳）、食譜後端（資料表、權限、儲存與發佈函式、食譜照片權限）、食譜畫面（編輯頁與食譜頁）已完成、我的食譜（時間軸、草稿匣、搜尋、最近刪除）已完成，錯誤紀錄與每日維護（M0-13a）已完成，函式與每週維護（M0-13b）已完成，下一段是 M0-14（口味資料）；其他功能照 18 的順序往下做。收藏（`bookmarks`）從 M1a 才做。
 
 ## 溝通與文件
 
@@ -101,4 +101,4 @@ Vite＋React＋TypeScript 的 PWA（放在 Netlify）；Supabase（Postgres＋RL
 | 資料庫的權限測試（pgTAP） | `pnpm db:test`；測試放在 `supabase/tests/` |
 | 從本機資料庫產生型別 | `pnpm gen:types`（產生 `packages/shared-types/src/database.ts`，不要手改） |
 
-**部署**：前端由 Netlify 從 git 自動部署（`netlify.toml`）；每個 PR 由 GitHub Actions 跑型別檢查、測試、Deno 檢查、建置，以及資料庫的權限測試與型別是否過期（`.github/workflows/ci.yml`）。資料庫由 `.github/workflows/deploy-db.yml` 部署：PR 改到資料庫或字典時對測試專案試跑，合併到 `main` 後先部署測試專案、成功才部署正式專案；每次先套用 migration，再整批匯入字典。Edge Functions 跟著資料庫一起部署（`supabase/functions/`）；每週喚醒、孤兒照片檔掃描與加密備份由 `.github/workflows/weekly.yml` 執行。
+**部署**：前端由 Netlify 從 git 自動部署（`netlify.toml`）；每個 PR 由 GitHub Actions 跑型別檢查、測試、Deno 檢查、建置，以及資料庫的權限測試與型別是否過期（`.github/workflows/ci.yml`）。資料庫由 `.github/workflows/deploy-db.yml` 部署：PR 改到資料庫或字典時對測試專案試跑，合併到 `main` 後先部署測試專案、成功才部署正式專案；每次先套用 migration，再整批匯入字典。Edge Functions 跟著資料庫一起部署（`supabase/functions/`）；每週喚醒與孤兒照片檔掃描由 `.github/workflows/weekly.yml` 執行。

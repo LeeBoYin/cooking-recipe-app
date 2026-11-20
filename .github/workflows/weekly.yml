@@ -3,8 +3,8 @@ name: Weekly
 # 每週一次（04 免費方案限制、16 第九節）：
 # - 喚醒：測試與正式專案各連一次資料庫，避免一週沒有使用被暫停
 # - 孤兒照片檔：呼叫 maintenance 函式，清掉資料庫沒有記錄的檔案
-# - 備份（只有正式專案）：pg_dump → age 用公開金鑰加密 → 推到另一個私人儲存庫，保留最近 8 份
-# 每一步的結果都寫進 error_logs（source: backup／cron），後台看得到。
+# 資料庫備份暫不做（只有一人使用，見 04）；需要時升級 Supabase 付費方案的每日備份。
+# 每一步的結果都寫進 error_logs（source: cron），後台看得到。
 # 公開儲存庫 60 天沒有更新會自動停用排程，後台總覽會提醒超過 8 天沒執行。
 
 on:
@@ -26,12 +26,10 @@ jobs:
             project_id: usnsgpcutztcmnjbqopg
             db_secret: SUPABASE_DB_PASSWORD_STAGING
             token_secret: MAINTENANCE_TOKEN_STAGING
-            backup: false
           - name: production
             project_id: dvlfioarakgddstcwfiu
             db_secret: SUPABASE_DB_PASSWORD_PRODUCTION
             token_secret: MAINTENANCE_TOKEN_PRODUCTION
-            backup: true
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       PGPASSWORD: ${{ secrets[matrix.db_secret] }}
@@ -45,7 +43,7 @@ jobs:
       - name: 喚醒專案
         run: |
           if psql "$(cat supabase/.temp/pooler-url)" -v ON_ERROR_STOP=1 -q -c "select 1" > /dev/null; then
-            scripts/ci-log-error.sh backup weekly_wake_ok weekly_wake info
+            scripts/ci-log-error.sh cron weekly_wake_ok weekly_wake info
           else
             echo "::error::喚醒失敗"
             exit 1
@@ -71,61 +69,3 @@ jobs:
             exit 1
           fi
           scripts/ci-log-error.sh cron orphan_sweep_ok orphan_sweep info
-
-      - name: 安裝備份工具
-        if: matrix.backup
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq postgresql-common age
-          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-          sudo apt-get install -y -qq postgresql-client-17
-
-      - name: 加密備份資料庫
-        if: matrix.backup
-        env:
-          BACKUP_DB_PASSWORD: ${{ secrets.BACKUP_DB_PASSWORD_PRODUCTION }}
-          BACKUP_AGE_PUBLIC_KEY: ${{ secrets.BACKUP_AGE_PUBLIC_KEY }}
-          BACKUP_REPO_DEPLOY_KEY: ${{ secrets.BACKUP_REPO_DEPLOY_KEY }}
-          BACKUP_REPO: ${{ vars.BACKUP_REPO }}
-        run: |
-          fail() {
-            scripts/ci-log-error.sh backup weekly_backup_failed weekly_backup critical || true
-            echo "::error::$1"
-            exit 1
-          }
-          [ -n "$BACKUP_REPO" ] && [ -n "$BACKUP_AGE_PUBLIC_KEY" ] && [ -n "$BACKUP_REPO_DEPLOY_KEY" ] \
-            && [ -n "$BACKUP_DB_PASSWORD" ] || fail "備份的設定不齊（見 docs/16 第二節）"
-
-          stamp=$(date -u +%Y-%m-%d)
-          work="$RUNNER_TEMP/backup"
-          mkdir -p "$work"
-
-          # 唯讀帳號 backup_ro 經連線池連線（使用者名稱是 backup_ro.<專案代號>）
-          url=$(sed 's#//postgres\.#//backup_ro.#' supabase/.temp/pooler-url)
-          [ "$url" != "$(cat supabase/.temp/pooler-url)" ] || fail "連線字串的格式不是預期的 postgres.<專案代號>"
-          PGPASSWORD="$BACKUP_DB_PASSWORD" /usr/lib/postgresql/17/bin/pg_dump "$url" \
-            --format=custom --no-owner --no-privileges --schema=public --schema=auth \
-            --file "$work/dump" || fail "pg_dump 失敗"
-
-          # 只用公開金鑰加密；解密的私密金鑰不在 GitHub
-          age -r "$BACKUP_AGE_PUBLIC_KEY" -o "$work/backup-$stamp.dump.age" "$work/dump" || fail "加密失敗"
-          rm "$work/dump"
-
-          # 推到備份庫：保留最近 8 份，用單一 commit 覆蓋，舊的備份不會留在 git 歷史裡
-          install -m 600 /dev/null "$RUNNER_TEMP/deploy_key"
-          printf '%s\n' "$BACKUP_REPO_DEPLOY_KEY" > "$RUNNER_TEMP/deploy_key"
-          export GIT_SSH_COMMAND="ssh -i $RUNNER_TEMP/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
-          git clone -q "git@github.com:$BACKUP_REPO.git" "$RUNNER_TEMP/repo" || fail "找不到備份庫或 deploy key 沒有權限"
-          cd "$RUNNER_TEMP/repo"
-          cp "$work/backup-$stamp.dump.age" .
-          ls -1 backup-*.dump.age | sort | head -n -8 | xargs -r rm
-          git config user.name "weekly-backup"
-          git config user.email "weekly-backup@users.noreply.github.com"
-          git checkout -q --orphan snapshot
-          git add -A
-          git commit -q -m "backup $stamp"
-          git push -q -f origin HEAD:main || fail "推到備份庫失敗"
-          rm -f "$RUNNER_TEMP/deploy_key"
-
-          cd "$GITHUB_WORKSPACE"
-          scripts/ci-log-error.sh backup weekly_backup_ok weekly_backup info
