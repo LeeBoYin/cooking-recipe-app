@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useNavigate, useParams } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import { DIFFICULTY_FACETS, difficultyOverall, type DifficultyFacet } from '@zhusha/core';
 import type { RecipeVisibility } from '@zhusha/shared-types';
 import { useDeleteRecipe, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
@@ -129,7 +129,9 @@ function StepRow({ step, index, thumb, onText, onPhoto, onRemovePhoto, over, aut
 function Editor({ recipeId, recipe, photoRows }: { recipeId: string; recipe: Recipe | null; photoRows: Photo[] }) {
   const intl = useIntl();
   const navigate = useNavigate();
-  const ed = useRecipeEditor(recipeId, recipe, photoRows);
+  const location = useLocation();
+  const initialTitle = (location.state as { title?: string } | null)?.title;
+  const ed = useRecipeEditor(recipeId, recipe, photoRows, initialTitle);
   const remove = useDeleteRecipe();
   const { form, patchForm, setForm } = ed;
   const [methodOpen, setMethodOpen] = useState(

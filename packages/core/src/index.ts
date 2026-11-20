@@ -10,3 +10,10 @@ export {
   type QuizEnv, type QuizMode, type QuizSession, type QuizStep,
 } from './taste/session.ts';
 export { buildCard, EXPLORER_CODE, LIGHT_CODE, type TasteCard } from './taste/card.ts';
+export * from './ideas/types.ts';
+export * from './ideas/constants.ts';
+export {
+  buildIdeaPool, confidentLikeCount, isTasteEnough, violatesLimits, mainIngredientIds, tasteSimilarity, dishDimensionKeys,
+  longAgoValue, scoreBaseDish, scoreOwnRecipe,
+} from './ideas/score.ts';
+export { ideaSet, hasNextIdeaSet, todayInTimeZone } from './ideas/pick.ts';
