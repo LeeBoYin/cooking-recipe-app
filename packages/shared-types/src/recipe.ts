@@ -26,13 +26,10 @@ export type RecipeStep = {
   target_temp?: Temperature;
 };
 
-export type Rating = 'loved' | 'ok' | 'flop';
-
 export type CookNote = {
   id: string; // UUID（又做了一次的照片指向它）
   cooked_on: string; // YYYY-MM-DD
   text?: string;
-  rating?: Rating;
 };
 
 export type Highlight =

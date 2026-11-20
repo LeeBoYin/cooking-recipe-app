@@ -25,14 +25,14 @@ export type Database = {
           Tables: {
             "app_config": {
                   Row: {
-                    "id": boolean,"photo_limits": NonNullable<Json>,"soft_delete_retention_days": number,"text_limits": NonNullable<Json>,"updated_at": string
+                    "id": boolean,"max_steps": number,"photo_limits": NonNullable<Json>,"soft_delete_retention_days": number,"text_limits": NonNullable<Json>,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "id"?: boolean,"photo_limits"?: NonNullable<Json>,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
+                    "id"?: boolean,"max_steps"?: number,"photo_limits"?: NonNullable<Json>,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Update: {
-                    "id"?: boolean,"photo_limits"?: NonNullable<Json>,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
+                    "id"?: boolean,"max_steps"?: number,"photo_limits"?: NonNullable<Json>,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -291,14 +291,14 @@ isOneToOne: true
                   ]
                 },"recipes": {
                   Row: {
-                    "ai_tags": Json | null,"cook_notes": NonNullable<Json>,"cooked_at": string | null,"cooked_dates": (string)[],"cooked_on": string | null,"created_at": string,"created_via": string,"cuisine_keys": (string)[] | null,"deleted_at": string | null,"difficulty": Json | null,"dish_type_keys": (string)[] | null,"equipment_type_ids": (string)[],"equipment_used_ids": (string)[],"highlights": (string)[],"id": string,"ingredient_ids": (string)[],"ingredients": NonNullable<Json>,"kitchen_id": string | null,"lang": string,"parent_recipe_id": string | null,"published_at": string | null,"rating": string | null,"safety_warnings": (string)[],"schema_version": number,"servings": number | null,"source": Json | null,"status": string,"steps": NonNullable<Json>,"story": string | null,"tags": (string)[],"techniques": (string)[],"tips": string | null,"title": string | null,"updated_at": string,"user_id": string,"version": number,"visibility": string
+                    "ai_tags": Json | null,"cook_notes": NonNullable<Json>,"cooked_at": string | null,"cooked_dates": (string)[],"cooked_on": string | null,"created_at": string,"created_via": string,"deleted_at": string | null,"difficulty": Json | null,"equipment_type_ids": (string)[],"equipment_used_ids": (string)[],"highlights": (string)[],"id": string,"ingredient_ids": (string)[],"ingredients": NonNullable<Json>,"kitchen_id": string | null,"lang": string,"parent_recipe_id": string | null,"published_at": string | null,"safety_warnings": (string)[],"schema_version": number,"servings": number | null,"source": Json | null,"status": string,"steps": NonNullable<Json>,"story": string | null,"techniques": (string)[],"tips": string | null,"title": string | null,"updated_at": string,"user_id": string,"version": number,"visibility": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "ai_tags"?: Json | null,"cook_notes"?: NonNullable<Json>,"cooked_at"?: string | null,"cooked_dates"?: (string)[],"cooked_on"?: string | null,"created_at"?: string,"created_via"?: string,"cuisine_keys"?: (string)[] | null,"deleted_at"?: string | null,"difficulty"?: Json | null,"dish_type_keys"?: (string)[] | null,"equipment_type_ids"?: (string)[],"equipment_used_ids"?: (string)[],"highlights"?: (string)[],"id": string,"ingredient_ids"?: (string)[],"ingredients"?: NonNullable<Json>,"kitchen_id"?: string | null,"lang"?: string,"parent_recipe_id"?: string | null,"published_at"?: string | null,"rating"?: string | null,"safety_warnings"?: (string)[],"schema_version"?: number,"servings"?: number | null,"source"?: Json | null,"status"?: string,"steps"?: NonNullable<Json>,"story"?: string | null,"tags"?: (string)[],"techniques"?: (string)[],"tips"?: string | null,"title"?: string | null,"updated_at"?: string,"user_id": string,"version"?: number,"visibility"?: string
+                    "ai_tags"?: Json | null,"cook_notes"?: NonNullable<Json>,"cooked_at"?: string | null,"cooked_dates"?: (string)[],"cooked_on"?: string | null,"created_at"?: string,"created_via"?: string,"deleted_at"?: string | null,"difficulty"?: Json | null,"equipment_type_ids"?: (string)[],"equipment_used_ids"?: (string)[],"highlights"?: (string)[],"id": string,"ingredient_ids"?: (string)[],"ingredients"?: NonNullable<Json>,"kitchen_id"?: string | null,"lang"?: string,"parent_recipe_id"?: string | null,"published_at"?: string | null,"safety_warnings"?: (string)[],"schema_version"?: number,"servings"?: number | null,"source"?: Json | null,"status"?: string,"steps"?: NonNullable<Json>,"story"?: string | null,"techniques"?: (string)[],"tips"?: string | null,"title"?: string | null,"updated_at"?: string,"user_id": string,"version"?: number,"visibility"?: string
                   }
                   Update: {
-                    "ai_tags"?: Json | null,"cook_notes"?: NonNullable<Json>,"cooked_at"?: string | null,"cooked_dates"?: (string)[],"cooked_on"?: string | null,"created_at"?: string,"created_via"?: string,"cuisine_keys"?: (string)[] | null,"deleted_at"?: string | null,"difficulty"?: Json | null,"dish_type_keys"?: (string)[] | null,"equipment_type_ids"?: (string)[],"equipment_used_ids"?: (string)[],"highlights"?: (string)[],"id"?: string,"ingredient_ids"?: (string)[],"ingredients"?: NonNullable<Json>,"kitchen_id"?: string | null,"lang"?: string,"parent_recipe_id"?: string | null,"published_at"?: string | null,"rating"?: string | null,"safety_warnings"?: (string)[],"schema_version"?: number,"servings"?: number | null,"source"?: Json | null,"status"?: string,"steps"?: NonNullable<Json>,"story"?: string | null,"tags"?: (string)[],"techniques"?: (string)[],"tips"?: string | null,"title"?: string | null,"updated_at"?: string,"user_id"?: string,"version"?: number,"visibility"?: string
+                    "ai_tags"?: Json | null,"cook_notes"?: NonNullable<Json>,"cooked_at"?: string | null,"cooked_dates"?: (string)[],"cooked_on"?: string | null,"created_at"?: string,"created_via"?: string,"deleted_at"?: string | null,"difficulty"?: Json | null,"equipment_type_ids"?: (string)[],"equipment_used_ids"?: (string)[],"highlights"?: (string)[],"id"?: string,"ingredient_ids"?: (string)[],"ingredients"?: NonNullable<Json>,"kitchen_id"?: string | null,"lang"?: string,"parent_recipe_id"?: string | null,"published_at"?: string | null,"safety_warnings"?: (string)[],"schema_version"?: number,"servings"?: number | null,"source"?: Json | null,"status"?: string,"steps"?: NonNullable<Json>,"story"?: string | null,"techniques"?: (string)[],"tips"?: string | null,"title"?: string | null,"updated_at"?: string,"user_id"?: string,"version"?: number,"visibility"?: string
                   }
                   Relationships: [
                     {
@@ -409,10 +409,8 @@ isOneToOne: false
 "cooked_on": string | null,
 "created_at": string,
 "created_via": string,
-"cuisine_keys": (string)[] | null,
 "deleted_at": string | null,
 "difficulty": Json | null,
-"dish_type_keys": (string)[] | null,
 "equipment_type_ids": (string)[],
 "equipment_used_ids": (string)[],
 "highlights": (string)[],
@@ -423,7 +421,6 @@ isOneToOne: false
 "lang": string,
 "parent_recipe_id": string | null,
 "published_at": string | null,
-"rating": string | null,
 "safety_warnings": (string)[],
 "schema_version": number,
 "servings": number | null,
@@ -431,7 +428,6 @@ isOneToOne: false
 "status": string,
 "steps": NonNullable<Json>,
 "story": string | null,
-"tags": (string)[],
 "techniques": (string)[],
 "tips": string | null,
 "title": string | null,
@@ -455,10 +451,8 @@ isOneToOne: false
 "cooked_on": string | null,
 "created_at": string,
 "created_via": string,
-"cuisine_keys": (string)[] | null,
 "deleted_at": string | null,
 "difficulty": Json | null,
-"dish_type_keys": (string)[] | null,
 "equipment_type_ids": (string)[],
 "equipment_used_ids": (string)[],
 "highlights": (string)[],
@@ -469,7 +463,6 @@ isOneToOne: false
 "lang": string,
 "parent_recipe_id": string | null,
 "published_at": string | null,
-"rating": string | null,
 "safety_warnings": (string)[],
 "schema_version": number,
 "servings": number | null,
@@ -477,7 +470,6 @@ isOneToOne: false
 "status": string,
 "steps": NonNullable<Json>,
 "story": string | null,
-"tags": (string)[],
 "techniques": (string)[],
 "tips": string | null,
 "title": string | null,
@@ -563,10 +555,8 @@ isOneToOne: false
 "cooked_on": string | null,
 "created_at": string,
 "created_via": string,
-"cuisine_keys": (string)[] | null,
 "deleted_at": string | null,
 "difficulty": Json | null,
-"dish_type_keys": (string)[] | null,
 "equipment_type_ids": (string)[],
 "equipment_used_ids": (string)[],
 "highlights": (string)[],
@@ -577,7 +567,6 @@ isOneToOne: false
 "lang": string,
 "parent_recipe_id": string | null,
 "published_at": string | null,
-"rating": string | null,
 "safety_warnings": (string)[],
 "schema_version": number,
 "servings": number | null,
@@ -585,7 +574,6 @@ isOneToOne: false
 "status": string,
 "steps": NonNullable<Json>,
 "story": string | null,
-"tags": (string)[],
 "techniques": (string)[],
 "tips": string | null,
 "title": string | null,
@@ -601,7 +589,7 @@ isOneToOne: false
         isSetofReturn: false
       } },
 "save_recipe":
-{ Args: { "p_expected_updated_at"?: string,"p_private"?: Json,"p_recipe": Json }; Returns: {
+{ Args: { "p_expected_updated_at"?: string,"p_photos"?: Json,"p_private"?: Json,"p_recipe": Json }; Returns: {
               "ai_tags": Json | null,
 "cook_notes": NonNullable<Json>,
 "cooked_at": string | null,
@@ -609,10 +597,8 @@ isOneToOne: false
 "cooked_on": string | null,
 "created_at": string,
 "created_via": string,
-"cuisine_keys": (string)[] | null,
 "deleted_at": string | null,
 "difficulty": Json | null,
-"dish_type_keys": (string)[] | null,
 "equipment_type_ids": (string)[],
 "equipment_used_ids": (string)[],
 "highlights": (string)[],
@@ -623,7 +609,6 @@ isOneToOne: false
 "lang": string,
 "parent_recipe_id": string | null,
 "published_at": string | null,
-"rating": string | null,
 "safety_warnings": (string)[],
 "schema_version": number,
 "servings": number | null,
@@ -631,7 +616,6 @@ isOneToOne: false
 "status": string,
 "steps": NonNullable<Json>,
 "story": string | null,
-"tags": (string)[],
 "techniques": (string)[],
 "tips": string | null,
 "title": string | null,

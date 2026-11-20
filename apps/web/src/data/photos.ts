@@ -17,13 +17,14 @@ export async function listEquipmentPhotos(kitchenId: string): Promise<Photo[]> {
   return data;
 }
 
-// 一篇食譜的照片（含步驟照片與又做了一次的照片）；封面排在最前面
+// 一篇食譜上方的照片與步驟照片（不含又做了一次的照片）；順序依 sort_order，封面是上方的第一張
 export async function listRecipePhotos(recipeId: string): Promise<Photo[]> {
   const { data, error } = await supabase()
     .from('photos')
     .select('*')
-    .or(`and(owner_type.eq.recipe,owner_id.eq.${recipeId}),and(owner_type.eq.recipe_step,recipe_id.eq.${recipeId})`)
-    .order('is_cover', { ascending: false })
+    .or(
+      `and(owner_type.eq.recipe,owner_id.eq.${recipeId},cook_note_id.is.null),and(owner_type.eq.recipe_step,recipe_id.eq.${recipeId})`,
+    )
     .order('sort_order', { ascending: true });
   if (error) throw error;
   return data;
@@ -37,6 +38,12 @@ export type NewEquipmentPhotoRow = {
   height: number;
   takenAt?: string;
 };
+
+// 個人的照片（食譜、步驟）：users/{userId}/{photoId}.webp
+export function userPhotoPaths(userId: string, id: string) {
+  const base = `users/${userId}/${id}`;
+  return { storage: `${base}.webp`, feed: `${base}_feed.webp`, thumb: `${base}_thumb.webp` };
+}
 
 export function kitchenPhotoPaths(kitchenId: string, id: string) {
   const base = `kitchens/${kitchenId}/${id}`;

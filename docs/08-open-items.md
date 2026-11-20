@@ -37,7 +37,7 @@
 | AI 每月預算、人數上限 | US$18（每月營運總額 US$20）、30 人（含使用者邀請的家人與朋友） | [06](06-roadmap.md#已確定的決定) |
 | 廚房上限 | 每人 5 個、每廚房 10 人 | [02](02-features.md#多個廚房的規則) |
 | 連結期限 | 邀請 14 天、重設密碼 24 小時 | [02](02-features.md#k-帳號與邀請制註冊) |
-| 照片尺寸與上限 | 原圖長邊 1600px、動態圖 1080px、縮圖 400px；每篇最多 10 張、又做了一次最多 3 張；分享副本封面加最多 3 張 | [04](04-architecture.md) |
+| 照片尺寸與上限 | 原圖長邊 1600px、動態圖 1080px、縮圖 400px；每篇上方最多 5 張、步驟最多 10 步且每步 1 張、又做了一次最多 3 張；分享副本封面加最多 3 張 | [04](04-architecture.md) |
 | 產品數據 | 主指標與輔助指標的目標值（前三個月累積基準後再訂）；分組最少 5 人；原始事件保留 13 個月；微問卷每人每月最多一題 | [14](14-product-metrics.md) |
 
 ---
@@ -153,8 +153,8 @@
 |  | 「換手法」變奏、沒有某件廚具時的替代做法 | 廚具字典的手法、`TechniqueSubstitute` | M1b |
 |  | 從對話學口味 | `PreferenceProfile` 的 `learned` 來源 | M3 |
 |  | 「對你來說」的個人化難易度 | 讀取時換算，不改 `Recipe.difficulty` | 難易度上線半年後 |
-| 回顧 | 季節回顧、一年前的今天 | `cookedDates`、`cuisineKeys`、`techniques` | M3 |
-|  | 翻車博物館、家的味道 | 「值得記住的原因」標籤、評分、可見範圍「家人」 | M3、M4 |
+| 回顧 | 季節回顧、一年前的今天 | `cookedDates`、`aiTags.cuisineKeys`、`techniques` | M3 |
+|  | 翻車博物館、家的味道 | 「值得記住的原因」、可見範圍「家人」 | M3、M4 |
 |  | 口味指紋、年度回顧的圖表 | `TasteProfileSnapshot`、食譜資料（年度代表作的 AI 文字除外） | M3、M4 |
 | 社群 | 我做了你的菜：原作者頁面列出誰做過 | `Recipe.parentRecipeId`、`source.fromUserId`、通知類型 `cooked_your_recipe` | M4 |
 |  | 好友拿手菜 | `PublicProfile.signatureRecipeIds` | M4 |
