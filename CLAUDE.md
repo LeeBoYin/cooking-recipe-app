@@ -93,8 +93,9 @@ Vite＋React＋TypeScript 的 PWA（放在 Netlify）；Supabase（Postgres＋RL
 | 單元測試 | `pnpm test` |
 | 共用套件能不能在 Deno 跑 | `pnpm check:deno` |
 | 建置 | `pnpm build` |
-| 本機資料庫：啟動／停止／重建 | `pnpm db:start`、`pnpm db:stop`、`pnpm db:reset`（重建時套用 `supabase/seed.sql`，有一個本機開發帳號） |
+| 本機資料庫：啟動／停止／重建 | `pnpm db:start`、`pnpm db:stop`、`pnpm db:reset`（重建時匯入字典，並套用 `supabase/seed.sql` 建一個本機開發帳號） |
+| 改了字典檔後重新匯入本機 | `pnpm db:dict` 產生 SQL，再 `pnpm db:reset` |
 | 資料庫的權限測試（pgTAP） | `pnpm db:test`；測試放在 `supabase/tests/` |
 | 從本機資料庫產生型別 | `pnpm gen:types`（產生 `packages/shared-types/src/database.ts`，不要手改） |
 
-**部署**：前端由 Netlify 從 git 自動部署（`netlify.toml`）；每個 PR 由 GitHub Actions 跑型別檢查、測試、Deno 檢查、建置，以及資料庫的權限測試與型別是否過期（`.github/workflows/ci.yml`）。資料庫 migration 由 `.github/workflows/deploy-db.yml` 部署：PR 改到 `supabase/` 時對測試專案試跑，合併到 `main` 後先部署測試專案、成功才部署正式專案。Edge Functions 的部署在第一個函式時加上。
+**部署**：前端由 Netlify 從 git 自動部署（`netlify.toml`）；每個 PR 由 GitHub Actions 跑型別檢查、測試、Deno 檢查、建置，以及資料庫的權限測試與型別是否過期（`.github/workflows/ci.yml`）。資料庫由 `.github/workflows/deploy-db.yml` 部署：PR 改到資料庫或字典時對測試專案試跑，合併到 `main` 後先部署測試專案、成功才部署正式專案；每次先套用 migration，再整批匯入字典。Edge Functions 的部署在第一個函式時加上。

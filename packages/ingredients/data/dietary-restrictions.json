@@ -1,0 +1,70 @@
+[
+  {
+    "id": "vegetarian",
+    "name": {
+      "zh-TW": "蛋奶素"
+    },
+    "excludesTraits": [
+      "meat",
+      "seafood"
+    ]
+  },
+  {
+    "id": "vegan",
+    "name": {
+      "zh-TW": "全素"
+    },
+    "excludesTraits": [
+      "animal",
+      "egg",
+      "dairy",
+      "honey"
+    ]
+  },
+  {
+    "id": "buddhist-vegetarian",
+    "name": {
+      "zh-TW": "五辛素"
+    },
+    "excludesTraits": [
+      "animal",
+      "allium"
+    ]
+  },
+  {
+    "id": "pescatarian",
+    "name": {
+      "zh-TW": "吃海鮮不吃肉"
+    },
+    "excludesTraits": [
+      "meat"
+    ]
+  },
+  {
+    "id": "no-beef",
+    "name": {
+      "zh-TW": "不吃牛"
+    },
+    "excludesTraits": [
+      "beef"
+    ]
+  },
+  {
+    "id": "no-pork",
+    "name": {
+      "zh-TW": "不吃豬"
+    },
+    "excludesTraits": [
+      "pork"
+    ]
+  },
+  {
+    "id": "no-alcohol",
+    "name": {
+      "zh-TW": "不吃含酒精的"
+    },
+    "excludesTraits": [
+      "alcohol"
+    ]
+  }
+]
