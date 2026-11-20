@@ -109,7 +109,6 @@ interface DietaryProfile {
   allergenIds: string[];              // 對應過敏原字典，硬性限制
   dislikeIngredientIds: string[];     // 對應食材字典，盡量避開
   dietaryRestrictionIds: string[];    // 對應飲食限制字典：飲食原則（素食、不吃牛…）、宗教與文化規則（清真、五辛素、印度教不吃牛…）
-  recurringRules?: { restrictionId: string; schedule: 'lunar_1_15' | 'weekly' | 'ramadan'; weekday?: number }[];   // 週期性規則，例：初一十五吃素；先維持這三種，有人需要別的再加
   noCookingAlcohol: boolean;          // 不用料理酒（米酒、紹興、味醂）
   updatedAt: Instant;
 }
@@ -124,12 +123,12 @@ interface DietaryProfile {
 ```ts
 interface UserIdentity {
   userId: string;
-  displayName: string;                // 暱稱；M0 在新手設定時填（可跳過，預設「我」）
+  displayName: string;                // 暱稱，1–20 字，預設「我」；在「我的」修改
   updatedAt: Instant;
 }
 ```
 
-- 頭像是一張 `Photo`（`ownerType: 'avatar'`），不在這裡另存照片 ID。
+- 頭像是一張 `Photo`（`ownerType: 'avatar'`），不在這裡另存照片 ID。每人最多一張，正方形、只存 400px；經 `set_avatar` 換新的，舊的資料列一起刪除，檔案由每週的孤兒照片檔掃描清掉。
 - 誰能讀：本人、同廚房的成員（含前成員的歷史紀錄顯示）、好友。
 
 - M0 第一次使用時自動建立一個廚房與一筆 `admin` 成員。
@@ -577,7 +576,7 @@ interface ChefMessage {
 
 ### PreferenceProfile — 口味地圖
 
-飲食偏好模型的完整設計見 [13 口味地圖](13-taste-preferences.md)。硬限制（過敏、宗教與文化、飲食原則、週期性規則）放在 `DietaryProfile`；這裡只放喜好與情境。
+飲食偏好模型的完整設計見 [13 口味地圖](13-taste-preferences.md)。硬限制（過敏、宗教與文化、飲食原則）放在 `DietaryProfile`；這裡只放喜好與情境。
 
 ```ts
 interface PreferenceProfile extends UserEntity {   // 只有本人能讀
