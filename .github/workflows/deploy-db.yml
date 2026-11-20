@@ -7,10 +7,10 @@ name: Deploy database
 
 on:
   pull_request:
-    paths: ["supabase/**"]
+    paths: ["supabase/**", ".github/workflows/deploy-db.yml"]
   push:
     branches: [main]
-    paths: ["supabase/**"]
+    paths: ["supabase/**", ".github/workflows/deploy-db.yml"]
   workflow_dispatch:
 
 concurrency:
