@@ -55,8 +55,9 @@ jobs:
         env:
           MAINTENANCE_TOKEN: ${{ secrets[matrix.token_secret] }}
         run: |
+          token=$(printf '%s' "$MAINTENANCE_TOKEN" | tr -d '[:space:]')
           if ! body=$(curl -sS --fail-with-body -X POST \
-              -H "Authorization: Bearer $MAINTENANCE_TOKEN" \
+              -H "Authorization: Bearer $token" \
               "https://${{ matrix.project_id }}.supabase.co/functions/v1/maintenance"); then
             scripts/ci-log-error.sh cron orphan_sweep_failed orphan_sweep critical || true
             echo "::error::孤兒照片檔掃描失敗"

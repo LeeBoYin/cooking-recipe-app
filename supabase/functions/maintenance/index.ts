@@ -47,9 +47,11 @@ async function referencedPaths(client: SupabaseClient): Promise<Set<string>> {
 }
 
 Deno.serve(async (req) => {
-  const token = Deno.env.get('MAINTENANCE_TOKEN');
-  const given = req.headers.get('authorization')?.replace(/^Bearer /i, '') ?? '';
-  if (!token || !safeEqual(given, token)) return json({ error: 'unauthorized' }, 401);
+  // 設定時容易多貼到頭尾的空白或換行，兩邊都先去掉
+  const token = Deno.env.get('MAINTENANCE_TOKEN')?.trim();
+  if (!token) return json({ error: 'not_configured' }, 500);
+  const given = (req.headers.get('authorization') ?? '').replace(/^Bearer /i, '').trim();
+  if (!safeEqual(given, token)) return json({ error: 'unauthorized' }, 401);
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
 
   const url = Deno.env.get('SUPABASE_URL');
