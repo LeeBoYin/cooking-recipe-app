@@ -384,7 +384,7 @@ interface PantryItem extends KitchenEntity {   // 屬於廚房，同廚房的成
   wantToUseSoon: boolean;     // 🔥 想先用掉（使用者手動）
   expiresAt?: LocalDate;      // 選填：使用者自己設定的期限，以廚房時區解讀；有值才會提醒
   dateType?: 'use-by' | 'best-before';   // 有效日期／賞味期限；不做系統估算
-  expirySetOn?: LocalDate;    // 設定期限的那天，計算提醒比例用
+  expirySetOn?: LocalDate;    // 設定期限的那天，計算提醒比例用；由資料庫在期限變動時填
   status: 'active' | 'removed';   // removed 不區分用掉或丟掉、不問原因
   removedAt?: Instant;        // 「最近移除」清單用，可復原（復原就改回 active）
   removedBy?: string;         // 哪位成員移除的

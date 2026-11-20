@@ -79,7 +79,7 @@
 
 | 資料表 | 主鍵 | 外鍵（刪除時） | 階段 |
 |-------|------|--------------|------|
-| `pantry_items` | `id` | `kitchen_id`（連動）；`created_by`、`removed_by`（佔位）；`ingredient_id` → `dict_ingredients`（限制）；`removed_with_recipe_id`（空值） | M0 |
+| `pantry_items` | `id` | `kitchen_id`（連動）；`created_by`、`removed_by`（佔位）；`ingredient_id` → `dict_ingredients`（限制）；`removed_with_recipe_id`（空值；`recipes` 建好後補外鍵） | M0 |
 | `kitchen_equipment` | `id` | `kitchen_id`（連動）；`equipment_type_id` → `dict_equipment_types`（限制） | M0 |
 
 ### 食譜、收藏與對話
@@ -150,7 +150,8 @@
 | `kitchen_members` | 同廚房成員 | 函式（接受邀請） | 管理者改角色；本人改自己的提醒設定 | 函式（離開、移除） |
 | `kitchen_join_codes` | 無（只經函式） | 函式 | 函式 | 函式 |
 | `household_profiles` | 成員 | 管理者 | 管理者 | 管理者 |
-| `pantry_items`、`kitchen_equipment` | 成員 | 成員（食材經 `add_pantry_items`） | 成員 | 成員 |
+| `pantry_items` | 成員 | 函式（`add_pantry_items`） | 成員只能改放哪裡、想先用掉、期限、備註（只改「有」的）；其他欄位與狀態經函式 | 函式（移除與復原改狀態；超過 30 天的由每日維護刪除） |
+| `kitchen_equipment` | 成員 | 成員 | 成員 | 成員 |
 | `recipes` | `can_view_recipe`：作者；家人（household、friends）；好友（friends）；分享給他且沒收回的人。草稿只有作者 | 作者 | 作者（經 `save_recipe`） | 作者（軟刪除） |
 | `recipe_revisions` | 作者 | 函式 | — | 連動 |
 | `photos` | 依擁有者：食譜照片跟著食譜；廚具照片給廚房成員；頭像給本人、家人、好友 | 本人 | 本人；廚具照片給廚房成員 | 同修改 |
@@ -173,8 +174,8 @@
 | `save_recipe` | 作者 | 新增或更新食譜（含草稿）；比對讀取時的 `updated_at`，不一致就拒絕；用字典表算出 `ingredient_ids`、`equipment_type_ids`、`techniques`、`difficulty.overall`、`cooked_dates`；做法改變時寫一版 `recipe_revisions`；檢查長度與照片上限 |
 | `publish_recipe` | 作者 | 檢查有標題或照片、填 `published_at`、對好友與家人送「有新動態」訊號（Realtime Broadcast） |
 | `record_cook_again` | 作者 | 新增一筆「又做了一次」，更新 `cooked_dates` |
-| `add_pantry_items` | 廚房成員 | 一次加入多樣食材：已經有的只更新日期（保留較早的期限），沒有的新增；套用使用者自己的對應優先、全站對應其次 |
-| `remove_pantry_item`、`restore_pantry_item` | 廚房成員 | 移除與復原 |
+| `add_pantry_items` | 廚房成員 | 一次加入多樣食材（最多 100 樣）：已經有的只更新加入日期（保留較早的期限），沒有的新增；放哪裡沒指定時用字典的預設，對應不到字典就放 `pantry`；同一個 ID 重送不會重複新增。食材對應到字典（使用者自己的對應優先、全站對應其次）在 M1a 的食材正規化一起做 |
+| `remove_pantry_item`、`restore_pantry_item` | 廚房成員 | 移除與復原；復原時同一種食材已經又被加回來，就併進現有那一筆（保留較早的加入日期與期限），被復原的那一筆維持移除 |
 | `merge_kitchen_into` | 來源廚房的管理者，且是目標廚房的成員 | 把一個廚房的食材與廚具搬到另一個，同一種食材合併 |
 | `leave_kitchen` | 成員 | 離開；最後一位管理者要先指定接手者；最後一位成員離開時軟刪除廚房 |
 | `create_kitchen_join_code` | 廚房成員 | 產生 6 碼代碼（只回傳一次，資料庫存雜湊），10 分鐘後到期；同一個成員再產生時，舊的作廢 |
@@ -239,7 +240,7 @@ Supabase Auth 另設「建立使用者前」的 hook：Google 登入時檢查 em
 |------|------|-------|
 | 到期提醒、週末靈感 | 每 15 分鐘（`pg_cron`） | 找出現在是當地提醒時間的廚房、週六早上的使用者，排入推播 |
 | 背景任務 | 每分鐘 | 執行 `background_jobs` 裡到期的任務，失敗就退避重試 |
-| 每日維護 | 每天凌晨 | 刪除超過 30 天的對話、90 天的通知與錯誤紀錄、過期的速率計數；軟刪除到期的資料；13 個月以上的產品事件與 AI 用量明細；AI 費用對帳 |
+| 每日維護 | 每天凌晨 | 刪除超過 30 天的對話、移除超過 30 天的食材（`private.purge_removed_pantry_items`）、90 天的通知與錯誤紀錄、過期的速率計數；軟刪除到期的資料；13 個月以上的產品事件與 AI 用量明細；AI 費用對帳 |
 | 每月匯總 | 每月 1 日 | 產生上個月的 `product_metrics_monthly` |
 | 喚醒與備份 | 每週（GitHub Actions） | 喚醒專案；加密備份資料庫到另一個 GitHub 私人儲存庫 |
 

@@ -2,11 +2,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { getMyIdentity, getMySettings } from './account.ts';
 import { listMyKitchens } from './kitchens.ts';
+import { listPantryItems, listRecentlyRemoved } from './pantry.ts';
 
 export const queryKeys = {
   settings: ['me', 'settings'] as const,
   identity: ['me', 'identity'] as const,
   kitchens: ['me', 'kitchens'] as const,
+  pantry: (kitchenId: string) => ['kitchen', kitchenId, 'pantry'] as const,
+  pantryRemoved: (kitchenId: string) => ['kitchen', kitchenId, 'pantry', 'removed'] as const,
 };
 
 export function useMySettings() {
@@ -31,4 +34,22 @@ export function useCurrentKitchen() {
     isPending: settings.isPending || kitchens.isPending,
     error: settings.error ?? kitchens.error,
   };
+}
+
+// 廚房現在有的食材；沒有廚房 ID 時不查
+export function usePantryItems(kitchenId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.pantry(kitchenId ?? ''),
+    queryFn: () => listPantryItems(kitchenId as string),
+    enabled: !!kitchenId,
+  });
+}
+
+// 最近移除（可復原）
+export function useRecentlyRemovedPantry(kitchenId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.pantryRemoved(kitchenId ?? ''),
+    queryFn: () => listRecentlyRemoved(kitchenId as string),
+    enabled: !!kitchenId,
+  });
 }
