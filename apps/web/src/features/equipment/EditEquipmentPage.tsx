@@ -5,10 +5,13 @@ import { getEquipmentType, techniques } from '@zhusha/equipment';
 import {
   useCurrentKitchen,
   useDeleteKitchenEquipment,
+  useEquipmentPhotos,
   useKitchenEquipmentItem,
   useUpdateKitchenEquipment,
 } from '../../data/hooks.ts';
 import type { KitchenEquipment } from '../../data/equipment.ts';
+import { removeFiles } from '../../data/photos.ts';
+import { EquipmentPhoto } from './EquipmentPhoto.tsx';
 import { SubPage } from '../shell/SubPage.tsx';
 
 const INPUT = 'h-12 rounded-card border border-line bg-surface px-3 text-body text-ink';
@@ -32,6 +35,7 @@ function Form({ item, kitchenId }: { item: KitchenEquipment; kitchenId: string }
   const navigate = useNavigate();
   const update = useUpdateKitchenEquipment(kitchenId);
   const remove = useDeleteKitchenEquipment(kitchenId);
+  const photo = useEquipmentPhotos(kitchenId).data?.get(item.id);
   const type = getEquipmentType(item.equipment_type_id);
 
   const [name, setName] = useState(item.raw_name);
@@ -85,6 +89,8 @@ function Form({ item, kitchenId }: { item: KitchenEquipment; kitchenId: string }
   return (
     <div className="flex flex-col gap-4 pb-28">
       <h2 className="m-0 font-round text-heading font-bold">{item.raw_name}</h2>
+
+      <EquipmentPhoto equipmentId={item.id} />
 
       {type && (
         <section className="flex flex-col gap-2 rounded-card bg-surface p-3">
@@ -165,7 +171,15 @@ function Form({ item, kitchenId }: { item: KitchenEquipment; kitchenId: string }
             <button
               type="button"
               disabled={remove.isPending}
-              onClick={() => remove.mutate(item.id, { onSuccess: () => void navigate(-1) })}
+              onClick={() =>
+                remove.mutate(item.id, {
+                  onSuccess: () => {
+                    // 照片資料列由資料庫連動刪除；檔案盡力清掉，清不掉的由維護工作掃孤兒檔
+                    if (photo) void removeFiles([photo.storage_path, photo.feed_path, photo.thumb_path]).catch(() => undefined);
+                    void navigate(-1);
+                  },
+                })
+              }
               className="h-12 rounded-card border-0 bg-error px-4 text-body font-bold text-surface disabled:opacity-50"
             >
               <FormattedMessage id="equipment.delete.yes" />

@@ -629,13 +629,14 @@ interface QuizItem {                  // 題庫，隨版本發佈
 ### Photo — 照片
 
 ```ts
-interface Photo extends UserEntity {   // 照片只記錄自己屬於誰；上層資料不存照片 ID。userId 是上傳的人；廚具照片（equipment）屬於廚房：同廚房成員都能管理，上傳的人刪除帳號時保留
+interface Photo extends UserEntity {   // 照片只記錄自己屬於誰；上層資料不存照片 ID。個人的照片 userId 是擁有者（刪除帳號時一起刪）；廚具照片（equipment）屬於廚房：userId 為空、同廚房成員都能管理，上傳的人另記在 createdBy，他刪除帳號時保留照片、createdBy 設為空
   ownerType: 'recipe' | 'recipe_step' | 'equipment' | 'avatar' | 'status';
   ownerId: string;            // 對應的食譜、步驟、廚具、使用者、近況
   cookNoteId?: string;        // ownerType 為 recipe 時，屬於哪一次「又做了一次」
   recipeId?: string;          // ownerType 為 recipe_step 時，所屬的食譜（權限判斷用）
   kitchenId?: string;         // ownerType 為 equipment 時，所屬的廚房（權限與擁有者都依它）
-  sortOrder: number;          // 同一個擁有者的照片順序
+  createdBy?: string;         // 上傳的人（資料庫記下）
+  sortOrder: number;          // 同一個擁有者的照片順序；一件廚具只有一張照片
   isCover: boolean;           // 食譜的封面
   storagePath: string;        // Storage 路徑（原圖，已壓縮）；上傳完成才建立這筆資料
   feedPath: string;           // 動態圖：長邊 1080px，動態與滿版顯示用

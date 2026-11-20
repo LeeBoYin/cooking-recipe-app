@@ -89,7 +89,7 @@
 | `recipes` | `id` | `user_id`（連動）；`kitchen_id`（空值）；`parent_recipe_id`（空值） | M0 |
 | `recipe_private` | `recipe_id` | `recipes`（連動） | M0（口述 M1b） |
 | `recipe_revisions` | `id` | `recipe_id`（連動） | M1b |
-| `photos` | `id` | `user_id`（連動，廚具照片除外）；`kitchen_id`（連動，廚具照片） | M0 |
+| `photos` | `id` | `user_id`（連動，廚具照片為空）；`kitchen_id`（連動，廚具照片）；`created_by`（佔位） | M0（廚具照片先做；食譜、步驟、頭像、近況的寫入規則等食譜表與好友關係建好再補） |
 | `bookmarks` | `id` | `user_id`（連動）；`recipe_id`（空值，顯示「已收起來」）；`cooked_recipe_id`（空值） | M1a（朋友的食譜 M2） |
 | `chef_conversations` | `id` | `user_id`（連動）；`kitchen_id`（空值） | M1a |
 | `preference_profiles` | `user_id` | `auth.users`（連動） | M0 |
@@ -154,7 +154,7 @@
 | `kitchen_equipment` | 成員 | 成員 | 成員（不能改所屬廚房；選配手法只能是字典列出的，由觸發器檢查） | 成員 |
 | `recipes` | `can_view_recipe`：作者；家人（household、friends）；好友（friends）；分享給他且沒收回的人。草稿只有作者 | 作者 | 作者（經 `save_recipe`） | 作者（軟刪除） |
 | `recipe_revisions` | 作者 | 函式 | — | 連動 |
-| `photos` | 依擁有者：食譜照片跟著食譜；廚具照片給廚房成員；頭像給本人、家人、好友 | 本人 | 本人；廚具照片給廚房成員 | 同修改 |
+| `photos` | 依擁有者：食譜照片跟著食譜；廚具照片給廚房成員；頭像給本人、家人、好友。私有 bucket `photos` 的 Storage 規則依路徑前綴判斷（`users/{userId}/` 本人、`kitchens/{kitchenId}/` 廚房成員），路徑格式不對一律拒絕 | 本人；廚具照片給廚房成員。三個檔案都已在 Storage 才能建立資料列；路徑必須是由 ID 與擁有者決定的固定格式；一件廚具一張 | 只能改排序與封面 | 同新增；廚具刪除時資料列由觸發器一起刪，檔案由 `maintenance` 掃孤兒檔 |
 | `bookmarks` | 本人 | 本人（朋友的食譜要讀得到才能收藏） | 本人 | 本人 |
 | `share_links` | 作者（公開頁由 `share` 函式以服務權限讀） | 作者 | 作者（撤銷） | 連動 |
 | `reactions`、`comments` | 讀得到那篇食譜的人 | 讀得到那篇食譜的人 | 本人 | 本人；食譜作者可刪自己食譜下的留言 |

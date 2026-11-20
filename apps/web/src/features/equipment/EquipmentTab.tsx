@@ -1,7 +1,7 @@
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router';
 import { Chef } from '../../chef/Chef.tsx';
-import { useCurrentKitchen, useKitchenEquipment } from '../../data/hooks.ts';
+import { useCurrentKitchen, useEquipmentPhotos, useKitchenEquipment, usePhotoUrls } from '../../data/hooks.ts';
 import type { KitchenEquipment } from '../../data/equipment.ts';
 import { ActionBar } from '../kitchen/ActionBar.tsx';
 import { Icon } from '../shell/Icon.tsx';
@@ -9,12 +9,12 @@ import { detailTags, groupEquipment } from './logic.ts';
 
 const TAG = 'rounded-tag bg-line-soft px-2 text-small font-bold text-ink-muted';
 
-function Row({ item }: { item: KitchenEquipment }) {
+function Row({ item, thumbUrl }: { item: KitchenEquipment; thumbUrl?: string }) {
   return (
     <li className="border-b border-line-soft last:border-b-0">
       <Link to={`/kitchen/equipment/${item.id}`} className="flex min-h-14 items-center gap-3 px-3 py-2 text-ink no-underline">
-        <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-line-soft">
-          <Icon name="pot" size={22} />
+        <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-line-soft">
+          {thumbUrl ? <img src={thumbUrl} alt="" className="size-full object-cover" /> : <Icon name="pot" size={22} />}
         </span>
         <span className="flex-1 text-body">{item.raw_name}</span>
         {detailTags(item).map((t) => (
@@ -30,6 +30,9 @@ export function EquipmentTab() {
   const { kitchen } = useCurrentKitchen();
   const equipment = useKitchenEquipment(kitchen?.id);
   const groups = groupEquipment(equipment.data ?? []);
+  const photos = useEquipmentPhotos(kitchen?.id).data;
+  const thumbPaths = [...(photos?.values() ?? [])].map((p) => p.thumb_path);
+  const thumbUrls = usePhotoUrls(thumbPaths).data;
 
   return (
     <div className="flex flex-col gap-3">
@@ -56,7 +59,7 @@ export function EquipmentTab() {
             </h2>
             <ul className="m-0 list-none overflow-hidden rounded-card bg-surface p-0">
               {g.items.map((i) => (
-                <Row key={i.id} item={i} />
+                <Row key={i.id} item={i} thumbUrl={thumbUrls?.[photos?.get(i.id)?.thumb_path ?? '']} />
               ))}
             </ul>
           </section>
