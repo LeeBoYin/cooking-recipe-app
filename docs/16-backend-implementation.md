@@ -191,7 +191,7 @@
 | `delete_account` | 本人 | 依 04 的規則處理所有資料，別人資料裡的參照改成空值（顯示「已刪除的使用者」），排入照片清理的背景任務 |
 | `search_recipes` | 已登入的人 | PGroonga 查詢，只回傳讀得到的食譜與收藏 |
 | `feed_page` | 已登入的人 | 朋友與家人的動態，用 `(published_at, id)` 游標分頁 |
-| `bookmark_recipe`、`unbookmark_recipe` | 已登入的人 | 收藏時存下菜名快照 |
+| `bookmark_recipe`、`unbookmark_recipe` | 已登入的人 | 收藏時存下菜名快照；大廚的點子另存理由與 `baseDishId`，同一道家常菜每人只能收藏一筆（再收藏回傳既有那筆）；`ideaIngredientIds` 由家常菜的主要食材算出，不信任手機送來的值 |
 | `share_to_friend`、`revoke_friend_share` | 作者 | 分享與收回 |
 | `toggle_reaction`、`add_comment`、`delete_comment` | 讀得到食譜的人 | 回覆只能一層 |
 | `regenerate_friend_link`、`accept_friend_link`、`remove_friend` | 本人 | 好友連結與移除好友 |
