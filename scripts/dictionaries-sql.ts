@@ -3,9 +3,10 @@
 // 版本號是字典內容的雜湊，內容沒變版本就不變。
 import { createHash } from 'node:crypto';
 import { equipmentTypes, techniques } from '../packages/equipment/src/index.ts';
-import { allergens, dietaryRestrictions, ingredients } from '../packages/ingredients/src/index.ts';
+import { allergens, dietaryRestrictions, ingredients, regionProfiles as regions } from '../packages/ingredients/src/index.ts';
+import { baseDishes, preferenceDimensions, quizItems } from '../packages/taste/src/index.ts';
 
-const content = { allergens, ingredients, dietaryRestrictions, techniques, equipmentTypes };
+const content = { allergens, ingredients, dietaryRestrictions, techniques, equipmentTypes, regions, preferenceDimensions, quizItems, baseDishes };
 const version = createHash('sha256').update(JSON.stringify(content)).digest('hex').slice(0, 12);
 const json = JSON.stringify({ version, ...content });
 

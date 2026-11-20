@@ -1,0 +1,849 @@
+[
+  {
+    "key": "cuisine.taiwan",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "台灣"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "cuisine.taiwan.home",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "台式家常"
+    },
+    "parentKey": "cuisine.taiwan",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.taiwan.street_food",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "台灣小吃"
+    },
+    "parentKey": "cuisine.taiwan",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.taiwan.hakka",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "客家"
+    },
+    "parentKey": "cuisine.taiwan",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.taiwan.indigenous",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "原住民料理"
+    },
+    "parentKey": "cuisine.taiwan",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.japan",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "日本"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "cuisine.japan.washoku",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "和食"
+    },
+    "parentKey": "cuisine.japan",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.japan.yoshoku",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "洋食"
+    },
+    "parentKey": "cuisine.japan",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.japan.izakaya",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "居酒屋"
+    },
+    "parentKey": "cuisine.japan",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.korea",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "韓國"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "cuisine.china",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "中國各地"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "cuisine.china.sichuan",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "川菜"
+    },
+    "parentKey": "cuisine.china",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.china.cantonese",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "粵菜"
+    },
+    "parentKey": "cuisine.china",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.china.jiangzhe",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "江浙菜"
+    },
+    "parentKey": "cuisine.china",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.china.northern",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "北方菜"
+    },
+    "parentKey": "cuisine.china",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.china.yunnan_guizhou",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "雲貴菜"
+    },
+    "parentKey": "cuisine.china",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.southeast_asia",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "東南亞"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "cuisine.southeast_asia.thai",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "泰式"
+    },
+    "parentKey": "cuisine.southeast_asia",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.southeast_asia.vietnamese",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "越式"
+    },
+    "parentKey": "cuisine.southeast_asia",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.southeast_asia.malay",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "馬來"
+    },
+    "parentKey": "cuisine.southeast_asia",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.southeast_asia.indonesian",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "印尼"
+    },
+    "parentKey": "cuisine.southeast_asia",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.southeast_asia.filipino",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "菲律賓"
+    },
+    "parentKey": "cuisine.southeast_asia",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.south_asia",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "南亞"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "cuisine.south_asia.north_indian",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "北印度"
+    },
+    "parentKey": "cuisine.south_asia",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.south_asia.south_indian",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "南印度"
+    },
+    "parentKey": "cuisine.south_asia",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.middle_east",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "中東"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "cuisine.mediterranean",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "地中海"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "cuisine.mediterranean.italian",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "義式"
+    },
+    "parentKey": "cuisine.mediterranean",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.mediterranean.greek",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "希臘"
+    },
+    "parentKey": "cuisine.mediterranean",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.mediterranean.spanish",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "西班牙"
+    },
+    "parentKey": "cuisine.mediterranean",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.france",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "法式"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "cuisine.american",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "美式"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "cuisine.american.southern",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "美國南方"
+    },
+    "parentKey": "cuisine.american",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.american.bbq",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "BBQ"
+    },
+    "parentKey": "cuisine.american",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.american.tex_mex",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "Tex-Mex"
+    },
+    "parentKey": "cuisine.american",
+    "impact": 0.6
+  },
+  {
+    "key": "cuisine.mexico",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "墨西哥"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "cuisine.latin_america",
+    "group": "cuisine",
+    "name": {
+      "zh-TW": "拉丁美洲"
+    },
+    "impact": 0.9
+  },
+  {
+    "key": "taste.sour",
+    "group": "taste",
+    "name": {
+      "zh-TW": "酸"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "taste.sweet",
+    "group": "taste",
+    "name": {
+      "zh-TW": "甜"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "taste.bitter",
+    "group": "taste",
+    "name": {
+      "zh-TW": "苦"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "taste.spicy",
+    "group": "taste",
+    "name": {
+      "zh-TW": "辣"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "taste.salty",
+    "group": "taste",
+    "name": {
+      "zh-TW": "鹹"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "taste.umami",
+    "group": "taste",
+    "name": {
+      "zh-TW": "鮮"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "taste.numbing",
+    "group": "taste",
+    "name": {
+      "zh-TW": "麻"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "taste.aromatic",
+    "group": "taste",
+    "name": {
+      "zh-TW": "香（爆香、焦香）"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "taste.smoky",
+    "group": "taste",
+    "name": {
+      "zh-TW": "燻"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "spice_type.numbing_spicy",
+    "group": "spice_type",
+    "name": {
+      "zh-TW": "麻辣"
+    },
+    "parentKey": "taste.spicy",
+    "impact": 0.5
+  },
+  {
+    "key": "spice_type.sour_spicy",
+    "group": "spice_type",
+    "name": {
+      "zh-TW": "酸辣"
+    },
+    "parentKey": "taste.spicy",
+    "impact": 0.5
+  },
+  {
+    "key": "spice_type.sweet_spicy",
+    "group": "spice_type",
+    "name": {
+      "zh-TW": "甜辣"
+    },
+    "parentKey": "taste.spicy",
+    "impact": 0.5
+  },
+  {
+    "key": "spice_type.savory_spicy",
+    "group": "spice_type",
+    "name": {
+      "zh-TW": "香辣"
+    },
+    "parentKey": "taste.spicy",
+    "impact": 0.5
+  },
+  {
+    "key": "spice_type.curry_spicy",
+    "group": "spice_type",
+    "name": {
+      "zh-TW": "咖哩辣"
+    },
+    "parentKey": "taste.spicy",
+    "impact": 0.5
+  },
+  {
+    "key": "spice_type.mexican_chili",
+    "group": "spice_type",
+    "name": {
+      "zh-TW": "墨西哥辣椒"
+    },
+    "parentKey": "taste.spicy",
+    "impact": 0.5
+  },
+  {
+    "key": "seasoning.soy_sauce",
+    "group": "seasoning",
+    "name": {
+      "zh-TW": "醬油系"
+    },
+    "impact": 0.6
+  },
+  {
+    "key": "seasoning.miso_dashi",
+    "group": "seasoning",
+    "name": {
+      "zh-TW": "味噌與柴魚系"
+    },
+    "impact": 0.6
+  },
+  {
+    "key": "seasoning.fish_sauce_lemongrass",
+    "group": "seasoning",
+    "name": {
+      "zh-TW": "魚露香茅系"
+    },
+    "impact": 0.6
+  },
+  {
+    "key": "seasoning.curry_spice",
+    "group": "seasoning",
+    "name": {
+      "zh-TW": "咖哩香料系"
+    },
+    "impact": 0.6
+  },
+  {
+    "key": "seasoning.tomato_cheese",
+    "group": "seasoning",
+    "name": {
+      "zh-TW": "番茄起司系"
+    },
+    "impact": 0.6
+  },
+  {
+    "key": "seasoning.butter_herb",
+    "group": "seasoning",
+    "name": {
+      "zh-TW": "奶油香草系"
+    },
+    "impact": 0.6
+  },
+  {
+    "key": "seasoning.doubanjiang_mala",
+    "group": "seasoning",
+    "name": {
+      "zh-TW": "豆瓣麻辣系"
+    },
+    "impact": 0.6
+  },
+  {
+    "key": "seasoning.korean_paste",
+    "group": "seasoning",
+    "name": {
+      "zh-TW": "韓式醬系"
+    },
+    "impact": 0.6
+  },
+  {
+    "key": "seasoning.bbq_smoke",
+    "group": "seasoning",
+    "name": {
+      "zh-TW": "BBQ 煙燻系"
+    },
+    "impact": 0.6
+  },
+  {
+    "key": "seasoning.shacha",
+    "group": "seasoning",
+    "name": {
+      "zh-TW": "沙茶系"
+    },
+    "impact": 0.6
+  },
+  {
+    "key": "texture.crispy",
+    "group": "texture",
+    "name": {
+      "zh-TW": "酥脆"
+    },
+    "impact": 0.4
+  },
+  {
+    "key": "texture.tender",
+    "group": "texture",
+    "name": {
+      "zh-TW": "軟嫩"
+    },
+    "impact": 0.4
+  },
+  {
+    "key": "texture.bouncy",
+    "group": "texture",
+    "name": {
+      "zh-TW": "Q 彈"
+    },
+    "impact": 0.4
+  },
+  {
+    "key": "texture.smooth",
+    "group": "texture",
+    "name": {
+      "zh-TW": "滑順"
+    },
+    "impact": 0.4
+  },
+  {
+    "key": "texture.chewy",
+    "group": "texture",
+    "name": {
+      "zh-TW": "有嚼勁"
+    },
+    "impact": 0.4
+  },
+  {
+    "key": "texture.soupy",
+    "group": "texture",
+    "name": {
+      "zh-TW": "湯湯水水"
+    },
+    "impact": 0.4
+  },
+  {
+    "key": "form.soup",
+    "group": "form",
+    "name": {
+      "zh-TW": "湯"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "form.stew_braise",
+    "group": "form",
+    "name": {
+      "zh-TW": "燉滷"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "form.stir_fry",
+    "group": "form",
+    "name": {
+      "zh-TW": "快炒"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "form.grill",
+    "group": "form",
+    "name": {
+      "zh-TW": "燒烤"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "form.fried",
+    "group": "form",
+    "name": {
+      "zh-TW": "炸"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "form.steamed",
+    "group": "form",
+    "name": {
+      "zh-TW": "蒸"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "form.cold_dish",
+    "group": "form",
+    "name": {
+      "zh-TW": "涼拌"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "form.raw",
+    "group": "form",
+    "name": {
+      "zh-TW": "生食"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "form.one_pot",
+    "group": "form",
+    "name": {
+      "zh-TW": "一鍋料理"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "form.noodles",
+    "group": "form",
+    "name": {
+      "zh-TW": "麵食"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "form.rice",
+    "group": "form",
+    "name": {
+      "zh-TW": "飯類"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "form.dessert_baking",
+    "group": "form",
+    "name": {
+      "zh-TW": "甜點烘焙"
+    },
+    "impact": 0.7
+  },
+  {
+    "key": "protein.pork",
+    "group": "protein",
+    "name": {
+      "zh-TW": "豬"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "protein.chicken",
+    "group": "protein",
+    "name": {
+      "zh-TW": "雞"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "protein.beef",
+    "group": "protein",
+    "name": {
+      "zh-TW": "牛"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "protein.lamb",
+    "group": "protein",
+    "name": {
+      "zh-TW": "羊"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "protein.fish",
+    "group": "protein",
+    "name": {
+      "zh-TW": "魚"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "protein.shellfish",
+    "group": "protein",
+    "name": {
+      "zh-TW": "蝦蟹貝"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "protein.tofu_soy",
+    "group": "protein",
+    "name": {
+      "zh-TW": "豆腐豆製品"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "protein.egg",
+    "group": "protein",
+    "name": {
+      "zh-TW": "蛋"
+    },
+    "impact": 0.8
+  },
+  {
+    "key": "ingredient.cilantro",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "香菜"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.bitter_melon",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "苦瓜"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.stinky_tofu",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "臭豆腐"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.offal",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "內臟"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.sashimi",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "生魚片"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.lamb_gamey",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "羊肉的羶味"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.blue_cheese",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "藍紋起司"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.durian",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "榴槤"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.eggplant",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "茄子"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.okra",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "秋葵"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.celery",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "芹菜"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.ginger",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "薑"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "richness.rich",
+    "group": "richness",
+    "name": {
+      "zh-TW": "濃郁"
+    },
+    "impact": 0.5
+  },
+  {
+    "key": "richness.oily",
+    "group": "richness",
+    "name": {
+      "zh-TW": "重油香"
+    },
+    "impact": 0.5
+  }
+]

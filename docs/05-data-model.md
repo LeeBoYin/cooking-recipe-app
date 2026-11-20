@@ -19,7 +19,7 @@ type LocalDate = string;   // 某一天，'YYYY-MM-DD'，一律以「廚房的�
 // ── 語系與地區（見 15）──
 type LanguageTag = string; // 任何語言代碼（BCP 47），例 'zh-TW'、'zh-CN'、'ja'、'en-US'；字典可以有任何語言的名稱與別名
 type UiLocale = 'zh-TW';   // App 介面實際支援的語言，是 LanguageTag 的一部分。目前只有繁中；加介面語言時擴充，例 'zh-TW' | 'ja'
-type RegionCode = string;  // 地區代碼（ISO 3166-1 alpha-2），例 'TW'、'US'、'JP'；和語系分開
+type RegionCode = string;  // 地區代碼：國家用 ISO 3166-1 alpha-2，需要時加子區（ISO 3166-2），例 'TW'、'JP'、'US-CA'；找不到子區的資料時退回上層（US-CA → US）；和語系分開
 type LocalizedText = { 'zh-TW': string } & Record<LanguageTag, string>;     // 字典的顯示文字：繁中必填，其他語言選填；顯示時用使用者的介面語言，缺的退回繁中
 type LocalizedTerms = { 'zh-TW': string[] } & Record<LanguageTag, string[]>; // 別名與搜尋詞，可以放介面還不支援的語言（例：日文的「長ねぎ」、中國用語的「西紅柿」）；搜尋時比對所有語言
 
@@ -56,7 +56,7 @@ interface Kitchen {
   id: string;
   name: string;                       // 「我家」「爸媽家」
   timezone: string;                   // IANA 時區，例 'Asia/Taipei'、'America/Los_Angeles'；建立時取手機時區，可修改。到期日、「今天」、每日提醒、深夜判斷一律以它為準
-  region: RegionCode;                 // 地區代碼，例 'TW'、'US'；對應 RegionProfile；決定季節分法、當季食材與節日料理。該地區還沒有當季資料時，只用依南北半球的四季
+  region: RegionCode;                 // 地區代碼，例 'TW'、'US-CA'、'JP'；對應 RegionProfile；決定季節分法、當季食材與節日料理。該地區還沒有當季資料時，只用依南北半球的四季
   createdBy: string;
   updatedBy: string;
   // 不在廚房上放長期共用的連結：還沒有帳號的家人用 Invite（type: 'kitchen'，綁定 email、一次性）；已經有帳號、人在旁邊的用 KitchenJoinCode（10 分鐘、一次性）
@@ -192,7 +192,7 @@ interface Ingredient {
   isPerishable: boolean;             // 是否為生鮮；決定「最近買的」標記
   recentDays?: number;               // 生鮮加入後維持「最近買的」幾天（例：葉菜 5、根莖類 14），之後自動淡化
   densityGPerMl?: number;            // 容量換算重量用（1 杯麵粉 ≈ ? 克），P2
-  seasonMonths?: Partial<Record<RegionCode, number[]>>;   // 依地區的當季月份，例 { TW: [11,12,1,2], US: [10,11] }；先做台灣與美國
+  seasonMonths?: Partial<Record<RegionCode, number[]>>;   // 依地區的當季月份，例 { TW: [11,12,1,2], 'US-CA': [10,11] }；目前先做台灣，美國加州與日本之後補
   flavorTags?: FlavorTag[];          // salty | sweet | sour | spicy | umami | aromatic | bitter
   allergenIds?: string[];            // 對應過敏原字典
   deprecated?: boolean;              // 淘汰的項目（ID 不刪除）；所有字典都有這兩個欄位，見〈完整性與穩定性規則〉
@@ -615,7 +615,8 @@ interface QuizItem {                  // 題庫，隨版本發佈
   description?: LocalizedText;        // 描述菜卡的感官描述，30 字以內（每個語系各自寫，不是直譯）
   regions: RegionCode[];              // 哪些地區的使用者會看到
   mapping: Record<string, number>;    // 回答時各維度的加減
-  excludedBy?: string[];              // 有這些硬限制的人不會看到（例：蝦蟹過敏）
+  excludedAllergenIds?: string[];     // 有這些過敏原的人不會看到（例：蝦蟹過敏 → 'crustacean'）
+  excludedRestrictionIds?: string[];  // 有這些飲食限制的人不會看到（例：不吃牛 → 'no-beef'）
   followUps?: string[];
 }
 ```

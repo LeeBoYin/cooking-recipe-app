@@ -88,14 +88,14 @@
   "type": "dish_card",
   "title": { "zh-TW": "泰式冬蔭功" },              // 字典文字一律分語系
   "description": { "zh-TW": "酸辣湯底，香茅、南薑、檸檬葉的香氣，加蝦和魚露" },
-  "regions": ["TW", "US"],                          // 哪些地區的使用者會看到
+  "regions": ["TW", "US-CA", "JP"],                 // 哪些地區的使用者會看到
   "mapping": {                                      // 回答「喜歡」時各維度加多少；「不愛」時反向
     "cuisine.southeast_asia.thai": 0.8,
     "taste.sour": 0.5, "taste.spicy": 0.5, "spice_type.sour_spicy": 0.7,
     "seasoning.fish_sauce_lemongrass": 0.8,
     "protein.shellfish": 0.4, "form.soup": 0.4
   },
-  "hardConstraintCheck": ["allergen.shellfish"],    // 有蝦蟹過敏的人不會看到這張
+  "excludedAllergenIds": ["crustacean"],            // 有蝦蟹過敏的人不會看到這張；飲食限制用 excludedRestrictionIds
   "followUps": ["card_green_curry", "card_pho"]     // 喜歡時，接著可能問的題目
 }
 ```

@@ -13,6 +13,10 @@ on:
       - "supabase/**"
       - "packages/ingredients/data/**"
       - "packages/ingredients/src/**"
+      - "packages/equipment/data/**"
+      - "packages/equipment/src/**"
+      - "packages/taste/data/**"
+      - "packages/taste/src/**"
       - "scripts/dictionaries-sql.ts"
       - ".github/workflows/deploy-db.yml"
   push:
@@ -21,6 +25,10 @@ on:
       - "supabase/**"
       - "packages/ingredients/data/**"
       - "packages/ingredients/src/**"
+      - "packages/equipment/data/**"
+      - "packages/equipment/src/**"
+      - "packages/taste/data/**"
+      - "packages/taste/src/**"
       - "scripts/dictionaries-sql.ts"
       - ".github/workflows/deploy-db.yml"
   workflow_dispatch:

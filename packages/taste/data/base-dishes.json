@@ -1,0 +1,1214 @@
+[
+  {
+    "id": "tomato-scrambled-eggs",
+    "name": {
+      "zh-TW": "番茄炒蛋"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "tomato",
+      "egg",
+      "scallion",
+      "salt"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "scallion-omelet",
+    "name": {
+      "zh-TW": "蔥花蛋"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "egg",
+      "scallion",
+      "salt"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "egg-fried-rice",
+    "name": {
+      "zh-TW": "蛋炒飯"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "rice",
+      "egg",
+      "scallion",
+      "soy-sauce"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "shrimp-fried-rice",
+    "name": {
+      "zh-TW": "蝦仁炒飯"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "rice",
+      "shrimp",
+      "egg",
+      "scallion"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "stir-fried-cabbage",
+    "name": {
+      "zh-TW": "炒高麗菜"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "cabbage",
+      "garlic",
+      "salt"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "basil-eggplant",
+    "name": {
+      "zh-TW": "塔香茄子"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "eggplant",
+      "thai-basil",
+      "garlic",
+      "soy-sauce"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "mapo-tofu",
+    "name": {
+      "zh-TW": "麻婆豆腐"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.china.sichuan"
+    ],
+    "ingredientIds": [
+      "tofu",
+      "ground-pork",
+      "chili-pepper",
+      "garlic",
+      "scallion"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "home-style-tofu",
+    "name": {
+      "zh-TW": "家常豆腐"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "tofu",
+      "soy-sauce",
+      "garlic",
+      "scallion"
+    ],
+    "techniques": [
+      "pan-fry",
+      "red-braise"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "cold-tofu",
+    "name": {
+      "zh-TW": "涼拌豆腐"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "tofu",
+      "soy-sauce",
+      "sesame-oil",
+      "scallion"
+    ],
+    "techniques": [
+      "toss"
+    ],
+    "equipmentTypeIds": [],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "cold-cabbage",
+    "name": {
+      "zh-TW": "涼拌高麗菜"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "cabbage",
+      "garlic",
+      "soy-sauce",
+      "sesame-oil",
+      "chili-pepper"
+    ],
+    "techniques": [
+      "blanch",
+      "toss"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "steamed-egg",
+    "name": {
+      "zh-TW": "蒸蛋"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "egg",
+      "salt"
+    ],
+    "techniques": [
+      "steam"
+    ],
+    "equipmentTypeIds": [
+      "steamer-basket"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 2,
+      "time": 2,
+      "technique": 3,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "egg-drop-soup",
+    "name": {
+      "zh-TW": "蛋花湯"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "egg",
+      "scallion",
+      "salt"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 2,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "tomato-egg-noodles",
+    "name": {
+      "zh-TW": "番茄蛋花麵"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "noodles",
+      "tomato",
+      "egg",
+      "scallion"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "stockpot"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "stir-fried-noodles",
+    "name": {
+      "zh-TW": "炒麵"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "noodles",
+      "cabbage",
+      "ground-pork",
+      "soy-sauce"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "lu-rou-fan",
+    "name": {
+      "zh-TW": "滷肉飯"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "pork-belly",
+      "rice",
+      "soy-sauce",
+      "rice-wine",
+      "rock-sugar"
+    ],
+    "techniques": [
+      "soy-braise"
+    ],
+    "equipmentTypeIds": [
+      "stockpot",
+      "electric-rice-cooker"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 2,
+      "time": 4,
+      "technique": 3,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "braised-egg",
+    "name": {
+      "zh-TW": "滷蛋"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "egg",
+      "soy-sauce",
+      "rock-sugar"
+    ],
+    "techniques": [
+      "soy-braise"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "red-braised-pork",
+    "name": {
+      "zh-TW": "紅燒肉"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.china.jiangzhe"
+    ],
+    "ingredientIds": [
+      "pork-belly",
+      "soy-sauce",
+      "rice-wine",
+      "rock-sugar",
+      "ginger"
+    ],
+    "techniques": [
+      "red-braise"
+    ],
+    "equipmentTypeIds": [
+      "stockpot"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 2,
+      "time": 4,
+      "technique": 3,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "three-cup-chicken",
+    "name": {
+      "zh-TW": "三杯雞"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "chicken-thigh",
+      "ginger",
+      "garlic",
+      "thai-basil",
+      "soy-sauce",
+      "sesame-oil",
+      "rice-wine"
+    ],
+    "techniques": [
+      "braise"
+    ],
+    "equipmentTypeIds": [
+      "clay-pot",
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 3,
+      "equipment": 2,
+      "time": 3,
+      "technique": 3,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "sesame-oil-chicken",
+    "name": {
+      "zh-TW": "麻油雞"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "chicken-thigh",
+      "sesame-oil",
+      "ginger",
+      "rice-wine"
+    ],
+    "techniques": [
+      "braise"
+    ],
+    "equipmentTypeIds": [
+      "stockpot"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "shiitake-chicken-soup",
+    "name": {
+      "zh-TW": "香菇雞湯"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "chicken-thigh",
+      "shiitake",
+      "ginger",
+      "rice-wine"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "stockpot"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 4,
+      "technique": 2,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "soy-garlic-chicken",
+    "name": {
+      "zh-TW": "蒜香醬燒雞腿"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "chicken-thigh",
+      "soy-sauce",
+      "honey",
+      "garlic"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "scallion-beef",
+    "name": {
+      "zh-TW": "蔥爆牛肉"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "beef-slices",
+      "scallion",
+      "soy-sauce",
+      "rice-wine"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 3,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "tomato-beef",
+    "name": {
+      "zh-TW": "番茄牛肉"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "beef-slices",
+      "tomato",
+      "onion",
+      "soy-sauce"
+    ],
+    "techniques": [
+      "braise"
+    ],
+    "equipmentTypeIds": [
+      "stockpot"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "shrimp-with-egg",
+    "name": {
+      "zh-TW": "蝦仁炒蛋"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "shrimp",
+      "egg",
+      "scallion",
+      "salt"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 1,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "garlic-shrimp",
+    "name": {
+      "zh-TW": "蒜香炒蝦"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "shrimp",
+      "garlic",
+      "rice-wine",
+      "salt"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 1,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "pan-fried-salmon",
+    "name": {
+      "zh-TW": "香煎鮭魚"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "salmon",
+      "salt",
+      "black-pepper",
+      "cooking-oil"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "teriyaki-salmon",
+    "name": {
+      "zh-TW": "照燒鮭魚"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "salmon",
+      "soy-sauce",
+      "mirin",
+      "sugar"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "salmon-fried-rice",
+    "name": {
+      "zh-TW": "鮭魚炒飯"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "rice",
+      "salmon",
+      "egg",
+      "scallion"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "oyakodon",
+    "name": {
+      "zh-TW": "親子丼"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "chicken-thigh",
+      "egg",
+      "onion",
+      "soy-sauce",
+      "mirin",
+      "rice"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 3,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "gyudon",
+    "name": {
+      "zh-TW": "牛丼"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "beef-slices",
+      "onion",
+      "soy-sauce",
+      "mirin",
+      "sugar",
+      "rice"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "tamagoyaki",
+    "name": {
+      "zh-TW": "玉子燒"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "egg",
+      "mirin",
+      "soy-sauce",
+      "sugar"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "tamagoyaki-pan",
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 2,
+      "time": 2,
+      "technique": 3,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "ginger-pork",
+    "name": {
+      "zh-TW": "薑燒豬肉"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "pork-belly",
+      "ginger",
+      "soy-sauce",
+      "mirin",
+      "onion"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "pad-krapow",
+    "name": {
+      "zh-TW": "泰式打拋豬"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.southeast_asia.thai"
+    ],
+    "ingredientIds": [
+      "ground-pork",
+      "thai-basil",
+      "chili-pepper",
+      "garlic",
+      "fish-sauce"
+    ],
+    "techniques": [
+      "stir-fry"
+    ],
+    "equipmentTypeIds": [
+      "wok"
+    ],
+    "difficulty": {
+      "ingredients": 3,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "bulgogi",
+    "name": {
+      "zh-TW": "韓式烤牛肉"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.korea"
+    ],
+    "ingredientIds": [
+      "beef-slices",
+      "soy-sauce",
+      "sugar",
+      "garlic",
+      "sesame-oil",
+      "onion"
+    ],
+    "techniques": [
+      "marinate",
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 3,
+      "equipment": 1,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "scallion-pancake",
+    "name": {
+      "zh-TW": "蔥油餅"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.street_food"
+    ],
+    "ingredientIds": [
+      "flour",
+      "scallion",
+      "cooking-oil",
+      "salt"
+    ],
+    "techniques": [
+      "knead",
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan",
+      "rolling-pin"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 2,
+      "time": 3,
+      "technique": 4,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "pork-cabbage-dumplings",
+    "name": {
+      "zh-TW": "高麗菜水餃"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "flour",
+      "ground-pork",
+      "cabbage",
+      "soy-sauce",
+      "sesame-oil"
+    ],
+    "techniques": [
+      "knead",
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "stockpot",
+      "rolling-pin"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 2,
+      "time": 5,
+      "technique": 4,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "pancakes",
+    "name": {
+      "zh-TW": "美式鬆餅"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "flour",
+      "egg",
+      "milk",
+      "sugar"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "peanut-tofu",
+    "name": {
+      "zh-TW": "花生拌豆腐"
+    },
+    "regions": [
+      "TW"
+    ],
+    "cuisineKeys": [
+      "cuisine.taiwan.home"
+    ],
+    "ingredientIds": [
+      "tofu",
+      "peanut",
+      "soy-sauce",
+      "sesame-oil"
+    ],
+    "techniques": [
+      "toss"
+    ],
+    "equipmentTypeIds": [],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  }
+]

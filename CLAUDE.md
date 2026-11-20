@@ -2,7 +2,7 @@
 
 朋友之間的料理社群，加上一位懂你的靈感大廚。可安裝到手機的 PWA，資料只存在雲端。
 
-目前狀態：規格完成，M0 進行中：登入、帳號與廚房、字典、食材、廚具、照片（廚具照片：資料表、轉檔、上傳）、食譜後端（資料表、權限、儲存與發佈函式、食譜照片權限）、食譜畫面（編輯頁與食譜頁）已完成、我的食譜（時間軸、草稿匣、搜尋、最近刪除）已完成，錯誤紀錄與每日維護（M0-13a）已完成，函式與每週維護（M0-13b）已完成，下一段是 M0-14（口味資料）；其他功能照 18 的順序往下做。收藏（`bookmarks`）從 M1a 才做。
+目前狀態：規格完成，M0 進行中：登入、帳號與廚房、字典、食材、廚具、照片（廚具照片：資料表、轉檔、上傳）、食譜後端（資料表、權限、儲存與發佈函式、食譜照片權限）、食譜畫面（編輯頁與食譜頁）已完成、我的食譜（時間軸、草稿匣、搜尋、最近刪除）已完成，錯誤紀錄與每日維護（M0-13a）已完成，函式與每週維護（M0-13b）已完成，口味資料（M0-14：口味維度、題庫樣本、地區、基礎菜色，以及口味地圖與飲食限制兩張表）已完成，下一段是 M0-15（口味探索的邏輯與畫面；完整題庫在這一段討論）；其他功能照 18 的順序往下做。收藏（`bookmarks`）從 M1a 才做。
 
 ## 溝通與文件
 
@@ -34,7 +34,7 @@
 
 ## 技術組合
 
-Vite＋React＋TypeScript 的 PWA（放在 Netlify）；Supabase（Postgres＋RLS、Auth、Storage、Realtime、Edge Functions、pg_cron）；AI 只透過 `ai` Edge Function 呼叫 Claude。專案結構見 04 ADR-11（pnpm monorepo：`apps/web`、`packages/core`、`ingredients`、`equipment`、`shared-types`、`supabase/`）。
+Vite＋React＋TypeScript 的 PWA（放在 Netlify）；Supabase（Postgres＋RLS、Auth、Storage、Realtime、Edge Functions、pg_cron）；AI 只透過 `ai` Edge Function 呼叫 Claude。專案結構見 04 ADR-11（pnpm monorepo：`apps/web`、`packages/core`、`ingredients`、`equipment`、`taste`、`shared-types`、`supabase/`）。
 
 ## 開發慣例
 
