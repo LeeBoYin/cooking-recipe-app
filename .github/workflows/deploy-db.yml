@@ -46,7 +46,7 @@ jobs:
         with:
           version: 3.2.0
       - run: supabase link --project-ref "$STAGING_PROJECT_ID"
-      - run: supabase db push --remote --password "$DB_PASSWORD"
+      - run: supabase db push --remote --yes --password "$DB_PASSWORD"
         env:
           DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
 
@@ -59,6 +59,6 @@ jobs:
         with:
           version: 3.2.0
       - run: supabase link --project-ref "$PRODUCTION_PROJECT_ID"
-      - run: supabase db push --remote --password "$DB_PASSWORD"
+      - run: supabase db push --remote --yes --password "$DB_PASSWORD"
         env:
           DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PRODUCTION }}
