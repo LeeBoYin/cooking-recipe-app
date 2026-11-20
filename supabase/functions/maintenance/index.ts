@@ -59,11 +59,13 @@ Deno.serve(async (req) => {
   if (!url || !serviceKey) return json({ error: 'not_configured' }, 500);
   const client = createClient(url, serviceKey, { auth: { persistSession: false } });
 
+  let stage = 'list';
   try {
     const [files, referenced] = await Promise.all([listAll(client), referencedPaths(client)]);
     const plan = planOrphanRemoval(files, referenced, new Date());
     let removed = 0;
     if (!plan.refusedReason) {
+      stage = 'remove';
       for (const batch of chunk(plan.orphans, 100)) {
         const { error } = await client.storage.from(BUCKET).remove(batch);
         if (error) throw error;
@@ -71,8 +73,10 @@ Deno.serve(async (req) => {
       }
     }
     return json({ total: plan.total, orphans: plan.orphans.length, removed, refused: plan.refusedReason ?? null });
-  } catch (_err) {
-    // 不把錯誤內容送回去，呼叫端只需要知道失敗
-    return json({ error: 'failed' }, 500);
+  } catch (err) {
+    // 呼叫端已經通過通行證驗證，回報是哪一階段、什麼錯誤（資料庫或 Storage 的錯誤訊息，不含檔名與內容）
+    const message = err instanceof Error ? err.message : typeof err === 'object' && err && 'message' in err ? String(err.message) : String(err);
+    console.error('maintenance failed', stage, message);
+    return json({ error: 'failed', stage, message: message.slice(0, 300) }, 500);
   }
 });
