@@ -2,7 +2,7 @@
 
 朋友之間的料理社群，加上一位懂你的靈感大廚。可安裝到手機的 PWA，資料只存在雲端。
 
-目前狀態：規格完成，階段 0（開工前的準備）進行中，還沒有產品程式碼。
+目前狀態：規格完成，專案骨架已建好（monorepo、PWA 空殼、CI），M0 功能還沒開始。
 
 ## 溝通與文件
 
@@ -82,4 +82,17 @@ Vite＋React＋TypeScript 的 PWA（放在 Netlify）；Supabase（Postgres＋RL
 
 ## 常用指令
 
-專案骨架建好後補上（安裝、開發伺服器、測試、型別產生、部署）。
+需要 Node 24、pnpm、Supabase CLI、Deno；本機資料庫要先開 OrbStack。
+
+| 做什麼 | 指令 |
+|-------|------|
+| 安裝 | `pnpm install` |
+| 開發伺服器（http://localhost:5173） | `pnpm dev`；先把 `apps/web/.env.example` 複製成 `.env.local` |
+| 型別檢查 | `pnpm typecheck` |
+| 單元測試 | `pnpm test` |
+| 共用套件能不能在 Deno 跑 | `pnpm check:deno` |
+| 建置 | `pnpm build` |
+| 本機資料庫：啟動／停止／重建 | `pnpm db:start`、`pnpm db:stop`、`pnpm db:reset` |
+| 從本機資料庫產生型別 | `pnpm gen:types`（產生 `packages/shared-types/src/database.ts`，不要手改） |
+
+**部署**：前端由 Netlify 從 git 自動部署（`netlify.toml`）；每個 PR 由 GitHub Actions 跑型別檢查、測試、Deno 檢查與建置（`.github/workflows/ci.yml`）。資料庫 migration 與 Edge Functions 的自動部署在第一個 migration 時加上。

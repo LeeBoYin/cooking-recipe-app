@@ -1,0 +1,63 @@
+@import 'tailwindcss';
+
+/* 色彩、字型、字級、圓角一律用 17 視覺設計的代碼，不直接寫色碼。 */
+@theme {
+  --color-*: initial;
+  --color-bg: #f4ede2;
+  --color-surface: #ffffff;
+  --color-ink: #2b2622;
+  --color-ink-muted: #6e655c;
+  --color-line: #e8dfd2;
+  --color-line-soft: #f1ece4;
+  --color-line-strong: #d9cbb5;
+  --color-photo-empty: #efe4d2;
+  --color-bulb: #f2b705;
+  --color-bulb-soft: #fff1c2;
+  --color-chef-soft: #fff8e1;
+  --color-tomato: #e0533d;
+  --color-green: #2f6b3a;
+  --color-green-soft: #e3f1e2;
+  --color-error: #b83a2e;
+
+  --font-sans: -apple-system, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+  --font-round: 'jf-openhuninn', 'Yuanti TC', 'PingFang TC', sans-serif;
+
+  --text-display: 28px;
+  --text-title: 24px;
+  --text-heading: 22px;
+  --text-card-title: 18px;
+  --text-body: 16px;
+  --text-caption: 14px;
+  --text-small: 13px;
+  --text-tab: 12px;
+
+  --radius-card: 10px;
+  --radius-chef: 14px;
+  --radius-tag: 6px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: 1.6;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
