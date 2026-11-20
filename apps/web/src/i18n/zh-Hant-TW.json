@@ -345,5 +345,19 @@
   "taste.card.suffix.cuisine.american.bbq": "BBQ",
   "taste.card.suffix.cuisine.american.tex_mex": "Tex-Mex",
   "taste.card.suffix.cuisine.mexico": "墨西哥",
-  "taste.card.suffix.cuisine.latin_america": "拉美"
+  "taste.card.suffix.cuisine.latin_america": "拉美",
+  "common.cancel": "取消",
+  "common.save": "儲存",
+  "me.loadError": "讀不到你的資料，重新整理看看。",
+  "me.avatar.change": "換大頭貼",
+  "me.avatar.error": "大頭貼沒有換成功，網路好像不太穩，等一下再試一次。",
+  "me.avatar.crop.title": "移動與縮放",
+  "me.avatar.crop.use": "使用",
+  "me.avatar.crop.zoom": "縮放",
+  "me.avatar.crop.hint": "拖曳移動，兩指縮放。只存成小張的正方形。",
+  "me.avatar.crop.error": "這張照片打不開，換一張試試。",
+  "me.name.label": "暱稱",
+  "me.name.edit": "改暱稱",
+  "me.name.hint": "1 到 {max} 個字",
+  "me.name.error": "暱稱沒有存成功，等一下再試一次。"
 }

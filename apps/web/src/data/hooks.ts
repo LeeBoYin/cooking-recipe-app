@@ -10,9 +10,9 @@ import {
   onPhotoCommitted,
   subscribeUploads,
 } from '../photos/uploadQueue.ts';
-import { deletePhoto, listEquipmentPhotos, listMyRecipePhotos, listRecipePhotos, signPhotoUrls, type Photo } from './photos.ts';
+import { deletePhoto, getAvatar, listEquipmentPhotos, listMyRecipePhotos, listRecipePhotos, replaceAvatar, signPhotoUrls, type Photo } from './photos.ts';
 import { deleteRecipe, getRecipe, listMyDeletedRecipes, listMyRecipes, restoreRecipe, searchMyRecipes } from './recipes.ts';
-import { currentUserId, getMyIdentity, getMySettings } from './account.ts';
+import { currentUserId, getMyIdentity, getMySettings, updateDisplayName } from './account.ts';
 import { getMyHardLimits, getMyTasteProfile, saveTasteProfile } from './taste.ts';
 import type { TasteProfile } from '@zhusha/core';
 import { listMyKitchens, setCurrentKitchen } from './kitchens.ts';
@@ -53,6 +53,7 @@ export const queryKeys = {
   recipeSearch: (q: string) => ['recipes', 'search', q] as const,
   recipe: (id: string) => ['recipe', id] as const,
   recipePhotos: (id: string) => ['recipe', id, 'photos'] as const,
+  avatar: (userId: string) => ['avatar', userId] as const,
   tasteProfile: ['me', 'taste', 'profile'] as const,
   hardLimits: ['me', 'taste', 'hard-limits'] as const,
   photoUrls: (paths: string[]) => ['photo-urls', ...paths] as const,
@@ -304,5 +305,46 @@ export function useSaveTasteProfile() {
     mutationFn: (v: { profile: TasteProfile; cardTitle: string | null; previousContext?: Parameters<typeof saveTasteProfile>[2] }) =>
       saveTasteProfile(v.profile, v.cardTitle, v.previousContext),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.tasteProfile }),
+  });
+}
+
+// 暱稱：1–20 字，存進 user_identities
+export function useUpdateDisplayName() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (name: string) => updateDisplayName(name),
+    onSuccess: (identity) => queryClient.setQueryData(queryKeys.identity, identity),
+  });
+}
+
+// 大頭貼：回傳照片資料列（沒有時是 null）；網址用 usePhotoUrls 另外簽
+export function useAvatar(userId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.avatar(userId ?? ''),
+    queryFn: () => getAvatar(userId as string),
+    enabled: !!userId,
+  });
+}
+
+// 換大頭貼：裁好的 400px WebP 傳上去，再由 set_avatar 換掉舊的
+export function useSetAvatar() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (blob: Blob) => {
+      const userId = await currentUserId();
+      const id = newId();
+      let last: unknown;
+      for (let i = 0; i < 3; i++) {
+        try {
+          await replaceAvatar(userId, id, blob);
+          return userId;
+        } catch (e) {
+          last = e;
+          await new Promise((r) => setTimeout(r, 800 * 2 ** i));
+        }
+      }
+      throw last;
+    },
+    onSuccess: (userId) => queryClient.invalidateQueries({ queryKey: queryKeys.avatar(userId) }),
   });
 }
