@@ -1,5 +1,5 @@
 // 標準食材字典，以及過敏原與飲食限制字典。前端與 Edge Functions 共用，部署時也匯入資料庫的 dict_* 表。
-// 目前是範例資料（約 35 種食材），正式字典依 08「內容與資料準備」整理後替換；安全相關的標記上線前要人工審過。
+// 目前是範例資料（約 80 種食材），正式字典依 08「內容與資料準備」整理後替換；安全相關的標記上線前要人工審過。
 import allergensData from '../data/allergens.json' with { type: 'json' };
 import dietaryRestrictionsData from '../data/dietary-restrictions.json' with { type: 'json' };
 import ingredientsData from '../data/ingredients.json' with { type: 'json' };

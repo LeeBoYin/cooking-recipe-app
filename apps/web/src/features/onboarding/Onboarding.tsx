@@ -5,8 +5,11 @@ import { useMySettings, useUpdateSettings } from '../../data/hooks.ts';
 import { DietaryEditor } from '../me/DietaryEditor.tsx';
 import { Chef } from '../../chef/Chef.tsx';
 import { TastePage } from '../taste/TastePage.tsx';
+import { DoneStep } from './DoneStep.tsx';
 import { InstallStep } from './InstallStep.tsx';
-import { barPosition, isLastStep, nextStepId, type StepId } from './steps.ts';
+import { KitchenStep } from './KitchenStep.tsx';
+import { STOCK_LATER, barPosition, isLastStep, nextStepId, type StepId } from './steps.ts';
+import { StockStep } from './StockStep.tsx';
 import { VisionStep } from './VisionStep.tsx';
 
 function ProgressBar({ now, total }: { now: number; total: number }) {
@@ -45,9 +48,11 @@ function Steps({ completed, redo }: { completed: string[]; redo: boolean }) {
   const [done, setDone] = useState<string[]>(completed);
 
   // mark：記成已完成（自動跳過的步驟不記）。重跑時不動設定
+  // extra：同時記下的旗標（⑦ 選「之後再說」記 stock_later）
   const advance = useCallback(
-    (id: StepId, mark: boolean) => {
-      const steps = mark && !done.includes(id) ? [...done, id] : done;
+    (id: StepId, mark: boolean, extra?: string) => {
+      const marked = mark && !done.includes(id) ? [...done, id] : done;
+      const steps = extra && !marked.includes(extra) ? [...marked, extra] : marked;
       const next = nextStepId(id, steps, redo);
       if (!redo) {
         const patch = {
@@ -81,6 +86,9 @@ function Steps({ completed, redo }: { completed: string[]; redo: boolean }) {
         </div>
       )}
       {current === 'taste' && <TastePage onFinish={() => advance('taste', true)} doneId="onboarding.taste.continue" />}
+      {current === 'kitchen' && <KitchenStep redo={redo} onDone={() => advance('kitchen', true)} />}
+      {current === 'stock' && <StockStep onDone={() => advance('stock', true)} onLater={() => advance('stock', true, STOCK_LATER)} />}
+      {current === 'done' && <DoneStep onStart={() => advance('done', true)} />}
     </div>
   );
 }

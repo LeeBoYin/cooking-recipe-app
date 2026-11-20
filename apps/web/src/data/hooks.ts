@@ -16,7 +16,7 @@ import { currentUserId, getMyIdentity, getMySettings, updateDisplayName, updateM
 import { getMyDietary, saveMyDietary, type Dietary } from './dietary.ts';
 import { getMyHardLimits, getMyTasteProfile, saveTasteProfile } from './taste.ts';
 import type { TasteProfile } from '@zhusha/core';
-import { listMyKitchens, setCurrentKitchen } from './kitchens.ts';
+import { listMyKitchens, setCurrentKitchen, updateKitchen, type KitchenPatch } from './kitchens.ts';
 import {
   addPantryItems,
   listPantryItems,
@@ -83,6 +83,15 @@ export function useSetCurrentKitchen() {
 }
 
 // 目前所在的廚房
+// 改廚房的名稱、時區、地區（新手引導 ⑥；管理者才改得動，由 RLS 判斷）
+export function useUpdateKitchen() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { kitchenId: string; patch: KitchenPatch }) => updateKitchen(v.kitchenId, v.patch),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.kitchens }),
+  });
+}
+
 export function useCurrentKitchen() {
   const settings = useMySettings();
   const kitchens = useMyKitchens();

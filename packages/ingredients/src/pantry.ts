@@ -46,3 +46,8 @@ export function rankFrequent(addedIngredientIds: (string | null)[], regionCommon
   const rest = regionCommonIds.filter((id) => byId.has(id) && !counts.has(id));
   return [...mine, ...rest].slice(0, limit);
 }
+
+// 新手引導 ⑦ 的「醬料櫃」：放在調味料櫃的食材（醬料、油、鹽糖、香料），照字典順序
+export function seasoningIngredientIds(): string[] {
+  return ingredients.filter((i) => !i.deprecated && i.defaultStorage === 'seasoning').map((i) => i.id);
+}

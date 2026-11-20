@@ -6,6 +6,7 @@ import { Chef } from '../../chef/Chef.tsx';
 import { useCurrentKitchen, usePantryItems, useRemovePantryItem, useRestorePantryItem } from '../../data/hooks.ts';
 import type { PantryItem } from '../../data/pantry.ts';
 import { ActionBar } from '../kitchen/ActionBar.tsx';
+import { StockCard } from '../kitchen/StockCard.tsx';
 import { Icon } from '../shell/Icon.tsx';
 import { todayIn } from './dates.ts';
 import { ZONES, ZONE_EMOJI, displayName, emojiFor } from './labels.ts';
@@ -79,10 +80,16 @@ export function PantryTab() {
       ) : pantry.error ? (
         <p role="alert" className="m-0 text-caption text-error"><FormattedMessage id="pantry.loadError" /></p>
       ) : items.length === 0 ? (
-        <div className="flex flex-col items-center py-10 text-center">
-          <Chef size={96} />
-          <p className="mt-4 mb-0 text-body"><FormattedMessage id="pantry.empty" /></p>
-        </div>
+        <>
+          <StockCard kind="pantry" />
+          <div className="flex flex-col items-center py-10 text-center">
+            <Chef size={96} />
+            <p className="mt-4 mb-0 text-body"><FormattedMessage id="pantry.empty" /></p>
+            <Link to="/kitchen/pantry/inventory" className="mt-3 flex h-11 items-center rounded-card border-2 border-ink bg-bulb px-4 text-body font-bold text-ink no-underline">
+              <FormattedMessage id="pantry.inventory" />
+            </Link>
+          </div>
+        </>
       ) : (
         ZONES.map((zone) => {
           const inZone = items.filter((i) => i.zone === zone);

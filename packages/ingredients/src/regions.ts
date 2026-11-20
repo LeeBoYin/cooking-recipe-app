@@ -28,6 +28,14 @@ export const regionProfiles: RegionProfile[] = [
       'egg', 'tofu', 'milk', 'pork-belly', 'ground-pork', 'chicken-thigh', 'beef-slices', 'shrimp', 'salmon',
       'rice', 'noodles', 'flour', 'peanut', 'cooking-oil',
     ],
+    stapleIngredientIds: [
+      'rice', 'noodles', 'glass-noodles', 'rice-noodles', 'spaghetti', 'instant-noodles', 'flour', 'oats',
+      'dried-shiitake', 'wood-ear', 'dried-shrimp', 'seaweed', 'red-dates', 'goji', 'dried-chili',
+      'red-bean', 'mung-bean', 'peanut', 'sesame-seed',
+      'tuna-can', 'corn-can', 'canned-tomato',
+      'frozen-dumplings', 'frozen-edamame', 'frozen-mixed-veg',
+      'egg', 'onion', 'potato', 'sweet-potato', 'carrot', 'garlic', 'ginger',
+    ],
     dataStatus: 'partial',
   },
   {
@@ -41,6 +49,7 @@ export const regionProfiles: RegionProfile[] = [
     usesSolarTerms: false,
     holidays: [],
     commonPantryIngredientIds: [],
+    stapleIngredientIds: [],
     dataStatus: 'partial',
   },
   {
@@ -54,6 +63,7 @@ export const regionProfiles: RegionProfile[] = [
     usesSolarTerms: false,
     holidays: [],
     commonPantryIngredientIds: [],
+    stapleIngredientIds: [],
     dataStatus: 'partial',
   },
 ];
@@ -80,4 +90,10 @@ export function getRegionProfile(code: string): RegionProfile | undefined {
 export function commonIngredientIdsFor(region: string): string[] {
   const own = getRegionProfile(region)?.commonPantryIngredientIds ?? [];
   return own.length > 0 ? own : (getRegionProfile('TW')?.commonPantryIngredientIds ?? []);
+}
+
+// 新手引導 ⑦ 的常備食材：沒有該地區的設定、或該地區還沒有清單時，用台灣的
+export function stapleIngredientIdsFor(region: string): string[] {
+  const own = getRegionProfile(region)?.stapleIngredientIds ?? [];
+  return own.length > 0 ? own : (getRegionProfile('TW')?.stapleIngredientIds ?? []);
 }
