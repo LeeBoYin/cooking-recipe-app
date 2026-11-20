@@ -1,8 +1,22 @@
 {
   "app.name": "今仔日煮啥",
   "chef.greeting": "叮！今仔日欲煮啥？",
-  "skeleton.note": "專案骨架已經建好，畫面接下來一個一個做。",
   "pwa.updateReady": "大廚換了頂新廚師帽，重新整理看看？",
   "pwa.reload": "重新整理",
-  "pwa.later": "之後再說"
+  "pwa.later": "之後再說",
+  "common.loading": "讀取中…",
+  "signIn.tagline": "朋友之間的料理社群，加上一位懂你的靈感大廚。",
+  "signIn.email": "Email",
+  "signIn.password": "密碼",
+  "signIn.submit": "登入",
+  "signIn.submitting": "登入中…",
+  "signIn.error.invalidCredentials": "Email 或密碼不對，再試一次。",
+  "signIn.error.network": "網路好像斷了，連上之後再試一次。",
+  "signIn.error.unknown": "登入失敗了，等一下再試試看。",
+  "signIn.forgot": "忘記密碼？",
+  "signIn.forgotHelp": "請聯絡邀請你的人，取得重設密碼的連結。",
+  "signIn.inviteOnly": "目前只開放受邀使用。",
+  "home.placeholder": "你現在在「{kitchen}」。其他功能接下來一個一個做。",
+  "home.loadError": "讀不到你的資料，重新整理看看。",
+  "signOut": "登出"
 }

@@ -40,7 +40,7 @@ begin
 end;
 $$;
 
--- 使用者的第一個廚房
+-- 使用者自己的廚房（他是管理者的那一個）。同一個交易裡 joined_at 都一樣，不能只靠時間排序
 create or replace function tests.kitchen_of(p_user_id uuid)
 returns uuid
 language sql
@@ -48,7 +48,8 @@ security definer
 as $$
   select kitchen_id from public.kitchen_members
   where user_id = p_user_id and left_at is null
-  order by joined_at limit 1;
+  order by (role = 'admin') desc, joined_at, id
+  limit 1;
 $$;
 
 grant execute on all functions in schema tests to authenticated;

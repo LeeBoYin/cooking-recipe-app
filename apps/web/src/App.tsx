@@ -1,18 +1,16 @@
-import { FormattedMessage } from 'react-intl';
+import { useSession } from './data/auth.ts';
+import { SignInPage } from './features/auth/SignInPage.tsx';
+import { HomePage } from './features/home/HomePage.tsx';
 import { UpdatePrompt } from './pwa/UpdatePrompt.tsx';
 
 export function App() {
+  const session = useSession();
+
   return (
-    <main className="mx-auto min-h-dvh max-w-[560px] px-4 pt-[calc(44px+env(safe-area-inset-top))]">
-      <section className="rounded-chef border-2 border-bulb bg-chef-soft p-4">
-        <h1 className="m-0 font-round text-body font-bold">
-          <FormattedMessage id="chef.greeting" />
-        </h1>
-        <p className="m-0 mt-2 text-small text-ink-muted">
-          <FormattedMessage id="skeleton.note" />
-        </p>
-      </section>
+    <>
+      {/* 還在讀取登入狀態時只顯示底色，避免登入頁閃一下 */}
+      {session === undefined ? null : session ? <HomePage /> : <SignInPage />}
       <UpdatePrompt />
-    </main>
+    </>
   );
 }
