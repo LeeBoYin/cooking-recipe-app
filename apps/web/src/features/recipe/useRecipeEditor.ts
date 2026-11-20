@@ -81,6 +81,9 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
       const current = formRef.current;
       const ready = isReadyRef.current;
       const patch = buildPatch(savedForm.current, current);
+      // 料理時間預設取第一張照片的拍攝時間（時間軸依它排序）；之後不再改
+      const takenAt = current.photos.find((p) => ready(p.id))?.takenAt;
+      if (takenAt && !savedRecipe.current?.cooked_at) patch.cooked_at = takenAt;
       const photosDiff = photosChanged(savedForm.current, current, ready);
       if (Object.keys(patch).length === 0 && !photosDiff) return savedRecipe.current;
       if (!savedRecipe.current && isBlank(current)) return null;
@@ -102,6 +105,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
         for (const p of allPhotos(savedForm.current)) serverIds.current.add(p.id);
         queryClient.setQueryData(queryKeys.recipe(recipeId), result);
         void queryClient.invalidateQueries({ queryKey: queryKeys.recipePhotos(recipeId) });
+        void queryClient.invalidateQueries({ queryKey: ['recipes'] });
         setSaveState('saved');
         return result;
       } catch {
@@ -253,6 +257,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
       savedRecipe.current = result;
       setRecipeState(result);
       queryClient.setQueryData(queryKeys.recipe(recipeId), result);
+      void queryClient.invalidateQueries({ queryKey: ['recipes'] });
       return result;
     } catch {
       setSaveState('error');

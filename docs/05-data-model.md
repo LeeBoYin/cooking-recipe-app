@@ -1166,11 +1166,11 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 設了期限、快到期的 | 同上，篩有 `expires_at` 的，依比例計算提醒狀態；計算函式放在 `packages/core`，排程推播也用同一個 |
 | 最近移除（可復原） | `pantry_items (kitchen_id, removed_at)` |
 | 常買清單 | `pantry_items (kitchen_id, ingredient_id, added_on)`：過去 30 天加入過的食材依筆數排序（已移除的也算；再加入已有的食材只更新日期，所以一筆代表一段「有」的期間）；次數不顯示。新廚房用 `RegionProfile.commonPantryIngredientIds` |
-| 食譜時間軸 | `recipes.cooked_dates`（GIN 索引）展開成「食譜＋日期」，只取 published、未刪除；又做了一次的那天顯示那次的照片與一句話 |
+| 食譜時間軸 | `recipes.cooked_dates`（GIN 索引）展開成「食譜＋日期」、依月分組，只取 published、未刪除；又做了一次的那天顯示那次的照片與一句話 |
 | 草稿匣 | `recipes (user_id, status)` 取 draft |
 | 依「值得記住的原因」瀏覽（第一次做的…） | `recipes.highlights`（GIN 索引） |
 | 季節回顧 | 依 `cooked_dates` 範圍取出後，用廚房地區的季節分法分組（不另存季節） |
-| 搜尋食譜（名稱、心得、食材原文、標籤） | PGroonga 全文索引（能斷中文、日文詞），建在 `recipes` 的 `title`、`story` 與 `ingredients` 原文；收藏用 `Bookmark.titleSnapshot` 與原作一起查。食材名稱先用字典的別名（所有語言）對到 ID，再用 `ingredient_ids` 查 |
+| 搜尋食譜（名稱、食材原文） | M0 先用 `ilike` 比對 `title` 與 `ingredients` 原文（資料量小）；資料量大了再換 PGroonga 全文索引（能斷中文、日文詞）；收藏用 `Bookmark.titleSnapshot` 與原作一起查。食材名稱先用字典的別名（所有語言）對到 ID，再用 `ingredient_ids` 查 |
 | 依手邊食材評分候選（L1） | `recipes.ingredient_ids`（GIN 索引）比對手邊的食材 |
 | 收藏的材料齊了嗎 | 大廚點子用 `bookmarks.idea_ingredient_ids`（GIN 索引），朋友的食譜接到原作的 `recipes.ingredient_ids`；只看還沒做過的（`cooked_recipe_id` 為空） |
 | 裝備卡的拿手菜 | `recipes.equipment_used_ids`（GIN 索引，只含自己的食譜） |
