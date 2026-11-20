@@ -75,5 +75,6 @@ export interface RegionProfile {
   usesSolarTerms: boolean;
   holidays: never[];
   commonPantryIngredientIds: string[];
+  stapleIngredientIds: string[];
   dataStatus: 'full' | 'partial';
 }

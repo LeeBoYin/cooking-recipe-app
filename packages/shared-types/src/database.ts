@@ -191,14 +191,14 @@ isOneToOne: false
                   ]
                 },"dict_regions": {
                   Row: {
-                    "code": string,"common_pantry_ingredient_ids": (string)[],"data_status": string,"default_locale": string,"default_timezone": string,"default_units": NonNullable<Json>,"deprecated": boolean,"hemisphere": string,"holidays": NonNullable<Json>,"name": NonNullable<Json>,"replaced_by": string | null,"seasons": NonNullable<Json>,"uses_solar_terms": boolean
+                    "code": string,"common_pantry_ingredient_ids": (string)[],"data_status": string,"default_locale": string,"default_timezone": string,"default_units": NonNullable<Json>,"deprecated": boolean,"hemisphere": string,"holidays": NonNullable<Json>,"name": NonNullable<Json>,"replaced_by": string | null,"seasons": NonNullable<Json>,"staple_ingredient_ids": (string)[],"uses_solar_terms": boolean
                   }
                   ComputedFields: never
                   Insert: {
-                    "code": string,"common_pantry_ingredient_ids"?: (string)[],"data_status": string,"default_locale": string,"default_timezone": string,"default_units": NonNullable<Json>,"deprecated"?: boolean,"hemisphere": string,"holidays"?: NonNullable<Json>,"name": NonNullable<Json>,"replaced_by"?: string | null,"seasons": NonNullable<Json>,"uses_solar_terms"?: boolean
+                    "code": string,"common_pantry_ingredient_ids"?: (string)[],"data_status": string,"default_locale": string,"default_timezone": string,"default_units": NonNullable<Json>,"deprecated"?: boolean,"hemisphere": string,"holidays"?: NonNullable<Json>,"name": NonNullable<Json>,"replaced_by"?: string | null,"seasons": NonNullable<Json>,"staple_ingredient_ids"?: (string)[],"uses_solar_terms"?: boolean
                   }
                   Update: {
-                    "code"?: string,"common_pantry_ingredient_ids"?: (string)[],"data_status"?: string,"default_locale"?: string,"default_timezone"?: string,"default_units"?: NonNullable<Json>,"deprecated"?: boolean,"hemisphere"?: string,"holidays"?: NonNullable<Json>,"name"?: NonNullable<Json>,"replaced_by"?: string | null,"seasons"?: NonNullable<Json>,"uses_solar_terms"?: boolean
+                    "code"?: string,"common_pantry_ingredient_ids"?: (string)[],"data_status"?: string,"default_locale"?: string,"default_timezone"?: string,"default_units"?: NonNullable<Json>,"deprecated"?: boolean,"hemisphere"?: string,"holidays"?: NonNullable<Json>,"name"?: NonNullable<Json>,"replaced_by"?: string | null,"seasons"?: NonNullable<Json>,"staple_ingredient_ids"?: (string)[],"uses_solar_terms"?: boolean
                   }
                   Relationships: [
                     {

@@ -4,6 +4,7 @@ import { Chef } from '../../chef/Chef.tsx';
 import { useCurrentKitchen, useEquipmentPhotos, useKitchenEquipment, usePhotoUrls } from '../../data/hooks.ts';
 import type { KitchenEquipment } from '../../data/equipment.ts';
 import { ActionBar } from '../kitchen/ActionBar.tsx';
+import { StockCard } from '../kitchen/StockCard.tsx';
 import { Icon } from '../shell/Icon.tsx';
 import { detailTags, groupEquipment } from './logic.ts';
 
@@ -47,10 +48,13 @@ export function EquipmentTab() {
       ) : equipment.error ? (
         <p role="alert" className="m-0 text-caption text-error"><FormattedMessage id="equipment.loadError" /></p>
       ) : groups.length === 0 ? (
-        <div className="flex flex-col items-center py-10 text-center">
-          <Chef size={96} />
-          <p className="mt-4 mb-0 text-body"><FormattedMessage id="equipment.empty" /></p>
-        </div>
+        <>
+          <StockCard kind="equipment" />
+          <div className="flex flex-col items-center py-10 text-center">
+            <Chef size={96} />
+            <p className="mt-4 mb-0 text-body"><FormattedMessage id="equipment.empty" /></p>
+          </div>
+        </>
       ) : (
         groups.map((g) => (
           <section key={g.key} aria-labelledby={`eq-${g.key}`}>
