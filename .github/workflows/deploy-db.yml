@@ -31,9 +31,7 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 3.2.0
-      - run: supabase link --project-ref "$STAGING_PROJECT_ID" --password "$DB_PASSWORD"
-        env:
-          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
+      - run: supabase link --project-ref "$STAGING_PROJECT_ID" --debug
       - name: 列出會套用到測試專案的 migration
         run: supabase db push --remote --dry-run --password "$DB_PASSWORD"
         env:
@@ -47,9 +45,7 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 3.2.0
-      - run: supabase link --project-ref "$STAGING_PROJECT_ID" --password "$DB_PASSWORD"
-        env:
-          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
+      - run: supabase link --project-ref "$STAGING_PROJECT_ID"
       - run: supabase db push --remote --password "$DB_PASSWORD"
         env:
           DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
@@ -62,9 +58,7 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 3.2.0
-      - run: supabase link --project-ref "$PRODUCTION_PROJECT_ID" --password "$DB_PASSWORD"
-        env:
-          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PRODUCTION }}
+      - run: supabase link --project-ref "$PRODUCTION_PROJECT_ID"
       - run: supabase db push --remote --password "$DB_PASSWORD"
         env:
           DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PRODUCTION }}
