@@ -229,6 +229,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"photos": {
+                  Row: {
+                    "cook_note_id": string | null,"created_at": string,"created_by": string | null,"feed_path": string,"height": number,"id": string,"is_cover": boolean,"kitchen_id": string | null,"owner_id": string,"owner_type": string,"recipe_id": string | null,"sort_order": number,"storage_path": string,"taken_at": string | null,"thumb_path": string,"updated_at": string,"user_id": string | null,"width": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cook_note_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"feed_path": string,"height": number,"id": string,"is_cover"?: boolean,"kitchen_id"?: string | null,"owner_id": string,"owner_type": string,"recipe_id"?: string | null,"sort_order"?: number,"storage_path": string,"taken_at"?: string | null,"thumb_path": string,"updated_at"?: string,"user_id"?: string | null,"width": number
+                  }
+                  Update: {
+                    "cook_note_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"feed_path"?: string,"height"?: number,"id"?: string,"is_cover"?: boolean,"kitchen_id"?: string | null,"owner_id"?: string,"owner_type"?: string,"recipe_id"?: string | null,"sort_order"?: number,"storage_path"?: string,"taken_at"?: string | null,"thumb_path"?: string,"updated_at"?: string,"user_id"?: string | null,"width"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "photos_kitchen_id_fkey"
+      columns: ["kitchen_id"]
+isOneToOne: false
+      referencedRelation: "kitchens"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"user_identities": {
                   Row: {
                     "created_at": string,"display_name": string,"updated_at": string,"user_id": string

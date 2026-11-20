@@ -121,5 +121,11 @@
   "equipment.inventory.title": "你的廚房有什麼",
   "equipment.inventory.help": "點一下勾選，大部分家庭都有的已經先勾好。已經登記的在清單裡編輯或刪除。",
   "equipment.inventory.done": "完成，新增 {count} 件",
-  "equipment.inventory.owned": "已登記"
+  "equipment.inventory.owned": "已登記",
+  "equipment.photo.add": "加照片",
+  "equipment.photo.replace": "換照片",
+  "equipment.photo.remove": "移除照片",
+  "equipment.photo.uploading": "上傳中（{done}/{total}）",
+  "equipment.photo.retry": "照片還沒傳完，網路好了會自動再傳。",
+  "equipment.photo.error": "照片沒有成功，換一張或等一下再試。"
 }

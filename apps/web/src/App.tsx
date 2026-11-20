@@ -15,6 +15,7 @@ import { RemovedPage } from './features/pantry/RemovedPage.tsx';
 import { AppShell } from './features/shell/AppShell.tsx';
 import { InnerLayout } from './features/shell/InnerLayout.tsx';
 import { Placeholder } from './features/shell/Placeholder.tsx';
+import { PhotoSync } from './photos/PhotoSync.tsx';
 import { UpdatePrompt } from './pwa/UpdatePrompt.tsx';
 
 export function App() {
@@ -25,6 +26,7 @@ export function App() {
       {/* 還在讀取登入狀態時只顯示底色，避免登入頁閃一下 */}
       {session === undefined ? null : session ? (
         <BrowserRouter>
+          <PhotoSync />
           <Routes>
             <Route element={<AppShell />}>
               <Route index element={<HomePage />} />
