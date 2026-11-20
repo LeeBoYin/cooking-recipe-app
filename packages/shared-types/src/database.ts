@@ -69,6 +69,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"dict_equipment_types": {
+                  Row: {
+                    "aliases": NonNullable<Json>,"assists": (string)[],"category": string,"deprecated": boolean,"dishwasher_safe": string,"icon_key": string,"id": string,"is_heat_source": boolean,"name": NonNullable<Json>,"onboarding": NonNullable<Json>,"optional_techniques": (string)[],"regions": (string)[],"replaced_by": string | null,"requires_heat_source": boolean,"techniques": (string)[]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aliases"?: NonNullable<Json>,"assists"?: (string)[],"category": string,"deprecated"?: boolean,"dishwasher_safe": string,"icon_key": string,"id": string,"is_heat_source": boolean,"name": NonNullable<Json>,"onboarding": NonNullable<Json>,"optional_techniques"?: (string)[],"regions"?: (string)[],"replaced_by"?: string | null,"requires_heat_source": boolean,"techniques"?: (string)[]
+                  }
+                  Update: {
+                    "aliases"?: NonNullable<Json>,"assists"?: (string)[],"category"?: string,"deprecated"?: boolean,"dishwasher_safe"?: string,"icon_key"?: string,"id"?: string,"is_heat_source"?: boolean,"name"?: NonNullable<Json>,"onboarding"?: NonNullable<Json>,"optional_techniques"?: (string)[],"regions"?: (string)[],"replaced_by"?: string | null,"requires_heat_source"?: boolean,"techniques"?: (string)[]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dict_equipment_types_replaced_by_fkey"
+      columns: ["replaced_by"]
+isOneToOne: false
+      referencedRelation: "dict_equipment_types"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"dict_ingredients": {
                   Row: {
                     "aliases": NonNullable<Json>,"allergen_ids": (string)[],"category": string,"default_storage": string,"density_g_per_ml": number | null,"deprecated": boolean,"family": string,"flavor_tags": (string)[],"id": string,"is_perishable": boolean,"name": NonNullable<Json>,"recent_days": number | null,"replaced_by": string | null,"season_months": NonNullable<Json>,"traits": (string)[]
@@ -89,6 +109,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"dict_techniques": {
+                  Row: {
+                    "deprecated": boolean,"id": string,"name": NonNullable<Json>,"replaced_by": string | null,"safety_rule_id": string | null,"technique_group": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "deprecated"?: boolean,"id": string,"name": NonNullable<Json>,"replaced_by"?: string | null,"safety_rule_id"?: string | null,"technique_group": string
+                  }
+                  Update: {
+                    "deprecated"?: boolean,"id"?: string,"name"?: NonNullable<Json>,"replaced_by"?: string | null,"safety_rule_id"?: string | null,"technique_group"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dict_techniques_replaced_by_fkey"
+      columns: ["replaced_by"]
+isOneToOne: false
+      referencedRelation: "dict_techniques"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"dict_version": {
                   Row: {
                     "id": boolean,"imported_at": string,"version": string
@@ -102,6 +142,32 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"kitchen_equipment": {
+                  Row: {
+                    "acquired_at": string | null,"brand": string | null,"capacity_unit": string | null,"capacity_value": number | null,"created_at": string,"created_by": string | null,"description": string | null,"dishwasher_safe": boolean | null,"enabled_optional_techniques": (string)[],"equipment_type_id": string | null,"id": string,"kitchen_id": string,"model": string | null,"raw_name": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "acquired_at"?: string | null,"brand"?: string | null,"capacity_unit"?: string | null,"capacity_value"?: number | null,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"dishwasher_safe"?: boolean | null,"enabled_optional_techniques"?: (string)[],"equipment_type_id"?: string | null,"id": string,"kitchen_id": string,"model"?: string | null,"raw_name": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "acquired_at"?: string | null,"brand"?: string | null,"capacity_unit"?: string | null,"capacity_value"?: number | null,"created_at"?: string,"created_by"?: string | null,"description"?: string | null,"dishwasher_safe"?: boolean | null,"enabled_optional_techniques"?: (string)[],"equipment_type_id"?: string | null,"id"?: string,"kitchen_id"?: string,"model"?: string | null,"raw_name"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "kitchen_equipment_equipment_type_id_fkey"
+      columns: ["equipment_type_id"]
+isOneToOne: false
+      referencedRelation: "dict_equipment_types"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "kitchen_equipment_kitchen_id_fkey"
+      columns: ["kitchen_id"]
+isOneToOne: false
+      referencedRelation: "kitchens"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"kitchen_members": {
                   Row: {

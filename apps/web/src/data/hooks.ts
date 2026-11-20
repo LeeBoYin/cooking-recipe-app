@@ -13,6 +13,15 @@ import {
   type NewPantryItem,
   type PantryItemPatch,
 } from './pantry.ts';
+import {
+  addKitchenEquipment,
+  deleteKitchenEquipment,
+  getKitchenEquipment,
+  listKitchenEquipment,
+  updateKitchenEquipment,
+  type EquipmentPatch,
+  type NewEquipment,
+} from './equipment.ts';
 
 export const queryKeys = {
   settings: ['me', 'settings'] as const,
@@ -21,6 +30,8 @@ export const queryKeys = {
   pantry: (kitchenId: string) => ['kitchen', kitchenId, 'pantry'] as const,
   pantryAdditions: (kitchenId: string) => ['kitchen', kitchenId, 'pantry-additions'] as const,
   pantryRemoved: (kitchenId: string) => ['kitchen', kitchenId, 'pantry', 'removed'] as const,
+  equipment: (kitchenId: string) => ['kitchen', kitchenId, 'equipment'] as const,
+  equipmentItem: (kitchenId: string, id: string) => ['kitchen', kitchenId, 'equipment', id] as const,
 };
 
 export function useMySettings() {
@@ -94,4 +105,40 @@ export function useRestorePantryItem(kitchenId: string | undefined) {
 }
 export function useUpdatePantryItem(kitchenId: string | undefined) {
   return usePantryMutation(kitchenId, (v: { id: string; patch: PantryItemPatch }) => updatePantryItem(v.id, v.patch));
+}
+
+// 廚房的廚具；沒有廚房 ID 時不查
+export function useKitchenEquipment(kitchenId: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.equipment(kitchenId ?? ''),
+    queryFn: () => listKitchenEquipment(kitchenId as string),
+    enabled: !!kitchenId,
+  });
+}
+
+export function useKitchenEquipmentItem(kitchenId: string | undefined, id: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.equipmentItem(kitchenId ?? '', id ?? ''),
+    queryFn: () => getKitchenEquipment(id as string),
+    enabled: !!kitchenId && !!id,
+  });
+}
+
+// 廚具的寫入。成功後把這個廚房的廚具標成過期重讀
+function useEquipmentMutation<TVars, TResult>(kitchenId: string | undefined, fn: (vars: TVars) => Promise<TResult>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: fn,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.equipment(kitchenId ?? '') }),
+  });
+}
+
+export function useAddKitchenEquipment(kitchenId: string | undefined) {
+  return useEquipmentMutation(kitchenId, (item: NewEquipment) => addKitchenEquipment(kitchenId as string, item));
+}
+export function useUpdateKitchenEquipment(kitchenId: string | undefined) {
+  return useEquipmentMutation(kitchenId, (v: { id: string; patch: EquipmentPatch }) => updateKitchenEquipment(v.id, v.patch));
+}
+export function useDeleteKitchenEquipment(kitchenId: string | undefined) {
+  return useEquipmentMutation(kitchenId, (id: string) => deleteKitchenEquipment(id));
 }

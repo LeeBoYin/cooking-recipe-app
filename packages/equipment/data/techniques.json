@@ -1,0 +1,235 @@
+[
+  {
+    "id": "pan-fry",
+    "name": {
+      "zh-TW": "煎"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "stir-fry",
+    "name": {
+      "zh-TW": "炒"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "deep-fry",
+    "name": {
+      "zh-TW": "炸"
+    },
+    "group": "heat",
+    "safetyRuleId": "SR-deep-fry"
+  },
+  {
+    "id": "boil",
+    "name": {
+      "zh-TW": "煮"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "blanch",
+    "name": {
+      "zh-TW": "汆燙"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "steam",
+    "name": {
+      "zh-TW": "蒸"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "braise",
+    "name": {
+      "zh-TW": "燉"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "soy-braise",
+    "name": {
+      "zh-TW": "滷"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "red-braise",
+    "name": {
+      "zh-TW": "燒"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "roast",
+    "name": {
+      "zh-TW": "烤"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "grill",
+    "name": {
+      "zh-TW": "燒烤"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "gratin",
+    "name": {
+      "zh-TW": "焗"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "bake",
+    "name": {
+      "zh-TW": "烘焙"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "air-fry",
+    "name": {
+      "zh-TW": "氣炸"
+    },
+    "group": "heat"
+  },
+  {
+    "id": "microwave",
+    "name": {
+      "zh-TW": "微波"
+    },
+    "group": "heat",
+    "safetyRuleId": "SR-microwave"
+  },
+  {
+    "id": "pressure-cook",
+    "name": {
+      "zh-TW": "壓力烹調"
+    },
+    "group": "heat",
+    "safetyRuleId": "SR-pressure"
+  },
+  {
+    "id": "sous-vide",
+    "name": {
+      "zh-TW": "舒肥"
+    },
+    "group": "heat",
+    "safetyRuleId": "SR-sous-vide"
+  },
+  {
+    "id": "torch-sear",
+    "name": {
+      "zh-TW": "炙燒"
+    },
+    "group": "heat",
+    "safetyRuleId": "SR-torch"
+  },
+  {
+    "id": "smoke",
+    "name": {
+      "zh-TW": "煙燻"
+    },
+    "group": "heat",
+    "safetyRuleId": "SR-smoke"
+  },
+  {
+    "id": "toss",
+    "name": {
+      "zh-TW": "拌"
+    },
+    "group": "no-heat"
+  },
+  {
+    "id": "blend",
+    "name": {
+      "zh-TW": "打碎／打泥"
+    },
+    "group": "no-heat",
+    "safetyRuleId": "SR-blend-hot"
+  },
+  {
+    "id": "grind",
+    "name": {
+      "zh-TW": "研磨"
+    },
+    "group": "no-heat"
+  },
+  {
+    "id": "whip",
+    "name": {
+      "zh-TW": "打發"
+    },
+    "group": "no-heat"
+  },
+  {
+    "id": "emulsify",
+    "name": {
+      "zh-TW": "乳化"
+    },
+    "group": "no-heat"
+  },
+  {
+    "id": "knead",
+    "name": {
+      "zh-TW": "揉麵"
+    },
+    "group": "no-heat"
+  },
+  {
+    "id": "shred-slice",
+    "name": {
+      "zh-TW": "刨絲切片"
+    },
+    "group": "no-heat"
+  },
+  {
+    "id": "freeze",
+    "name": {
+      "zh-TW": "冷凍"
+    },
+    "group": "time-temp",
+    "safetyRuleId": "SR-thaw"
+  },
+  {
+    "id": "chill-set",
+    "name": {
+      "zh-TW": "冷藏定型"
+    },
+    "group": "time-temp",
+    "safetyRuleId": "SR-cooling"
+  },
+  {
+    "id": "marinate",
+    "name": {
+      "zh-TW": "醃漬"
+    },
+    "group": "time-temp"
+  },
+  {
+    "id": "ferment",
+    "name": {
+      "zh-TW": "發酵"
+    },
+    "group": "time-temp"
+  },
+  {
+    "id": "vacuum-seal",
+    "name": {
+      "zh-TW": "真空保存"
+    },
+    "group": "time-temp"
+  },
+  {
+    "id": "dehydrate",
+    "name": {
+      "zh-TW": "烘乾"
+    },
+    "group": "time-temp"
+  }
+]

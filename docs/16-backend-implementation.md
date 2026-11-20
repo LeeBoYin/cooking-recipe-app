@@ -80,7 +80,7 @@
 | 資料表 | 主鍵 | 外鍵（刪除時） | 階段 |
 |-------|------|--------------|------|
 | `pantry_items` | `id` | `kitchen_id`（連動）；`created_by`、`removed_by`（佔位）；`ingredient_id` → `dict_ingredients`（限制）；`removed_with_recipe_id`（空值；`recipes` 建好後補外鍵） | M0 |
-| `kitchen_equipment` | `id` | `kitchen_id`（連動）；`equipment_type_id` → `dict_equipment_types`（限制） | M0 |
+| `kitchen_equipment` | `id` | `kitchen_id`（連動）；`created_by`、`updated_by`（佔位）；`equipment_type_id` → `dict_equipment_types`（限制，自訂廚具為空） | M0 |
 
 ### 食譜、收藏與對話
 
@@ -151,7 +151,7 @@
 | `kitchen_join_codes` | 無（只經函式） | 函式 | 函式 | 函式 |
 | `household_profiles` | 成員 | 管理者 | 管理者 | 管理者 |
 | `pantry_items` | 成員 | 函式（`add_pantry_items`） | 成員只能改放哪裡、想先用掉、期限、備註（只改「有」的）；其他欄位與狀態經函式 | 函式（移除與復原改狀態；超過 30 天的由每日維護刪除） |
-| `kitchen_equipment` | 成員 | 成員 | 成員 | 成員 |
+| `kitchen_equipment` | 成員 | 成員 | 成員（不能改所屬廚房；選配手法只能是字典列出的，由觸發器檢查） | 成員 |
 | `recipes` | `can_view_recipe`：作者；家人（household、friends）；好友（friends）；分享給他且沒收回的人。草稿只有作者 | 作者 | 作者（經 `save_recipe`） | 作者（軟刪除） |
 | `recipe_revisions` | 作者 | 函式 | — | 連動 |
 | `photos` | 依擁有者：食譜照片跟著食譜；廚具照片給廚房成員；頭像給本人、家人、好友 | 本人 | 本人；廚具照片給廚房成員 | 同修改 |

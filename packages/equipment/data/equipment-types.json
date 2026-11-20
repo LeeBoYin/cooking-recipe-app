@@ -1,0 +1,1627 @@
+[
+  {
+    "id": "gas-stove",
+    "name": {
+      "zh-TW": "瓦斯爐"
+    },
+    "aliases": {
+      "zh-TW": [
+        "爐台",
+        "天然氣爐"
+      ]
+    },
+    "category": "heat-source",
+    "techniques": [],
+    "requiresHeatSource": false,
+    "isHeatSource": true,
+    "onboarding": {
+      "default": "default-on"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "gas-stove"
+  },
+  {
+    "id": "induction-cooktop",
+    "name": {
+      "zh-TW": "電磁爐"
+    },
+    "aliases": {
+      "zh-TW": [
+        "IH 爐"
+      ]
+    },
+    "category": "heat-source",
+    "techniques": [],
+    "requiresHeatSource": false,
+    "isHeatSource": true,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "induction-cooktop"
+  },
+  {
+    "id": "radiant-cooktop",
+    "name": {
+      "zh-TW": "電陶爐"
+    },
+    "aliases": {
+      "zh-TW": [
+        "黑晶爐"
+      ]
+    },
+    "category": "heat-source",
+    "techniques": [],
+    "requiresHeatSource": false,
+    "isHeatSource": true,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "radiant-cooktop"
+  },
+  {
+    "id": "portable-gas-stove",
+    "name": {
+      "zh-TW": "卡式爐"
+    },
+    "aliases": {
+      "zh-TW": [
+        "卡式瓦斯爐",
+        "露營爐"
+      ]
+    },
+    "category": "heat-source",
+    "techniques": [],
+    "requiresHeatSource": false,
+    "isHeatSource": true,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "portable-gas-stove"
+  },
+  {
+    "id": "wok",
+    "name": {
+      "zh-TW": "炒鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "中華炒鍋",
+        "鐵鍋"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "stir-fry",
+      "pan-fry",
+      "deep-fry",
+      "boil",
+      "blanch",
+      "red-braise",
+      "smoke"
+    ],
+    "optionalTechniques": [
+      "steam"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "default-on"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "wok"
+  },
+  {
+    "id": "frying-pan",
+    "name": {
+      "zh-TW": "平底鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "不沾鍋",
+        "煎鍋"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "pan-fry",
+      "stir-fry",
+      "red-braise"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "default-on"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "frying-pan"
+  },
+  {
+    "id": "cast-iron-skillet",
+    "name": {
+      "zh-TW": "鑄鐵平底鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "鑄鐵煎鍋"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "pan-fry",
+      "stir-fry",
+      "red-braise",
+      "grill",
+      "roast",
+      "bake"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "cast-iron-skillet"
+  },
+  {
+    "id": "dutch-oven",
+    "name": {
+      "zh-TW": "鑄鐵燉鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "琺瑯鑄鐵鍋",
+        "鑄鐵鍋"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "braise",
+      "soy-braise",
+      "red-braise",
+      "boil",
+      "deep-fry",
+      "roast",
+      "bake"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "dutch-oven"
+  },
+  {
+    "id": "stockpot",
+    "name": {
+      "zh-TW": "湯鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "不鏽鋼鍋",
+        "深鍋"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "boil",
+      "blanch",
+      "braise",
+      "soy-braise"
+    ],
+    "optionalTechniques": [
+      "steam"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "default-on"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "stockpot"
+  },
+  {
+    "id": "saucepan",
+    "name": {
+      "zh-TW": "雪平鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "單柄鍋",
+        "牛奶鍋"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "boil",
+      "blanch"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "saucepan"
+  },
+  {
+    "id": "clay-pot",
+    "name": {
+      "zh-TW": "砂鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "陶鍋"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "braise",
+      "boil",
+      "soy-braise"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "clay-pot"
+  },
+  {
+    "id": "pressure-cooker",
+    "name": {
+      "zh-TW": "壓力鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "快鍋"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "pressure-cook",
+      "braise",
+      "boil"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "pressure-cooker"
+  },
+  {
+    "id": "grill-pan",
+    "name": {
+      "zh-TW": "橫紋煎鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "牛排煎鍋",
+        "烤盤鍋"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "grill",
+      "pan-fry"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "grill-pan"
+  },
+  {
+    "id": "tamagoyaki-pan",
+    "name": {
+      "zh-TW": "玉子燒鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "方形煎蛋鍋"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "pan-fry"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "tamagoyaki-pan"
+  },
+  {
+    "id": "steamer-basket",
+    "name": {
+      "zh-TW": "蒸籠"
+    },
+    "aliases": {
+      "zh-TW": [
+        "竹蒸籠"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "steam"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "steamer-basket"
+  },
+  {
+    "id": "steaming-rack",
+    "name": {
+      "zh-TW": "蒸架"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蒸盤架"
+      ]
+    },
+    "category": "cookware",
+    "techniques": [
+      "steam"
+    ],
+    "requiresHeatSource": true,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "steaming-rack"
+  },
+  {
+    "id": "tatung-rice-cooker",
+    "name": {
+      "zh-TW": "電鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "大同電鍋",
+        "外鍋電鍋"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "steam",
+      "boil",
+      "braise",
+      "soy-braise"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "default-on",
+      "byRegion": {
+        "US": "show"
+      }
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "tatung-rice-cooker"
+  },
+  {
+    "id": "electric-rice-cooker",
+    "name": {
+      "zh-TW": "電子鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "IH 電子鍋"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "boil"
+    ],
+    "optionalTechniques": [
+      "braise",
+      "bake"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "electric-rice-cooker"
+  },
+  {
+    "id": "microwave",
+    "name": {
+      "zh-TW": "微波爐"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "category": "appliance",
+    "techniques": [
+      "microwave"
+    ],
+    "optionalTechniques": [
+      "roast",
+      "gratin",
+      "air-fry"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "default-on"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "microwave"
+  },
+  {
+    "id": "oven",
+    "name": {
+      "zh-TW": "烤箱"
+    },
+    "aliases": {
+      "zh-TW": [
+        "大烤箱",
+        "旋風烤箱"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "roast",
+      "gratin",
+      "bake",
+      "dehydrate"
+    ],
+    "optionalTechniques": [
+      "air-fry",
+      "ferment"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show",
+      "byRegion": {
+        "US": "default-on"
+      }
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "oven"
+  },
+  {
+    "id": "toaster-oven",
+    "name": {
+      "zh-TW": "小烤箱"
+    },
+    "aliases": {
+      "zh-TW": [
+        "烤麵包機",
+        "電烤箱（小）"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "roast",
+      "gratin"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "toaster-oven"
+  },
+  {
+    "id": "air-fryer",
+    "name": {
+      "zh-TW": "氣炸鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "氣炸烤箱"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "air-fry",
+      "roast",
+      "dehydrate"
+    ],
+    "optionalTechniques": [
+      "bake"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "air-fryer"
+  },
+  {
+    "id": "steam-oven",
+    "name": {
+      "zh-TW": "水波爐"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蒸烤爐",
+        "蒸烤箱"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "steam",
+      "roast",
+      "bake",
+      "gratin"
+    ],
+    "optionalTechniques": [
+      "air-fry",
+      "ferment"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "steam-oven"
+  },
+  {
+    "id": "fridge",
+    "name": {
+      "zh-TW": "冰箱冷藏室"
+    },
+    "aliases": {
+      "zh-TW": [
+        "冰箱"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "chill-set",
+      "marinate"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "default-on"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "fridge"
+  },
+  {
+    "id": "freezer",
+    "name": {
+      "zh-TW": "冷凍庫"
+    },
+    "aliases": {
+      "zh-TW": [
+        "冷凍櫃"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "freeze"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "default-on"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "freezer"
+  },
+  {
+    "id": "electric-grill",
+    "name": {
+      "zh-TW": "電烤盤"
+    },
+    "aliases": {
+      "zh-TW": [
+        "燒烤盤",
+        "韓式烤盤"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "grill",
+      "pan-fry"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "electric-grill"
+  },
+  {
+    "id": "multi-pot",
+    "name": {
+      "zh-TW": "美食鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "電火鍋",
+        "多功能電煮鍋"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "boil",
+      "braise",
+      "stir-fry",
+      "blanch"
+    ],
+    "optionalTechniques": [
+      "steam"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "multi-pot"
+  },
+  {
+    "id": "multi-cooker",
+    "name": {
+      "zh-TW": "萬用鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "電子壓力鍋",
+        "智慧鍋"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "pressure-cook",
+      "braise",
+      "boil",
+      "steam"
+    ],
+    "optionalTechniques": [
+      "sous-vide",
+      "ferment"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "multi-cooker"
+  },
+  {
+    "id": "slow-cooker",
+    "name": {
+      "zh-TW": "慢燉鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "燉鍋（電）"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "braise",
+      "soy-braise"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "slow-cooker"
+  },
+  {
+    "id": "sous-vide-circulator",
+    "name": {
+      "zh-TW": "舒肥機"
+    },
+    "aliases": {
+      "zh-TW": [
+        "舒肥棒",
+        "低溫烹調機"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "sous-vide"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "sous-vide-circulator"
+  },
+  {
+    "id": "bread-maker",
+    "name": {
+      "zh-TW": "麵包機"
+    },
+    "aliases": {
+      "zh-TW": [
+        "製麵包機"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "knead",
+      "ferment",
+      "bake"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "bread-maker"
+  },
+  {
+    "id": "yogurt-maker",
+    "name": {
+      "zh-TW": "優格機"
+    },
+    "aliases": {
+      "zh-TW": [
+        "發酵機"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "ferment"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "yogurt-maker"
+  },
+  {
+    "id": "dehydrator",
+    "name": {
+      "zh-TW": "乾果機"
+    },
+    "aliases": {
+      "zh-TW": [
+        "食物乾燥機"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "dehydrate"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "dehydrator"
+  },
+  {
+    "id": "deep-fryer",
+    "name": {
+      "zh-TW": "電炸鍋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "油炸鍋"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "deep-fry"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "deep-fryer"
+  },
+  {
+    "id": "waffle-maker",
+    "name": {
+      "zh-TW": "鬆餅機"
+    },
+    "aliases": {
+      "zh-TW": [
+        "點心機",
+        "熱壓吐司機"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "bake"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "waffle-maker"
+  },
+  {
+    "id": "electric-kettle",
+    "name": {
+      "zh-TW": "快煮壺"
+    },
+    "aliases": {
+      "zh-TW": [
+        "電熱水壺"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [
+      "boil"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "electric-kettle"
+  },
+  {
+    "id": "dishwasher",
+    "name": {
+      "zh-TW": "洗碗機"
+    },
+    "aliases": {
+      "zh-TW": [
+        "洗碗烘碗機"
+      ]
+    },
+    "category": "appliance",
+    "techniques": [],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "dishwasher"
+  },
+  {
+    "id": "blender",
+    "name": {
+      "zh-TW": "調理機"
+    },
+    "aliases": {
+      "zh-TW": [
+        "高速調理機",
+        "破壁機"
+      ]
+    },
+    "category": "blending",
+    "techniques": [
+      "blend",
+      "emulsify",
+      "grind"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "blender"
+  },
+  {
+    "id": "juicer-blender",
+    "name": {
+      "zh-TW": "果汁機"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "category": "blending",
+    "techniques": [
+      "blend"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "juicer-blender"
+  },
+  {
+    "id": "food-processor",
+    "name": {
+      "zh-TW": "食物處理機"
+    },
+    "aliases": {
+      "zh-TW": [
+        "切碎機",
+        "多功能料理機"
+      ]
+    },
+    "category": "blending",
+    "techniques": [
+      "blend",
+      "shred-slice",
+      "emulsify"
+    ],
+    "optionalTechniques": [
+      "knead"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "food-processor"
+  },
+  {
+    "id": "immersion-blender",
+    "name": {
+      "zh-TW": "手持攪拌棒"
+    },
+    "aliases": {
+      "zh-TW": [
+        "均質機",
+        "手持料理棒"
+      ]
+    },
+    "category": "blending",
+    "techniques": [
+      "blend",
+      "emulsify"
+    ],
+    "optionalTechniques": [
+      "whip"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "immersion-blender"
+  },
+  {
+    "id": "stand-mixer",
+    "name": {
+      "zh-TW": "桌上型攪拌機"
+    },
+    "aliases": {
+      "zh-TW": [
+        "廚師機"
+      ]
+    },
+    "category": "blending",
+    "techniques": [
+      "whip",
+      "knead",
+      "toss"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "stand-mixer"
+  },
+  {
+    "id": "hand-mixer",
+    "name": {
+      "zh-TW": "電動打蛋器"
+    },
+    "aliases": {
+      "zh-TW": [
+        "手持打蛋機"
+      ]
+    },
+    "category": "blending",
+    "techniques": [
+      "whip"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "hand-mixer"
+  },
+  {
+    "id": "whisk",
+    "name": {
+      "zh-TW": "打蛋器"
+    },
+    "aliases": {
+      "zh-TW": [
+        "手動打蛋器",
+        "蛋拌"
+      ]
+    },
+    "category": "blending",
+    "techniques": [
+      "whip",
+      "toss",
+      "emulsify"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "default-on"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "whisk"
+  },
+  {
+    "id": "mortar-pestle",
+    "name": {
+      "zh-TW": "研磨缽"
+    },
+    "aliases": {
+      "zh-TW": [
+        "擂缽",
+        "搗臼"
+      ]
+    },
+    "category": "blending",
+    "techniques": [
+      "grind",
+      "emulsify"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "mortar-pestle"
+  },
+  {
+    "id": "spice-grinder",
+    "name": {
+      "zh-TW": "香料研磨機"
+    },
+    "aliases": {
+      "zh-TW": [
+        "磨豆機",
+        "磨粉機"
+      ]
+    },
+    "category": "blending",
+    "techniques": [
+      "grind"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "spice-grinder"
+  },
+  {
+    "id": "pull-chopper",
+    "name": {
+      "zh-TW": "手拉切碎器"
+    },
+    "aliases": {
+      "zh-TW": [
+        "拉拉切碎器"
+      ]
+    },
+    "category": "blending",
+    "techniques": [
+      "blend"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "pull-chopper"
+  },
+  {
+    "id": "chef-knife",
+    "name": {
+      "zh-TW": "主廚刀"
+    },
+    "aliases": {
+      "zh-TW": [
+        "西式廚刀",
+        "三德刀"
+      ]
+    },
+    "category": "knife-prep",
+    "techniques": [
+      "shred-slice"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "chef-knife"
+  },
+  {
+    "id": "cleaver",
+    "name": {
+      "zh-TW": "中式菜刀"
+    },
+    "aliases": {
+      "zh-TW": [
+        "片刀",
+        "剁刀"
+      ]
+    },
+    "category": "knife-prep",
+    "techniques": [
+      "shred-slice"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "default-on"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "cleaver"
+  },
+  {
+    "id": "grater",
+    "name": {
+      "zh-TW": "刨絲器"
+    },
+    "aliases": {
+      "zh-TW": [
+        "刨刀",
+        "起司刨刀"
+      ]
+    },
+    "category": "knife-prep",
+    "techniques": [
+      "shred-slice"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "grater"
+  },
+  {
+    "id": "mandoline",
+    "name": {
+      "zh-TW": "切片器"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蔬菜切片器"
+      ]
+    },
+    "category": "knife-prep",
+    "techniques": [
+      "shred-slice"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "mandoline"
+  },
+  {
+    "id": "peeler",
+    "name": {
+      "zh-TW": "削皮刀"
+    },
+    "aliases": {
+      "zh-TW": [
+        "削皮器"
+      ]
+    },
+    "category": "knife-prep",
+    "techniques": [
+      "shred-slice"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "peeler"
+  },
+  {
+    "id": "garlic-press",
+    "name": {
+      "zh-TW": "壓蒜器"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蒜泥器"
+      ]
+    },
+    "category": "knife-prep",
+    "techniques": [
+      "grind"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "garlic-press"
+  },
+  {
+    "id": "rolling-pin",
+    "name": {
+      "zh-TW": "擀麵棍"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "category": "knife-prep",
+    "techniques": [
+      "knead"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "rolling-pin"
+  },
+  {
+    "id": "kitchen-shears",
+    "name": {
+      "zh-TW": "廚房剪刀"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "category": "knife-prep",
+    "techniques": [
+      "shred-slice"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "partial",
+    "iconKey": "kitchen-shears"
+  },
+  {
+    "id": "kitchen-torch",
+    "name": {
+      "zh-TW": "噴槍"
+    },
+    "aliases": {
+      "zh-TW": [
+        "料理噴槍",
+        "炙燒槍"
+      ]
+    },
+    "category": "special",
+    "techniques": [
+      "torch-sear"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "kitchen-torch"
+  },
+  {
+    "id": "smoking-gun",
+    "name": {
+      "zh-TW": "煙燻槍"
+    },
+    "aliases": {
+      "zh-TW": [
+        "手持煙燻機"
+      ]
+    },
+    "category": "special",
+    "techniques": [
+      "smoke"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "smoking-gun"
+  },
+  {
+    "id": "vacuum-sealer",
+    "name": {
+      "zh-TW": "真空封口機"
+    },
+    "aliases": {
+      "zh-TW": [
+        "真空機"
+      ]
+    },
+    "category": "special",
+    "techniques": [
+      "vacuum-seal"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "vacuum-sealer"
+  },
+  {
+    "id": "charcoal-grill",
+    "name": {
+      "zh-TW": "烤肉架"
+    },
+    "aliases": {
+      "zh-TW": [
+        "烤肉爐",
+        "BBQ 爐"
+      ]
+    },
+    "category": "special",
+    "techniques": [
+      "grill",
+      "smoke"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "charcoal-grill"
+  },
+  {
+    "id": "ice-tray",
+    "name": {
+      "zh-TW": "製冰盒"
+    },
+    "aliases": {
+      "zh-TW": [
+        "冰塊盒",
+        "分裝盒"
+      ]
+    },
+    "category": "special",
+    "techniques": [
+      "freeze"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "ice-tray"
+  },
+  {
+    "id": "fermentation-jar",
+    "name": {
+      "zh-TW": "發酵罐"
+    },
+    "aliases": {
+      "zh-TW": [
+        "醃漬玻璃罐",
+        "泡菜罐"
+      ]
+    },
+    "category": "special",
+    "techniques": [
+      "marinate",
+      "ferment"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "fermentation-jar"
+  },
+  {
+    "id": "thermometer",
+    "name": {
+      "zh-TW": "料理溫度計"
+    },
+    "aliases": {
+      "zh-TW": [
+        "探針溫度計",
+        "油溫計"
+      ]
+    },
+    "category": "measuring",
+    "techniques": [],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "assists": [
+      "deep-fry",
+      "roast",
+      "sous-vide"
+    ],
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "thermometer"
+  },
+  {
+    "id": "kitchen-scale",
+    "name": {
+      "zh-TW": "料理秤"
+    },
+    "aliases": {
+      "zh-TW": [
+        "電子秤"
+      ]
+    },
+    "category": "measuring",
+    "techniques": [],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "assists": [
+      "bake"
+    ],
+    "onboarding": {
+      "default": "show"
+    },
+    "dishwasherSafe": "n/a",
+    "iconKey": "kitchen-scale"
+  },
+  {
+    "id": "measuring-set",
+    "name": {
+      "zh-TW": "量杯量匙"
+    },
+    "aliases": {
+      "zh-TW": [
+        "量杯",
+        "量匙"
+      ]
+    },
+    "category": "measuring",
+    "techniques": [],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "assists": [
+      "bake",
+      "marinate"
+    ],
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "measuring-set"
+  },
+  {
+    "id": "cake-pan",
+    "name": {
+      "zh-TW": "蛋糕模"
+    },
+    "aliases": {
+      "zh-TW": [
+        "戚風模",
+        "活底模"
+      ]
+    },
+    "category": "baking",
+    "techniques": [
+      "bake"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "cake-pan"
+  },
+  {
+    "id": "loaf-pan",
+    "name": {
+      "zh-TW": "吐司模"
+    },
+    "aliases": {
+      "zh-TW": [
+        "磅蛋糕模"
+      ]
+    },
+    "category": "baking",
+    "techniques": [
+      "bake"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "loaf-pan"
+  },
+  {
+    "id": "muffin-tin",
+    "name": {
+      "zh-TW": "瑪芬烤盤"
+    },
+    "aliases": {
+      "zh-TW": [
+        "杯子蛋糕模"
+      ]
+    },
+    "category": "baking",
+    "techniques": [
+      "bake"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "muffin-tin"
+  },
+  {
+    "id": "tart-pan",
+    "name": {
+      "zh-TW": "塔模"
+    },
+    "aliases": {
+      "zh-TW": [
+        "派盤"
+      ]
+    },
+    "category": "baking",
+    "techniques": [
+      "bake"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden"
+    },
+    "dishwasherSafe": "yes",
+    "iconKey": "tart-pan"
+  }
+]
