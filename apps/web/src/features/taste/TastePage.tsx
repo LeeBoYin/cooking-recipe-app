@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useNavigate } from 'react-router';
+import { useNavigate, useSearchParams } from 'react-router';
 import {
   buildCard,
   finishSession,
@@ -15,7 +15,7 @@ import {
   type TasteCard,
   type TasteProfile,
 } from '@zhusha/core';
-import { regionChain } from '@zhusha/ingredients';
+import { getAllergen, regionChain } from '@zhusha/ingredients';
 import { preferenceDimensions, quizItems } from '@zhusha/taste';
 import { Chef } from '../../chef/Chef.tsx';
 import { useCurrentKitchen, useMyHardLimits, useMyTasteProfile, useSaveTasteProfile } from '../../data/hooks.ts';
@@ -42,19 +42,23 @@ export function TastePage() {
     allergenIds: limits.data.allergenIds,
     restrictionIds: limits.data.restrictionIds,
   };
-  return <Explore initial={stored.data.profile} previousContext={stored.data.context} env={env} />;
+  return <Explore initial={stored.data.profile} allergenNames={limits.data.allergenIds.map((id) => getAllergen(id)?.name['zh-TW'] ?? id)} previousContext={stored.data.context} env={env} />;
 }
 
 const itemById = new Map(quizItems.map((q) => [q.id, q]));
 
 type Result = { profile: TasteProfile; card: TasteCard };
 
-function Explore({ initial, previousContext, env }: { initial: TasteProfile; previousContext: Parameters<ReturnType<typeof useSaveTasteProfile>['mutate']>[0]['previousContext']; env: QuizEnv }) {
+function Explore({ initial: stored, allergenNames, previousContext, env }: { initial: TasteProfile; allergenNames: string[]; previousContext: Parameters<ReturnType<typeof useSaveTasteProfile>['mutate']>[0]['previousContext']; env: QuizEnv }) {
   const intl = useIntl();
   const navigate = useNavigate();
   const save = useSaveTasteProfile();
+  // ?mode=deep：再多聊幾題（接續目前的口味地圖）；?mode=redo：重新探索（題目重問一次，自己設定的項目不會被蓋掉）
+  const [params] = useSearchParams();
+  const mode = params.get('mode');
+  const initial = useMemo(() => (mode === 'redo' ? { ...stored, answeredItemIds: [] } : stored), [stored, mode]);
   const seed = useRef(newId());
-  const [session, setSession] = useState<QuizSession>(() => startSession(initial, 'quick', seed.current, env));
+  const [session, setSession] = useState<QuizSession>(() => startSession(initial, mode === 'deep' ? 'deep' : 'quick', seed.current, env));
   const [contextAnswered, setContextAnswered] = useState(0);
   const [reaction, setReaction] = useState<ReactionKey | null>(null);
   const [result, setResult] = useState<Result | null>(null);
@@ -102,6 +106,7 @@ function Explore({ initial, previousContext, env }: { initial: TasteProfile; pre
     return (
       <CardView
         card={result.card}
+        allergens={allergenNames}
         saveState={save.isPending ? 'saving' : save.isError ? 'error' : 'saved'}
         onDone={() =>
           save.isError ? save.mutate({ profile: result.profile, cardTitle: result.card.titleCode ?? null, previousContext }) : void navigate('/')

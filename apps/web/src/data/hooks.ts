@@ -12,7 +12,8 @@ import {
 } from '../photos/uploadQueue.ts';
 import { deletePhoto, getAvatar, listEquipmentPhotos, listMyRecipePhotos, listRecipePhotos, replaceAvatar, signPhotoUrls, type Photo } from './photos.ts';
 import { deleteRecipe, getRecipe, listMyDeletedRecipes, listMyRecipes, restoreRecipe, searchMyRecipes } from './recipes.ts';
-import { currentUserId, getMyIdentity, getMySettings, updateDisplayName } from './account.ts';
+import { currentUserId, getMyIdentity, getMySettings, updateDisplayName, updateMySettings, type UserSettings, type UserSettingsPatch } from './account.ts';
+import { getMyDietary, saveMyDietary, type Dietary } from './dietary.ts';
 import { getMyHardLimits, getMyTasteProfile, saveTasteProfile } from './taste.ts';
 import type { TasteProfile } from '@zhusha/core';
 import { listMyKitchens, setCurrentKitchen } from './kitchens.ts';
@@ -56,6 +57,7 @@ export const queryKeys = {
   avatar: (userId: string) => ['avatar', userId] as const,
   tasteProfile: ['me', 'taste', 'profile'] as const,
   hardLimits: ['me', 'taste', 'hard-limits'] as const,
+  dietary: ['me', 'dietary'] as const,
   photoUrls: (paths: string[]) => ['photo-urls', ...paths] as const,
 };
 
@@ -346,5 +348,39 @@ export function useSetAvatar() {
       throw last;
     },
     onSuccess: (userId) => queryClient.invalidateQueries({ queryKey: queryKeys.avatar(userId) }),
+  });
+}
+
+// 飲食限制：存好後，探索用的硬限制也要重讀
+export function useMyDietary() {
+  return useQuery({ queryKey: queryKeys.dietary, queryFn: getMyDietary });
+}
+
+export function useSaveDietary() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (value: Dietary) => saveMyDietary(value),
+    onSuccess: () => Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.dietary }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.hardLimits }),
+    ]),
+  });
+}
+
+// 個人設定（人份、單位、大廚的語氣、小卡是否關掉）：先更新畫面，失敗再退回
+export function useUpdateSettings() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (patch: UserSettingsPatch) => updateMySettings(patch),
+    onMutate: async (patch) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.settings });
+      const previous = queryClient.getQueryData<UserSettings>(queryKeys.settings);
+      if (previous) queryClient.setQueryData(queryKeys.settings, { ...previous, ...patch });
+      return { previous };
+    },
+    onError: (_e, _v, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(queryKeys.settings, ctx.previous);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.settings }),
   });
 }

@@ -13,6 +13,10 @@ export const dietaryRestrictions = dietaryRestrictionsData as DietaryRestriction
 
 const allergenById = new Map(allergens.map((a) => [a.id, a]));
 
+export function getAllergen(id: string): Allergen | undefined {
+  return allergenById.get(id);
+}
+
 // 過敏原和它所有的上層（例：shrimp → crustacean）。選了上層的人，標了下層的食材也要排除
 export function allergenWithAncestors(id: string): string[] {
   const out: string[] = [];
