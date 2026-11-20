@@ -76,6 +76,7 @@ Vite＋React＋TypeScript 的 PWA（放在 Netlify）；Supabase（Postgres＋RL
 ## 環境與安全
 
 - Supabase 正式專案 `dvlfioarakgddstcwfiu`、測試專案 `usnsgpcutztcmnjbqopg`（東京、免費方案）。
+- 正式網站 https://tsu-siann.netlify.app（Netlify，從 `main` 自動部署；預覽網址連測試專案）。
 - 實驗和測試的 SQL 只在**測試專案**或本機跑；正式專案只透過 CI 部署。
 - 金鑰不進儲存庫：資料庫密碼、Anthropic 金鑰、VAPID 私密金鑰、推播訂閱資料都不 commit，也不貼進對話。
 - 本機開發用 Supabase CLI＋OrbStack（Docker）。若找不到 `docker` 指令，先把 `~/.orbstack/bin` 加進 `PATH`。
@@ -92,7 +93,8 @@ Vite＋React＋TypeScript 的 PWA（放在 Netlify）；Supabase（Postgres＋RL
 | 單元測試 | `pnpm test` |
 | 共用套件能不能在 Deno 跑 | `pnpm check:deno` |
 | 建置 | `pnpm build` |
-| 本機資料庫：啟動／停止／重建 | `pnpm db:start`、`pnpm db:stop`、`pnpm db:reset` |
+| 本機資料庫：啟動／停止／重建 | `pnpm db:start`、`pnpm db:stop`、`pnpm db:reset`（重建時套用 `supabase/seed.sql`，有一個本機開發帳號） |
+| 資料庫的權限測試（pgTAP） | `pnpm db:test`；測試放在 `supabase/tests/` |
 | 從本機資料庫產生型別 | `pnpm gen:types`（產生 `packages/shared-types/src/database.ts`，不要手改） |
 
-**部署**：前端由 Netlify 從 git 自動部署（`netlify.toml`）；每個 PR 由 GitHub Actions 跑型別檢查、測試、Deno 檢查與建置（`.github/workflows/ci.yml`）。資料庫 migration 與 Edge Functions 的自動部署在第一個 migration 時加上。
+**部署**：前端由 Netlify 從 git 自動部署（`netlify.toml`）；每個 PR 由 GitHub Actions 跑型別檢查、測試、Deno 檢查、建置，以及資料庫的權限測試與型別是否過期（`.github/workflows/ci.yml`）。資料庫 migration 與 Edge Functions 的自動部署在第一個 migration 時加上。

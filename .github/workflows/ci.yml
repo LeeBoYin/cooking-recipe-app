@@ -24,3 +24,19 @@ jobs:
       - run: pnpm test
       - run: pnpm check:deno
       - run: pnpm build
+
+  database:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 3.2.0
+      # 只啟動資料庫：套用 migration 與 seed
+      - run: supabase db start
+      - name: 權限測試（pgTAP）
+        run: supabase test db
+      - name: 型別要和 migration 一致（改了資料表就要跑 pnpm gen:types）
+        run: |
+          supabase gen types typescript > /tmp/database.ts
+          diff -u packages/shared-types/src/database.ts /tmp/database.ts
