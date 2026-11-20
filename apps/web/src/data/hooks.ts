@@ -13,6 +13,8 @@ import {
 import { deletePhoto, listEquipmentPhotos, listMyRecipePhotos, listRecipePhotos, signPhotoUrls, type Photo } from './photos.ts';
 import { deleteRecipe, getRecipe, listMyDeletedRecipes, listMyRecipes, restoreRecipe, searchMyRecipes } from './recipes.ts';
 import { currentUserId, getMyIdentity, getMySettings } from './account.ts';
+import { getMyHardLimits, getMyTasteProfile, saveTasteProfile } from './taste.ts';
+import type { TasteProfile } from '@zhusha/core';
 import { listMyKitchens, setCurrentKitchen } from './kitchens.ts';
 import {
   addPantryItems,
@@ -51,6 +53,8 @@ export const queryKeys = {
   recipeSearch: (q: string) => ['recipes', 'search', q] as const,
   recipe: (id: string) => ['recipe', id] as const,
   recipePhotos: (id: string) => ['recipe', id, 'photos'] as const,
+  tasteProfile: ['me', 'taste', 'profile'] as const,
+  hardLimits: ['me', 'taste', 'hard-limits'] as const,
   photoUrls: (paths: string[]) => ['photo-urls', ...paths] as const,
 };
 
@@ -283,4 +287,22 @@ export function useMyDeletedRecipes() {
 export function useSearchMyRecipes(query: string) {
   const q = query.trim();
   return useQuery({ queryKey: queryKeys.recipeSearch(q), queryFn: () => searchMyRecipes(q), enabled: q !== '' });
+}
+
+// 我的口味地圖與硬限制
+export function useMyTasteProfile() {
+  return useQuery({ queryKey: queryKeys.tasteProfile, queryFn: getMyTasteProfile });
+}
+
+export function useMyHardLimits() {
+  return useQuery({ queryKey: queryKeys.hardLimits, queryFn: getMyHardLimits });
+}
+
+export function useSaveTasteProfile() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { profile: TasteProfile; cardTitle: string | null; previousContext?: Parameters<typeof saveTasteProfile>[2] }) =>
+      saveTasteProfile(v.profile, v.cardTitle, v.previousContext),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.tasteProfile }),
+  });
 }

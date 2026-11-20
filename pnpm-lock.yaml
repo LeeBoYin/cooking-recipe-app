@@ -214,6 +214,9 @@ importers:
       '@zhusha/shared-types':
         specifier: workspace:*
         version: link:../../packages/shared-types
+      '@zhusha/taste':
+        specifier: workspace:*
+        version: link:../../packages/taste
       idb-keyval:
         specifier: ^6.3.0
         version: 6.3.0
@@ -255,7 +258,11 @@ importers:
         specifier: ^7.4.1
         version: 7.4.1
 
-  packages/core: {}
+  packages/core:
+    devDependencies:
+      '@zhusha/taste':
+        specifier: workspace:*
+        version: link:../taste
 
   packages/equipment: {}
 

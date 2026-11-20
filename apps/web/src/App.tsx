@@ -22,6 +22,7 @@ import { PantryTab } from './features/pantry/PantryTab.tsx';
 import { RemovedPage } from './features/pantry/RemovedPage.tsx';
 import { AppShell } from './features/shell/AppShell.tsx';
 import { InnerLayout } from './features/shell/InnerLayout.tsx';
+import { TastePage } from './features/taste/TastePage.tsx';
 import { Placeholder } from './features/shell/Placeholder.tsx';
 import { PhotoSync } from './photos/PhotoSync.tsx';
 import { UpdatePrompt } from './pwa/UpdatePrompt.tsx';
@@ -57,6 +58,7 @@ export function App() {
               <Route path="recipes/deleted" element={<DeletedPage />} />
               <Route path="recipes/:id" element={<RecipePage />} />
               <Route path="recipes/:id/edit" element={<RecipeEditPage />} />
+              <Route path="taste" element={<TastePage />} />
               <Route path="kitchen/pantry/add" element={<AddPage />} />
               <Route path="kitchen/pantry/inventory" element={<InventoryPage />} />
               <Route path="kitchen/pantry/removed" element={<RemovedPage />} />

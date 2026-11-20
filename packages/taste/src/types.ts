@@ -23,13 +23,31 @@ export interface PreferenceDimension {
 export const QUIZ_ITEM_TYPES = ['dish_card', 'this_or_that', 'spectrum', 'quick_fire', 'constraint', 'context'] as const;
 export type QuizItemType = (typeof QUIZ_ITEM_TYPES)[number];
 
+export interface QuizOption {
+  label: LocalizedText;
+  mapping?: Record<string, number>; // 二選一：選這邊時各維度的加減
+  value?: string | number; // 情境題：寫進 contextField 的值
+  addGoal?: string; // 情境題：選了就把這個維度 key 加進「想學」
+}
+
+export interface QuizSpectrum {
+  dimension: string; // 一個維度 key
+  labels: LocalizedText[]; // 五個點的文字，由「最不要」到「最愛」
+}
+
+export const QUIZ_CONTEXT_FIELDS = ['time_preference', 'cooks_for', 'adventure'] as const;
+export type QuizContextField = (typeof QUIZ_CONTEXT_FIELDS)[number];
+
 export interface QuizItem {
   id: string; // 小寫英文、數字、底線：card_tom_yum
   type: QuizItemType;
   title: LocalizedText;
   description?: LocalizedText; // 描述菜卡的感官描述，30 字以內
   regions: RegionCode[]; // 哪些地區的使用者會看到
-  mapping: Record<string, number>; // 回答「喜歡」時各維度的加減（−1～1）；「不愛」時反向
+  mapping: Record<string, number>; // 回答「喜歡」時各維度的加減（−1～1）；「不愛」時反向（描述菜卡、快問快答；其他題型為空）
+  options?: QuizOption[]; // 二選一（兩個）、情境題（多個）的選項
+  spectrum?: QuizSpectrum; // 口味光譜
+  contextField?: QuizContextField; // 情境題寫進哪個欄位；cooks_for 可複選
   excludedAllergenIds?: string[]; // 有這些過敏原的人不會看到
   excludedRestrictionIds?: string[]; // 有這些飲食限制的人不會看到
   followUps?: string[];

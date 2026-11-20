@@ -23,10 +23,18 @@
       "form.soup": 0.4
     },
     "excludedAllergenIds": [
-      "crustacean"
+      "crustacean",
+      "shrimp"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian"
     ],
     "followUps": [
-      "card_pad_krapow"
+      "card_pad_krapow",
+      "card_green_curry",
+      "card_pho"
     ]
   },
   {
@@ -51,7 +59,14 @@
       "protein.pork": 0.4,
       "form.stir_fry": 0.5,
       "form.rice": 0.4
-    }
+    },
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
   },
   {
     "id": "card_mapo_tofu",
@@ -77,8 +92,12 @@
       "texture.tender": 0.3,
       "richness.oily": 0.4
     },
+    "excludedAllergenIds": [
+      "soy"
+    ],
     "followUps": [
-      "card_beef_noodle_soup"
+      "card_beef_noodle_soup",
+      "card_cumin_lamb"
     ]
   },
   {
@@ -88,12 +107,10 @@
       "zh-TW": "滷肉飯"
     },
     "description": {
-      "zh-TW": "五花肉用醬油和冰糖慢慢滷，肥肉入口即化，淋在白飯上"
+      "zh-TW": "五花肉丁慢慢滷到軟爛，醬油香甜，淋在白飯上"
     },
     "regions": [
-      "TW",
-      "US-CA",
-      "JP"
+      "TW"
     ],
     "mapping": {
       "cuisine.taiwan.home": 0.8,
@@ -121,12 +138,10 @@
       "zh-TW": "紅燒牛肉麵"
     },
     "description": {
-      "zh-TW": "牛腱燉到軟爛，湯頭濃郁帶點豆瓣的微辣，配彈牙的麵"
+      "zh-TW": "牛腱燉得軟嫩，濃郁的紅燒湯頭，配上有嚼勁的麵條"
     },
     "regions": [
-      "TW",
-      "US-CA",
-      "JP"
+      "TW"
     ],
     "mapping": {
       "cuisine.taiwan.street_food": 0.5,
@@ -150,10 +165,10 @@
     "id": "card_oyakodon",
     "type": "dish_card",
     "title": {
-      "zh-TW": "日式親子丼"
+      "zh-TW": "親子丼"
     },
     "description": {
-      "zh-TW": "雞腿肉和半熟蛋用甜甜鹹鹹的高湯燉過，蓋在白飯上"
+      "zh-TW": "雞肉和半熟蛋用柴魚醬汁燴煮，蓋在白飯上，滑嫩香甜"
     },
     "regions": [
       "TW",
@@ -171,6 +186,9 @@
       "form.one_pot": 0.3,
       "texture.tender": 0.5
     },
+    "excludedAllergenIds": [
+      "egg"
+    ],
     "excludedRestrictionIds": [
       "vegetarian",
       "vegan",
@@ -178,7 +196,8 @@
       "pescatarian"
     ],
     "followUps": [
-      "card_miso_salmon"
+      "card_miso_salmon",
+      "card_ramen"
     ]
   },
   {
@@ -188,7 +207,7 @@
       "zh-TW": "味噌烤鮭魚"
     },
     "description": {
-      "zh-TW": "鮭魚抹上味噌醬烤到微焦，鹹香帶一點甜，配白飯很剛好"
+      "zh-TW": "鮭魚抹上味噌醃過再烤，焦香帶甜，配白飯剛好"
     },
     "regions": [
       "TW",
@@ -207,6 +226,11 @@
     "excludedAllergenIds": [
       "fish",
       "soy"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian"
     ]
   },
   {
@@ -216,7 +240,7 @@
       "zh-TW": "韓式烤牛肉"
     },
     "description": {
-      "zh-TW": "牛肉片用醬油、梨和蒜醃過，烤得微焦，包生菜吃"
+      "zh-TW": "牛肉用醬油、梨和蒜醃過再烤，甜香軟嫩，包生菜吃"
     },
     "regions": [
       "TW",
@@ -239,6 +263,9 @@
       "vegan",
       "buddhist-vegetarian",
       "pescatarian"
+    ],
+    "followUps": [
+      "card_kimchi_jjigae"
     ]
   },
   {
@@ -248,7 +275,7 @@
       "zh-TW": "番茄起司義大利麵"
     },
     "description": {
-      "zh-TW": "番茄醬汁加羅勒和莫札瑞拉起司，酸酸甜甜又濃郁"
+      "zh-TW": "番茄醬汁加羅勒和莫札瑞拉起司，酸甜濃郁，麵條彈牙"
     },
     "regions": [
       "TW",
@@ -265,17 +292,18 @@
     },
     "excludedAllergenIds": [
       "milk",
-      "gluten-grain"
+      "gluten-grain",
+      "wheat"
     ]
   },
   {
     "id": "card_bbq_ribs",
     "type": "dish_card",
     "title": {
-      "zh-TW": "美式 BBQ 烤肋排"
+      "zh-TW": "美式 BBQ 肋排"
     },
     "description": {
-      "zh-TW": "豬肋排抹上煙燻香料，慢烤到骨肉分離，刷上甜甜的 BBQ 醬"
+      "zh-TW": "豬肋排用煙燻慢烤，刷上甜甜鹹鹹的醬，肉軟到脫骨"
     },
     "regions": [
       "TW",
@@ -304,10 +332,10 @@
     "id": "card_chicken_curry",
     "type": "dish_card",
     "title": {
-      "zh-TW": "印度奶油雞"
+      "zh-TW": "印度咖哩雞"
     },
     "description": {
-      "zh-TW": "雞肉泡在番茄與奶油調成的香料醬汁裡，微辣、濃稠，沾饢吃"
+      "zh-TW": "雞肉用多種香料和優格燉煮，濃稠香濃，配饢或白飯"
     },
     "regions": [
       "TW",
@@ -340,7 +368,7 @@
       "zh-TW": "墨西哥塔可"
     },
     "description": {
-      "zh-TW": "玉米餅夾烤肉、洋蔥和香菜，擠上萊姆汁，帶一點辣椒的香氣"
+      "zh-TW": "玉米餅夾烤肉，擠上萊姆、香菜和莎莎醬，酸辣清爽"
     },
     "regions": [
       "TW",
@@ -354,6 +382,1021 @@
       "taste.spicy": 0.3,
       "ingredient.cilantro": 0.3,
       "form.grill": 0.3
+    }
+  },
+  {
+    "id": "card_three_cup_chicken",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "三杯雞"
+    },
+    "description": {
+      "zh-TW": "雞肉和麻油、醬油、米酒、九層塔一起收乾，香氣撲鼻"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.home": 0.8,
+      "seasoning.soy_sauce": 0.6,
+      "taste.aromatic": 0.7,
+      "taste.salty": 0.3,
+      "protein.chicken": 0.6,
+      "form.stew_braise": 0.4,
+      "form.stir_fry": 0.3
+    },
+    "excludedRestrictionIds": [
+      "no-alcohol",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_oyster_omelet",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "蚵仔煎"
+    },
+    "description": {
+      "zh-TW": "鮮蚵、蛋和地瓜粉煎到外酥內軟，淋上甜辣醬"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "protein.shellfish": 0.5,
+      "protein.egg": 0.4,
+      "texture.bouncy": 0.5,
+      "taste.sweet": 0.3,
+      "form.fried": 0.3
+    },
+    "excludedAllergenIds": [
+      "mollusc",
+      "egg"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian"
+    ]
+  },
+  {
+    "id": "card_hakka_stir_fry",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "客家小炒"
+    },
+    "description": {
+      "zh-TW": "豬肉、豆乾、魷魚和蔥段大火快炒，鹹香下飯"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.hakka": 0.9,
+      "taste.salty": 0.5,
+      "taste.aromatic": 0.5,
+      "protein.pork": 0.4,
+      "form.stir_fry": 0.6,
+      "seasoning.soy_sauce": 0.4
+    },
+    "excludedAllergenIds": [
+      "mollusc"
+    ],
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_salt_crispy_chicken",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "鹽酥雞"
+    },
+    "description": {
+      "zh-TW": "雞塊裹粉炸到酥脆，撒上胡椒鹽和炸九層塔"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "texture.crispy": 0.7,
+      "form.fried": 0.7,
+      "taste.salty": 0.4,
+      "taste.aromatic": 0.4,
+      "protein.chicken": 0.5,
+      "richness.oily": 0.5
+    },
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_sesame_oil_chicken",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "麻油雞"
+    },
+    "description": {
+      "zh-TW": "雞肉用老薑和麻油煸香，加米酒燉成熱湯，冬天喝特別暖"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.home": 0.8,
+      "taste.aromatic": 0.6,
+      "ingredient.ginger": 0.4,
+      "form.soup": 0.5,
+      "protein.chicken": 0.5,
+      "richness.rich": 0.5
+    },
+    "excludedAllergenIds": [
+      "sesame"
+    ],
+    "excludedRestrictionIds": [
+      "no-alcohol",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_ramen",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "日式豚骨拉麵"
+    },
+    "description": {
+      "zh-TW": "豬骨熬出濃白湯頭，細麵加叉燒、溏心蛋，濃郁鮮香"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.japan": 0.8,
+      "form.noodles": 0.7,
+      "form.soup": 0.5,
+      "taste.umami": 0.6,
+      "richness.rich": 0.7,
+      "richness.oily": 0.4,
+      "protein.pork": 0.5
+    },
+    "excludedAllergenIds": [
+      "wheat",
+      "gluten-grain",
+      "egg"
+    ],
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_sushi",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "握壽司"
+    },
+    "description": {
+      "zh-TW": "醋飯捏上新鮮生魚片，沾一點醬油和哇沙比，清爽鮮甜"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.japan.washoku": 0.8,
+      "form.raw": 0.8,
+      "protein.fish": 0.6,
+      "form.rice": 0.4,
+      "ingredient.sashimi": 0.7,
+      "richness.rich": -0.3
+    },
+    "excludedAllergenIds": [
+      "fish"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian"
+    ]
+  },
+  {
+    "id": "card_kimchi_jjigae",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "韓式泡菜鍋"
+    },
+    "description": {
+      "zh-TW": "酸辣的老泡菜和豬肉燉成熱鍋，湯頭濃烈，配白飯"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.korea": 0.8,
+      "taste.sour": 0.4,
+      "taste.spicy": 0.6,
+      "spice_type.sweet_spicy": 0.4,
+      "seasoning.korean_paste": 0.6,
+      "form.soup": 0.5,
+      "form.one_pot": 0.5,
+      "protein.pork": 0.3
+    },
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_pho",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "越南牛肉河粉"
+    },
+    "description": {
+      "zh-TW": "牛骨清湯加香料熬煮，河粉配薄牛肉，擠檸檬、加香草"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.southeast_asia.vietnamese": 0.9,
+      "form.noodles": 0.6,
+      "form.soup": 0.6,
+      "taste.aromatic": 0.5,
+      "richness.rich": -0.3,
+      "ingredient.cilantro": 0.2,
+      "protein.beef": 0.5
+    },
+    "excludedRestrictionIds": [
+      "no-beef",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_green_curry",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "泰式綠咖哩"
+    },
+    "description": {
+      "zh-TW": "椰奶和綠咖哩醬燉雞肉與茄子，香濃微辣帶甜"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.southeast_asia.thai": 0.8,
+      "seasoning.curry_spice": 0.5,
+      "spice_type.curry_spicy": 0.5,
+      "taste.spicy": 0.4,
+      "taste.sweet": 0.3,
+      "richness.rich": 0.5,
+      "protein.chicken": 0.4,
+      "ingredient.eggplant": 0.2
+    },
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_steamed_fish",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "清蒸魚"
+    },
+    "description": {
+      "zh-TW": "整條魚蒸到剛熟，淋上熱油和醬油，保留魚的鮮甜"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.china.cantonese": 0.8,
+      "form.steamed": 0.8,
+      "protein.fish": 0.7,
+      "taste.umami": 0.5,
+      "texture.tender": 0.5,
+      "richness.rich": -0.5
+    },
+    "excludedAllergenIds": [
+      "fish"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian"
+    ]
+  },
+  {
+    "id": "card_xiao_long_bao",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "小籠包"
+    },
+    "description": {
+      "zh-TW": "薄皮包著鮮肉和湯汁，咬開一口鮮甜，沾薑絲醋吃"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.china.jiangzhe": 0.8,
+      "form.steamed": 0.6,
+      "protein.pork": 0.4,
+      "taste.umami": 0.6,
+      "texture.tender": 0.4,
+      "ingredient.ginger": 0.1
+    },
+    "excludedAllergenIds": [
+      "wheat",
+      "gluten-grain"
+    ],
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_cumin_lamb",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "孜然羊肉"
+    },
+    "description": {
+      "zh-TW": "羊肉片和孜然、辣椒大火爆炒，香辣帶點羶味"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.china.northern": 0.8,
+      "protein.lamb": 0.7,
+      "taste.spicy": 0.5,
+      "taste.aromatic": 0.6,
+      "form.stir_fry": 0.6,
+      "ingredient.lamb_gamey": 0.3
+    },
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_shakshuka",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "北非蕃茄蛋"
+    },
+    "description": {
+      "zh-TW": "蛋在香料番茄醬裡煮到半熟，蘸麵包吃，酸甜微辣"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.middle_east": 0.8,
+      "protein.egg": 0.5,
+      "taste.sour": 0.3,
+      "taste.spicy": 0.3,
+      "seasoning.tomato_cheese": 0.3,
+      "form.one_pot": 0.4,
+      "texture.smooth": 0.3
+    },
+    "excludedAllergenIds": [
+      "egg"
+    ]
+  },
+  {
+    "id": "card_beef_bourguignon",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "法式紅酒燉牛肉"
+    },
+    "description": {
+      "zh-TW": "牛肉用紅酒和蔬菜燉上幾小時，醬汁濃郁，軟到入口即化"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.france": 0.9,
+      "protein.beef": 0.6,
+      "form.stew_braise": 0.7,
+      "richness.rich": 0.7,
+      "texture.tender": 0.5
+    },
+    "excludedRestrictionIds": [
+      "no-beef",
+      "no-alcohol",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_tiramisu",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "提拉米蘇"
+    },
+    "description": {
+      "zh-TW": "手指餅乾沾咖啡，疊上馬斯卡彭起司，冰過後綿密微苦"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "form.dessert_baking": 0.8,
+      "cuisine.mediterranean.italian": 0.4,
+      "taste.sweet": 0.6,
+      "taste.bitter": 0.3,
+      "texture.smooth": 0.6
+    },
+    "excludedAllergenIds": [
+      "milk",
+      "egg",
+      "wheat",
+      "gluten-grain"
+    ]
+  },
+  {
+    "id": "tot_rainy_day",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "下雨天，你比較想吃…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "一鍋濃郁的紅燒牛肉"
+        },
+        "mapping": {
+          "richness.rich": 0.7,
+          "form.stew_braise": 0.6,
+          "seasoning.soy_sauce": 0.4
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "一碗清爽的味噌湯"
+        },
+        "mapping": {
+          "richness.rich": -0.6,
+          "form.soup": 0.6,
+          "seasoning.miso_dashi": 0.5
+        }
+      }
+    ]
+  },
+  {
+    "id": "tot_crispy_tender",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "你比較愛哪一種口感？"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "炸得酥脆"
+        },
+        "mapping": {
+          "texture.crispy": 0.8,
+          "form.fried": 0.5
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "蒸得軟嫩"
+        },
+        "mapping": {
+          "texture.tender": 0.7,
+          "form.steamed": 0.5
+        }
+      }
+    ]
+  },
+  {
+    "id": "tot_rice_noodles",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "吃飽的主食，你會選…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "一碗白飯"
+        },
+        "mapping": {
+          "form.rice": 0.8
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "一碗麵"
+        },
+        "mapping": {
+          "form.noodles": 0.8
+        }
+      }
+    ]
+  },
+  {
+    "id": "tot_spicy_type",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "同樣是辣，你比較愛…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "麻辣，舌頭發麻的那種"
+        },
+        "mapping": {
+          "spice_type.numbing_spicy": 0.8,
+          "taste.numbing": 0.6
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "酸辣，開胃又提神"
+        },
+        "mapping": {
+          "spice_type.sour_spicy": 0.8,
+          "taste.sour": 0.4
+        }
+      }
+    ]
+  },
+  {
+    "id": "tot_grill_pot",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "聚餐時你比較想要…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "炭火燒烤，帶點煙燻香"
+        },
+        "mapping": {
+          "form.grill": 0.7,
+          "taste.smoky": 0.5
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "一鍋咕嚕咕嚕的燉煮"
+        },
+        "mapping": {
+          "form.one_pot": 0.7,
+          "form.stew_braise": 0.5
+        }
+      }
+    ]
+  },
+  {
+    "id": "tot_bouncy_smooth",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "你比較愛哪種口感？"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "Q 彈有嚼勁"
+        },
+        "mapping": {
+          "texture.bouncy": 0.7,
+          "texture.chewy": 0.5
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "滑順入口即化"
+        },
+        "mapping": {
+          "texture.smooth": 0.7,
+          "texture.tender": 0.4
+        }
+      }
+    ]
+  },
+  {
+    "id": "tot_cold_hot",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "配飯的小菜，你比較想要…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "涼拌小菜，清爽開胃"
+        },
+        "mapping": {
+          "form.cold_dish": 0.8,
+          "richness.rich": -0.3
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "熱炒小菜，鑊氣十足"
+        },
+        "mapping": {
+          "form.stir_fry": 0.8,
+          "taste.aromatic": 0.3
+        }
+      }
+    ]
+  },
+  {
+    "id": "tot_curry_tomato",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "醬汁你比較想要…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "香料味重的咖哩"
+        },
+        "mapping": {
+          "seasoning.curry_spice": 0.8
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "番茄加起司的濃郁醬汁"
+        },
+        "mapping": {
+          "seasoning.tomato_cheese": 0.8
+        }
+      }
+    ]
+  },
+  {
+    "id": "spec_spicy",
+    "type": "spectrum",
+    "title": {
+      "zh-TW": "你能吃多辣？"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "spectrum": {
+      "dimension": "taste.spicy",
+      "labels": [
+        {
+          "zh-TW": "一點都不要"
+        },
+        {
+          "zh-TW": "只要一點點辣"
+        },
+        {
+          "zh-TW": "小辣剛剛好"
+        },
+        {
+          "zh-TW": "中辣很過癮"
+        },
+        {
+          "zh-TW": "麻辣鍋等級"
+        }
+      ]
+    }
+  },
+  {
+    "id": "spec_sour",
+    "type": "spectrum",
+    "title": {
+      "zh-TW": "你對酸的接受度？"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "spectrum": {
+      "dimension": "taste.sour",
+      "labels": [
+        {
+          "zh-TW": "不喜歡酸"
+        },
+        {
+          "zh-TW": "只要一點點檸檬"
+        },
+        {
+          "zh-TW": "偶爾來點醋"
+        },
+        {
+          "zh-TW": "喜歡酸酸的"
+        },
+        {
+          "zh-TW": "越酸越好"
+        }
+      ]
+    }
+  },
+  {
+    "id": "spec_sweet",
+    "type": "spectrum",
+    "title": {
+      "zh-TW": "菜裡帶甜味，你覺得…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "spectrum": {
+      "dimension": "taste.sweet",
+      "labels": [
+        {
+          "zh-TW": "鹹的菜不要甜"
+        },
+        {
+          "zh-TW": "只要一點點"
+        },
+        {
+          "zh-TW": "適中"
+        },
+        {
+          "zh-TW": "喜歡鹹甜口味"
+        },
+        {
+          "zh-TW": "越甜越好"
+        }
+      ]
+    }
+  },
+  {
+    "id": "spec_numbing",
+    "type": "spectrum",
+    "title": {
+      "zh-TW": "花椒的麻，你覺得…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "spectrum": {
+      "dimension": "taste.numbing",
+      "labels": [
+        {
+          "zh-TW": "完全不行"
+        },
+        {
+          "zh-TW": "只能接受一點點"
+        },
+        {
+          "zh-TW": "還可以"
+        },
+        {
+          "zh-TW": "喜歡麻麻的"
+        },
+        {
+          "zh-TW": "越麻越過癮"
+        }
+      ]
+    }
+  },
+  {
+    "id": "spec_salty",
+    "type": "spectrum",
+    "title": {
+      "zh-TW": "口味的鹹淡，你偏好…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "spectrum": {
+      "dimension": "taste.salty",
+      "labels": [
+        {
+          "zh-TW": "越淡越好"
+        },
+        {
+          "zh-TW": "偏淡"
+        },
+        {
+          "zh-TW": "剛剛好"
+        },
+        {
+          "zh-TW": "偏重口味"
+        },
+        {
+          "zh-TW": "越鹹越下飯"
+        }
+      ]
+    }
+  },
+  {
+    "id": "spec_rich",
+    "type": "spectrum",
+    "title": {
+      "zh-TW": "菜餚的濃淡，你偏好…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "spectrum": {
+      "dimension": "richness.rich",
+      "labels": [
+        {
+          "zh-TW": "清淡爽口"
+        },
+        {
+          "zh-TW": "偏清爽"
+        },
+        {
+          "zh-TW": "都可以"
+        },
+        {
+          "zh-TW": "偏濃郁"
+        },
+        {
+          "zh-TW": "越濃郁越過癮"
+        }
+      ]
+    }
+  },
+  {
+    "id": "spec_oily",
+    "type": "spectrum",
+    "title": {
+      "zh-TW": "菜裡的油香，你覺得…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "spectrum": {
+      "dimension": "richness.oily",
+      "labels": [
+        {
+          "zh-TW": "少油最好"
+        },
+        {
+          "zh-TW": "偏少油"
+        },
+        {
+          "zh-TW": "適中"
+        },
+        {
+          "zh-TW": "喜歡油香"
+        },
+        {
+          "zh-TW": "越油越香"
+        }
+      ]
+    }
+  },
+  {
+    "id": "spec_bitter",
+    "type": "spectrum",
+    "title": {
+      "zh-TW": "苦味，你覺得…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "spectrum": {
+      "dimension": "taste.bitter",
+      "labels": [
+        {
+          "zh-TW": "完全不行"
+        },
+        {
+          "zh-TW": "只能一點點"
+        },
+        {
+          "zh-TW": "還可以"
+        },
+        {
+          "zh-TW": "喜歡微苦的回甘"
+        },
+        {
+          "zh-TW": "越苦越有味"
+        }
+      ]
     }
   },
   {
@@ -387,6 +1430,22 @@
     }
   },
   {
+    "id": "qf_stinky_tofu",
+    "type": "quick_fire",
+    "title": {
+      "zh-TW": "臭豆腐"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "ingredient.stinky_tofu": 1
+    },
+    "excludedAllergenIds": [
+      "soy"
+    ]
+  },
+  {
     "id": "qf_offal",
     "type": "quick_fire",
     "title": {
@@ -399,6 +1458,89 @@
     ],
     "mapping": {
       "ingredient.offal": 1
+    },
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "qf_sashimi",
+    "type": "quick_fire",
+    "title": {
+      "zh-TW": "生魚片"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "ingredient.sashimi": 1
+    },
+    "excludedAllergenIds": [
+      "fish"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian"
+    ]
+  },
+  {
+    "id": "qf_lamb_gamey",
+    "type": "quick_fire",
+    "title": {
+      "zh-TW": "羊肉的羶味"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "ingredient.lamb_gamey": 1
+    },
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "qf_blue_cheese",
+    "type": "quick_fire",
+    "title": {
+      "zh-TW": "藍紋起司"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "ingredient.blue_cheese": 1
+    },
+    "excludedAllergenIds": [
+      "milk"
+    ]
+  },
+  {
+    "id": "qf_durian",
+    "type": "quick_fire",
+    "title": {
+      "zh-TW": "榴槤"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "ingredient.durian": 1
     }
   },
   {
@@ -415,5 +1557,544 @@
     "mapping": {
       "ingredient.eggplant": 1
     }
+  },
+  {
+    "id": "qf_okra",
+    "type": "quick_fire",
+    "title": {
+      "zh-TW": "秋葵"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "ingredient.okra": 1
+    }
+  },
+  {
+    "id": "qf_celery",
+    "type": "quick_fire",
+    "title": {
+      "zh-TW": "芹菜"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "ingredient.celery": 1
+    }
+  },
+  {
+    "id": "qf_ginger",
+    "type": "quick_fire",
+    "title": {
+      "zh-TW": "薑"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "ingredient.ginger": 1
+    }
+  },
+  {
+    "id": "qf_shiitake",
+    "type": "quick_fire",
+    "title": {
+      "zh-TW": "香菇"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "ingredient.shiitake": 1
+    }
+  },
+  {
+    "id": "qf_taro",
+    "type": "quick_fire",
+    "title": {
+      "zh-TW": "芋頭"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {
+      "ingredient.taro": 1
+    }
+  },
+  {
+    "id": "ctx_time",
+    "type": "context",
+    "title": {
+      "zh-TW": "平常煮飯，你願意花多少時間？"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "contextField": "time_preference",
+    "options": [
+      {
+        "label": {
+          "zh-TW": "越快越好"
+        },
+        "value": "quick"
+      },
+      {
+        "label": {
+          "zh-TW": "普通就好"
+        },
+        "value": "normal"
+      },
+      {
+        "label": {
+          "zh-TW": "花時間也沒關係"
+        },
+        "value": "relaxed"
+      }
+    ]
+  },
+  {
+    "id": "ctx_cooks_for",
+    "type": "context",
+    "title": {
+      "zh-TW": "你通常煮給誰吃？（可以多選）"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "contextField": "cooks_for",
+    "options": [
+      {
+        "label": {
+          "zh-TW": "自己"
+        },
+        "value": "self"
+      },
+      {
+        "label": {
+          "zh-TW": "另一半"
+        },
+        "value": "partner"
+      },
+      {
+        "label": {
+          "zh-TW": "家人或小孩"
+        },
+        "value": "family"
+      },
+      {
+        "label": {
+          "zh-TW": "招待朋友"
+        },
+        "value": "guests"
+      }
+    ]
+  },
+  {
+    "id": "ctx_weekend",
+    "type": "context",
+    "title": {
+      "zh-TW": "週末有空時，你比較想…"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "mapping": {},
+    "contextField": "adventure",
+    "options": [
+      {
+        "label": {
+          "zh-TW": "慢慢燉一鍋"
+        },
+        "value": 0.3
+      },
+      {
+        "label": {
+          "zh-TW": "挑戰沒做過的菜"
+        },
+        "value": 0.8
+      },
+      {
+        "label": {
+          "zh-TW": "簡單快速就好"
+        },
+        "value": 0.1
+      },
+      {
+        "label": {
+          "zh-TW": "烤點甜點"
+        },
+        "value": 0.4,
+        "addGoal": "form.dessert_baking"
+      }
+    ]
+  },
+  {
+    "id": "card_lu_wei",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "滷味"
+    },
+    "description": {
+      "zh-TW": "各種豆乾、海帶、蔬菜泡進五香醬滷，入味鹹香，夜市邊走邊吃"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "seasoning.soy_sauce": 0.6,
+      "form.stew_braise": 0.5,
+      "taste.salty": 0.4,
+      "taste.aromatic": 0.3
+    },
+    "excludedAllergenIds": [
+      "soy"
+    ]
+  },
+  {
+    "id": "card_oyster_vermicelli",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "蚵仔麵線"
+    },
+    "description": {
+      "zh-TW": "大腸和鮮蚵煮進濃稠的麵線糊，柴魚香加蒜泥醋，滑順鹹鮮"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "form.soup": 0.5,
+      "form.noodles": 0.4,
+      "texture.smooth": 0.6,
+      "taste.umami": 0.5,
+      "protein.shellfish": 0.4
+    },
+    "excludedAllergenIds": [
+      "mollusc",
+      "wheat",
+      "gluten-grain"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian"
+    ]
+  },
+  {
+    "id": "card_stir_fry_vermicelli",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "炒米粉"
+    },
+    "description": {
+      "zh-TW": "米粉和高麗菜、香菇、豬肉絲一起炒，醬油香，吃起來乾爽"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.home": 0.8,
+      "form.stir_fry": 0.7,
+      "form.noodles": 0.5,
+      "seasoning.soy_sauce": 0.5,
+      "taste.aromatic": 0.4,
+      "ingredient.shiitake": 0.2
+    },
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_gua_bao",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "刈包"
+    },
+    "description": {
+      "zh-TW": "軟白的包子夾滷到軟爛的五花肉，加酸菜、花生粉和香菜"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "protein.pork": 0.5,
+      "form.stew_braise": 0.4,
+      "richness.rich": 0.5,
+      "taste.sweet": 0.3,
+      "ingredient.cilantro": 0.2
+    },
+    "excludedAllergenIds": [
+      "peanut",
+      "wheat",
+      "gluten-grain"
+    ],
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_radish_omelet",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "菜脯蛋"
+    },
+    "description": {
+      "zh-TW": "菜脯碎拌蛋液煎到金黃，鹹香帶脆口，配稀飯最對味"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.home": 0.9,
+      "protein.egg": 0.6,
+      "taste.salty": 0.5,
+      "texture.crispy": 0.2,
+      "form.rice": 0.3
+    },
+    "excludedAllergenIds": [
+      "egg"
+    ],
+    "excludedRestrictionIds": [
+      "vegan"
+    ]
+  },
+  {
+    "id": "card_scallion_pancake",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "蔥油餅"
+    },
+    "description": {
+      "zh-TW": "麵團擀成薄片，裹滿蔥花煎到外酥內軟，一層一層的"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "texture.crispy": 0.6,
+      "texture.chewy": 0.4,
+      "taste.aromatic": 0.5,
+      "richness.oily": 0.5,
+      "form.fried": 0.4
+    },
+    "excludedAllergenIds": [
+      "wheat",
+      "gluten-grain"
+    ]
+  },
+  {
+    "id": "card_zongzi",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "肉粽"
+    },
+    "description": {
+      "zh-TW": "糯米包著五花肉、香菇和蛋黃，竹葉蒸得香，綿密軟糯"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.home": 0.8,
+      "form.steamed": 0.5,
+      "form.rice": 0.5,
+      "texture.chewy": 0.5,
+      "protein.pork": 0.4,
+      "ingredient.shiitake": 0.2,
+      "seasoning.soy_sauce": 0.4
+    },
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_pineapple_cake",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "鳳梨酥"
+    },
+    "description": {
+      "zh-TW": "奶油酥皮包著微酸的鳳梨餡，一口酥香，帶點甜"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan": 0.7,
+      "form.dessert_baking": 0.8,
+      "taste.sweet": 0.6,
+      "taste.sour": 0.2,
+      "texture.crispy": 0.3
+    },
+    "excludedAllergenIds": [
+      "milk",
+      "egg",
+      "wheat",
+      "gluten-grain"
+    ]
+  },
+  {
+    "id": "card_pepper_bun",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "胡椒餅"
+    },
+    "description": {
+      "zh-TW": "酥脆的餅皮裹著胡椒豬肉餡，炭爐烤得香氣十足，咬下肉汁滿溢"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "form.grill": 0.5,
+      "taste.aromatic": 0.6,
+      "taste.spicy": 0.2,
+      "protein.pork": 0.4,
+      "texture.crispy": 0.4,
+      "taste.smoky": 0.3
+    },
+    "excludedAllergenIds": [
+      "wheat",
+      "gluten-grain"
+    ],
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "tot_tofu_pudding",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "豆花，你比較愛…"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "甜的，配糖水和珍珠"
+        },
+        "mapping": {
+          "taste.sweet": 0.7,
+          "texture.smooth": 0.4
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "鹹的，配肉燥和蔥花"
+        },
+        "mapping": {
+          "taste.salty": 0.6,
+          "taste.umami": 0.4
+        }
+      }
+    ]
+  },
+  {
+    "id": "tot_breakfast",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "早餐你比較想吃…"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "蛋餅，煎得香香的"
+        },
+        "mapping": {
+          "protein.egg": 0.5,
+          "form.fried": 0.4,
+          "texture.chewy": 0.3
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "飯糰，包得滿滿的"
+        },
+        "mapping": {
+          "form.rice": 0.7,
+          "texture.chewy": 0.4
+        }
+      }
+    ]
+  },
+  {
+    "id": "tot_dry_soup_noodles",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "吃麵你比較愛…"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "乾麵，拌著醬汁"
+        },
+        "mapping": {
+          "form.noodles": 0.6,
+          "richness.oily": 0.4,
+          "seasoning.soy_sauce": 0.3
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "湯麵，連湯喝掉"
+        },
+        "mapping": {
+          "form.noodles": 0.6,
+          "form.soup": 0.6
+        }
+      }
+    ]
   }
 ]

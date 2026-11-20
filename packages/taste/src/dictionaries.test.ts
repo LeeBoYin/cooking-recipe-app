@@ -2,7 +2,7 @@
 import { equipmentTypes, techniques } from '@zhusha/equipment';
 import { allergens, dietaryRestrictions, ingredients, regionProfiles } from '@zhusha/ingredients';
 import { describe, expect, it } from 'vitest';
-import { DIMENSION_GROUPS, QUIZ_ITEM_TYPES, baseDishes, dimensionWithAncestors, preferenceDimensions, quizItems } from './index.ts';
+import { DIMENSION_GROUPS, QUIZ_CONTEXT_FIELDS, QUIZ_ITEM_TYPES, baseDishes, dimensionWithAncestors, preferenceDimensions, quizItems } from './index.ts';
 
 const DICT_ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const DIMENSION_KEY = /^[a-z0-9_]+(\.[a-z0-9_]+)*$/;
@@ -61,15 +61,51 @@ describe('題庫', () => {
     }
   });
 
-  it('mapping 只指向存在的維度，值在 −1～1，而且至少有一項', () => {
+  it('mapping 只指向存在的維度，值在 −1～1；菜卡與快問快答至少有一項', () => {
     for (const q of quizItems) {
       const entries = Object.entries(q.mapping);
-      expect(entries.length, q.id).toBeGreaterThan(0);
+      if (q.type === 'dish_card' || q.type === 'quick_fire') expect(entries.length, q.id).toBeGreaterThan(0);
       for (const [key, value] of entries) {
         expect(dimensionKeys, `${q.id} → ${key}`).toContain(key);
         expect(Math.abs(value)).toBeLessThanOrEqual(1);
       }
     }
+  });
+
+  it('二選一有兩個選項、各有 mapping；光譜有五個點；情境題有欄位與選項', () => {
+    for (const q of quizItems) {
+      if (q.type === 'this_or_that') {
+        expect(q.options?.length, q.id).toBe(2);
+        for (const o of q.options ?? []) {
+          expect(o.label['zh-TW'].trim(), q.id).not.toBe('');
+          const entries = Object.entries(o.mapping ?? {});
+          expect(entries.length, q.id).toBeGreaterThan(0);
+          for (const [key, value] of entries) {
+            expect(dimensionKeys, `${q.id} → ${key}`).toContain(key);
+            expect(Math.abs(value)).toBeLessThanOrEqual(1);
+          }
+        }
+      } else if (q.type === 'spectrum') {
+        expect(dimensionKeys, q.id).toContain(q.spectrum?.dimension);
+        expect(q.spectrum?.labels.length, q.id).toBe(5);
+      } else if (q.type === 'context') {
+        expect(QUIZ_CONTEXT_FIELDS, q.id).toContain(q.contextField);
+        expect(q.options?.length, q.id).toBeGreaterThanOrEqual(2);
+        for (const o of q.options ?? []) {
+          expect(o.value, q.id).toBeDefined();
+          if (o.addGoal) expect(dimensionKeys, q.id).toContain(o.addGoal);
+        }
+      } else {
+        expect(q.options, q.id).toBeUndefined();
+        expect(q.spectrum, q.id).toBeUndefined();
+      }
+    }
+  });
+
+  it('題庫共 73 題（20 題台灣限定），各題型數量符合規格', () => {
+    const count = (type: string) => quizItems.filter((q) => q.type === type).length;
+    expect([count('dish_card'), count('quick_fire'), count('this_or_that'), count('spectrum'), count('context')]).toEqual([37, 14, 11, 8, 3]);
+    expect(quizItems.filter((q) => q.regions.length === 1 && q.regions[0] === 'TW')).toHaveLength(20);
   });
 
   it('地區、後續題目、排除的過敏原與飲食限制都存在', () => {
