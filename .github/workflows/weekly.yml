@@ -59,6 +59,7 @@ jobs:
           if ! body=$(curl -sS --fail-with-body -X POST \
               -H "Authorization: Bearer $token" \
               "https://${{ matrix.project_id }}.supabase.co/functions/v1/maintenance"); then
+            echo "函式回應：$body"
             scripts/ci-log-error.sh cron orphan_sweep_failed orphan_sweep critical || true
             echo "::error::孤兒照片檔掃描失敗"
             exit 1
