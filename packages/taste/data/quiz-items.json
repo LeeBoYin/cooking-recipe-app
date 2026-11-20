@@ -1747,5 +1747,354 @@
         "addGoal": "form.dessert_baking"
       }
     ]
+  },
+  {
+    "id": "card_lu_wei",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "滷味"
+    },
+    "description": {
+      "zh-TW": "各種豆乾、海帶、蔬菜泡進五香醬滷，入味鹹香，夜市邊走邊吃"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "seasoning.soy_sauce": 0.6,
+      "form.stew_braise": 0.5,
+      "taste.salty": 0.4,
+      "taste.aromatic": 0.3
+    },
+    "excludedAllergenIds": [
+      "soy"
+    ]
+  },
+  {
+    "id": "card_oyster_vermicelli",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "蚵仔麵線"
+    },
+    "description": {
+      "zh-TW": "大腸和鮮蚵煮進濃稠的麵線糊，柴魚香加蒜泥醋，滑順鹹鮮"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "form.soup": 0.5,
+      "form.noodles": 0.4,
+      "texture.smooth": 0.6,
+      "taste.umami": 0.5,
+      "protein.shellfish": 0.4
+    },
+    "excludedAllergenIds": [
+      "mollusc",
+      "wheat",
+      "gluten-grain"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian"
+    ]
+  },
+  {
+    "id": "card_stir_fry_vermicelli",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "炒米粉"
+    },
+    "description": {
+      "zh-TW": "米粉和高麗菜、香菇、豬肉絲一起炒，醬油香，吃起來乾爽"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.home": 0.8,
+      "form.stir_fry": 0.7,
+      "form.noodles": 0.5,
+      "seasoning.soy_sauce": 0.5,
+      "taste.aromatic": 0.4,
+      "ingredient.shiitake": 0.2
+    },
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_gua_bao",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "刈包"
+    },
+    "description": {
+      "zh-TW": "軟白的包子夾滷到軟爛的五花肉，加酸菜、花生粉和香菜"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "protein.pork": 0.5,
+      "form.stew_braise": 0.4,
+      "richness.rich": 0.5,
+      "taste.sweet": 0.3,
+      "ingredient.cilantro": 0.2
+    },
+    "excludedAllergenIds": [
+      "peanut",
+      "wheat",
+      "gluten-grain"
+    ],
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_radish_omelet",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "菜脯蛋"
+    },
+    "description": {
+      "zh-TW": "菜脯碎拌蛋液煎到金黃，鹹香帶脆口，配稀飯最對味"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.home": 0.9,
+      "protein.egg": 0.6,
+      "taste.salty": 0.5,
+      "texture.crispy": 0.2,
+      "form.rice": 0.3
+    },
+    "excludedAllergenIds": [
+      "egg"
+    ],
+    "excludedRestrictionIds": [
+      "vegan"
+    ]
+  },
+  {
+    "id": "card_scallion_pancake",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "蔥油餅"
+    },
+    "description": {
+      "zh-TW": "麵團擀成薄片，裹滿蔥花煎到外酥內軟，一層一層的"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "texture.crispy": 0.6,
+      "texture.chewy": 0.4,
+      "taste.aromatic": 0.5,
+      "richness.oily": 0.5,
+      "form.fried": 0.4
+    },
+    "excludedAllergenIds": [
+      "wheat",
+      "gluten-grain"
+    ]
+  },
+  {
+    "id": "card_zongzi",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "肉粽"
+    },
+    "description": {
+      "zh-TW": "糯米包著五花肉、香菇和蛋黃，竹葉蒸得香，綿密軟糯"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.home": 0.8,
+      "form.steamed": 0.5,
+      "form.rice": 0.5,
+      "texture.chewy": 0.5,
+      "protein.pork": 0.4,
+      "ingredient.shiitake": 0.2,
+      "seasoning.soy_sauce": 0.4
+    },
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_pineapple_cake",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "鳳梨酥"
+    },
+    "description": {
+      "zh-TW": "奶油酥皮包著微酸的鳳梨餡，一口酥香，帶點甜"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan": 0.7,
+      "form.dessert_baking": 0.8,
+      "taste.sweet": 0.6,
+      "taste.sour": 0.2,
+      "texture.crispy": 0.3
+    },
+    "excludedAllergenIds": [
+      "milk",
+      "egg",
+      "wheat",
+      "gluten-grain"
+    ]
+  },
+  {
+    "id": "card_pepper_bun",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "胡椒餅"
+    },
+    "description": {
+      "zh-TW": "酥脆的餅皮裹著胡椒豬肉餡，炭爐烤得香氣十足，咬下肉汁滿溢"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {
+      "cuisine.taiwan.street_food": 0.9,
+      "form.grill": 0.5,
+      "taste.aromatic": 0.6,
+      "taste.spicy": 0.2,
+      "protein.pork": 0.4,
+      "texture.crispy": 0.4,
+      "taste.smoky": 0.3
+    },
+    "excludedAllergenIds": [
+      "wheat",
+      "gluten-grain"
+    ],
+    "excludedRestrictionIds": [
+      "no-pork",
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "tot_tofu_pudding",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "豆花，你比較愛…"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "甜的，配糖水和珍珠"
+        },
+        "mapping": {
+          "taste.sweet": 0.7,
+          "texture.smooth": 0.4
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "鹹的，配肉燥和蔥花"
+        },
+        "mapping": {
+          "taste.salty": 0.6,
+          "taste.umami": 0.4
+        }
+      }
+    ]
+  },
+  {
+    "id": "tot_breakfast",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "早餐你比較想吃…"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "蛋餅，煎得香香的"
+        },
+        "mapping": {
+          "protein.egg": 0.5,
+          "form.fried": 0.4,
+          "texture.chewy": 0.3
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "飯糰，包得滿滿的"
+        },
+        "mapping": {
+          "form.rice": 0.7,
+          "texture.chewy": 0.4
+        }
+      }
+    ]
+  },
+  {
+    "id": "tot_dry_soup_noodles",
+    "type": "this_or_that",
+    "title": {
+      "zh-TW": "吃麵你比較愛…"
+    },
+    "regions": [
+      "TW"
+    ],
+    "mapping": {},
+    "options": [
+      {
+        "label": {
+          "zh-TW": "乾麵，拌著醬汁"
+        },
+        "mapping": {
+          "form.noodles": 0.6,
+          "richness.oily": 0.4,
+          "seasoning.soy_sauce": 0.3
+        }
+      },
+      {
+        "label": {
+          "zh-TW": "湯麵，連湯喝掉"
+        },
+        "mapping": {
+          "form.noodles": 0.6,
+          "form.soup": 0.6
+        }
+      }
+    ]
   }
 ]

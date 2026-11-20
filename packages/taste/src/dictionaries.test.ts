@@ -102,9 +102,10 @@ describe('題庫', () => {
     }
   });
 
-  it('題庫共 61 題，各題型數量符合規格', () => {
+  it('題庫共 73 題（20 題台灣限定），各題型數量符合規格', () => {
     const count = (type: string) => quizItems.filter((q) => q.type === type).length;
-    expect([count('dish_card'), count('quick_fire'), count('this_or_that'), count('spectrum'), count('context')]).toEqual([28, 14, 8, 8, 3]);
+    expect([count('dish_card'), count('quick_fire'), count('this_or_that'), count('spectrum'), count('context')]).toEqual([37, 14, 11, 8, 3]);
+    expect(quizItems.filter((q) => q.regions.length === 1 && q.regions[0] === 'TW')).toHaveLength(20);
   });
 
   it('地區、後續題目、排除的過敏原與飲食限制都存在', () => {
