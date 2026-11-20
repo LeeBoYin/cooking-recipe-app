@@ -89,7 +89,7 @@
 | `recipes` | `id` | `user_id`（連動）；`kitchen_id`（空值）；`parent_recipe_id`（空值） | M0 |
 | `recipe_private` | `recipe_id` | `recipes`（連動） | M0（口述 M1b） |
 | `recipe_revisions` | `id` | `recipe_id`（連動） | M1b |
-| `photos` | `id` | `user_id`（連動，廚具照片為空）；`kitchen_id`（連動，廚具照片）；`created_by`（佔位） | M0（廚具照片先做；食譜、步驟、頭像、近況的寫入規則等食譜表與好友關係建好再補） |
+| `photos` | `id` | `user_id`（連動，廚具照片為空）；`kitchen_id`（連動，廚具照片）；`created_by`（佔位） | M0（廚具、食譜、步驟照片；頭像、近況的寫入規則等好友關係建好再補） |
 | `bookmarks` | `id` | `user_id`（連動）；`recipe_id`（空值，顯示「已收起來」）；`cooked_recipe_id`（空值） | M1a（朋友的食譜 M2） |
 | `chef_conversations` | `id` | `user_id`（連動）；`kitchen_id`（空值） | M1a |
 | `preference_profiles` | `user_id` | `auth.users`（連動） | M0 |
@@ -115,7 +115,7 @@
 
 | 資料表 | 階段 | 說明 |
 |-------|------|------|
-| `app_config` | M0 | 單列設定 |
+| `app_config` | M0 | 單列設定：文字長度上限、照片張數上限、軟刪除保留天數 |
 | `error_logs` | M0 | ADR-21 |
 | `ingredient_mappings` | M0 | 全站共用的食材對應快取（只來自 AI 與你的審查） |
 | `background_jobs` | M1a | 背景任務佇列 |
@@ -152,9 +152,9 @@
 | `household_profiles` | 成員 | 管理者 | 管理者 | 管理者 |
 | `pantry_items` | 成員 | 函式（`add_pantry_items`） | 成員只能改放哪裡、想先用掉、期限、備註（只改「有」的）；其他欄位與狀態經函式 | 函式（移除與復原改狀態；超過 30 天的由每日維護刪除） |
 | `kitchen_equipment` | 成員 | 成員 | 成員（不能改所屬廚房；選配手法只能是字典列出的，由觸發器檢查） | 成員 |
-| `recipes` | `can_view_recipe`：作者；家人（household、friends）；好友（friends）；分享給他且沒收回的人。草稿只有作者 | 作者 | 作者（經 `save_recipe`） | 作者（軟刪除） |
+| `recipes` | `can_view_recipe`：作者；家人（household、friends）；好友（friends）；分享給他且沒收回的人。草稿只有作者 | 作者（經 `save_recipe`） | 作者（經 `save_recipe`） | 作者（經 `delete_recipe` 軟刪除） |
 | `recipe_revisions` | 作者 | 函式 | — | 連動 |
-| `photos` | 依擁有者：食譜照片跟著食譜；廚具照片給廚房成員；頭像給本人、家人、好友。私有 bucket `photos` 的 Storage 規則依路徑前綴判斷（`users/{userId}/` 本人、`kitchens/{kitchenId}/` 廚房成員），路徑格式不對一律拒絕 | 本人；廚具照片給廚房成員。三個檔案都已在 Storage 才能建立資料列；路徑必須是由 ID 與擁有者決定的固定格式；一件廚具一張 | 只能改排序與封面 | 同新增；廚具刪除時資料列由觸發器一起刪，檔案由 `maintenance` 掃孤兒檔 |
+| `photos` | 依擁有者：食譜照片跟著食譜；廚具照片給廚房成員；頭像給本人、家人、好友。私有 bucket `photos` 的 Storage 規則依路徑前綴判斷（`users/{userId}/` 本人、`kitchens/{kitchenId}/` 廚房成員），路徑格式不對一律拒絕；`users/{userId}/` 底下的食譜與步驟照片，另外開放給讀得到那篇食譜的人（由路徑裡的照片 ID 找到資料列，再用 `can_view_recipe` 判斷） | 本人；廚具照片給廚房成員。食譜與步驟照片只能掛在自己沒刪除的食譜上；三個檔案都已在 Storage 才能建立資料列；路徑必須是由 ID 與擁有者決定的固定格式；一件廚具一張；每篇食譜一張封面；張數上限由觸發器檢查 | 只能改排序與封面 | 同新增；廚具刪除時資料列由觸發器一起刪，檔案由 `maintenance` 掃孤兒檔 |
 | `bookmarks` | 本人 | 本人（朋友的食譜要讀得到才能收藏） | 本人 | 本人 |
 | `share_links` | 作者（公開頁由 `share` 函式以服務權限讀） | 作者 | 作者（撤銷） | 連動 |
 | `reactions`、`comments` | 讀得到那篇食譜的人 | 讀得到那篇食譜的人 | 本人 | 本人；食譜作者可刪自己食譜下的留言 |
@@ -171,8 +171,9 @@
 
 | 函式 | 誰能呼叫 | 做什麼 |
 |------|---------|-------|
-| `save_recipe` | 作者 | 新增或更新食譜（含草稿）；比對讀取時的 `updated_at`，不一致就拒絕；用字典表算出 `ingredient_ids`、`equipment_type_ids`、`techniques`、`difficulty.overall`、`cooked_dates`；做法改變時寫一版 `recipe_revisions`；檢查長度與照片上限 |
-| `publish_recipe` | 作者 | 檢查有標題或照片、填 `published_at`、對好友與家人送「有新動態」訊號（Realtime Broadcast） |
+| `save_recipe` | 作者 | 新增或更新食譜（含草稿），只送有改的欄位；ID 還不存在時新增一篇草稿；比對讀取時的 `updated_at`，不一致就拒絕；用字典表算出 `ingredient_ids`、`equipment_type_ids`、`techniques`、`difficulty.overall`、`cooked_on`（料理時間改變時才重算，用食譜所在廚房的時區；沒指定廚房時用目前的廚房）、`cooked_dates`；做法改變時 `version` 加一（M1b 起同時寫一版 `recipe_revisions`）；依 `app_config.text_limits` 檢查長度；刪掉已經不在步驟裡的步驟照片資料列（檔案由孤兒檔清理處理）；可以一起存 `recipe_private`，兩張表同一個交易 |
+| `publish_recipe` | 作者 | 檢查有標題或照片、改成已發佈、第一次發佈時填 `published_at`；M2 起對好友與家人送「有新動態」訊號（Realtime Broadcast，和 `feed_page` 一起做） |
+| `delete_recipe`、`restore_recipe` | 作者 | 軟刪除與復原；`app_config.soft_delete_retention_days` 內可以復原，到期後由每日維護真正刪除 |
 | `record_cook_again` | 作者 | 新增一筆「又做了一次」，更新 `cooked_dates` |
 | `add_pantry_items` | 廚房成員 | 一次加入多樣食材（最多 100 樣）：已經有的只更新加入日期（保留較早的期限），沒有的新增；放哪裡沒指定時用字典的預設，對應不到字典就放 `pantry`；同一個 ID 重送不會重複新增。食材對應到字典（使用者自己的對應優先、全站對應其次）在 M1a 的食材正規化一起做 |
 | `remove_pantry_item`、`restore_pantry_item` | 廚房成員 | 移除與復原；復原時同一種食材已經又被加回來，就併進現有那一筆（保留較早的加入日期與期限），被復原的那一筆維持移除 |
@@ -214,6 +215,7 @@ Supabase Auth 另設「建立使用者前」的 hook：Google 登入時檢查 em
 | 觸發時機 | 做什麼 |
 |---------|-------|
 | 每張表新增、修改 | 設定 `created_at`、`updated_at` |
+| `photos` 新增 | 檢查擁有者存在；食譜照片（含步驟照）先鎖住那篇食譜，再依 `app_config.photo_limits` 檢查張數（每篇 10 張含步驟照、每次又做了一次 3 張，兩種各自計算），同時送出也不會超過 |
 | `kitchen_members` 新增、修改、刪除 | 每人最多 5 個廚房、每廚房最多 10 人、至少一位管理者；產生廚房相關通知 |
 | `reactions`、`comments`、`bookmarks`、`friend_shares`、`friendships` 新增 | 依收件人的通知開關產生通知；要推播的，排一筆 `push` 背景任務 |
 | `comments` 新增 | 回覆只能一層 |

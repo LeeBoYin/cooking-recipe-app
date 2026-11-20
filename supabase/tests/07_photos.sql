@@ -93,7 +93,7 @@ select throws_ok(format(
 select throws_ok(format(
   $$insert into public.photos (id, kitchen_id, owner_type, owner_id, storage_path, feed_path, thumb_path, width, height)
     values ('%1$s', '%2$s', 'recipe', '%3$s', 'kitchens/%2$s/%1$s.webp', 'kitchens/%2$s/%1$s_feed.webp', 'kitchens/%2$s/%1$s_thumb.webp', 1200, 1200)$$,
-  :'p3', :'k1', :'eq2'), '42501', null, '食譜照片現在還不能新增');
+  :'p3', :'k1', :'eq2'), '23503', null, '食譜照片要掛在自己的食譜上（食譜的照片另外在 08_recipes 測）');
 select tests.logout();
 
 -- 另一個廚房的廚具，不能掛照片

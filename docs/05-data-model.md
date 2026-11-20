@@ -413,8 +413,8 @@ interface Recipe extends UserEntity {
   highlights: Highlight[];    // 為什麼值得記住，可多選、可空
   rating?: 'loved' | 'ok' | 'flop';   // 😋 🙂 😅
   cookedAt?: Instant;         // 記錄的那次料理的時間點（預設取第一張照片的拍攝時間）；匯入的食譜沒有
-  cookedOn?: LocalDate;       // 衍生：依當時廚房時區算出的日期，建立後不變；時間軸、回顧用
-  kitchenId?: string;         // 在哪個廚房做的
+  cookedOn?: LocalDate;       // 衍生：依當時廚房時區算出的日期，只在 cookedAt 改變時重算；時間軸、回顧用
+  kitchenId?: string;         // 在哪個廚房做的；沒指定時用作者目前的廚房
   // 一起吃的人只有作者看得到，放在 RecipePrivate.diners；招待朋友用 highlights 的 'hosted_friends'
   cookNotes: CookNote[];      // 又做了一次（P1）；不計次數、不顯示做過幾次
   cookedDates: LocalDate[];   // 衍生：cookedOn 加上每一次「又做了一次」的日期；時間軸、季節回顧、一年前的今天都看它
@@ -450,7 +450,7 @@ interface Recipe extends UserEntity {
   };
   safetyWarnings?: string[];  // 後端檢查未通過的項目（過敏原、舒肥組合不在表內等），App 中醒目顯示
   parentRecipeId?: string;    // 改編自哪一份（自己的或朋友的）；「記錄我做的版本」時填入
-  version: number;            // 做法每次修改加一；舊版存在 RecipeRevision
+  version: number;            // 做法每次修改加一；舊版存在 RecipeRevision（M1b）
   visibility: Visibility;     // 預設 'friends'；從網址匯入、外部 AI 建立的預設 'private'；草稿一律只有自己；household 進入家庭食譜本
   // 季節不存：查詢時由 cookedOn 與廚房地區計算
 }
@@ -793,7 +793,7 @@ interface AppConfig {                 // 後端設定，在管理後台的「系
   registrationMode: 'invite_only' | 'waitlist' | 'open';
   maxUsers: number;                   // 已註冊＋還沒過期的待接受邀請（expiresAt 在現在之後）合計上限，預設 30
   softDeleteRetentionDays: number;    // 刪除的食譜與廚房保留多久可以復原，預設 30
-  photoLimits: { perRecipe: number; perCookNote: number };   // 每篇食譜最多 10 張（含步驟照）、每次又做了一次最多 3 張
+  photoLimits: { perRecipe: number; perCookNote: number };   // 每篇食譜最多 10 張（含步驟照、不含又做了一次的照片）、每次又做了一次最多 3 張
   textLimits: {                       // 使用者內容的長度上限，資料庫與 API 都檢查
     title: number;                    // 80
     story: number;                    // 心得 2,000
@@ -1110,6 +1110,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 - 難易度的五個面向在 1–5；`overall` 在 1–10。
 - `DietaryProfile` 的 `userId`、`householdProfileId` 恰好一個有值；`Photo` 依 `ownerType` 檢查對應的欄位有值。
 - 已發佈的食譜要有標題或至少一張照片：在發佈的 API 檢查（照片在另一張表，資料庫約束做不到）。
+- 照片張數依 `AppConfig.photoLimits` 檢查（每篇食譜含步驟照 10 張、每次又做了一次 3 張，兩種各自計算）：照片直接寫進照片表、不經儲存食譜的 API，所以由照片表的觸發器檢查，先鎖住那篇食譜，同時送出也不會超過。每篇食譜只有一張封面。
 - 草稿一律只有作者看得到：RLS 判斷 `status = 'draft'` 時只放行作者，不看 `visibility`。
 
 **內嵌 JSON 的格式**
@@ -1145,6 +1146,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 食材 | 移除只是改狀態（可復原）；真的刪掉才用軟刪除 |
 | 廚房 | 最後一位成員離開時軟刪除，保留期限同上，到期後刪除食材、廚具、家人檔案 |
 | 帳號 | 依 [04 安全與隱私](04-architecture.md#安全與隱私)：比照離開廚房；個人資料刪除；別人資料裡的參照改成空值，顯示為「前成員」 |
+| 步驟 | 儲存食譜時，已經不在步驟清單裡的步驟照片資料列一起刪掉，檔案照下一列處理 |
 | 照片檔 | 照片資料列刪除時，排程清掉 Storage 裡的檔案；每週再掃一次沒有對應資料列的孤兒檔案（上傳成功但資料列建立失敗時會產生） |
 
 **字典 ID 永遠不刪、不改名**
@@ -1203,7 +1205,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | `Recipe.ingredientIds` | 依序取第一個有值的來源：① 食材清單中對應到字典的項目 ② AI 補的標籤 | 儲存食譜、發佈後整理完成時 |
 | `Bookmark.ideaIngredientIds` | 大廚點子的主要食材（只有 chef_idea） | 收藏時；之後不變 |
 | `Recipe.difficulty.overall` | 五個面向的平均換算成 1–10 | 面向改變時 |
-| `Recipe.cookedOn` | `cookedAt` 依**當時**廚房的時區換算 | 只在建立時計算一次，之後廚房改時區也不變 |
+| `Recipe.cookedOn` | `cookedAt` 依**當時**廚房的時區換算 | 只在 `cookedAt` 設定或改變時計算，之後廚房改時區也不變 |
 | `Recipe.cookedDates` | `cookedOn` 與 `cookNotes[].cookedOn` | 新增或刪除「又做了一次」時 |
 | `ShareLink.snapshot` | 分享當下的食譜 | 刻意不重算（快照），使用者可以手動「更新分享內容」 |
 | `Bookmark.ownerId`（M2） | 食譜的作者 | 刻意保留以加快查詢；作者不會變動 |
