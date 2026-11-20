@@ -48,7 +48,6 @@
 | `ANTHROPIC_API_KEY` | Supabase 的秘密設定（正式、測試各一把） | 只有 `ai`、`mcp` 函式讀得到；Claude Console 另設每月上限 |
 | `VAPID_PRIVATE_KEY` | Supabase 的秘密設定 | 推播簽章；公開金鑰放前端的環境變數 |
 | Google 登入的用戶端 ID 與密鑰 | Supabase Auth 設定 | 只做 Google 與密碼登入 |
-| `FIRST_ADMIN_EMAIL` | Supabase 的秘密設定 | 第一位系統管理員 |
 | `SUPABASE_ACCESS_TOKEN`、專案 ID | GitHub 的秘密設定 | GitHub Actions 部署 migration 與 Edge Functions |
 | 資料庫連線字串（唯讀備份帳號） | GitHub 的秘密設定 | 每週備份用 |
 | 備份加密的**公開**金鑰 | GitHub 的秘密設定 | 用非對稱加密：GitHub 只有公開金鑰、只能加密；解密的私密金鑰由你離線保管 |
@@ -227,7 +226,9 @@ Supabase Auth 另設「建立使用者前」的 hook：Google 登入時檢查 em
 | 一般邀請、或你自己（M0） | 一個自己的廚房（預設名稱與手機的時區、地區，新手引導 ⑥-2 再確認），加上管理者身分；依邀請設定和邀請者成為好友 |
 | 廚房邀請 | 新手引導 ⑥ 確認後加入邀請者的廚房（成員身分），不另外建自己的廚房；選了「建立自己的廚房」才建；預設和邀請者成為好友 |
 
-全部在同一個資料庫函式 `setup_new_user` 裡完成，由 `accept-invite` 呼叫；M0 的第一個帳號由部署時的初始化腳本建立。上表的資料表還沒建的，建表時一併加進這個函式。
+全部在同一個資料庫函式 `setup_new_user` 裡完成，由 `accept-invite` 呼叫。
+
+**M0 的第一個帳號**（正式、測試專案各做一次）：Supabase 後台關閉「Allow new users to sign up」，在 Authentication → Users 建立帳號（勾選自動確認），再到 SQL Editor 執行 `select private.init_first_admin('email');`：跑 `setup_new_user` 並設為系統管理員。這個函式只有資料庫擁有者能執行，不經 API 公開。上表的資料表還沒建的，建表時一併加進這個函式。
 
 ## 九、排程
 
