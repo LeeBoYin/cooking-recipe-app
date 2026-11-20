@@ -592,12 +592,12 @@ interface PreferenceProfile extends UserEntity {   // 只有本人能讀
     timePreference?: 'quick' | 'normal' | 'relaxed';   // 願意花的時間：越快越好／普通／花時間也沒關係（不用分鐘）
     cooksFor?: ('self' | 'partner' | 'family' | 'guests')[];
     adventure: number;                // 0–1，挑戰意願，「新挑戰」的冒險程度，預設 0.2（只存這裡）
-    goals: string[];                  // 想學的方向
+    goals: string[];                  // 想學的方向：存維度 key（例 'cuisine.southeast_asia.thai'），顯示時從字典取名稱
     festiveDishes: boolean;           // 想在節日做應景菜
   };
   answeredItemIds: string[];          // 已回答的題目，避免重複問
   lastExploredAt?: Instant;
-  cardTitle?: string;                 // 口味名片的名稱，例「香辣台式派」（由程式產生）
+  cardTitle?: string;                 // 口味名片名稱的組合代碼，例 'taste.spicy|cuisine.taiwan'、'explorer'（由程式產生，顯示時從語系檔組出「香辣台式派」）
 }
 
 interface PreferenceDimension {       // 字典，隨版本發佈
@@ -614,7 +614,18 @@ interface QuizItem {                  // 題庫，隨版本發佈
   title: LocalizedText;
   description?: LocalizedText;        // 描述菜卡的感官描述，30 字以內（每個語系各自寫，不是直譯）
   regions: RegionCode[];              // 哪些地區的使用者會看到
-  mapping: Record<string, number>;    // 回答時各維度的加減
+  mapping: Record<string, number>;    // 回答時各維度的加減（描述菜卡、快問快答）
+  options?: {                         // 二選一（兩個）、情境題（多個）的選項
+    label: LocalizedText;
+    mapping?: Record<string, number>; // 二選一：選這邊時各維度的加減
+    value?: string | number;          // 情境題：寫進 contextField 的值
+    addGoal?: string;                 // 情境題：選了就把這個維度 key 加進「想學」
+  }[];
+  spectrum?: {                        // 口味光譜
+    dimension: string;                // 一個維度 key
+    labels: LocalizedText[];          // 五個點的文字，由「最不要」到「最愛」
+  };
+  contextField?: 'time_preference' | 'cooks_for' | 'adventure';   // 情境題寫進哪個欄位；cooks_for 可複選
   excludedAllergenIds?: string[];     // 有這些過敏原的人不會看到（例：蝦蟹過敏 → 'crustacean'）
   excludedRestrictionIds?: string[];  // 有這些飲食限制的人不會看到（例：不吃牛 → 'no-beef'）
   followUps?: string[];
