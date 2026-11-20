@@ -1,0 +1,254 @@
+[
+  {
+    "id": "crustacean",
+    "name": {
+      "zh-TW": "甲殼類（蝦蟹）"
+    },
+    "aliases": {
+      "zh-TW": [
+        "甲殼類",
+        "蝦蟹"
+      ]
+    },
+    "regions": [
+      "TW",
+      "US"
+    ]
+  },
+  {
+    "id": "shrimp",
+    "name": {
+      "zh-TW": "蝦"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蝦子",
+        "蝦仁"
+      ]
+    },
+    "parentId": "crustacean",
+    "displayLevelByRegion": {
+      "TW": "parent",
+      "US": "parent"
+    }
+  },
+  {
+    "id": "crab",
+    "name": {
+      "zh-TW": "蟹"
+    },
+    "aliases": {
+      "zh-TW": [
+        "螃蟹"
+      ]
+    },
+    "parentId": "crustacean",
+    "displayLevelByRegion": {
+      "TW": "parent",
+      "US": "parent"
+    }
+  },
+  {
+    "id": "mollusc",
+    "name": {
+      "zh-TW": "軟體動物（貝類、頭足類）"
+    },
+    "aliases": {
+      "zh-TW": [
+        "貝類",
+        "軟體動物"
+      ]
+    }
+  },
+  {
+    "id": "fish",
+    "name": {
+      "zh-TW": "魚類"
+    },
+    "aliases": {
+      "zh-TW": [
+        "魚"
+      ]
+    },
+    "regions": [
+      "TW",
+      "US"
+    ]
+  },
+  {
+    "id": "milk",
+    "name": {
+      "zh-TW": "牛奶、羊奶"
+    },
+    "aliases": {
+      "zh-TW": [
+        "乳製品",
+        "奶"
+      ]
+    },
+    "regions": [
+      "TW",
+      "US"
+    ]
+  },
+  {
+    "id": "egg",
+    "name": {
+      "zh-TW": "蛋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "雞蛋"
+      ]
+    },
+    "regions": [
+      "TW",
+      "US"
+    ]
+  },
+  {
+    "id": "peanut",
+    "name": {
+      "zh-TW": "花生"
+    },
+    "aliases": {
+      "zh-TW": [
+        "土豆"
+      ]
+    },
+    "regions": [
+      "TW",
+      "US"
+    ]
+  },
+  {
+    "id": "tree-nut",
+    "name": {
+      "zh-TW": "堅果"
+    },
+    "aliases": {
+      "zh-TW": [
+        "堅果類"
+      ]
+    },
+    "regions": [
+      "TW",
+      "US"
+    ]
+  },
+  {
+    "id": "walnut",
+    "name": {
+      "zh-TW": "核桃"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "parentId": "tree-nut",
+    "displayLevelByRegion": {
+      "TW": "parent",
+      "US": "parent"
+    }
+  },
+  {
+    "id": "almond",
+    "name": {
+      "zh-TW": "杏仁"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "parentId": "tree-nut",
+    "displayLevelByRegion": {
+      "TW": "parent",
+      "US": "parent"
+    }
+  },
+  {
+    "id": "sesame",
+    "name": {
+      "zh-TW": "芝麻"
+    },
+    "aliases": {
+      "zh-TW": [
+        "胡麻"
+      ]
+    },
+    "regions": [
+      "TW",
+      "US"
+    ]
+  },
+  {
+    "id": "gluten-grain",
+    "name": {
+      "zh-TW": "含麩質的穀物"
+    },
+    "aliases": {
+      "zh-TW": [
+        "麩質"
+      ]
+    },
+    "regions": [
+      "TW"
+    ]
+  },
+  {
+    "id": "wheat",
+    "name": {
+      "zh-TW": "小麥"
+    },
+    "aliases": {
+      "zh-TW": [
+        "麵粉"
+      ]
+    },
+    "parentId": "gluten-grain",
+    "regions": [
+      "US"
+    ],
+    "displayLevelByRegion": {
+      "TW": "parent",
+      "US": "self"
+    }
+  },
+  {
+    "id": "soy",
+    "name": {
+      "zh-TW": "大豆"
+    },
+    "aliases": {
+      "zh-TW": [
+        "黃豆"
+      ]
+    },
+    "regions": [
+      "TW",
+      "US"
+    ]
+  },
+  {
+    "id": "mango",
+    "name": {
+      "zh-TW": "芒果"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "regions": [
+      "TW"
+    ]
+  },
+  {
+    "id": "sulfite",
+    "name": {
+      "zh-TW": "亞硫酸鹽"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "regions": [
+      "TW"
+    ]
+  }
+]

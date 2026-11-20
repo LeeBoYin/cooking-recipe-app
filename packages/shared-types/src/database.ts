@@ -23,7 +23,87 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "kitchen_members": {
+            "dict_allergens": {
+                  Row: {
+                    "aliases": NonNullable<Json>,"deprecated": boolean,"display_level_by_region": NonNullable<Json>,"id": string,"name": NonNullable<Json>,"parent_id": string | null,"regions": (string)[],"replaced_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aliases"?: NonNullable<Json>,"deprecated"?: boolean,"display_level_by_region"?: NonNullable<Json>,"id": string,"name": NonNullable<Json>,"parent_id"?: string | null,"regions"?: (string)[],"replaced_by"?: string | null
+                  }
+                  Update: {
+                    "aliases"?: NonNullable<Json>,"deprecated"?: boolean,"display_level_by_region"?: NonNullable<Json>,"id"?: string,"name"?: NonNullable<Json>,"parent_id"?: string | null,"regions"?: (string)[],"replaced_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dict_allergens_parent_id_fkey"
+      columns: ["parent_id"]
+isOneToOne: false
+      referencedRelation: "dict_allergens"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "dict_allergens_replaced_by_fkey"
+      columns: ["replaced_by"]
+isOneToOne: false
+      referencedRelation: "dict_allergens"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"dict_dietary_restrictions": {
+                  Row: {
+                    "deprecated": boolean,"excludes_ingredient_ids": (string)[],"excludes_traits": (string)[],"id": string,"name": NonNullable<Json>,"replaced_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "deprecated"?: boolean,"excludes_ingredient_ids"?: (string)[],"excludes_traits"?: (string)[],"id": string,"name": NonNullable<Json>,"replaced_by"?: string | null
+                  }
+                  Update: {
+                    "deprecated"?: boolean,"excludes_ingredient_ids"?: (string)[],"excludes_traits"?: (string)[],"id"?: string,"name"?: NonNullable<Json>,"replaced_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dict_dietary_restrictions_replaced_by_fkey"
+      columns: ["replaced_by"]
+isOneToOne: false
+      referencedRelation: "dict_dietary_restrictions"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"dict_ingredients": {
+                  Row: {
+                    "aliases": NonNullable<Json>,"allergen_ids": (string)[],"category": string,"default_storage": string,"density_g_per_ml": number | null,"deprecated": boolean,"family": string,"flavor_tags": (string)[],"id": string,"is_perishable": boolean,"name": NonNullable<Json>,"recent_days": number | null,"replaced_by": string | null,"season_months": NonNullable<Json>,"traits": (string)[]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aliases"?: NonNullable<Json>,"allergen_ids"?: (string)[],"category": string,"default_storage": string,"density_g_per_ml"?: number | null,"deprecated"?: boolean,"family": string,"flavor_tags"?: (string)[],"id": string,"is_perishable": boolean,"name": NonNullable<Json>,"recent_days"?: number | null,"replaced_by"?: string | null,"season_months"?: NonNullable<Json>,"traits"?: (string)[]
+                  }
+                  Update: {
+                    "aliases"?: NonNullable<Json>,"allergen_ids"?: (string)[],"category"?: string,"default_storage"?: string,"density_g_per_ml"?: number | null,"deprecated"?: boolean,"family"?: string,"flavor_tags"?: (string)[],"id"?: string,"is_perishable"?: boolean,"name"?: NonNullable<Json>,"recent_days"?: number | null,"replaced_by"?: string | null,"season_months"?: NonNullable<Json>,"traits"?: (string)[]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dict_ingredients_replaced_by_fkey"
+      columns: ["replaced_by"]
+isOneToOne: false
+      referencedRelation: "dict_ingredients"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"dict_version": {
+                  Row: {
+                    "id": boolean,"imported_at": string,"version": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id"?: boolean,"imported_at"?: string,"version": string
+                  }
+                  Update: {
+                    "id"?: boolean,"imported_at"?: string,"version"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"kitchen_members": {
                   Row: {
                     "default_diners_all": boolean,"expiry_alerts": boolean,"id": string,"joined_at": string,"kitchen_id": string,"left_at": string | null,"role": string,"share_dietary_info": boolean,"updated_at": string,"user_id": string
                   }

@@ -32,8 +32,15 @@ jobs:
       - uses: supabase/setup-cli@v1
         with:
           version: 3.2.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
       # 只啟動資料庫：套用 migration 與 seed
       - run: supabase db start
+      - name: 字典檔能匯入資料庫
+        run: |
+          node scripts/dictionaries-sql.ts > "$RUNNER_TEMP/dictionaries.sql"
+          supabase db query --file "$RUNNER_TEMP/dictionaries.sql"
       - name: 權限測試（pgTAP）
         run: supabase test db
       - name: 型別要和 migration 一致（改了資料表就要跑 pnpm gen:types）

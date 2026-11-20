@@ -1,16 +1,27 @@
 name: Deploy database
 
-# 資料庫 migration 的部署（04 ADR-11）：
-# - PR 改到 supabase/ 時：對測試專案試跑（dry run），只列出會套用哪些 migration，不改資料庫
-# - 合併到 main 後：先部署到測試專案，成功才部署到正式專案
+# 資料庫的部署（04 ADR-11、16 第三節〈字典〉）：
+# - PR 改到資料庫或字典時：對測試專案試跑（dry run），列出會套用哪些 migration、確認連得上，不改資料庫
+# - 合併到 main 後：先部署到測試專案，成功才部署到正式專案；每次都是先套用 migration，再整批匯入字典
 # 正式專案只透過這個流程部署，不從本機直接推。
+# 匯入字典用 psql 經連線池（IPv4）連線，只需要資料庫密碼，存取權杖不必開資料庫權限。
 
 on:
   pull_request:
-    paths: ["supabase/**", ".github/workflows/deploy-db.yml"]
+    paths:
+      - "supabase/**"
+      - "packages/ingredients/data/**"
+      - "packages/ingredients/src/**"
+      - "scripts/dictionaries-sql.ts"
+      - ".github/workflows/deploy-db.yml"
   push:
     branches: [main]
-    paths: ["supabase/**", ".github/workflows/deploy-db.yml"]
+    paths:
+      - "supabase/**"
+      - "packages/ingredients/data/**"
+      - "packages/ingredients/src/**"
+      - "scripts/dictionaries-sql.ts"
+      - ".github/workflows/deploy-db.yml"
   workflow_dispatch:
 
 concurrency:
@@ -28,37 +39,64 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
       - uses: supabase/setup-cli@v1
         with:
           version: 3.2.0
       - run: supabase link --project-ref "$STAGING_PROJECT_ID"
       - name: 列出會套用到測試專案的 migration
-        run: supabase db push --remote --dry-run --password "$DB_PASSWORD"
+        run: supabase db push --remote --dry-run --password "$PGPASSWORD"
         env:
-          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
+      - name: 產生字典匯入的 SQL
+        run: node scripts/dictionaries-sql.ts > "$RUNNER_TEMP/dictionaries.sql" && head -c 120 "$RUNNER_TEMP/dictionaries.sql"
+      - name: 確認匯入字典用的連線（只查詢，不寫入）
+        run: psql "$(cat supabase/.temp/pooler-url)" -v ON_ERROR_STOP=1 -c "select current_database()"
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
 
   staging:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
       - uses: supabase/setup-cli@v1
         with:
           version: 3.2.0
       - run: supabase link --project-ref "$STAGING_PROJECT_ID"
-      - run: supabase db push --remote --yes --password "$DB_PASSWORD"
+      - run: supabase db push --remote --yes --password "$PGPASSWORD"
         env:
-          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
+      - name: 匯入字典
+        run: |
+          node scripts/dictionaries-sql.ts > "$RUNNER_TEMP/dictionaries.sql"
+          psql "$(cat supabase/.temp/pooler-url)" -v ON_ERROR_STOP=1 -f "$RUNNER_TEMP/dictionaries.sql"
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
 
   production:
     needs: staging
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
       - uses: supabase/setup-cli@v1
         with:
           version: 3.2.0
       - run: supabase link --project-ref "$PRODUCTION_PROJECT_ID"
-      - run: supabase db push --remote --yes --password "$DB_PASSWORD"
+      - run: supabase db push --remote --yes --password "$PGPASSWORD"
         env:
-          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PRODUCTION }}
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PRODUCTION }}
+      - name: 匯入字典
+        run: |
+          node scripts/dictionaries-sql.ts > "$RUNNER_TEMP/dictionaries.sql"
+          psql "$(cat supabase/.temp/pooler-url)" -v ON_ERROR_STOP=1 -f "$RUNNER_TEMP/dictionaries.sql"
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PRODUCTION }}

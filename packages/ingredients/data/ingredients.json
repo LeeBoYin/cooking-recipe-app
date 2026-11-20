@@ -1,0 +1,749 @@
+[
+  {
+    "id": "soy-sauce",
+    "name": {
+      "zh-TW": "醬油"
+    },
+    "aliases": {
+      "zh-TW": [
+        "生抽",
+        "薄鹽醬油"
+      ]
+    },
+    "family": "soy-sauce-family",
+    "traits": [],
+    "category": "sauce",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "salty",
+      "umami"
+    ],
+    "allergenIds": [
+      "soy",
+      "wheat"
+    ]
+  },
+  {
+    "id": "rice-wine",
+    "name": {
+      "zh-TW": "米酒"
+    },
+    "aliases": {
+      "zh-TW": [
+        "料理米酒"
+      ]
+    },
+    "family": "cooking-wine-family",
+    "traits": [
+      "alcohol"
+    ],
+    "category": "sauce",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "aromatic"
+    ]
+  },
+  {
+    "id": "mirin",
+    "name": {
+      "zh-TW": "味醂"
+    },
+    "aliases": {
+      "zh-TW": [
+        "味霖"
+      ]
+    },
+    "family": "cooking-wine-family",
+    "traits": [
+      "alcohol"
+    ],
+    "category": "sauce",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "sweet"
+    ]
+  },
+  {
+    "id": "fish-sauce",
+    "name": {
+      "zh-TW": "魚露"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "family": "fish-sauce-family",
+    "traits": [
+      "animal",
+      "seafood"
+    ],
+    "category": "sauce",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "salty",
+      "umami"
+    ],
+    "allergenIds": [
+      "fish"
+    ]
+  },
+  {
+    "id": "sesame-oil",
+    "name": {
+      "zh-TW": "麻油"
+    },
+    "aliases": {
+      "zh-TW": [
+        "黑麻油",
+        "香油"
+      ]
+    },
+    "family": "sesame-oil-family",
+    "traits": [],
+    "category": "oil",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "aromatic"
+    ],
+    "allergenIds": [
+      "sesame"
+    ]
+  },
+  {
+    "id": "salt",
+    "name": {
+      "zh-TW": "鹽"
+    },
+    "aliases": {
+      "zh-TW": [
+        "食鹽",
+        "海鹽"
+      ]
+    },
+    "family": "salt-family",
+    "traits": [],
+    "category": "seasoning",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "salty"
+    ]
+  },
+  {
+    "id": "sugar",
+    "name": {
+      "zh-TW": "糖"
+    },
+    "aliases": {
+      "zh-TW": [
+        "砂糖",
+        "白糖"
+      ]
+    },
+    "family": "sugar-family",
+    "traits": [],
+    "category": "seasoning",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "sweet"
+    ]
+  },
+  {
+    "id": "rock-sugar",
+    "name": {
+      "zh-TW": "冰糖"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "family": "sugar-family",
+    "traits": [],
+    "category": "seasoning",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "sweet"
+    ]
+  },
+  {
+    "id": "black-pepper",
+    "name": {
+      "zh-TW": "黑胡椒"
+    },
+    "aliases": {
+      "zh-TW": [
+        "黑胡椒粒"
+      ]
+    },
+    "family": "pepper-family",
+    "traits": [],
+    "category": "spice",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "spicy",
+      "aromatic"
+    ]
+  },
+  {
+    "id": "honey",
+    "name": {
+      "zh-TW": "蜂蜜"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "family": "honey-family",
+    "traits": [
+      "animal",
+      "honey"
+    ],
+    "category": "seasoning",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "sweet"
+    ]
+  },
+  {
+    "id": "garlic",
+    "name": {
+      "zh-TW": "大蒜"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蒜頭",
+        "蒜"
+      ]
+    },
+    "family": "allium-family",
+    "traits": [
+      "allium"
+    ],
+    "category": "vegetable",
+    "defaultStorage": "pantry",
+    "isPerishable": true,
+    "recentDays": 14,
+    "flavorTags": [
+      "aromatic",
+      "spicy"
+    ]
+  },
+  {
+    "id": "scallion",
+    "name": {
+      "zh-TW": "青蔥"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蔥",
+        "蔥花"
+      ]
+    },
+    "family": "allium-family",
+    "traits": [
+      "allium"
+    ],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "flavorTags": [
+      "aromatic"
+    ]
+  },
+  {
+    "id": "onion",
+    "name": {
+      "zh-TW": "洋蔥"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "family": "allium-family",
+    "traits": [
+      "allium"
+    ],
+    "category": "vegetable",
+    "defaultStorage": "pantry",
+    "isPerishable": true,
+    "recentDays": 14,
+    "flavorTags": [
+      "sweet",
+      "aromatic"
+    ]
+  },
+  {
+    "id": "ginger",
+    "name": {
+      "zh-TW": "薑"
+    },
+    "aliases": {
+      "zh-TW": [
+        "老薑",
+        "嫩薑",
+        "生薑"
+      ]
+    },
+    "family": "ginger-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 14,
+    "flavorTags": [
+      "spicy",
+      "aromatic"
+    ]
+  },
+  {
+    "id": "chili-pepper",
+    "name": {
+      "zh-TW": "辣椒"
+    },
+    "aliases": {
+      "zh-TW": [
+        "紅辣椒",
+        "朝天椒"
+      ]
+    },
+    "family": "chili-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 7,
+    "flavorTags": [
+      "spicy"
+    ]
+  },
+  {
+    "id": "thai-basil",
+    "name": {
+      "zh-TW": "九層塔"
+    },
+    "aliases": {
+      "zh-TW": [
+        "羅勒"
+      ]
+    },
+    "family": "basil-family",
+    "traits": [],
+    "category": "herb",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 4,
+    "flavorTags": [
+      "aromatic"
+    ]
+  },
+  {
+    "id": "cabbage",
+    "name": {
+      "zh-TW": "高麗菜"
+    },
+    "aliases": {
+      "zh-TW": [
+        "甘藍",
+        "包心菜"
+      ]
+    },
+    "family": "cabbage-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 10,
+    "flavorTags": [
+      "sweet"
+    ],
+    "seasonMonths": {
+      "TW": [
+        11,
+        12,
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  {
+    "id": "tomato",
+    "name": {
+      "zh-TW": "番茄"
+    },
+    "aliases": {
+      "zh-TW": [
+        "牛番茄",
+        "大番茄"
+      ]
+    },
+    "family": "tomato-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 7,
+    "flavorTags": [
+      "sour",
+      "sweet",
+      "umami"
+    ],
+    "seasonMonths": {
+      "TW": [
+        12,
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "id": "eggplant",
+    "name": {
+      "zh-TW": "茄子"
+    },
+    "aliases": {
+      "zh-TW": []
+    },
+    "family": "eggplant-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "seasonMonths": {
+      "TW": [
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  },
+  {
+    "id": "shiitake",
+    "name": {
+      "zh-TW": "香菇"
+    },
+    "aliases": {
+      "zh-TW": [
+        "鮮香菇"
+      ]
+    },
+    "family": "mushroom-family",
+    "traits": [],
+    "category": "mushroom",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "flavorTags": [
+      "umami"
+    ]
+  },
+  {
+    "id": "tofu",
+    "name": {
+      "zh-TW": "豆腐"
+    },
+    "aliases": {
+      "zh-TW": [
+        "板豆腐",
+        "嫩豆腐"
+      ]
+    },
+    "family": "tofu-family",
+    "traits": [],
+    "category": "tofu-bean",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 4,
+    "allergenIds": [
+      "soy"
+    ]
+  },
+  {
+    "id": "egg",
+    "name": {
+      "zh-TW": "雞蛋"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蛋"
+      ]
+    },
+    "family": "egg-family",
+    "traits": [
+      "animal",
+      "egg"
+    ],
+    "category": "egg",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 14,
+    "allergenIds": [
+      "egg"
+    ]
+  },
+  {
+    "id": "milk",
+    "name": {
+      "zh-TW": "牛奶"
+    },
+    "aliases": {
+      "zh-TW": [
+        "鮮奶",
+        "鮮乳"
+      ]
+    },
+    "family": "milk-family",
+    "traits": [
+      "animal",
+      "dairy"
+    ],
+    "category": "dairy",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 7,
+    "allergenIds": [
+      "milk"
+    ]
+  },
+  {
+    "id": "pork-belly",
+    "name": {
+      "zh-TW": "五花肉"
+    },
+    "aliases": {
+      "zh-TW": [
+        "豬五花",
+        "三層肉"
+      ]
+    },
+    "family": "pork-family",
+    "traits": [
+      "animal",
+      "meat",
+      "pork"
+    ],
+    "category": "meat",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 3
+  },
+  {
+    "id": "ground-pork",
+    "name": {
+      "zh-TW": "豬絞肉"
+    },
+    "aliases": {
+      "zh-TW": [
+        "絞肉"
+      ]
+    },
+    "family": "pork-family",
+    "traits": [
+      "animal",
+      "meat",
+      "pork"
+    ],
+    "category": "meat",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 2
+  },
+  {
+    "id": "chicken-thigh",
+    "name": {
+      "zh-TW": "雞腿肉"
+    },
+    "aliases": {
+      "zh-TW": [
+        "去骨雞腿",
+        "雞腿"
+      ]
+    },
+    "family": "chicken-family",
+    "traits": [
+      "animal",
+      "meat",
+      "poultry"
+    ],
+    "category": "poultry",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 2
+  },
+  {
+    "id": "beef-slices",
+    "name": {
+      "zh-TW": "牛肉片"
+    },
+    "aliases": {
+      "zh-TW": [
+        "火鍋牛肉片"
+      ]
+    },
+    "family": "beef-family",
+    "traits": [
+      "animal",
+      "meat",
+      "beef"
+    ],
+    "category": "meat",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 2
+  },
+  {
+    "id": "shrimp",
+    "name": {
+      "zh-TW": "蝦仁"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蝦",
+        "白蝦"
+      ]
+    },
+    "family": "shrimp-family",
+    "traits": [
+      "animal",
+      "seafood",
+      "shellfish"
+    ],
+    "category": "seafood",
+    "defaultStorage": "freezer",
+    "isPerishable": true,
+    "recentDays": 2,
+    "flavorTags": [
+      "sweet",
+      "umami"
+    ],
+    "allergenIds": [
+      "shrimp"
+    ]
+  },
+  {
+    "id": "salmon",
+    "name": {
+      "zh-TW": "鮭魚"
+    },
+    "aliases": {
+      "zh-TW": [
+        "鮭魚排"
+      ]
+    },
+    "family": "salmon-family",
+    "traits": [
+      "animal",
+      "seafood"
+    ],
+    "category": "seafood",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 2,
+    "allergenIds": [
+      "fish"
+    ]
+  },
+  {
+    "id": "rice",
+    "name": {
+      "zh-TW": "白米"
+    },
+    "aliases": {
+      "zh-TW": [
+        "米"
+      ]
+    },
+    "family": "rice-family",
+    "traits": [],
+    "category": "grain",
+    "defaultStorage": "pantry",
+    "isPerishable": false
+  },
+  {
+    "id": "noodles",
+    "name": {
+      "zh-TW": "麵條"
+    },
+    "aliases": {
+      "zh-TW": [
+        "乾麵條",
+        "陽春麵"
+      ]
+    },
+    "family": "wheat-noodle-family",
+    "traits": [],
+    "category": "noodle",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "allergenIds": [
+      "wheat"
+    ]
+  },
+  {
+    "id": "flour",
+    "name": {
+      "zh-TW": "麵粉"
+    },
+    "aliases": {
+      "zh-TW": [
+        "中筋麵粉"
+      ]
+    },
+    "family": "wheat-flour-family",
+    "traits": [],
+    "category": "grain",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "allergenIds": [
+      "wheat"
+    ]
+  },
+  {
+    "id": "peanut",
+    "name": {
+      "zh-TW": "花生"
+    },
+    "aliases": {
+      "zh-TW": [
+        "花生米",
+        "土豆"
+      ]
+    },
+    "family": "peanut-family",
+    "traits": [],
+    "category": "nut-seed",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "allergenIds": [
+      "peanut"
+    ]
+  },
+  {
+    "id": "cooking-oil",
+    "name": {
+      "zh-TW": "食用油"
+    },
+    "aliases": {
+      "zh-TW": [
+        "沙拉油",
+        "植物油"
+      ]
+    },
+    "family": "cooking-oil-family",
+    "traits": [],
+    "category": "oil",
+    "defaultStorage": "pantry",
+    "isPerishable": false
+  }
+]
