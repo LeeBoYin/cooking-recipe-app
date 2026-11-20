@@ -1,42 +1,30 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import type { TasteCard } from '@zhusha/core';
-import { getDimension } from '@zhusha/taste';
 import { Chef } from '../../chef/Chef.tsx';
+import { cardTitleText, dimName } from './cardTitle.ts';
 import { challengeCuisine, parseCardTitle } from './logic.ts';
 
-const dimName = (key: string) => getDimension(key)?.name['zh-TW'] ?? key;
-
-function Row({ id, keys }: { id: string; keys: string[] }) {
-  if (keys.length === 0) return null;
+function Row({ id, keys, names }: { id: string; keys?: string[]; names?: string[] }) {
+  const labels = names ?? (keys ?? []).map(dimName);
+  if (labels.length === 0) return null;
   return (
     <div className="flex gap-2.5 border-t border-line-soft px-3 py-2 text-caption first:border-t-0">
       <dt className="w-[4.5em] shrink-0 text-ink-muted"><FormattedMessage id={id} /></dt>
       <dd className="m-0 flex flex-wrap gap-1">
-        {keys.map((k) => (
-          <span key={k} className="rounded-tag bg-line-soft px-2 text-small">{dimName(k)}</span>
+        {labels.map((label) => (
+          <span key={label} className="rounded-tag bg-line-soft px-2 text-small">{label}</span>
         ))}
       </dd>
     </div>
   );
 }
 
-// 口味名片：名稱、愛、口感、想學、不吃。「過敏」等飲食限制畫面完成後再接。
-export function CardView({ card, onDone, onMore, saveState }: { card: TasteCard; onDone: () => void; onMore: () => void; saveState: 'saving' | 'error' | 'saved' }) {
+// 口味名片：名稱、愛、口感、想學、不吃、過敏（過敏來自飲食限制，由呼叫的畫面傳入名稱）
+export function CardView({ card, allergens = [], onDone, onMore, saveState }: { card: TasteCard; allergens?: string[]; onDone: () => void; onMore: () => void; saveState: 'saving' | 'error' | 'saved' }) {
   const intl = useIntl();
   const name = parseCardTitle(card.titleCode);
   const cuisine = challengeCuisine(card);
-  const title =
-    name.kind === 'explorer'
-      ? intl.formatMessage({ id: 'taste.card.explorer' })
-      : name.kind === 'composed'
-        ? intl.formatMessage(
-            { id: 'taste.card.name' },
-            {
-              prefix: name.prefix ? intl.formatMessage({ id: `taste.card.prefix.${name.prefix}`, defaultMessage: dimName(name.prefix) }) : '',
-              suffix: name.suffix ? intl.formatMessage({ id: `taste.card.suffix.${name.suffix}`, defaultMessage: dimName(name.suffix) }) : '',
-            },
-          )
-        : null;
+  const title = cardTitleText(intl, card.titleCode);
   const goalKeys = card.goals.filter((g) => g !== cuisine);
   return (
     <div className="flex flex-col gap-3.5">
@@ -59,6 +47,7 @@ export function CardView({ card, onDone, onMore, saveState }: { card: TasteCard;
             <Row id="taste.card.textures" keys={card.textures} />
             <Row id="taste.card.goals" keys={goalKeys} />
             <Row id="taste.card.avoids" keys={card.avoids} />
+            <Row id="taste.card.allergens" names={allergens} />
           </dl>
         </section>
       )}

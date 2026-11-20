@@ -24,6 +24,9 @@ import { AppShell } from './features/shell/AppShell.tsx';
 import { InnerLayout } from './features/shell/InnerLayout.tsx';
 import { TastePage } from './features/taste/TastePage.tsx';
 import { MePage } from './features/me/MePage.tsx';
+import { DietPage } from './features/me/DietPage.tsx';
+import { SettingsPage } from './features/me/SettingsPage.tsx';
+import { TasteMapPage } from './features/me/TasteMapPage.tsx';
 import { Placeholder } from './features/shell/Placeholder.tsx';
 import { PhotoSync } from './photos/PhotoSync.tsx';
 import { UpdatePrompt } from './pwa/UpdatePrompt.tsx';
@@ -60,6 +63,9 @@ export function App() {
               <Route path="recipes/:id" element={<RecipePage />} />
               <Route path="recipes/:id/edit" element={<RecipeEditPage />} />
               <Route path="taste" element={<TastePage />} />
+              <Route path="me/taste" element={<TasteMapPage />} />
+              <Route path="me/diet" element={<DietPage />} />
+              <Route path="me/settings" element={<SettingsPage />} />
               <Route path="kitchen/pantry/add" element={<AddPage />} />
               <Route path="kitchen/pantry/inventory" element={<InventoryPage />} />
               <Route path="kitchen/pantry/removed" element={<RemovedPage />} />
