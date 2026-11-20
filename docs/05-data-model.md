@@ -545,6 +545,7 @@ interface Bookmark extends UserEntity {
     why?: string;
     recipeDraft?: { ingredients: RecipeIngredient[]; steps: RecipeStep[] };   // 收藏前已經展開過就一起存；沒有的話，第一次打開收藏時才產生並存進來
     suggestionId?: string;
+    baseDishId?: string;      // 點子來自內建家常菜時記下：展開做法時當依據，也用來判斷同一道是否已收藏（每人每道最多一筆）
   };
   ideaIngredientIds?: string[];   // 衍生（只有 chef_idea）：點子的主要食材；friend_recipe 直接讀原作的 ingredientIds，不另存，原作更新也不用改別人的資料
   cookedRecipeId?: string;    // 從這個收藏記錄了自己的版本後，連到那一篇；有值就是「做過了」
