@@ -89,7 +89,7 @@
 | `recipe_private` | `recipe_id` | `recipes`（連動） | M0（口述 M1b） |
 | `recipe_revisions` | `id` | `recipe_id`（連動） | M1b |
 | `photos` | `id` | `user_id`（連動，廚具照片為空）；`kitchen_id`（連動，廚具照片）；`created_by`（佔位） | M0（廚具、食譜、步驟照片、頭像；近況的寫入規則等好友關係建好再補） |
-| `bookmarks` | `id` | `user_id`（連動）；`recipe_id`（空值，顯示「已收起來」）；`cooked_recipe_id`（空值） | M1a（朋友的食譜 M2） |
+| `bookmarks` | `id` | `user_id`（連動）；`recipe_id`（空值，顯示「已收起來」）；`cooked_recipe_id`（空值） | M0（大廚的點子；朋友的食譜 M2） |
 | `chef_conversations` | `id` | `user_id`（連動）；`kitchen_id`（空值） | M1a |
 | `preference_profiles` | `user_id` | `auth.users`（連動） | M0 |
 | `taste_profile_snapshots` | `user_id` | `auth.users`（連動） | M1a |

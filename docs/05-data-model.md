@@ -277,7 +277,8 @@ interface RegionProfile {
   seasons: { key: 'spring' | 'summer' | 'autumn' | 'winter'; months: number[] }[];   // 例：台灣 3–5 春
   usesSolarTerms: boolean;            // 是否使用 24 節氣（台灣之後開啟）
   holidays: Holiday[];
-  commonPantryIngredientIds: string[];   // 快速盤點的常見食材（約 40 樣）
+  commonPantryIngredientIds: string[];   // 快速盤點的常見食材（約 40 樣，含葉菜、肉這類常變動的）
+  stapleIngredientIds: string[];         // 新手引導 ⑦ 的常備食材（約 30–40 樣，放得久的：乾貨、罐頭、冷凍、蛋、根莖類）
   dataStatus: 'full' | 'partial';     // 資料完整度，partial 時只用有的部分
 }
 
