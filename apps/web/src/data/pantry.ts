@@ -79,3 +79,15 @@ export async function updatePantryItem(id: string, patch: PantryItemPatch): Prom
   if (error) throw error;
   return data;
 }
+
+// 過去幾天加入過的食材 ID（含已移除的，但每日維護會清掉 30 天前移除的），給常買清單排序。次數只用來排序，不會顯示
+export async function listRecentAdditions(kitchenId: string, days = 30): Promise<(string | null)[]> {
+  const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const { data, error } = await supabase()
+    .from('pantry_items')
+    .select('ingredient_id')
+    .eq('kitchen_id', kitchenId)
+    .gte('added_on', since);
+  if (error) throw error;
+  return data.map((r) => r.ingredient_id);
+}

@@ -1166,7 +1166,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 最近買的 | 同上，依 `added_on` 與字典的 `recentDays` 判斷 |
 | 設了期限、快到期的 | 同上，篩有 `expires_at` 的，依比例計算提醒狀態；計算函式放在 `packages/core`，排程推播也用同一個 |
 | 最近移除（可復原） | `pantry_items (kitchen_id, removed_at)` |
-| 常買清單 | `pantry_items (kitchen_id, ingredient_id, added_on)`：過去 90 天加入過的食材依筆數排序（已移除的也算；再加入已有的食材只更新日期，所以一筆代表一段「有」的期間）；次數不顯示。新廚房用 `RegionProfile.commonPantryIngredientIds` |
+| 常買清單 | `pantry_items (kitchen_id, ingredient_id, added_on)`：過去 30 天加入過的食材依筆數排序（已移除的也算；再加入已有的食材只更新日期，所以一筆代表一段「有」的期間）；次數不顯示。新廚房用 `RegionProfile.commonPantryIngredientIds` |
 | 食譜時間軸 | `recipes.cooked_dates`（GIN 索引）展開成「食譜＋日期」，只取 published、未刪除；又做了一次的那天顯示那次的照片與一句話 |
 | 草稿匣 | `recipes (user_id, status)` 取 draft |
 | 依標籤瀏覽（第一次做的…） | `recipes.highlights`（GIN 索引） |

@@ -15,7 +15,7 @@ export function HomePage() {
   }
 
   return (
-    <main className="mx-auto min-h-dvh max-w-[560px] px-4 pt-[calc(44px+env(safe-area-inset-top))]">
+    <div className="pt-7">
       <section className="relative rounded-chef border-2 border-bulb bg-chef-soft px-4 pt-12 pb-4">
         <Chef size={56} className="absolute -top-[30px] left-3" />
         <h1 className="absolute top-2 left-[76px] m-0 font-round text-body font-bold">
@@ -39,6 +39,6 @@ export function HomePage() {
       >
         <FormattedMessage id="signOut" />
       </button>
-    </main>
+    </div>
   );
 }
