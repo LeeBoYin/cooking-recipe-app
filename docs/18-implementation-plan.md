@@ -38,12 +38,13 @@
 - [x] M0-10 食譜後端：資料表、權限、`save_recipe`、`publish_recipe`、照片權限（#11）
 - [x] M0-11 食譜畫面：編輯頁與食譜頁（#12）
 - [x] M0-12 我的食譜：時間軸、草稿匣、搜尋、最近刪除（#13）
+- [x] M0-13a 錯誤紀錄與每日維護：`error_logs`、`log_error`、每日維護排程、`app_config` 的註冊方式與人數上限、前端 `reportError`（本 PR）
 
 ### 待做（建議順序）
 
 | 編號 | 內容 | 模型 | 讀 |
 |------|------|------|-----|
-| [ ] M0-13 | **後端雜項**：`error_logs` 表與寫入；每日維護（超過 30 天的食材紀錄、到期的軟刪除食譜、孤兒照片檔）；每週備份與每週喚醒；`app_config` 補齊還沒用到的欄位 | Sonnet | 16 第三、七、九節；04 ADR-21 |
+| [ ] M0-13b | **函式與備份**：`maintenance` Edge Function（掃孤兒照片檔）、`deploy-db.yml` 加上 Edge Functions 部署（M1a-01 不用再做）、每週喚醒與加密備份的 GitHub Actions（先給設定 secrets 的步驟） | Sonnet | 16 第六、九節；05 照片檔；04 ADR-21 |
 | [ ] M0-14 | **口味資料**：補齊 `dict_preference_dimensions`、`dict_quiz_items`、`dict_regions`、`dict_base_dishes`（內建家常菜）；`preference_profiles`、`dietary_profiles` 表與 RLS、權限測試；把這兩張表加進 `setup_new_user` | Sonnet | 13 第八節；16 第三、四、八節；15 |
 | [ ] M0-15 | **口味探索的邏輯與畫面**：`core` 的自適應挑題與口味分數、題型元件、短版與長版兩種長度、口味名片 | Opus 先討論題庫與挑題規則，再 Sonnet | 13 第三～五節；17 |
 | [ ] M0-16 | **我的口味地圖**（偏好設定頁）：看、改、重答；偏好設定頁的外框與設定項目 | Sonnet | 13 第五節；09 |
@@ -63,7 +64,7 @@
 
 | 編號 | 內容 | 模型 | 讀 |
 |------|------|------|-----|
-| [ ] M1a-01 | **邀請與 `accept-invite`（後端）**：邀請表、`create_invite`、Edge Function、邀請碼、Auth hook（Google 登入檢查邀請）；第一個 Edge Function 一併加上部署流程 | Sonnet | 16 第五、六節；12 第二節；02 K |
+| [ ] M1a-01 | **邀請與 `accept-invite`（後端）**：邀請表、`create_invite`、Edge Function、邀請碼、Auth hook（Google 登入檢查邀請）；第一個 Edge Function 的部署流程在 M0-13b 已加上 | Sonnet | 16 第五、六節；12 第二節；02 K |
 | [ ] M1a-02 | **邀請與註冊（畫面）**：邀請連結入口、建立帳號、6 碼邀請碼、Google 登入 | Sonnet | 12 第二、三節 |
 | [ ] M1a-03 | **方案與 `entitlements`**、`app_config` 的 AI 設定、`ai` 函式骨架與模型設定檔 | Sonnet | 03；16 第六節 |
 | [ ] M1a-04 | **用量保護與異常清單**：每人每日與每月上限、每月預算、Claude Console 花費上限的對照 | Sonnet | 03 成本與保護；02 L |
@@ -126,10 +127,10 @@ M2 最大，先把資料表與權限一次定好（M2-01、02），再往畫面�
 
 | 階段 | 已完成 | 待做 |
 |------|-------|------|
-| M0 | 12 | 11 |
+| M0 | 13 | 11 |
 | M1a | 0 | 13 |
 | M1b | 0 | 5 |
 | M2 | 0 | 18 |
-| **合計** | **12** | **47** |
+| **合計** | **13** | **47** |
 
 數字是目前的切法，不是承諾；做到一半發現太大就拆，有些段落合併就併。
