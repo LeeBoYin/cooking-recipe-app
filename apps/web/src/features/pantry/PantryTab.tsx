@@ -5,6 +5,7 @@ import { isRecentlyBought } from '@zhusha/ingredients';
 import { Chef } from '../../chef/Chef.tsx';
 import { useCurrentKitchen, usePantryItems, useRemovePantryItem, useRestorePantryItem } from '../../data/hooks.ts';
 import type { PantryItem } from '../../data/pantry.ts';
+import { ActionBar } from '../kitchen/ActionBar.tsx';
 import { Icon } from '../shell/Icon.tsx';
 import { todayIn } from './dates.ts';
 import { ZONES, ZONE_EMOJI, displayName, emojiFor } from './labels.ts';
@@ -71,20 +72,7 @@ export function PantryTab() {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex gap-2">
-        <Link
-          to="/kitchen/pantry/add"
-          className="flex h-12 flex-1 items-center justify-center rounded-card bg-bulb text-body font-bold text-ink no-underline"
-        >
-          <FormattedMessage id="pantry.add" />
-        </Link>
-        <Link
-          to="/kitchen/pantry/inventory"
-          className="flex h-12 flex-1 items-center justify-center rounded-card bg-surface text-body font-bold text-ink no-underline"
-        >
-          <FormattedMessage id="pantry.inventory" />
-        </Link>
-      </div>
+      <ActionBar inventoryTo="/kitchen/pantry/inventory" addTo="/kitchen/pantry/add" inventoryId="pantry.inventory" addId="pantry.add" />
 
       {pantry.isPending ? (
         <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="common.loading" /></p>

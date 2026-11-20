@@ -1,7 +1,7 @@
 // TanStack Query 的讀取。資料一律即時向雲端讀取，不做離線快取（04 ADR-02）。
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getMyIdentity, getMySettings } from './account.ts';
-import { listMyKitchens } from './kitchens.ts';
+import { listMyKitchens, setCurrentKitchen } from './kitchens.ts';
 import {
   addPantryItems,
   listPantryItems,
@@ -44,6 +44,15 @@ export function useMyIdentity() {
 
 export function useMyKitchens() {
   return useQuery({ queryKey: queryKeys.kitchens, queryFn: listMyKitchens });
+}
+
+// 切換目前所在的廚房。食材、廚具都跟著換，所以把所有讀取標成過期重讀
+export function useSetCurrentKitchen() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (kitchenId: string) => setCurrentKitchen(kitchenId),
+    onSuccess: () => queryClient.invalidateQueries(),
+  });
 }
 
 // 目前所在的廚房

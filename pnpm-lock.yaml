@@ -193,6 +193,9 @@ importers:
       '@zhusha/core':
         specifier: workspace:*
         version: link:../../packages/core
+      '@zhusha/equipment':
+        specifier: workspace:*
+        version: link:../../packages/equipment
       '@zhusha/ingredients':
         specifier: workspace:*
         version: link:../../packages/ingredients
