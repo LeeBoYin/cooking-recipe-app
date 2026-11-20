@@ -766,6 +766,9 @@ isOneToOne: false
               "match_kind": string,"match_text": string,"recipe_id": string
             }[]
                            },
+"set_avatar":
+{ Args: { "p_photo_id": string }; Returns: undefined
+                           },
 "set_current_kitchen":
 { Args: { "p_kitchen_id": string }; Returns: undefined
                            },

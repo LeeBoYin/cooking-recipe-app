@@ -59,6 +59,31 @@ export function userPhotoPaths(userId: string, id: string) {
   return { storage: `${base}.webp`, feed: `${base}_feed.webp`, thumb: `${base}_thumb.webp` };
 }
 
+// 大頭貼：users/{userId}/avatar/{photoId}.webp，只有 400px 一個檔，三個路徑欄位都指向它
+export function avatarPath(userId: string, id: string) {
+  return `users/${userId}/avatar/${id}.webp`;
+}
+
+// 某人的大頭貼（本人與同廚房的成員讀得到；沒有時是 null）
+export async function getAvatar(userId: string): Promise<Photo | null> {
+  const { data, error } = await supabase()
+    .from('photos')
+    .select('*')
+    .eq('owner_type', 'avatar')
+    .eq('user_id', userId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+// 換大頭貼：400px 的檔案傳完才建立資料列（set_avatar 同一個交易刪掉舊的）；
+// 舊檔交給每週的孤兒照片檔掃描。重試同一個 id 是安全的（檔案覆寫、資料列重建）
+export async function replaceAvatar(userId: string, id: string, blob: Blob): Promise<void> {
+  await uploadFile(avatarPath(userId, id), blob);
+  const { error } = await supabase().rpc('set_avatar', { p_photo_id: id });
+  if (error) throw error;
+}
+
 export function kitchenPhotoPaths(kitchenId: string, id: string) {
   const base = `kitchens/${kitchenId}/${id}`;
   return { storage: `${base}.webp`, feed: `${base}_feed.webp`, thumb: `${base}_thumb.webp` };

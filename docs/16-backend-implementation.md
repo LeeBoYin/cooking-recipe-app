@@ -155,7 +155,7 @@
 | `kitchen_equipment` | 成員 | 成員 | 成員（不能改所屬廚房；選配手法只能是字典列出的，由觸發器檢查） | 成員 |
 | `recipes` | `can_view_recipe`：作者；家人（household、friends）；好友（friends）；分享給他且沒收回的人。草稿只有作者 | 作者（經 `save_recipe`） | 作者（經 `save_recipe`） | 作者（經 `delete_recipe` 軟刪除） |
 | `recipe_revisions` | 作者 | 函式 | — | 連動 |
-| `photos` | 依擁有者：食譜照片跟著食譜；廚具照片給廚房成員；頭像給本人與同廚房的成員（M2 起加好友），路徑 `users/{userId}/avatar/`。私有 bucket `photos` 的 Storage 規則依路徑前綴判斷（`users/{userId}/` 本人、`kitchens/{kitchenId}/` 廚房成員），路徑格式不對一律拒絕；`users/{userId}/` 底下的食譜與步驟照片，另外開放給讀得到那篇食譜的人（由路徑裡的照片 ID 找到資料列，再用 `can_view_recipe` 判斷） | 本人；廚具照片給廚房成員。食譜與步驟照片只經 `save_recipe` 的 `p_photos` 建立、頭像只經 `set_avatar` 建立（手機不能直接寫），只能掛在自己沒刪除的食譜上；三個檔案都已在 Storage 才能建立資料列（頭像只有 400px 一個檔）；路徑必須是由 ID 與擁有者決定的固定格式；一件廚具一張；每篇食譜一張封面；張數上限由觸發器檢查 | 廚具照片只能改排序與封面；食譜與步驟照片經 `save_recipe` | 同新增；廚具刪除時資料列由觸發器一起刪，檔案由 `maintenance` 掃孤兒檔 |
+| `photos` | 依擁有者：食譜照片跟著食譜；廚具照片給廚房成員；頭像給本人與同廚房的成員（M2 起加好友），路徑 `users/{userId}/avatar/`。私有 bucket `photos` 的 Storage 規則依路徑前綴判斷（`users/{userId}/` 本人、`kitchens/{kitchenId}/` 廚房成員），路徑格式不對一律拒絕；`users/{userId}/` 底下的食譜與步驟照片，另外開放給讀得到那篇食譜的人（由路徑裡的照片 ID 找到資料列，再用 `can_view_recipe` 判斷） | 本人；廚具照片給廚房成員。食譜與步驟照片只經 `save_recipe` 的 `p_photos` 建立、頭像只經 `set_avatar` 建立（手機不能直接寫），只能掛在自己沒刪除的食譜上；三個檔案都已在 Storage 才能建立資料列（頭像只有 400px 一個檔，資料列的三個路徑欄位都指向它：`users/{userId}/avatar/{照片ID}.webp`）；路徑必須是由 ID 與擁有者決定的固定格式；一件廚具一張；每篇食譜一張封面；張數上限由觸發器檢查 | 廚具照片只能改排序與封面；食譜與步驟照片經 `save_recipe` | 同新增；廚具刪除時資料列由觸發器一起刪，檔案由 `maintenance` 掃孤兒檔 |
 | `bookmarks` | 本人 | 本人（朋友的食譜要讀得到才能收藏） | 本人 | 本人 |
 | `share_links` | 作者（公開頁由 `share` 函式以服務權限讀） | 作者 | 作者（撤銷） | 連動 |
 | `reactions`、`comments` | 讀得到那篇食譜的人 | 讀得到那篇食譜的人 | 本人 | 本人；食譜作者可刪自己食譜下的留言 |

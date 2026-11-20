@@ -2,7 +2,8 @@
 // 重新編碼會拿掉 EXIF（含 GPS），只留下我們另外讀出的拍攝時間。
 import { encodeWebp } from './encode.ts';
 import { readTakenAt } from './exif.ts';
-import { ASPECT, PHOTO_SIZES, centerCrop, fitLongEdge, type AspectName, type PhotoVariant } from './sizes.ts';
+import { AVATAR_SIZE } from './avatarCrop.ts';
+import { ASPECT, PHOTO_SIZES, centerCrop, fitLongEdge, type AspectName, type Crop, type PhotoVariant } from './sizes.ts';
 
 export type ProcessedPhoto = {
   blobs: Record<PhotoVariant, Blob>;
@@ -40,4 +41,26 @@ export async function processPhoto(file: Blob, aspect: AspectName | 'none' = 'sq
   } finally {
     bitmap.close();
   }
+}
+
+// 大頭貼：只輸出 400px 的正方形。crop 是使用者在圓框裡選好的範圍（照片像素，已轉正）。
+// 重新編碼會拿掉 EXIF（含 GPS），也不讀拍攝時間。
+export async function processAvatar(file: Blob, crop: Crop): Promise<Blob> {
+  const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+  try {
+    return await renderAvatar(bitmap, crop);
+  } finally {
+    bitmap.close();
+  }
+}
+
+export async function renderAvatar(bitmap: ImageBitmap, crop: Crop): Promise<Blob> {
+  const canvas = document.createElement('canvas');
+  canvas.width = AVATAR_SIZE;
+  canvas.height = AVATAR_SIZE;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('canvas_unavailable');
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(bitmap, crop.x, crop.y, crop.width, crop.height, 0, 0, AVATAR_SIZE, AVATAR_SIZE);
+  return encodeWebp(canvas);
 }

@@ -23,6 +23,7 @@ import { RemovedPage } from './features/pantry/RemovedPage.tsx';
 import { AppShell } from './features/shell/AppShell.tsx';
 import { InnerLayout } from './features/shell/InnerLayout.tsx';
 import { TastePage } from './features/taste/TastePage.tsx';
+import { MePage } from './features/me/MePage.tsx';
 import { Placeholder } from './features/shell/Placeholder.tsx';
 import { PhotoSync } from './photos/PhotoSync.tsx';
 import { UpdatePrompt } from './pwa/UpdatePrompt.tsx';
@@ -44,7 +45,7 @@ export function App() {
                 <Route path="saved" element={<SavedTab />} />
               </Route>
               <Route path="record" element={<NewRecipe />} />
-              <Route path="me" element={<Placeholder />} />
+              <Route path="me" element={<MePage />} />
               <Route path="kitchen" element={<KitchenPage />}>
                 <Route index element={<PantryTab />} />
                 <Route path="equipment" element={<EquipmentTab />} />
