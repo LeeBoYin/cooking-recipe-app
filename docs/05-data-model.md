@@ -719,7 +719,7 @@ interface AiSuggestionCache {       // 存在後端，換手機也看得到上�
   expiresAt: string;
   payload: unknown;                   // 結構化輸出（點子卡片，不含做法）
   drafts?: Record<string, { ingredients: RecipeIngredient[]; steps: RecipeStep[]; tips?: string }>;   // 依點子 ID 存「展開做法」的結果；同一個點子不重算
-  feedback: { ideaId: string; action: 'bookmarked' | 'recorded' | 'dismissed'; reason?: string; at: Instant }[];   // 每個點子各自的回饋（一組最多 3 個點子），用來學口味
+  feedback: { ideaId: string; action: 'bookmarked' | 'recorded' | 'dismissed'; reason?: string; at: Instant }[];   // 每個點子各自的回饋（首頁一組最多 5 個點子），用來學口味
 }
 
 interface UserAchievement extends UserEntity {   // 解鎖類功能（徽章、護照）之後才做，初期不建這張表
@@ -1014,7 +1014,7 @@ interface Reaction {                  // 料理反應
   id: string;
   userId: string;
   recipeId: string;                   // 只有食譜一種對象，直接用外鍵
-  kind: 'yummy' | 'want_to_learn' | 'amazing' | 'fire';   // 😋 🤩 👏 🔥
+  kind: ReactionKind;                 // 精選的 24 種料理反應之一，英文代碼（例：'yummy' 😋），清單見 02 好友動態；資料庫用 text＋CHECK，之後只加不刪
   createdAt: string;
 }
 
@@ -1096,7 +1096,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 兩人同時加同一種食材 | 新增一律用「已經有就更新日期、沒有才新增」（upsert）的寫法 |
 | 同一個人在同一個廚房同時只有一段成員關係 | `kitchen_members (kitchen_id, user_id) WHERE left_at IS NULL` |
 | 同一篇朋友的食譜只收藏一次 | `bookmarks (user_id, recipe_id) WHERE kind = 'friend_recipe' AND deleted_at IS NULL` |
-| 每人對每篇食譜，每種反應最多一個（四種可以都按） | `reactions (user_id, recipe_id, kind)` |
+| 每人對每篇食譜，每種反應最多一個（不同反應可以同時按） | `reactions (user_id, recipe_id, kind)` |
 | 留言的回覆只有一層 | 觸發器檢查：`parentCommentId` 指向的留言本身沒有 `parentCommentId`，且屬於同一篇食譜 |
 | 同一個 email 同時只有一筆待接受的邀請 | `invites (email) WHERE status = 'pending'` |
 | 一組好友只有一筆 | `friendships (user_low_id, user_high_id)`，並檢查 `user_low_id < user_high_id` |
@@ -1179,7 +1179,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 是不是好友、是不是同廚房（RLS 每次都要判斷） | `friendships (user_low_id, user_high_id)` 唯一、`friendships (user_high_id)`；`kitchen_members (user_id) WHERE left_at IS NULL`；判斷寫成 `SECURITY DEFINER` 的資料庫函式 |
 | 一篇食譜的反應與留言 | `reactions (recipe_id)`、`comments (recipe_id, created_at) WHERE deleted_at IS NULL` |
 | 我的收藏 | `bookmarks (user_id, created_at)`；收藏了某篇食譜的人用 `bookmarks (recipe_id)`（原作收起時標示、發通知用；不顯示收藏次數） |
-| 通知鈴鐺 | `notifications (user_id, created_at DESC)`，未讀數用 `WHERE read_at IS NULL` 的部分索引 |
+| 通知（「我的」分頁的紅點） | `notifications (user_id, created_at DESC)`，未讀數用 `WHERE read_at IS NULL` 的部分索引 |
 | 對話紀錄 | `chef_conversations (user_id, last_message_at DESC)` |
 | 產品事件 | `product_events (at)`；每月匯總後刪除，量大時改成依月份分割資料表 |
 

@@ -208,7 +208,7 @@ Supabase Auth 另設「建立使用者前」的 hook：Google 登入時檢查 em
 | `kitchen_members` 新增、修改、刪除 | 每人最多 5 個廚房、每廚房最多 10 人、至少一位管理者；產生廚房相關通知 |
 | `reactions`、`comments`、`bookmarks`、`friend_shares`、`friendships` 新增 | 依收件人的通知開關產生通知；要推播的，排一筆 `push` 背景任務 |
 | `comments` 新增 | 回覆只能一層 |
-| `notifications` 新增 | Realtime 推給收件人的鈴鐺 |
+| `notifications` 新增 | Realtime 推給收件人，「我的」分頁出現紅點 |
 | `pantry_items`、`kitchen_equipment` 變更 | Realtime 推給同廚房的成員 |
 | `preference_profiles`、`recipes`、`bookmarks`、`ai_suggestion_cache`（回饋）、`pantry_items` 變更 | 把相關使用者的 `taste_profile_snapshots.stale` 設為真；實際重算在 `ai` 函式裡做 |
 

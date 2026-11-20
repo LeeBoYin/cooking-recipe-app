@@ -72,7 +72,7 @@
 | App | `app.open`（回到前景；30 分鐘內算同一次）、`screen.view` | `screen`；`installed`（是否加到主畫面）、`platform` |
 | 記錄 | `record.start`、`record.dictation_used`、`record.ai_filled`、`record.publish`、`record.abandon`、`record.draft_saved`、`record.draft_published`、`recipe.cook_again`、`recipe.refine_by_voice` | `entry`（＋記錄、烹飪模式、收藏、點子、又做了一次）；`photoCount`、`hasSteps`、`visibility`、`highlightCount`；`fieldsEditedAfterAi`（作者改了哪幾類 AI 填的欄位，只記類別，不記內容）；放棄時的 `step` |
 | 食譜 | `recipe.cooking_mode_start`、`recipe.cooking_mode_finish`、`recipe.shopping_list_shared`、`recipe.import` | `importType`（網址） |
-| 靈感 | `chat.start`、`chat.message_sent`、`chat.ingredients_added`、`suggestion.shown`、`suggestion.opened`、`suggestion.bookmarked`、`suggestion.recorded`、`suggestion.dismissed` | `starter`（快速開頭或自己打字）、`turn`、`count`、`source`（首頁、對話）、`slot`、`dismissReason`；**不記對話內容** |
+| 靈感 | `chat.start`、`chat.message_sent`、`chat.ingredients_added`、`suggestion.shown`、`suggestion.opened`、`suggestion.bookmarked`、`suggestion.recorded`、`suggestion.dismissed` | `turn`、`count`、`source`（首頁、對話）、`slot`、`dismissReason`；**不記對話內容** |
 | 食材 | `pantry.add`、`pantry.remove`、`pantry.restore`、`pantry.expiry_set`、`pantry.stocktake` | `method`（快速新增、搜尋、盤點）、`count` |
 | 社群 | `friend.added`、`feed.end_reached`、`social.reaction`、`social.comment`、`social.bookmark`、`social.version_recorded`、`social.share_to_friend` | `via`（好友連結、QR Code、邀請） |
 | 分享 | `share.link_created`、`share.text_copied`、`share.card_saved` | — |
@@ -154,7 +154,7 @@
 
 | 項目 | 類型 | 什麼時候看 | 怎麼判斷 |
 |------|------|-----------|---------|
-| 和大廚對話的使用率 | 檢討 | M1a 上線兩個月後 | 對話是首頁的核心假設：每月有對話的人少於三成時，檢討首頁的位置與快速開頭 |
+| 和大廚對話的使用率 | 檢討 | M1a 上線兩個月後 | 對話是首頁的核心假設：每月有對話的人少於三成時，檢討首頁的位置與大廚區塊的設計 |
 | 對話後有沒有煮 | 擴充 | M2 後 | 加上「對話後一週內記錄了相關的菜」的比例，判斷對話是否真的讓人想煮 |
 | 「用說的」的使用率與修改率 | 檢討 | 「用說的」上線一個月後 | 用說的比例低，檢討入口；AI 填的欄位修改率高，檢討整理的品質 |
 | 從開始記錄到發佈的時間 | 檢討 | 「用說的」上線一個月後 | 目標是累的時候 30 秒內能發佈；比較用說的和自己打的差距 |
