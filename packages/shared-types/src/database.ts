@@ -23,13 +23,100 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            [_ in never]: never
+            "kitchen_members": {
+                  Row: {
+                    "default_diners_all": boolean,"expiry_alerts": boolean,"id": string,"joined_at": string,"kitchen_id": string,"left_at": string | null,"role": string,"share_dietary_info": boolean,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "default_diners_all"?: boolean,"expiry_alerts"?: boolean,"id": string,"joined_at"?: string,"kitchen_id": string,"left_at"?: string | null,"role"?: string,"share_dietary_info"?: boolean,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "default_diners_all"?: boolean,"expiry_alerts"?: boolean,"id"?: string,"joined_at"?: string,"kitchen_id"?: string,"left_at"?: string | null,"role"?: string,"share_dietary_info"?: boolean,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "kitchen_members_kitchen_id_fkey"
+      columns: ["kitchen_id"]
+isOneToOne: false
+      referencedRelation: "kitchens"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"kitchens": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"deleted_at": string | null,"id": string,"name": string,"region": string,"timezone": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"id": string,"name": string,"region": string,"timezone": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"id"?: string,"name"?: string,"region"?: string,"timezone"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"user_identities": {
+                  Row: {
+                    "created_at": string,"display_name": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"display_name"?: string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"display_name"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"user_profiles": {
+                  Row: {
+                    "ai_paused": boolean,"created_at": string,"last_active_at": string | null,"role": string,"status": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ai_paused"?: boolean,"created_at"?: string,"last_active_at"?: string | null,"role"?: string,"status"?: string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "ai_paused"?: boolean,"created_at"?: string,"last_active_at"?: string | null,"role"?: string,"status"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"user_settings": {
+                  Row: {
+                    "alert_time": string,"analytics_opt_out": boolean,"chef_persona": string,"created_at": string,"current_kitchen_id": string | null,"expiring_alert": boolean,"haptics": boolean,"household_size": number,"last_survey_shown_at": string | null,"locale": string,"measure_unit": string,"onboarding_completed_at": string | null,"onboarding_completed_steps": (string)[],"seen_hints": (string)[],"sound": boolean,"temperature_unit": string,"updated_at": string,"user_id": string,"weekend_inspiration": boolean
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "alert_time"?: string,"analytics_opt_out"?: boolean,"chef_persona"?: string,"created_at"?: string,"current_kitchen_id"?: string | null,"expiring_alert"?: boolean,"haptics"?: boolean,"household_size"?: number,"last_survey_shown_at"?: string | null,"locale"?: string,"measure_unit"?: string,"onboarding_completed_at"?: string | null,"onboarding_completed_steps"?: (string)[],"seen_hints"?: (string)[],"sound"?: boolean,"temperature_unit"?: string,"updated_at"?: string,"user_id": string,"weekend_inspiration"?: boolean
+                  }
+                  Update: {
+                    "alert_time"?: string,"analytics_opt_out"?: boolean,"chef_persona"?: string,"created_at"?: string,"current_kitchen_id"?: string | null,"expiring_alert"?: boolean,"haptics"?: boolean,"household_size"?: number,"last_survey_shown_at"?: string | null,"locale"?: string,"measure_unit"?: string,"onboarding_completed_at"?: string | null,"onboarding_completed_steps"?: (string)[],"seen_hints"?: (string)[],"sound"?: boolean,"temperature_unit"?: string,"updated_at"?: string,"user_id"?: string,"weekend_inspiration"?: boolean
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "user_settings_current_kitchen_id_fkey"
+      columns: ["current_kitchen_id"]
+isOneToOne: false
+      referencedRelation: "kitchens"
+      referencedColumns: ["id"]
+    }
+                  ]
+                }
           }
           Views: {
             [_ in never]: never
           }
           Functions: {
-            [_ in never]: never
+            "set_current_kitchen":
+{ Args: { "p_kitchen_id": string }; Returns: undefined
+                           },
+"setup_new_user":
+{ Args: { "p_create_kitchen"?: boolean,"p_display_name"?: string,"p_kitchen_name"?: string,"p_region"?: string,"p_timezone"?: string,"p_user_id": string }; Returns: string
+                           }
           }
           Enums: {
             [_ in never]: never
