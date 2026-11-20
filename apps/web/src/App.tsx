@@ -1,6 +1,10 @@
 import { BrowserRouter, Route, Routes } from 'react-router';
 import { useSession } from './data/auth.ts';
 import { SignInPage } from './features/auth/SignInPage.tsx';
+import { AddEquipmentPage } from './features/equipment/AddEquipmentPage.tsx';
+import { EditEquipmentPage } from './features/equipment/EditEquipmentPage.tsx';
+import { EquipmentInventoryPage } from './features/equipment/EquipmentInventoryPage.tsx';
+import { EquipmentTab } from './features/equipment/EquipmentTab.tsx';
 import { HomePage } from './features/home/HomePage.tsx';
 import { KitchenPage } from './features/kitchen/KitchenPage.tsx';
 import { AddPage } from './features/pantry/AddPage.tsx';
@@ -29,7 +33,7 @@ export function App() {
               <Route path="me" element={<Placeholder />} />
               <Route path="kitchen" element={<KitchenPage />}>
                 <Route index element={<PantryTab />} />
-                <Route path="equipment" element={<Placeholder />} />
+                <Route path="equipment" element={<EquipmentTab />} />
               </Route>
               <Route path="*" element={<Placeholder />} />
             </Route>
@@ -39,6 +43,9 @@ export function App() {
               <Route path="kitchen/pantry/inventory" element={<InventoryPage />} />
               <Route path="kitchen/pantry/removed" element={<RemovedPage />} />
               <Route path="kitchen/pantry/:id" element={<EditPage />} />
+              <Route path="kitchen/equipment/add" element={<AddEquipmentPage />} />
+              <Route path="kitchen/equipment/inventory" element={<EquipmentInventoryPage />} />
+              <Route path="kitchen/equipment/:id" element={<EditEquipmentPage />} />
             </Route>
           </Routes>
         </BrowserRouter>
