@@ -137,6 +137,32 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"pantry_items": {
+                  Row: {
+                    "added_on": string,"alert_on": string | null,"alert_tier": string | null,"created_at": string,"created_by": string | null,"date_type": string | null,"expires_at": string | null,"expiry_set_on": string | null,"id": string,"ingredient_id": string | null,"kitchen_id": string,"note": string | null,"raw_name": string,"removed_at": string | null,"removed_by": string | null,"removed_with_recipe_id": string | null,"status": string,"still_there_asked_on": string | null,"updated_at": string,"updated_by": string | null,"want_to_use_soon": boolean,"zone": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "added_on": string,"alert_on"?: string | null,"alert_tier"?: string | null,"created_at"?: string,"created_by"?: string | null,"date_type"?: string | null,"expires_at"?: string | null,"expiry_set_on"?: string | null,"id": string,"ingredient_id"?: string | null,"kitchen_id": string,"note"?: string | null,"raw_name": string,"removed_at"?: string | null,"removed_by"?: string | null,"removed_with_recipe_id"?: string | null,"status"?: string,"still_there_asked_on"?: string | null,"updated_at"?: string,"updated_by"?: string | null,"want_to_use_soon"?: boolean,"zone": string
+                  }
+                  Update: {
+                    "added_on"?: string,"alert_on"?: string | null,"alert_tier"?: string | null,"created_at"?: string,"created_by"?: string | null,"date_type"?: string | null,"expires_at"?: string | null,"expiry_set_on"?: string | null,"id"?: string,"ingredient_id"?: string | null,"kitchen_id"?: string,"note"?: string | null,"raw_name"?: string,"removed_at"?: string | null,"removed_by"?: string | null,"removed_with_recipe_id"?: string | null,"status"?: string,"still_there_asked_on"?: string | null,"updated_at"?: string,"updated_by"?: string | null,"want_to_use_soon"?: boolean,"zone"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pantry_items_ingredient_id_fkey"
+      columns: ["ingredient_id"]
+isOneToOne: false
+      referencedRelation: "dict_ingredients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "pantry_items_kitchen_id_fkey"
+      columns: ["kitchen_id"]
+isOneToOne: false
+      referencedRelation: "kitchens"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"user_identities": {
                   Row: {
                     "created_at": string,"display_name": string,"updated_at": string,"user_id": string
@@ -191,7 +217,100 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "set_current_kitchen":
+            "add_pantry_items":
+{ Args: { "p_items": Json,"p_kitchen_id": string }; Returns: {
+              "added_on": string,
+"alert_on": string | null,
+"alert_tier": string | null,
+"created_at": string,
+"created_by": string | null,
+"date_type": string | null,
+"expires_at": string | null,
+"expiry_set_on": string | null,
+"id": string,
+"ingredient_id": string | null,
+"kitchen_id": string,
+"note": string | null,
+"raw_name": string,
+"removed_at": string | null,
+"removed_by": string | null,
+"removed_with_recipe_id": string | null,
+"status": string,
+"still_there_asked_on": string | null,
+"updated_at": string,
+"updated_by": string | null,
+"want_to_use_soon": boolean,
+"zone": string
+            }[]
+                          SetofOptions: {
+        from: "*"
+        to: "pantry_items"
+        isOneToOne: false
+        isSetofReturn: true
+      } },
+"remove_pantry_item":
+{ Args: { "p_id": string }; Returns: {
+              "added_on": string,
+"alert_on": string | null,
+"alert_tier": string | null,
+"created_at": string,
+"created_by": string | null,
+"date_type": string | null,
+"expires_at": string | null,
+"expiry_set_on": string | null,
+"id": string,
+"ingredient_id": string | null,
+"kitchen_id": string,
+"note": string | null,
+"raw_name": string,
+"removed_at": string | null,
+"removed_by": string | null,
+"removed_with_recipe_id": string | null,
+"status": string,
+"still_there_asked_on": string | null,
+"updated_at": string,
+"updated_by": string | null,
+"want_to_use_soon": boolean,
+"zone": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "pantry_items"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"restore_pantry_item":
+{ Args: { "p_id": string }; Returns: {
+              "added_on": string,
+"alert_on": string | null,
+"alert_tier": string | null,
+"created_at": string,
+"created_by": string | null,
+"date_type": string | null,
+"expires_at": string | null,
+"expiry_set_on": string | null,
+"id": string,
+"ingredient_id": string | null,
+"kitchen_id": string,
+"note": string | null,
+"raw_name": string,
+"removed_at": string | null,
+"removed_by": string | null,
+"removed_with_recipe_id": string | null,
+"status": string,
+"still_there_asked_on": string | null,
+"updated_at": string,
+"updated_by": string | null,
+"want_to_use_soon": boolean,
+"zone": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "pantry_items"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
+"set_current_kitchen":
 { Args: { "p_kitchen_id": string }; Returns: undefined
                            },
 "setup_new_user":
