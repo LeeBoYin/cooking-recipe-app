@@ -1,6 +1,6 @@
 -- 錯誤紀錄（ADR-21）、每日維護排程、app_config 補齊的欄位（16 第三、九節）
 begin;
-select plan(30);
+select plan(31);
 
 select tests.create_user('owner@zhusha.test') as owner \gset
 select tests.create_user('stranger@zhusha.test') as stranger \gset
@@ -118,6 +118,11 @@ select is(
 select is((select registration_mode from public.app_config), 'invite_only', '預設只能被邀請註冊');
 select is((select max_users from public.app_config), 30, '預設人數上限 30');
 select throws_ok($$update public.app_config set registration_mode = 'anyone'$$, '23514', null, '註冊方式只能是清單內的值');
+
+---------------------------------------------------------------------------
+-- maintenance 函式（service_role）要讀 photos 才能找孤兒照片檔（線上專案不會自動給這個權限）
+---------------------------------------------------------------------------
+select ok(has_table_privilege('service_role', 'public.photos', 'SELECT'), 'service_role 讀得到 photos');
 
 select * from finish();
 rollback;
