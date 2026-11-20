@@ -935,7 +935,7 @@ interface ErrorLog {                  // 錯誤紀錄（ADR-21），只有後端
   id: string;
   source: 'client' | 'edge_function' | 'cron' | 'backup';
   kind: string;                       // 錯誤類型，例 'photo_upload_failed'、'ai_timeout'、'rls_denied'
-  where: string;                      // 畫面或函式名稱
+  location: string;                   // 畫面或函式名稱
   severity: 'info' | 'warning' | 'critical';
   appVersion?: string;
   platform?: 'ios' | 'android' | 'desktop';

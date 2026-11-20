@@ -25,14 +25,14 @@ export type Database = {
           Tables: {
             "app_config": {
                   Row: {
-                    "id": boolean,"max_steps": number,"photo_limits": NonNullable<Json>,"soft_delete_retention_days": number,"text_limits": NonNullable<Json>,"updated_at": string
+                    "id": boolean,"max_steps": number,"max_users": number,"photo_limits": NonNullable<Json>,"registration_mode": string,"soft_delete_retention_days": number,"text_limits": NonNullable<Json>,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "id"?: boolean,"max_steps"?: number,"photo_limits"?: NonNullable<Json>,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
+                    "id"?: boolean,"max_steps"?: number,"max_users"?: number,"photo_limits"?: NonNullable<Json>,"registration_mode"?: string,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Update: {
-                    "id"?: boolean,"max_steps"?: number,"photo_limits"?: NonNullable<Json>,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
+                    "id"?: boolean,"max_steps"?: number,"max_users"?: number,"photo_limits"?: NonNullable<Json>,"registration_mode"?: string,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -153,6 +153,20 @@ isOneToOne: false
                   }
                   Update: {
                     "id"?: boolean,"imported_at"?: string,"version"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"error_logs": {
+                  Row: {
+                    "analytics_id": string | null,"app_version": string | null,"count": number,"first_at": string,"id": string,"kind": string,"last_at": string,"location": string,"platform": string | null,"severity": string,"source": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "analytics_id"?: string | null,"app_version"?: string | null,"count"?: number,"first_at"?: string,"id"?: string,"kind": string,"last_at"?: string,"location": string,"platform"?: string | null,"severity": string,"source": string
+                  }
+                  Update: {
+                    "analytics_id"?: string | null,"app_version"?: string | null,"count"?: number,"first_at"?: string,"id"?: string,"kind"?: string,"last_at"?: string,"location"?: string,"platform"?: string | null,"severity"?: string,"source"?: string
                   }
                   Relationships: [
                     
@@ -442,6 +456,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"log_error":
+{ Args: { "p_app_version"?: string,"p_kind": string,"p_location": string,"p_platform"?: string,"p_severity": string }; Returns: undefined
+                           },
 "publish_recipe":
 { Args: { "p_id": string }; Returns: {
               "ai_tags": Json | null,
