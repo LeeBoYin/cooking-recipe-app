@@ -49,7 +49,9 @@
 | `VAPID_PRIVATE_KEY` | Supabase 的秘密設定 | 推播簽章；公開金鑰放前端的環境變數 |
 | Google 登入的用戶端 ID 與密鑰 | Supabase Auth 設定 | 只做 Google 與密碼登入 |
 | `SUPABASE_ACCESS_TOKEN`、專案 ID | GitHub 的秘密設定 | GitHub Actions 部署 migration 與 Edge Functions |
-| 資料庫連線字串（唯讀備份帳號） | GitHub 的秘密設定 | 每週備份用 |
+| 唯讀備份帳號 `backup_ro` 的密碼（`BACKUP_DB_PASSWORD_PRODUCTION`） | GitHub 的秘密設定 | 每週備份用；只在正式專案建立，有 `pg_read_all_data` 權限 |
+| 備份庫的 deploy key 私鑰（`BACKUP_REPO_DEPLOY_KEY`）與備份庫名稱（變數 `BACKUP_REPO`） | GitHub 的秘密設定與變數 | 只能寫那一個私人備份儲存庫 |
+| `MAINTENANCE_TOKEN` | 各專案的 Edge Function Secrets；GitHub 的秘密設定 `MAINTENANCE_TOKEN_STAGING`、`MAINTENANCE_TOKEN_PRODUCTION` | 呼叫 `maintenance` 的通行證，測試與正式各一組 |
 | 備份加密的**公開**金鑰 | GitHub 的秘密設定 | 用非對稱加密：GitHub 只有公開金鑰、只能加密；解密的私密金鑰由你離線保管 |
 | `SUPABASE_URL`、`SUPABASE_ANON_KEY` | Netlify 的環境變數 | 公開的，前端用 |
 
@@ -244,9 +246,9 @@ Supabase Auth 另設「建立使用者前」的 hook：Google 登入時檢查 em
 |------|------|-------|
 | 到期提醒、週末靈感 | 每 15 分鐘（`pg_cron`） | 找出現在是當地提醒時間的廚房、週六早上的使用者，排入推播 |
 | 背景任務 | 每分鐘 | 執行 `background_jobs` 裡到期的任務，失敗就退避重試 |
-| 每日維護 | 每天凌晨 | 刪除超過 30 天的對話、移除超過 30 天的食材（`private.purge_removed_pantry_items`）、90 天的通知與錯誤紀錄、過期的速率計數；軟刪除到期的資料；13 個月以上的產品事件與 AI 用量明細；AI 費用對帳 |
+| 每日維護 | 每天凌晨 | 刪除超過 30 天的對話、移除超過 30 天的食材（`private.purge_removed_pantry_items`）、90 天的通知與錯誤紀錄、過期的速率計數；軟刪除到期的資料（食譜、廚房）；13 個月以上的產品事件與 AI 用量明細；AI 費用對帳 |
 | 每月匯總 | 每月 1 日 | 產生上個月的 `product_metrics_monthly` |
-| 喚醒與備份 | 每週（GitHub Actions） | 喚醒專案；加密備份資料庫到另一個 GitHub 私人儲存庫 |
+| 喚醒、孤兒照片檔與備份 | 每週（GitHub Actions，`weekly.yml`） | 喚醒測試與正式專案；呼叫 `maintenance` 清掉資料庫沒有記錄、且超過 24 小時的照片檔（孤兒超過檔案總數一半時不刪，記一筆 critical）；正式專案的資料庫用 `age` 公開金鑰加密後推到另一個 GitHub 私人儲存庫，保留最近 8 份 |
 
 每次執行的結果寫進 `error_logs`（`source: 'cron'`、`'backup'`），後台總覽顯示。
 

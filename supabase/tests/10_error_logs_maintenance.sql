@@ -1,6 +1,6 @@
 -- 錯誤紀錄（ADR-21）、每日維護排程、app_config 補齊的欄位（16 第三、九節）
 begin;
-select plan(26);
+select plan(30);
 
 select tests.create_user('owner@zhusha.test') as owner \gset
 select tests.create_user('stranger@zhusha.test') as stranger \gset
@@ -87,7 +87,23 @@ insert into public.pantry_items (id, kitchen_id, raw_name, zone, added_on, statu
   values (private.uuid_v7(), :'k1', '舊的蔥', 'fridge', current_date - 60, 'removed', now() - interval '31 days'),
          (private.uuid_v7(), :'k1', '新的蔥', 'fridge', current_date, 'active', null);
 
+-- 一個已經到期、一個還在保留期內的軟刪除廚房
+select private.uuid_v7() as k_old \gset
+select private.uuid_v7() as k_new \gset
+insert into public.kitchens (id, name, timezone, region, deleted_at) values
+  (:'k_old', '舊廚房', 'Asia/Taipei', 'TW', now() - interval '31 days'),
+  (:'k_new', '剛刪的廚房', 'Asia/Taipei', 'TW', now() - interval '2 days');
+insert into public.pantry_items (id, kitchen_id, raw_name, zone, added_on)
+  values (private.uuid_v7(), :'k_old', '舊廚房的蔥', 'fridge', current_date);
+select private.uuid_v7() as r_old \gset
+insert into public.recipes (id, user_id, kitchen_id, title, status)
+  values (:'r_old', :'owner', :'k_old', '舊廚房煮的菜', 'draft');
+
 select lives_ok($$select private.run_daily_maintenance()$$, '每日維護可以跑');
+select is((select count(*)::int from public.kitchens where id = :'k_old'), 0, '清掉到期的廚房');
+select is((select count(*)::int from public.pantry_items where raw_name = '舊廚房的蔥'), 0, '廚房的食材跟著刪');
+select is((select kitchen_id from public.recipes where id = :'r_old'), null, '食譜留下，只是不再屬於那個廚房');
+select is((select count(*)::int from public.kitchens where id = :'k_new'), 1, '還在保留期內的廚房不動');
 select is((select count(*)::int from public.pantry_items where raw_name = '舊的蔥'), 0, '清掉移除超過 30 天的食材');
 select is((select count(*)::int from public.pantry_items where raw_name = '新的蔥'), 1, '沒過期的食材不動');
 select is((select count(*)::int from public.error_logs where kind = 'old_one'), 0, '清掉超過 90 天的錯誤紀錄');
