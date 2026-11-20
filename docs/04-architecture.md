@@ -180,6 +180,7 @@ cooking-recipe-app/
 │   ├── core/                # 純 TypeScript 領域邏輯：統計、推薦評分、份量換算、單位換算、季節判斷
 │   ├── ingredients/         # 標準食材字典（JSON 資料＋查詢函式）
 │   ├── equipment/           # 器具字典、手法字典、器具↔手法對照、替代手法、安全溫度表
+│   ├── taste/               # 口味地圖的字典：偏好維度、題庫、基礎菜色庫（JSON 資料＋查詢函式）
 │   └── shared-types/        # 前後端共用的型別與 JSON Schema（含 AI 輸出格式）
 ├── supabase/
 │   ├── migrations/          # 資料庫 schema 與 RLS

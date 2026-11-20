@@ -63,6 +63,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"dict_base_dishes": {
+                  Row: {
+                    "cuisine_keys": (string)[],"deprecated": boolean,"difficulty": NonNullable<Json>,"equipment_type_ids": (string)[],"id": string,"ingredient_ids": (string)[],"name": NonNullable<Json>,"regions": (string)[],"replaced_by": string | null,"techniques": (string)[]
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cuisine_keys"?: (string)[],"deprecated"?: boolean,"difficulty": NonNullable<Json>,"equipment_type_ids"?: (string)[],"id": string,"ingredient_ids"?: (string)[],"name": NonNullable<Json>,"regions"?: (string)[],"replaced_by"?: string | null,"techniques"?: (string)[]
+                  }
+                  Update: {
+                    "cuisine_keys"?: (string)[],"deprecated"?: boolean,"difficulty"?: NonNullable<Json>,"equipment_type_ids"?: (string)[],"id"?: string,"ingredient_ids"?: (string)[],"name"?: NonNullable<Json>,"regions"?: (string)[],"replaced_by"?: string | null,"techniques"?: (string)[]
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dict_base_dishes_replaced_by_fkey"
+      columns: ["replaced_by"]
+isOneToOne: false
+      referencedRelation: "dict_base_dishes"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"dict_dietary_restrictions": {
                   Row: {
                     "deprecated": boolean,"excludes_ingredient_ids": (string)[],"excludes_traits": (string)[],"id": string,"name": NonNullable<Json>,"replaced_by": string | null
@@ -123,6 +143,72 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"dict_preference_dimensions": {
+                  Row: {
+                    "deprecated": boolean,"dimension_group": string,"impact": number,"key": string,"name": NonNullable<Json>,"parent_key": string | null,"replaced_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "deprecated"?: boolean,"dimension_group": string,"impact": number,"key": string,"name": NonNullable<Json>,"parent_key"?: string | null,"replaced_by"?: string | null
+                  }
+                  Update: {
+                    "deprecated"?: boolean,"dimension_group"?: string,"impact"?: number,"key"?: string,"name"?: NonNullable<Json>,"parent_key"?: string | null,"replaced_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dict_preference_dimensions_parent_key_fkey"
+      columns: ["parent_key"]
+isOneToOne: false
+      referencedRelation: "dict_preference_dimensions"
+      referencedColumns: ["key"]
+    },{
+      foreignKeyName: "dict_preference_dimensions_replaced_by_fkey"
+      columns: ["replaced_by"]
+isOneToOne: false
+      referencedRelation: "dict_preference_dimensions"
+      referencedColumns: ["key"]
+    }
+                  ]
+                },"dict_quiz_items": {
+                  Row: {
+                    "deprecated": boolean,"description": Json | null,"excluded_allergen_ids": (string)[],"excluded_restriction_ids": (string)[],"follow_ups": (string)[],"id": string,"item_type": string,"mapping": NonNullable<Json>,"regions": (string)[],"replaced_by": string | null,"title": NonNullable<Json>
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "deprecated"?: boolean,"description"?: Json | null,"excluded_allergen_ids"?: (string)[],"excluded_restriction_ids"?: (string)[],"follow_ups"?: (string)[],"id": string,"item_type": string,"mapping"?: NonNullable<Json>,"regions"?: (string)[],"replaced_by"?: string | null,"title": NonNullable<Json>
+                  }
+                  Update: {
+                    "deprecated"?: boolean,"description"?: Json | null,"excluded_allergen_ids"?: (string)[],"excluded_restriction_ids"?: (string)[],"follow_ups"?: (string)[],"id"?: string,"item_type"?: string,"mapping"?: NonNullable<Json>,"regions"?: (string)[],"replaced_by"?: string | null,"title"?: NonNullable<Json>
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dict_quiz_items_replaced_by_fkey"
+      columns: ["replaced_by"]
+isOneToOne: false
+      referencedRelation: "dict_quiz_items"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"dict_regions": {
+                  Row: {
+                    "code": string,"common_pantry_ingredient_ids": (string)[],"data_status": string,"default_locale": string,"default_timezone": string,"default_units": NonNullable<Json>,"deprecated": boolean,"hemisphere": string,"holidays": NonNullable<Json>,"name": NonNullable<Json>,"replaced_by": string | null,"seasons": NonNullable<Json>,"uses_solar_terms": boolean
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "code": string,"common_pantry_ingredient_ids"?: (string)[],"data_status": string,"default_locale": string,"default_timezone": string,"default_units": NonNullable<Json>,"deprecated"?: boolean,"hemisphere": string,"holidays"?: NonNullable<Json>,"name": NonNullable<Json>,"replaced_by"?: string | null,"seasons": NonNullable<Json>,"uses_solar_terms"?: boolean
+                  }
+                  Update: {
+                    "code"?: string,"common_pantry_ingredient_ids"?: (string)[],"data_status"?: string,"default_locale"?: string,"default_timezone"?: string,"default_units"?: NonNullable<Json>,"deprecated"?: boolean,"hemisphere"?: string,"holidays"?: NonNullable<Json>,"name"?: NonNullable<Json>,"replaced_by"?: string | null,"seasons"?: NonNullable<Json>,"uses_solar_terms"?: boolean
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "dict_regions_replaced_by_fkey"
+      columns: ["replaced_by"]
+isOneToOne: false
+      referencedRelation: "dict_regions"
+      referencedColumns: ["code"]
+    }
+                  ]
                 },"dict_techniques": {
                   Row: {
                     "deprecated": boolean,"id": string,"name": NonNullable<Json>,"replaced_by": string | null,"safety_rule_id": string | null,"technique_group": string
@@ -153,6 +239,20 @@ isOneToOne: false
                   }
                   Update: {
                     "id"?: boolean,"imported_at"?: string,"version"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"dietary_profiles": {
+                  Row: {
+                    "allergen_ids": (string)[],"created_at": string,"dietary_restriction_ids": (string)[],"dislike_ingredient_ids": (string)[],"id": string,"no_cooking_alcohol": boolean,"recurring_rules": NonNullable<Json>,"schema_version": number,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "allergen_ids"?: (string)[],"created_at"?: string,"dietary_restriction_ids"?: (string)[],"dislike_ingredient_ids"?: (string)[],"id": string,"no_cooking_alcohol"?: boolean,"recurring_rules"?: NonNullable<Json>,"schema_version"?: number,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "allergen_ids"?: (string)[],"created_at"?: string,"dietary_restriction_ids"?: (string)[],"dislike_ingredient_ids"?: (string)[],"id"?: string,"no_cooking_alcohol"?: boolean,"recurring_rules"?: NonNullable<Json>,"schema_version"?: number,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -282,6 +382,20 @@ isOneToOne: false
       referencedRelation: "kitchens"
       referencedColumns: ["id"]
     }
+                  ]
+                },"preference_profiles": {
+                  Row: {
+                    "answered_item_ids": (string)[],"card_title": string | null,"context": NonNullable<Json>,"created_at": string,"dims": NonNullable<Json>,"last_explored_at": string | null,"schema_version": number,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "answered_item_ids"?: (string)[],"card_title"?: string | null,"context"?: NonNullable<Json>,"created_at"?: string,"dims"?: NonNullable<Json>,"last_explored_at"?: string | null,"schema_version"?: number,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "answered_item_ids"?: (string)[],"card_title"?: string | null,"context"?: NonNullable<Json>,"created_at"?: string,"dims"?: NonNullable<Json>,"last_explored_at"?: string | null,"schema_version"?: number,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
                   ]
                 },"recipe_private": {
                   Row: {

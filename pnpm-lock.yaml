@@ -263,6 +263,15 @@ importers:
 
   packages/shared-types: {}
 
+  packages/taste:
+    devDependencies:
+      '@zhusha/equipment':
+        specifier: workspace:*
+        version: link:../equipment
+      '@zhusha/ingredients':
+        specifier: workspace:*
+        version: link:../ingredients
+
 packages:
 
   '@apideck/better-ajv-errors@0.3.7':

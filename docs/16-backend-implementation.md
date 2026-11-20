@@ -67,7 +67,7 @@
 | `kitchen_members` | `id` | `kitchen_id`（連動）；`user_id`（連動） | M0 |
 | `household_profiles` | `id` | `kitchen_id`（連動） | M2 |
 | `kitchen_join_codes` | `id` | `kitchen_id`（連動）；`created_by`、`used_by` → 使用者（空值） | M2 |
-| `dietary_profiles` | `id` | `user_id`（連動）或 `household_profile_id`（連動） | M0 |
+| `dietary_profiles` | `id` | `user_id`（連動，唯一）；`household_profile_id`（連動，M2 建 `household_profiles` 時加上欄位，並讓兩者恰好一個有值） | M0（只有使用者的） |
 | `entitlements` | `user_id` | `auth.users`（連動） | M1a |
 | `invites` | `id` | `invited_by`（佔位）；`kitchen_id`（連動）；`accepted_user_id`（空值） | M1a |
 | `password_reset_links` | `id` | `user_id`（連動） | M1a |
@@ -133,6 +133,8 @@
 - 唯一來源是程式碼庫裡的字典檔；每次部署由 GitHub Actions 匯入（整批取代），使用者與 App 都不能寫。
 - 匯入：`scripts/dictionaries-sql.ts` 把字典檔轉成一行 `select private.import_dictionaries(…)`，在同一個交易裡更新所有字典表並記下版本（字典內容的雜湊，存在 `dict_version`）。部署時先套用 migration，再用 `psql` 經連線池執行；本機的 `pnpm db:reset` 會一起匯入。
 - 匯入時再檢查一次：ID 不能從字典檔消失、陣列裡參照的 ID（例：食材的過敏原）都要存在、名稱一定要有繁中。
+- ID 與 key 的格式：一般字典用小寫英文加連字號（`soy-sauce`）；口味維度的 key 用點分層（`cuisine.southeast_asia.thai`，第一段是群組，上層可以跨群組）；題目 ID 用底線（`card_tom_yum`）；地區代碼用 ISO（`TW`、`US-CA`），`kitchens.region` 不加外鍵，只檢查格式。
+- 匯入時再檢查：題目的 `mapping` 只能指向存在的維度；題目與菜色的地區、後續題目、排除的過敏原與飲食限制、菜色的菜系／食材／手法／廚具、地區的常見食材都要存在。
 - 字典表跟著用到它的功能建：食材、過敏原、飲食限制先建；廚具與手法跟著廚具，口味維度與題庫跟著口味地圖，地區與基礎菜色跟著推薦。
 - 字典 ID 永遠不刪、不改名；淘汰的標 `deprecated`（05 完整性規則），所以外鍵用「限制」不會擋到部署。
 

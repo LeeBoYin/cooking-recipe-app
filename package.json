@@ -11,7 +11,7 @@
     "build": "pnpm --filter @zhusha/web build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "check:deno": "deno check packages/core/src/index.ts packages/ingredients/src/index.ts packages/equipment/src/index.ts",
+    "check:deno": "deno check packages/core/src/index.ts packages/ingredients/src/index.ts packages/equipment/src/index.ts packages/taste/src/index.ts",
     "check:functions": "cd supabase/functions/maintenance && deno check --no-lock --no-config index.ts && deno test --no-lock --no-config orphans.test.ts",
     "db:start": "supabase start",
     "db:stop": "supabase stop",

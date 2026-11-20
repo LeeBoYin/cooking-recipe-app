@@ -3,6 +3,10 @@ begin;
 select plan(11);
 
 -- 先清空，用一份小字典測（不依賴本機 seed 有沒有匯入）
+delete from public.dict_base_dishes;
+delete from public.dict_quiz_items;
+delete from public.dict_preference_dimensions;
+delete from public.dict_regions;
 delete from public.dict_equipment_types;
 delete from public.dict_techniques;
 delete from public.dict_dietary_restrictions;
