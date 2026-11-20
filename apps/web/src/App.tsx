@@ -1,4 +1,6 @@
-import { BrowserRouter, Route, Routes } from 'react-router';
+import { BrowserRouter, Outlet, Route, Routes } from 'react-router';
+import { useMySettings } from './data/hooks.ts';
+import { Onboarding } from './features/onboarding/Onboarding.tsx';
 import { useSession } from './data/auth.ts';
 import { SignInPage } from './features/auth/SignInPage.tsx';
 import { AddEquipmentPage } from './features/equipment/AddEquipmentPage.tsx';
@@ -31,6 +33,14 @@ import { Placeholder } from './features/shell/Placeholder.tsx';
 import { PhotoSync } from './photos/PhotoSync.tsx';
 import { UpdatePrompt } from './pwa/UpdatePrompt.tsx';
 
+// 登入後 onboarding_completed_at 還是空的，就先走新手引導（12 第三節）
+function OnboardingGate() {
+  const settings = useMySettings();
+  if (settings.isPending) return null;
+  if (settings.data && !settings.data.onboarding_completed_at) return <Onboarding />;
+  return <Outlet />;
+}
+
 export function App() {
   const session = useSession();
 
@@ -41,6 +51,8 @@ export function App() {
         <BrowserRouter>
           <PhotoSync />
           <Routes>
+            <Route element={<OnboardingGate />}>
+            <Route path="onboarding" element={<Onboarding redo />} />
             <Route element={<AppShell />}>
               <Route index element={<HomePage />} />
               <Route path="recipes" element={<RecipesPage />}>
@@ -73,6 +85,7 @@ export function App() {
               <Route path="kitchen/equipment/add" element={<AddEquipmentPage />} />
               <Route path="kitchen/equipment/inventory" element={<EquipmentInventoryPage />} />
               <Route path="kitchen/equipment/:id" element={<EditEquipmentPage />} />
+            </Route>
             </Route>
           </Routes>
         </BrowserRouter>
