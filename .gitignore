@@ -1,1 +1,15 @@
 .DS_Store
+node_modules/
+dist/
+dev-dist/
+coverage/
+*.tsbuildinfo
+
+# 本機環境變數與金鑰
+.env
+.env.*
+!.env.example
+
+# Supabase CLI 的暫存
+supabase/.temp/
+supabase/.branches/
