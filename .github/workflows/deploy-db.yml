@@ -74,7 +74,7 @@ jobs:
         env:
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
       - name: 部署 Edge Functions
-        run: supabase functions deploy --project-ref "$STAGING_PROJECT_ID"
+        run: supabase functions deploy --yes --remote "$STAGING_PROJECT_ID"
       - name: 匯入字典
         run: |
           node scripts/dictionaries-sql.ts > "$RUNNER_TEMP/dictionaries.sql"
@@ -98,7 +98,7 @@ jobs:
         env:
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PRODUCTION }}
       - name: 部署 Edge Functions
-        run: supabase functions deploy --project-ref "$PRODUCTION_PROJECT_ID"
+        run: supabase functions deploy --yes --remote "$PRODUCTION_PROJECT_ID"
       - name: 匯入字典
         run: |
           node scripts/dictionaries-sql.ts > "$RUNNER_TEMP/dictionaries.sql"
