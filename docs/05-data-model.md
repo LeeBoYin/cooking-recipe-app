@@ -364,7 +364,7 @@ interface KitchenEquipment extends KitchenEntity {   // 屬於廚房，同廚房
   rawName: string;            // 使用者取的名字（「阿嬤的鐵鍋」）
   brand?: string;
   model?: string;
-  capacity?: Quantity;        // 10 人份、5 公升、6 吋
+  capacity?: Quantity;        // 10 人份、5 公升、6 吋；資料庫存成 capacity_value＋capacity_unit，要一起填
   enabledOptionalTechniques?: TechniqueId[];   // 類型有選配功能時，使用者回答「有」的（例：烤箱有熱風 → air-fry）；其他手法不能手動改
   dishwasherSafe?: boolean;   // 使用者修正自己這件能否進洗碗機；字典標 'partial' 又沒修正時視為要手洗
   acquiredAt?: LocalDate;     // 照片是 Photo（ownerType: 'equipment'），不在這裡存照片 ID

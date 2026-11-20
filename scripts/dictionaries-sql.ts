@@ -2,9 +2,10 @@
 // 本機：pnpm db:reset 會先產生 supabase/seeds/dictionaries.sql；部署：GitHub Actions 產生後對雲端專案執行。
 // 版本號是字典內容的雜湊，內容沒變版本就不變。
 import { createHash } from 'node:crypto';
+import { equipmentTypes, techniques } from '../packages/equipment/src/index.ts';
 import { allergens, dietaryRestrictions, ingredients } from '../packages/ingredients/src/index.ts';
 
-const content = { allergens, ingredients, dietaryRestrictions };
+const content = { allergens, ingredients, dietaryRestrictions, techniques, equipmentTypes };
 const version = createHash('sha256').update(JSON.stringify(content)).digest('hex').slice(0, 12);
 const json = JSON.stringify({ version, ...content });
 
