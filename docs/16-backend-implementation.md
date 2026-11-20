@@ -154,7 +154,7 @@
 | `kitchen_equipment` | 成員 | 成員 | 成員（不能改所屬廚房；選配手法只能是字典列出的，由觸發器檢查） | 成員 |
 | `recipes` | `can_view_recipe`：作者；家人（household、friends）；好友（friends）；分享給他且沒收回的人。草稿只有作者 | 作者（經 `save_recipe`） | 作者（經 `save_recipe`） | 作者（經 `delete_recipe` 軟刪除） |
 | `recipe_revisions` | 作者 | 函式 | — | 連動 |
-| `photos` | 依擁有者：食譜照片跟著食譜；廚具照片給廚房成員；頭像給本人、家人、好友。私有 bucket `photos` 的 Storage 規則依路徑前綴判斷（`users/{userId}/` 本人、`kitchens/{kitchenId}/` 廚房成員），路徑格式不對一律拒絕；`users/{userId}/` 底下的食譜與步驟照片，另外開放給讀得到那篇食譜的人（由路徑裡的照片 ID 找到資料列，再用 `can_view_recipe` 判斷） | 本人；廚具照片給廚房成員。食譜與步驟照片只能掛在自己沒刪除的食譜上；三個檔案都已在 Storage 才能建立資料列；路徑必須是由 ID 與擁有者決定的固定格式；一件廚具一張；每篇食譜一張封面；張數上限由觸發器檢查 | 只能改排序與封面 | 同新增；廚具刪除時資料列由觸發器一起刪，檔案由 `maintenance` 掃孤兒檔 |
+| `photos` | 依擁有者：食譜照片跟著食譜；廚具照片給廚房成員；頭像給本人、家人、好友。私有 bucket `photos` 的 Storage 規則依路徑前綴判斷（`users/{userId}/` 本人、`kitchens/{kitchenId}/` 廚房成員），路徑格式不對一律拒絕；`users/{userId}/` 底下的食譜與步驟照片，另外開放給讀得到那篇食譜的人（由路徑裡的照片 ID 找到資料列，再用 `can_view_recipe` 判斷） | 本人；廚具照片給廚房成員。食譜與步驟照片只經 `save_recipe` 的 `p_photos` 建立（手機不能直接寫），只能掛在自己沒刪除的食譜上；三個檔案都已在 Storage 才能建立資料列；路徑必須是由 ID 與擁有者決定的固定格式；一件廚具一張；每篇食譜一張封面；張數上限由觸發器檢查 | 廚具照片只能改排序與封面；食譜與步驟照片經 `save_recipe` | 同新增；廚具刪除時資料列由觸發器一起刪，檔案由 `maintenance` 掃孤兒檔 |
 | `bookmarks` | 本人 | 本人（朋友的食譜要讀得到才能收藏） | 本人 | 本人 |
 | `share_links` | 作者（公開頁由 `share` 函式以服務權限讀） | 作者 | 作者（撤銷） | 連動 |
 | `reactions`、`comments` | 讀得到那篇食譜的人 | 讀得到那篇食譜的人 | 本人 | 本人；食譜作者可刪自己食譜下的留言 |
@@ -171,7 +171,7 @@
 
 | 函式 | 誰能呼叫 | 做什麼 |
 |------|---------|-------|
-| `save_recipe` | 作者 | 新增或更新食譜（含草稿），只送有改的欄位；ID 還不存在時新增一篇草稿；比對讀取時的 `updated_at`，不一致就拒絕；用字典表算出 `ingredient_ids`、`equipment_type_ids`、`techniques`、`difficulty.overall`、`cooked_on`（料理時間改變時才重算，用食譜所在廚房的時區；沒指定廚房時用目前的廚房）、`cooked_dates`；做法改變時 `version` 加一（M1b 起同時寫一版 `recipe_revisions`）；依 `app_config.text_limits` 檢查長度；刪掉已經不在步驟裡的步驟照片資料列（檔案由孤兒檔清理處理）；可以一起存 `recipe_private`，兩張表同一個交易 |
+| `save_recipe` | 作者 | 新增或更新食譜（含草稿），只送有改的欄位；ID 還不存在時新增一篇草稿；比對讀取時的 `updated_at`，不一致就拒絕；用字典表算出 `ingredient_ids`、`equipment_type_ids`、`techniques`、`difficulty.overall`、`cooked_on`（料理時間改變時才重算，用食譜所在廚房的時區；沒指定廚房時用目前的廚房）、`cooked_dates`；做法改變時 `version` 加一（M1b 起同時寫一版 `recipe_revisions`）；依 `app_config.text_limits` 檢查長度；刪掉已經不在步驟裡的步驟照片資料列（檔案由孤兒檔清理處理）；步驟最多 `app_config.max_steps` 步；`p_photos`（選填）是這篇食譜上方照片與步驟照片的完整清單：不在清單裡的刪除、新的建立、順序依清單，上方照片的第一張設為封面，張數依 `photo_limits` 檢查；可以一起存 `recipe_private`，兩張表同一個交易 |
 | `publish_recipe` | 作者 | 檢查有標題或照片、改成已發佈、第一次發佈時填 `published_at`；M2 起對好友與家人送「有新動態」訊號（Realtime Broadcast，和 `feed_page` 一起做） |
 | `delete_recipe`、`restore_recipe` | 作者 | 軟刪除與復原；`app_config.soft_delete_retention_days` 內可以復原，到期後由每日維護真正刪除 |
 | `record_cook_again` | 作者 | 新增一筆「又做了一次」，更新 `cooked_dates` |
@@ -215,7 +215,7 @@ Supabase Auth 另設「建立使用者前」的 hook：Google 登入時檢查 em
 | 觸發時機 | 做什麼 |
 |---------|-------|
 | 每張表新增、修改 | 設定 `created_at`、`updated_at` |
-| `photos` 新增 | 檢查擁有者存在；食譜照片（含步驟照）先鎖住那篇食譜，再依 `app_config.photo_limits` 檢查張數（每篇 10 張含步驟照、每次又做了一次 3 張，兩種各自計算），同時送出也不會超過 |
+| `photos` 新增 | 檢查擁有者存在；食譜照片（含步驟照）先鎖住那篇食譜，再依 `app_config.photo_limits` 檢查張數（上方 5 張、每步 1 張、每次又做了一次 3 張，各自計算），同時送出也不會超過 |
 | `kitchen_members` 新增、修改、刪除 | 每人最多 5 個廚房、每廚房最多 10 人、至少一位管理者；產生廚房相關通知 |
 | `reactions`、`comments`、`bookmarks`、`friend_shares`、`friendships` 新增 | 依收件人的通知開關產生通知；要推播的，排一筆 `push` 背景任務 |
 | `comments` 新增 | 回覆只能一層 |

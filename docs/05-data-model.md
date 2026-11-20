@@ -411,7 +411,6 @@ interface Recipe extends UserEntity {
   title?: string;             // 照片或標題至少一項；只有照片時顯示記錄日期
   story?: string;             // 心得與故事（「阿嬤的味道」）；封面是 isCover 的那張 Photo
   highlights: Highlight[];    // 為什麼值得記住，可多選、可空
-  rating?: 'loved' | 'ok' | 'flop';   // 😋 🙂 😅
   cookedAt?: Instant;         // 記錄的那次料理的時間點（預設取第一張照片的拍攝時間）；匯入的食譜沒有
   cookedOn?: LocalDate;       // 衍生：依當時廚房時區算出的日期，只在 cookedAt 改變時重算；時間軸、回顧用
   kitchenId?: string;         // 在哪個廚房做的；沒指定時用作者目前的廚房
@@ -425,9 +424,6 @@ interface Recipe extends UserEntity {
   steps: RecipeStep[];               // 可以是空的
   tips?: string;              // 料理筆記：心得以外的提醒與防雷（「培根很鹹，下次少放鹽」）
   // 「用說的」的口述原文不放在這裡，放在只有作者能讀的 RecipePrivate（RLS 是以列為單位，同一列的欄位朋友都讀得到）
-  cuisineKeys?: string[];     // 菜系，存口味維度的代碼，例 ['cuisine.taiwan']；顯示時從字典取名稱（不存中文顯示文字）
-  dishTypeKeys?: string[];    // 類型（主菜、湯、甜點…），存口味維度「料理型態」的代碼，例 ['form.soup']
-  tags: string[];             // 自訂標籤（使用者自己的文字）
   equipmentTypeIds?: string[];  // 衍生：由步驟彙整，例：['rice-cooker']
   techniques?: TechniqueId[];   // 衍生：由步驟彙整
   ingredientIds: string[];      // 衍生：這道菜用了哪些食材，來源優先序見「衍生欄位」
@@ -470,11 +466,10 @@ interface CookNote {          // 又做了一次：日期＋一句話＋照片�
   id: string;
   cookedOn: LocalDate;
   text?: string;              // 「這次少放糖，更好吃」
-  rating?: 'loved' | 'ok' | 'flop';
 }
 
 type Highlight = 'first_time' | 'hosted_friends' | 'improved' | 'family_favorite' | 'festive' | 'make_again' | 'funny_flop';
-// 第一次做、招待朋友、改良成功、家人最愛、節日料理、值得再做、翻車也好笑
+// 第一次做、招待朋友、改良成功、家人最愛、節日料理、值得再做、翻車也好笑；固定七個、不能自訂；前端遇到不認得的代碼略過不顯示
 
 type Diner =                  // 一起吃的人：一個清單、多種類型
   | { type: 'member'; userId: string }                     // 同廚房的成員（M2），合併其飲食限制
@@ -482,7 +477,7 @@ type Diner =                  // 一起吃的人：一個清單、多種類型
   | { type: 'friend'; userId: string }                     // 一起吃的好友：只記在作者這裡，不通知對方、對方看不到
   | { type: 'text'; name: string };                        // 自由文字（M0）
 
-type RecipeSnapshot = Pick<Recipe, 'title' | 'story' | 'highlights' | 'cookedOn' | 'servings' | 'difficulty' | 'ingredients' | 'steps' | 'tips' | 'cuisineKeys' | 'tags' | 'equipmentTypeIds' | 'techniques'> & {
+type RecipeSnapshot = Pick<Recipe, 'title' | 'story' | 'highlights' | 'cookedOn' | 'servings' | 'difficulty' | 'ingredients' | 'steps' | 'tips' | 'equipmentTypeIds' | 'techniques'> & {
   photoPaths: string[];       // 分享當下的公開照片副本：封面加最多 3 張，1080px；撤銷、管理員下架、食譜真正刪除時一起刪掉
   authorName: string;         // 分享當下的作者名字
 };
@@ -532,7 +527,7 @@ interface RecipeRevision {            // 做法的每一版；「用說的改食
 }
 ```
 
-- 只在「做法」（食材、步驟、料理筆記、份量、難易度）改變時新增一版；改心得、照片、標籤不算新版本。
+- 只在「做法」（食材、步驟、料理筆記、份量、難易度）改變時新增一版；改心得、照片不算新版本。
 - 版本只有作者能看；朋友永遠看到最新版。
 
 ### Bookmark — 收藏
@@ -637,7 +632,7 @@ interface Photo extends UserEntity {   // 照片只記錄自己屬於誰；上�
   kitchenId?: string;         // ownerType 為 equipment 時，所屬的廚房（權限與擁有者都依它）
   createdBy?: string;         // 上傳的人（資料庫記下）
   sortOrder: number;          // 同一個擁有者的照片順序；一件廚具只有一張照片
-  isCover: boolean;           // 食譜的封面
+  isCover: boolean;           // 食譜的封面：上方照片的第一張，由 `save_recipe` 依順序設定，不由手機決定
   storagePath: string;        // Storage 路徑（原圖，已壓縮）；上傳完成才建立這筆資料
   feedPath: string;           // 動態圖：長邊 1080px，動態與滿版顯示用
   thumbPath: string;          // 縮圖：長邊 400px，格子與清單用
@@ -793,7 +788,8 @@ interface AppConfig {                 // 後端設定，在管理後台的「系
   registrationMode: 'invite_only' | 'waitlist' | 'open';
   maxUsers: number;                   // 已註冊＋還沒過期的待接受邀請（expiresAt 在現在之後）合計上限，預設 30
   softDeleteRetentionDays: number;    // 刪除的食譜與廚房保留多久可以復原，預設 30
-  photoLimits: { perRecipe: number; perCookNote: number };   // 每篇食譜最多 10 張（含步驟照、不含又做了一次的照片）、每次又做了一次最多 3 張
+  photoLimits: { perRecipe: number; perStep: number; perCookNote: number };   // 每篇食譜上方最多 5 張、每個步驟 1 張、每次又做了一次 3 張
+  maxSteps: number;           // 每篇食譜最多 10 步
   textLimits: {                       // 使用者內容的長度上限，資料庫與 API 都檢查
     title: number;                    // 80
     story: number;                    // 心得 2,000
@@ -1110,7 +1106,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 - 難易度的五個面向在 1–5；`overall` 在 1–10。
 - `DietaryProfile` 的 `userId`、`householdProfileId` 恰好一個有值；`Photo` 依 `ownerType` 檢查對應的欄位有值。
 - 已發佈的食譜要有標題或至少一張照片：在發佈的 API 檢查（照片在另一張表，資料庫約束做不到）。
-- 照片張數依 `AppConfig.photoLimits` 檢查（每篇食譜含步驟照 10 張、每次又做了一次 3 張，兩種各自計算）：照片直接寫進照片表、不經儲存食譜的 API，所以由照片表的觸發器檢查，先鎖住那篇食譜，同時送出也不會超過。每篇食譜只有一張封面。
+- 照片張數依 `AppConfig.photoLimits` 檢查（每篇食譜上方 5 張、每個步驟 1 張、每次又做了一次 3 張，各自計算），步驟最多 `AppConfig.maxSteps` 步：食譜與步驟的照片只經 `save_recipe` 的 `p_photos` 寫入，由照片表的觸發器檢查，先鎖住那篇食譜，同時送出也不會超過。每篇食譜只有一張封面（上方照片的第一張）。
 - 草稿一律只有作者看得到：RLS 判斷 `status = 'draft'` 時只放行作者，不看 `visibility`。
 
 **內嵌 JSON 的格式**
@@ -1172,9 +1168,9 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 常買清單 | `pantry_items (kitchen_id, ingredient_id, added_on)`：過去 30 天加入過的食材依筆數排序（已移除的也算；再加入已有的食材只更新日期，所以一筆代表一段「有」的期間）；次數不顯示。新廚房用 `RegionProfile.commonPantryIngredientIds` |
 | 食譜時間軸 | `recipes.cooked_dates`（GIN 索引）展開成「食譜＋日期」，只取 published、未刪除；又做了一次的那天顯示那次的照片與一句話 |
 | 草稿匣 | `recipes (user_id, status)` 取 draft |
-| 依標籤瀏覽（第一次做的…） | `recipes.highlights`（GIN 索引） |
+| 依「值得記住的原因」瀏覽（第一次做的…） | `recipes.highlights`（GIN 索引） |
 | 季節回顧 | 依 `cooked_dates` 範圍取出後，用廚房地區的季節分法分組（不另存季節） |
-| 搜尋食譜（名稱、心得、食材原文、標籤） | PGroonga 全文索引（能斷中文、日文詞），建在 `recipes` 的 `title`、`story`、`ingredients` 原文與 `tags`；收藏用 `Bookmark.titleSnapshot` 與原作一起查。食材名稱先用字典的別名（所有語言）對到 ID，再用 `ingredient_ids` 查 |
+| 搜尋食譜（名稱、心得、食材原文、標籤） | PGroonga 全文索引（能斷中文、日文詞），建在 `recipes` 的 `title`、`story` 與 `ingredients` 原文；收藏用 `Bookmark.titleSnapshot` 與原作一起查。食材名稱先用字典的別名（所有語言）對到 ID，再用 `ingredient_ids` 查 |
 | 依手邊食材評分候選（L1） | `recipes.ingredient_ids`（GIN 索引）比對手邊的食材 |
 | 收藏的材料齊了嗎 | 大廚點子用 `bookmarks.idea_ingredient_ids`（GIN 索引），朋友的食譜接到原作的 `recipes.ingredient_ids`；只看還沒做過的（`cooked_recipe_id` 為空） |
 | 裝備卡的拿手菜 | `recipes.equipment_used_ids`（GIN 索引，只含自己的食譜） |

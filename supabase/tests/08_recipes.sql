@@ -1,7 +1,7 @@
 -- 食譜：save_recipe／publish_recipe／delete_recipe／restore_recipe、可見範圍、私人資料、
 -- 食譜與步驟照片的權限與張數上限（16 第三～五節）
 begin;
-select plan(97);
+select plan(116);
 
 create function tests.updated_rows(p_sql text)
 returns integer
@@ -17,7 +17,7 @@ end;
 $$;
 
 -- 儲存：自動帶上目前的 updated_at（同一個交易裡 now() 不變，衝突用另外的測試）
-create function tests.save(p jsonb, p_private jsonb default null)
+create function tests.save(p jsonb, p_private jsonb default null, p_photos jsonb default null)
 returns public.recipes
 language plpgsql
 as $$
@@ -25,8 +25,17 @@ declare
   v_updated timestamptz;
 begin
   select updated_at into v_updated from public.recipes where id = (p->>'id')::uuid;
-  return public.save_recipe(p, v_updated, p_private);
+  return public.save_recipe(p, v_updated, p_private, p_photos);
 end;
+$$;
+
+-- 組出 p_photos 的一項
+create function tests.photo(p_id uuid, p_type text, p_owner uuid default null)
+returns jsonb
+language sql
+as $$
+  select jsonb_strip_nulls(jsonb_build_object(
+    'id', p_id, 'owner_type', p_type, 'owner_id', p_owner, 'width', 1200, 'height', 900));
 $$;
 
 create function tests.add_photo(
@@ -54,7 +63,7 @@ as $$
     ('photos', format('users/%s/%s_feed.webp', p_user, p_id)),
     ('photos', format('users/%s/%s_thumb.webp', p_user, p_id));
 $$;
-grant execute on function tests.updated_rows(text), tests.save(jsonb, jsonb),
+grant execute on function tests.updated_rows(text), tests.save(jsonb, jsonb, jsonb), tests.photo(uuid, text, uuid),
   tests.add_photo(uuid, uuid, text, uuid, uuid, uuid, boolean) to authenticated;
 
 select tests.create_user('owner@zhusha.test') as owner \gset
@@ -81,6 +90,7 @@ select private.uuid_v7() as ph6 \gset
 select private.uuid_v7() as ph7 \gset
 select private.uuid_v7() as ph8 \gset
 select private.uuid_v7() as ph9 \gset
+select private.uuid_v7() as ph10 \gset
 
 select tests.add_files(:'owner', ph) from (values (:'ph1'::uuid), (:'ph2'::uuid), (:'ph3'::uuid), (:'ph4'::uuid),
   (:'ph5'::uuid), (:'ph6'::uuid), (:'ph7'::uuid), (:'ph8'::uuid), (:'ph9'::uuid)) as t(ph);
@@ -231,29 +241,76 @@ select tests.logout();
 ---------------------------------------------------------------------------
 -- 照片：食譜與步驟
 ---------------------------------------------------------------------------
-update public.app_config set photo_limits = '{"per_recipe": 3, "per_cook_note": 1}';
+update public.app_config set photo_limits = '{"per_recipe": 2, "per_step": 1, "per_cook_note": 1}', max_steps = 2;
 
 select tests.login_as(:'owner');
-select lives_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s')$$, :'ph1', :'owner', :'r1'), '作者可以新增食譜照片');
+select throws_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s')$$, :'ph1', :'owner', :'r1'),
+  '42501', null, '手機不能直接寫食譜照片');
+select throws_ok(format($$select tests.add_photo('%s', '%s', 'recipe_step', '%s', '%s')$$, :'ph3', :'owner', :'s1', :'r1'),
+  '42501', null, '手機不能直接寫步驟照片');
+select lives_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r1',
+  jsonb_build_array(tests.photo(:'ph1', 'recipe'), tests.photo(:'ph2', 'recipe'), tests.photo(:'ph3', 'recipe_step', :'s1'))),
+  '用 p_photos 存上方照片與步驟照片');
 select is((select created_by from public.photos where id = :'ph1'), :'owner'::uuid, '由資料庫記下上傳的人');
-select lives_ok(format($$update public.photos set is_cover = true where id = '%s'$$, :'ph1'), '設為封面');
-select throws_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s', null, null, true)$$, :'ph2', :'owner', :'r1'),
-  '23505', null, '每篇食譜只有一張封面');
-select lives_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s')$$, :'ph2', :'owner', :'r1'), '第二張');
-select lives_ok(format($$select tests.add_photo('%s', '%s', 'recipe_step', '%s', '%s')$$, :'ph3', :'owner', :'s1', :'r1'),
-  '步驟照片也算在上限裡');
-select throws_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s')$$, :'ph4', :'owner', :'r1'),
-  '54000', null, '超過每篇食譜的張數上限');
-select throws_ok(format($$select tests.add_photo('%s', '%s', 'recipe_step', '%s', '%s')$$, :'ph4', :'owner', :'s2', :'r1'),
+select is((select id from public.photos where owner_type = 'recipe' and owner_id = :'r1' and is_cover), :'ph1'::uuid, '第一張就是封面');
+select is((select array_agg(id order by sort_order) from public.photos where owner_type = 'recipe' and owner_id = :'r1'),
+  array[:'ph1', :'ph2']::uuid[], '順序依清單');
+select is((select recipe_id from public.photos where id = :'ph3'), :'r1'::uuid, '步驟照片記下所屬的食譜');
+
+select lives_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r1',
+  jsonb_build_array(tests.photo(:'ph2', 'recipe'), tests.photo(:'ph1', 'recipe'), tests.photo(:'ph3', 'recipe_step', :'s1'))),
+  '調換順序');
+select is((select id from public.photos where owner_type = 'recipe' and owner_id = :'r1' and is_cover), :'ph2'::uuid, '換順序後封面跟著換');
+select is((select count(*)::int from public.photos where owner_type = 'recipe' and owner_id = :'r1' and is_cover), 1, '只有一張封面');
+
+select throws_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r1',
+  jsonb_build_array(tests.photo(:'ph1', 'recipe'), tests.photo(:'ph2', 'recipe'), tests.photo(:'ph4', 'recipe'))),
+  '54000', null, '超過上方照片的張數上限');
+select is((select count(*)::int from public.photos where owner_type = 'recipe' and owner_id = :'r1' and cook_note_id is null), 2,
+  '超過上限時整批不寫入');
+select throws_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r1',
+  jsonb_build_array(tests.photo(:'ph3', 'recipe_step', :'s1'), tests.photo(:'ph4', 'recipe_step', :'s1'))),
+  '54000', null, '一個步驟只能放一張照片');
+select throws_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r1',
+  jsonb_build_array(tests.photo(:'ph3', 'recipe_step', :'s2'))),
   '23503', null, '步驟不存在');
+select throws_ok(format($$select tests.save('{"id":"%s"}', null, '{"id":"x"}')$$, :'r1'), '22023', null, 'p_photos 不是陣列');
+select throws_ok(format($$select tests.save('{"id":"%s"}', null, '[{"id":"%s","owner_type":"recipe"}]')$$, :'r1', :'ph1'),
+  '22023', null, '照片缺寬高');
+select throws_ok(format($$select tests.save('{"id":"%s"}', null, '[{"id":"%s","owner_type":"avatar","width":1,"height":1}]')$$, :'r1', :'ph1'),
+  '22023', null, '照片類型只能是食譜或步驟');
+select throws_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r1',
+  jsonb_build_array(tests.photo(:'ph1', 'recipe'), tests.photo(:'ph1', 'recipe'))),
+  '22023', null, '照片重複');
+select throws_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r1',
+  jsonb_build_array(tests.photo(:'ph10', 'recipe'))),
+  '23503', null, '檔案還沒傳完不能建立照片');
+select is((select count(*)::int from public.photos where owner_type = 'recipe' and owner_id = :'r1' and cook_note_id is null), 2,
+  '失敗的儲存不動照片');
+select throws_ok(format($$select tests.save('{"id":"%s","steps":[
+  {"id":"%s","order":0,"text":"a"},{"id":"%s","order":1,"text":"b"},{"id":"%s","order":2,"text":"c"}]}')$$,
+  :'r1', :'s1', :'s2', :'n1'), '54000', null, '步驟超過上限');
+
+-- 又做了一次的照片維持直接寫
 select lives_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s', null, '%s')$$, :'ph5', :'owner', :'r1', :'n1'),
-  '又做了一次的照片不算在每篇上限裡');
+  '又做了一次的照片不算在上方照片的上限裡');
 select throws_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s', null, '%s')$$, :'ph6', :'owner', :'r1', :'n1'),
   '54000', null, '超過每次又做了一次的張數上限');
 select throws_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s', null, '%s')$$, :'ph6', :'owner', :'r1', :'s2'),
   '23503', null, '又做了一次的記錄不存在');
 select throws_ok(format($$update public.photos set cook_note_id = null where id = '%s'$$, :'ph5'),
   '42501', null, '只能改排序與封面');
+select lives_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r1',
+  jsonb_build_array(tests.photo(:'ph2', 'recipe'), tests.photo(:'ph3', 'recipe_step', :'s1'))),
+  '清單裡沒有的照片會被刪掉');
+select is((select count(*)::int from public.photos where id = :'ph1'), 0, '被移除的照片資料列刪掉了');
+select is((select count(*)::int from public.photos where id = :'ph5'), 1, '又做了一次的照片不受影響');
+select lives_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r1',
+  jsonb_build_array(tests.photo(:'ph1', 'recipe'), tests.photo(:'ph2', 'recipe'), tests.photo(:'ph3', 'recipe_step', :'s1'))),
+  '復原：同一張照片的檔案還在，可以再加回來');
+select lives_ok(format($$select tests.save('{"id":"%s","story":"沒送 p_photos"}')$$, :'r1'), '沒送 p_photos 不動照片');
+select is((select count(*)::int from public.photos where owner_type in ('recipe', 'recipe_step') and (owner_id = :'r1' or recipe_id = :'r1')), 4,
+  '照片都還在');
 select tests.logout();
 
 -- 讀取：家人讀得到（食譜是家人可見）；外人不行
@@ -263,8 +320,9 @@ select is((select count(*)::int from storage.objects where bucket_id = 'photos' 
   12, '家人讀得到照片檔案（4 張 × 3 個尺寸）');
 select throws_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s')$$, :'ph7', :'owner', :'r2'),
   '42501', null, '不能用別人的名義新增照片');
-select throws_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s')$$, :'ph7', :'mate', :'r1'),
-  '23503', null, '不能把照片掛在別人的食譜上');
+select throws_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r1',
+  jsonb_build_array(tests.photo(:'ph7', 'recipe'))),
+  'P0002', null, '不能把照片掛在別人的食譜上');
 select is(tests.updated_rows(format($$delete from public.photos where id = '%s'$$, :'ph1')), 0, '家人刪不掉');
 select throws_ok(format($$insert into storage.objects (bucket_id, name) values ('photos', 'users/%s/%s.webp')$$, :'owner', :'ph8'),
   '42501', null, '家人不能寫別人路徑的檔案');
@@ -292,7 +350,7 @@ select is((select count(*)::int from public.photos where owner_type = 'recipe_st
 
 -- 只有照片也能發佈
 select lives_ok(format($$select tests.save('{"id":"%s"}')$$, :'r3'), '另一篇草稿');
-select lives_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s')$$, :'ph8', :'owner', :'r3'), '只放一張照片');
+select lives_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r3', jsonb_build_array(tests.photo(:'ph8', 'recipe'))), '只放一張照片');
 select lives_ok(format($$select public.publish_recipe('%s')$$, :'r3'), '只有照片也能發佈');
 
 ---------------------------------------------------------------------------
@@ -301,8 +359,8 @@ select lives_ok(format($$select public.publish_recipe('%s')$$, :'r3'), '只有�
 select lives_ok(format($$select public.delete_recipe('%s')$$, :'r3'), '刪除（軟刪除）');
 select ok((select deleted_at is not null from public.recipes where id = :'r3'), '作者還看得到，可以復原');
 select throws_ok(format($$select tests.save('{"id":"%s","story":"x"}')$$, :'r3'), 'P0002', null, '已刪除的不能再存');
-select throws_ok(format($$select tests.add_photo('%s', '%s', 'recipe', '%s')$$, :'ph9', :'owner', :'r3'),
-  '23503', null, '已刪除的食譜不能新增照片');
+select throws_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r3', jsonb_build_array(tests.photo(:'ph9', 'recipe'))),
+  'P0002', null, '已刪除的食譜不能新增照片');
 select tests.logout();
 
 select tests.login_as(:'mate');

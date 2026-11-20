@@ -21,7 +21,7 @@ export function EquipmentPhoto({ equipmentId }: { equipmentId: string }) {
   const remove = useDeletePhoto(kitchen?.id);
   const uploads = useUploadState();
   const input = useRef<HTMLInputElement>(null);
-  const upload = [...uploads.values()].find((u) => u.equipmentId === equipmentId);
+  const upload = [...uploads.values()].find((u) => u.ownerId === equipmentId);
 
   // 打開編輯頁時先預載 WebP 轉檔程式（iPhone 的 Safari 才需要）
   useEffect(() => {

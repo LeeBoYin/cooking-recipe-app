@@ -5,7 +5,6 @@ import type {
   Diner,
   Dictation,
   Highlight,
-  Rating,
   RecipeAiTags,
   RecipeDifficulty,
   RecipeIngredient,
@@ -14,6 +13,7 @@ import type {
   RecipeVisibility,
 } from '@zhusha/shared-types';
 import { newId } from '@zhusha/core';
+import { listRecipePhotos, type Photo } from './photos.ts';
 import { supabase } from './supabase.ts';
 import type { Row } from './types.ts';
 
@@ -26,7 +26,6 @@ export type RecipeFields = {
   title: string | null;
   story: string | null;
   highlights: Highlight[];
-  rating: Rating | null;
   cooked_at: string | null; // 時間點（ISO 8601）；cooked_on 由資料庫依廚房時區算
   kitchen_id: string | null; // 沒指定時用目前的廚房
   cook_notes: CookNote[];
@@ -35,9 +34,6 @@ export type RecipeFields = {
   ingredients: RecipeIngredient[];
   steps: RecipeStep[];
   tips: string | null;
-  cuisine_keys: string[] | null;
-  dish_type_keys: string[] | null;
-  tags: string[];
   equipment_used_ids: string[];
   ai_tags: RecipeAiTags | null;
   source: RecipeSource | null;
@@ -46,6 +42,33 @@ export type RecipeFields = {
 };
 
 export type RecipePatch = Partial<RecipeFields>;
+
+// 上限的預設值（和 app_config 的預設一致；後台改了數字，資料庫會拒絕、畫面顯示沒有成功）
+export const recipeLimits = { photos: 5, steps: 10, photosPerStep: 1 } as const;
+
+// save_recipe 的 p_photos：這篇食譜上方照片與步驟照片的完整清單（依序）。不在清單裡的會被刪掉，第一張上方照片是封面。
+// 步驟照片的 owner_id 是步驟 ID；上方照片不用給。
+export type RecipePhotoInput = {
+  id: string;
+  owner_type: 'recipe' | 'recipe_step';
+  owner_id?: string;
+  width: number;
+  height: number;
+  taken_at?: string;
+};
+
+export function photoInputs(rows: Photo[]): RecipePhotoInput[] {
+  return rows.map((p) => ({
+    id: p.id,
+    owner_type: p.owner_type as RecipePhotoInput['owner_type'],
+    ...(p.owner_type === 'recipe_step' ? { owner_id: p.owner_id } : {}),
+    width: p.width,
+    height: p.height,
+    ...(p.taken_at ? { taken_at: p.taken_at } : {}),
+  }));
+}
+
+export type SaveOptions = { private?: RecipePrivatePatch; photos?: RecipePhotoInput[] };
 
 // 作者的私人資料：口述原文、一起吃的人
 export type RecipePrivatePatch = { dictation?: Dictation | null; diners?: Diner[] };
@@ -58,6 +81,7 @@ export const recipeErrors = {
   empty: 'recipe_empty', // 發佈要有標題或至少一張照片
   textTooLong: 'text_too_long', // text_too_long:欄位:上限:超過幾字
   photoLimit: 'photo_limit_reached',
+  tooManySteps: 'too_many_steps',
 } as const;
 
 export function isRecipeError(error: unknown, reason: (typeof recipeErrors)[keyof typeof recipeErrors]): boolean {
@@ -107,11 +131,11 @@ export async function getRecipePrivate(recipeId: string): Promise<RecipePrivate 
 // 新增一篇草稿。id 由手機產生；重送同一個 id 不會產生兩筆（已經存在就回傳現有那一篇）
 export async function createRecipe(
   patch: RecipePatch = {},
-  options: { id?: string; private?: RecipePrivatePatch } = {},
+  options: SaveOptions & { id?: string } = {},
 ): Promise<Recipe> {
   const id = options.id ?? newId();
   try {
-    return await saveRecipe(id, patch, null, options.private);
+    return await saveRecipe(id, patch, null, options);
   } catch (error) {
     if (isRecipeError(error, recipeErrors.conflict)) {
       const existing = await getRecipe(id);
@@ -121,29 +145,55 @@ export async function createRecipe(
   }
 }
 
-// 更新。只送有改的欄位；expectedUpdatedAt 是讀取時的 updated_at，不一致資料庫就拒絕（recipeErrors.conflict）
+// 更新。只送有改的欄位；expectedUpdatedAt 是讀取時的 updated_at，不一致資料庫就拒絕（recipeErrors.conflict）。
+// 衝突時用最新的 updated_at 自動重送（畫面上不處理衝突），最多重送 3 次。
 export async function updateRecipe(
   id: string,
   patch: RecipePatch,
   expectedUpdatedAt: string,
-  priv?: RecipePrivatePatch,
+  options: SaveOptions = {},
 ): Promise<Recipe> {
-  return saveRecipe(id, patch, expectedUpdatedAt, priv);
+  let expected = expectedUpdatedAt;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await saveRecipe(id, patch, expected, options);
+    } catch (error) {
+      if (!isRecipeError(error, recipeErrors.conflict) || attempt >= 3) throw error;
+      const latest = await getRecipe(id);
+      if (!latest) throw error;
+      expected = latest.updated_at;
+    }
+  }
 }
 
 async function saveRecipe(
   id: string,
   patch: RecipePatch,
   expectedUpdatedAt: string | null,
-  priv?: RecipePrivatePatch,
+  options: SaveOptions,
 ): Promise<Recipe> {
   const { data, error } = await supabase().rpc('save_recipe', {
     p_recipe: { ...patch, id },
     ...(expectedUpdatedAt ? { p_expected_updated_at: expectedUpdatedAt } : {}),
-    ...(priv ? { p_private: priv } : {}),
+    ...(options.private ? { p_private: options.private } : {}),
+    ...(options.photos ? { p_photos: options.photos } : {}),
   });
   if (error) throw error;
   return data;
+}
+
+// 背景續傳完成、但編輯頁已經關掉時：把照片補進草稿（已發佈的要按「儲存」才改，這裡不動）。
+// 放不進去（滿了、步驟沒了）就放棄，檔案由之後的維護工作掃孤兒檔。
+export async function attachPhotoToDraft(recipeId: string, photo: RecipePhotoInput): Promise<void> {
+  const recipe = await getRecipe(recipeId);
+  if (!recipe || recipe.status !== 'draft' || recipe.deleted_at) return;
+  const list = photoInputs(await listRecipePhotos(recipeId));
+  if (list.some((p) => p.id === photo.id)) return;
+  const sameSlot = list.filter((p) =>
+    photo.owner_type === 'recipe' ? p.owner_type === 'recipe' : p.owner_id === photo.owner_id,
+  );
+  if (sameSlot.length >= (photo.owner_type === 'recipe' ? recipeLimits.photos : recipeLimits.photosPerStep)) return;
+  await updateRecipe(recipeId, {}, recipe.updated_at, { photos: [...list, photo] });
 }
 
 // 發佈：要有標題或至少一張照片。已經發佈的重複呼叫沒有影響

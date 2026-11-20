@@ -10,7 +10,8 @@ import {
   onPhotoCommitted,
   subscribeUploads,
 } from '../photos/uploadQueue.ts';
-import { deletePhoto, listEquipmentPhotos, signPhotoUrls, type Photo } from './photos.ts';
+import { deletePhoto, listEquipmentPhotos, listRecipePhotos, signPhotoUrls, type Photo } from './photos.ts';
+import { deleteRecipe, getRecipe, restoreRecipe } from './recipes.ts';
 import { getMyIdentity, getMySettings } from './account.ts';
 import { listMyKitchens, setCurrentKitchen } from './kitchens.ts';
 import {
@@ -44,6 +45,8 @@ export const queryKeys = {
   equipment: (kitchenId: string) => ['kitchen', kitchenId, 'equipment'] as const,
   equipmentItem: (kitchenId: string, id: string) => ['kitchen', kitchenId, 'equipment', id] as const,
   equipmentPhotos: (kitchenId: string) => ['kitchen', kitchenId, 'photos', 'equipment'] as const,
+  recipe: (id: string) => ['recipe', id] as const,
+  recipePhotos: (id: string) => ['recipe', id, 'photos'] as const,
   photoUrls: (paths: string[]) => ['photo-urls', ...paths] as const,
 };
 
@@ -218,5 +221,39 @@ export function useDeletePhoto(kitchenId: string | undefined) {
   return useMutation({
     mutationFn: (photo: Photo) => deletePhoto(photo),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.equipmentPhotos(kitchenId ?? '') }),
+  });
+}
+
+// 一篇食譜；不存在（還沒存過的新草稿）或讀不到時是 null
+export function useRecipe(id: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.recipe(id ?? ''),
+    queryFn: () => getRecipe(id as string),
+    enabled: !!id,
+  });
+}
+
+// 食譜上方的照片與步驟照片（依順序）
+export function useRecipePhotos(id: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.recipePhotos(id ?? ''),
+    queryFn: () => listRecipePhotos(id as string),
+    enabled: !!id,
+  });
+}
+
+export function useDeleteRecipe() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => deleteRecipe(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recipe'] }),
+  });
+}
+
+export function useRestoreRecipe() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => restoreRecipe(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['recipe'] }),
   });
 }

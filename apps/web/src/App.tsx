@@ -10,6 +10,9 @@ import { KitchenPage } from './features/kitchen/KitchenPage.tsx';
 import { AddPage } from './features/pantry/AddPage.tsx';
 import { EditPage } from './features/pantry/EditPage.tsx';
 import { InventoryPage } from './features/pantry/InventoryPage.tsx';
+import { NewRecipe } from './features/recipe/NewRecipe.tsx';
+import { RecipeEditPage } from './features/recipe/RecipeEditPage.tsx';
+import { RecipePage } from './features/recipe/RecipePage.tsx';
 import { PantryTab } from './features/pantry/PantryTab.tsx';
 import { RemovedPage } from './features/pantry/RemovedPage.tsx';
 import { AppShell } from './features/shell/AppShell.tsx';
@@ -31,7 +34,7 @@ export function App() {
             <Route element={<AppShell />}>
               <Route index element={<HomePage />} />
               <Route path="recipes" element={<Placeholder />} />
-              <Route path="record" element={<Placeholder />} />
+              <Route path="record" element={<NewRecipe />} />
               <Route path="me" element={<Placeholder />} />
               <Route path="kitchen" element={<KitchenPage />}>
                 <Route index element={<PantryTab />} />
@@ -41,6 +44,9 @@ export function App() {
             </Route>
             {/* 內頁：沒有分頁列，由 SubPage 提供返回 */}
             <Route element={<InnerLayout />}>
+              <Route path="recipes/new" element={<NewRecipe />} />
+              <Route path="recipes/:id" element={<RecipePage />} />
+              <Route path="recipes/:id/edit" element={<RecipeEditPage />} />
               <Route path="kitchen/pantry/add" element={<AddPage />} />
               <Route path="kitchen/pantry/inventory" element={<InventoryPage />} />
               <Route path="kitchen/pantry/removed" element={<RemovedPage />} />
