@@ -40,7 +40,7 @@
 - [x] M0-12 我的食譜：時間軸、草稿匣、搜尋、最近刪除（#13）
 - [x] M0-13a 錯誤紀錄與每日維護：`error_logs`、`log_error`、每日維護排程、`app_config` 的註冊方式與人數上限、前端 `reportError`（#16）
 - [x] M0-13b 函式與每週維護：到期廚房清除、`maintenance` Edge Function（孤兒照片檔）、Edge Functions 部署、每週喚醒與孤兒照片檔清理（#17～#21；資料庫備份暫不做）
-- [x] M0-14 口味資料：口味維度、題庫（16 題樣本）、地區（TW、US-CA、JP）、基礎菜色（38 道）四張字典，`preference_profiles`、`dietary_profiles` 與 RLS、權限測試、`setup_new_user` 補建（#PR）
+- [x] M0-14 口味資料：口味維度、題庫（16 題樣本）、地區（TW、US-CA、JP）、基礎菜色（38 道）四張字典，`preference_profiles`、`dietary_profiles` 與 RLS、權限測試、`setup_new_user` 補建（#24）
 
 ### 待做（建議順序）
 
