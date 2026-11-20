@@ -97,4 +97,4 @@ Vite＋React＋TypeScript 的 PWA（放在 Netlify）；Supabase（Postgres＋RL
 | 資料庫的權限測試（pgTAP） | `pnpm db:test`；測試放在 `supabase/tests/` |
 | 從本機資料庫產生型別 | `pnpm gen:types`（產生 `packages/shared-types/src/database.ts`，不要手改） |
 
-**部署**：前端由 Netlify 從 git 自動部署（`netlify.toml`）；每個 PR 由 GitHub Actions 跑型別檢查、測試、Deno 檢查、建置，以及資料庫的權限測試與型別是否過期（`.github/workflows/ci.yml`）。資料庫 migration 與 Edge Functions 的自動部署在第一個 migration 時加上。
+**部署**：前端由 Netlify 從 git 自動部署（`netlify.toml`）；每個 PR 由 GitHub Actions 跑型別檢查、測試、Deno 檢查、建置，以及資料庫的權限測試與型別是否過期（`.github/workflows/ci.yml`）。資料庫 migration 由 `.github/workflows/deploy-db.yml` 部署：PR 改到 `supabase/` 時對測試專案試跑，合併到 `main` 後先部署測試專案、成功才部署正式專案。Edge Functions 的部署在第一個函式時加上。
