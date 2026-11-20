@@ -831,6 +831,22 @@
     "impact": 0.3
   },
   {
+    "key": "ingredient.shiitake",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "香菇"
+    },
+    "impact": 0.3
+  },
+  {
+    "key": "ingredient.taro",
+    "group": "ingredient",
+    "name": {
+      "zh-TW": "芋頭"
+    },
+    "impact": 0.3
+  },
+  {
     "key": "richness.rich",
     "group": "richness",
     "name": {

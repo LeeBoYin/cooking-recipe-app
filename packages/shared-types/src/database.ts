@@ -171,14 +171,14 @@ isOneToOne: false
                   ]
                 },"dict_quiz_items": {
                   Row: {
-                    "deprecated": boolean,"description": Json | null,"excluded_allergen_ids": (string)[],"excluded_restriction_ids": (string)[],"follow_ups": (string)[],"id": string,"item_type": string,"mapping": NonNullable<Json>,"regions": (string)[],"replaced_by": string | null,"title": NonNullable<Json>
+                    "context_field": string | null,"deprecated": boolean,"description": Json | null,"excluded_allergen_ids": (string)[],"excluded_restriction_ids": (string)[],"follow_ups": (string)[],"id": string,"item_type": string,"mapping": NonNullable<Json>,"options": Json | null,"regions": (string)[],"replaced_by": string | null,"spectrum": Json | null,"title": NonNullable<Json>
                   }
                   ComputedFields: never
                   Insert: {
-                    "deprecated"?: boolean,"description"?: Json | null,"excluded_allergen_ids"?: (string)[],"excluded_restriction_ids"?: (string)[],"follow_ups"?: (string)[],"id": string,"item_type": string,"mapping"?: NonNullable<Json>,"regions"?: (string)[],"replaced_by"?: string | null,"title": NonNullable<Json>
+                    "context_field"?: string | null,"deprecated"?: boolean,"description"?: Json | null,"excluded_allergen_ids"?: (string)[],"excluded_restriction_ids"?: (string)[],"follow_ups"?: (string)[],"id": string,"item_type": string,"mapping"?: NonNullable<Json>,"options"?: Json | null,"regions"?: (string)[],"replaced_by"?: string | null,"spectrum"?: Json | null,"title": NonNullable<Json>
                   }
                   Update: {
-                    "deprecated"?: boolean,"description"?: Json | null,"excluded_allergen_ids"?: (string)[],"excluded_restriction_ids"?: (string)[],"follow_ups"?: (string)[],"id"?: string,"item_type"?: string,"mapping"?: NonNullable<Json>,"regions"?: (string)[],"replaced_by"?: string | null,"title"?: NonNullable<Json>
+                    "context_field"?: string | null,"deprecated"?: boolean,"description"?: Json | null,"excluded_allergen_ids"?: (string)[],"excluded_restriction_ids"?: (string)[],"follow_ups"?: (string)[],"id"?: string,"item_type"?: string,"mapping"?: NonNullable<Json>,"options"?: Json | null,"regions"?: (string)[],"replaced_by"?: string | null,"spectrum"?: Json | null,"title"?: NonNullable<Json>
                   }
                   Relationships: [
                     {

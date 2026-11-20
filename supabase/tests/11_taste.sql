@@ -1,6 +1,6 @@
 -- 口味資料：字典匯入的檢查、口味地圖與飲食限制的權限（13 第八節、16 第三、四、八節）
 begin;
-select plan(63);
+select plan(72);
 
 create function tests.updated_rows(p_sql text)
 returns integer
@@ -122,6 +122,43 @@ select throws_ok($$select private.import_dictionaries(tests.base_dict() || '{"ba
 select throws_ok($$select private.import_dictionaries(tests.base_dict() || '{"quizItems": [
   {"id": "card_a", "type": "dish_card", "title": {"zh-TW": "甲"}, "regions": ["TW"], "mapping": {"taste.spicy": 2}},
   {"id": "card_b", "type": "quick_fire", "title": {"zh-TW": "乙"}, "regions": ["TW"]}]}')$$, '23514', null, 'mapping 的值要在 −1～1');
+-- 題庫格式（二選一、光譜、情境題）
+select throws_ok($$select private.import_dictionaries(tests.base_dict() || '{"quizItems": [
+  {"id": "card_a", "type": "dish_card", "title": {"zh-TW": "甲"}, "regions": ["TW"], "mapping": {"taste.spicy": 0.5}},
+  {"id": "card_b", "type": "quick_fire", "title": {"zh-TW": "乙"}, "regions": ["TW"], "mapping": {"taste.spicy": 1}},
+  {"id": "tot_a", "type": "this_or_that", "title": {"zh-TW": "選一個"}, "regions": ["TW"],
+   "options": [{"label": {"zh-TW": "辣"}, "mapping": {"taste.mystery": 0.8}}]}]}')$$, '23503', null, '二選一選項的 mapping 要指向存在的維度');
+select throws_ok($$select private.import_dictionaries(tests.base_dict() || '{"quizItems": [
+  {"id": "card_a", "type": "dish_card", "title": {"zh-TW": "甲"}, "regions": ["TW"], "mapping": {"taste.spicy": 0.5}},
+  {"id": "card_b", "type": "quick_fire", "title": {"zh-TW": "乙"}, "regions": ["TW"], "mapping": {"taste.spicy": 1}},
+  {"id": "spec_a", "type": "spectrum", "title": {"zh-TW": "多辣"}, "regions": ["TW"],
+   "spectrum": {"dimension": "taste.mystery", "labels": [{"zh-TW": "1"}, {"zh-TW": "2"}, {"zh-TW": "3"}, {"zh-TW": "4"}, {"zh-TW": "5"}]}}]}')$$, '23503', null, '光譜的維度要存在');
+select throws_ok($$select private.import_dictionaries(tests.base_dict() || '{"quizItems": [
+  {"id": "card_a", "type": "dish_card", "title": {"zh-TW": "甲"}, "regions": ["TW"], "mapping": {"taste.spicy": 0.5}},
+  {"id": "card_b", "type": "quick_fire", "title": {"zh-TW": "乙"}, "regions": ["TW"], "mapping": {"taste.spicy": 1}},
+  {"id": "ctx_a", "type": "context", "title": {"zh-TW": "週末"}, "regions": ["TW"], "contextField": "adventure",
+   "options": [{"label": {"zh-TW": "烤"}, "value": 0.4, "addGoal": "form.mystery"}]}]}')$$, '23503', null, '情境題「想學」的維度要存在');
+select throws_ok($$select private.import_dictionaries(tests.base_dict() || '{"quizItems": [
+  {"id": "card_a", "type": "dish_card", "title": {"zh-TW": "甲"}, "regions": ["TW"], "mapping": {"taste.spicy": 0.5}},
+  {"id": "card_b", "type": "quick_fire", "title": {"zh-TW": "乙"}, "regions": ["TW"], "mapping": {"taste.spicy": 1}},
+  {"id": "spec_a", "type": "spectrum", "title": {"zh-TW": "多辣"}, "regions": ["TW"],
+   "spectrum": {"dimension": "taste.spicy", "labels": [{"zh-TW": "1"}, {"zh-TW": "2"}]}}]}')$$, '23514', null, '光譜要有五個點');
+select throws_ok($$insert into public.dict_quiz_items (id, item_type, title, context_field) values ('ctx_x', 'context', '{"zh-TW": "壞"}', 'mystery')$$, '23514', null, '情境題的欄位只能是三種之一');
+select private.import_dictionaries(tests.base_dict() || '{"quizItems": [
+  {"id": "card_a", "type": "dish_card", "title": {"zh-TW": "甲"}, "regions": ["TW"], "mapping": {"taste.spicy": 0.5}},
+  {"id": "card_b", "type": "quick_fire", "title": {"zh-TW": "乙"}, "regions": ["TW"], "mapping": {"taste.spicy": 1}},
+  {"id": "tot_a", "type": "this_or_that", "title": {"zh-TW": "選一個"}, "regions": ["TW"],
+   "options": [{"label": {"zh-TW": "辣"}, "mapping": {"taste.spicy": 0.8}}, {"label": {"zh-TW": "不辣"}, "mapping": {"taste.spicy": -0.8}}]},
+  {"id": "spec_a", "type": "spectrum", "title": {"zh-TW": "多辣"}, "regions": ["TW"],
+   "spectrum": {"dimension": "taste.spicy", "labels": [{"zh-TW": "1"}, {"zh-TW": "2"}, {"zh-TW": "3"}, {"zh-TW": "4"}, {"zh-TW": "5"}]}},
+  {"id": "ctx_a", "type": "context", "title": {"zh-TW": "週末"}, "regions": ["TW"], "contextField": "adventure",
+   "options": [{"label": {"zh-TW": "烤"}, "value": 0.4, "addGoal": "taste.spicy"}]}]}');
+select is((select options -> 0 -> 'mapping' ->> 'taste.spicy' from public.dict_quiz_items where id = 'tot_a'), '0.8', '二選一的選項存進 options');
+select is((select spectrum ->> 'dimension' from public.dict_quiz_items where id = 'spec_a'), 'taste.spicy', '光譜存進 spectrum');
+select is((select context_field from public.dict_quiz_items where id = 'ctx_a'), 'adventure', '情境題的欄位存進 context_field');
+select is((select options is null and spectrum is null and context_field is null from public.dict_quiz_items where id = 'card_a'), true, '菜卡沒有這三個欄位');
+delete from public.dict_quiz_items where id in ('tot_a', 'spec_a', 'ctx_a');
+
 select throws_ok($$insert into public.dict_quiz_items (id, item_type, title) values ('Card-A', 'dish_card', '{"zh-TW": "甲"}')$$, '23514', null, '題目 ID 的格式');
 select throws_ok($$select private.import_dictionaries(tests.base_dict() || '{"preferenceDimensions": [
   {"key": "cuisine.taiwan", "group": "taste", "name": {"zh-TW": "台灣"}, "impact": 0.9},
