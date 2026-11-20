@@ -20,7 +20,7 @@ function Row({ id, keys }: { id: string; keys: string[] }) {
   );
 }
 
-// 口味名片：名稱、愛、口感、想學、不吃。「過敏、週期性規則」等飲食限制畫面完成後再接。
+// 口味名片：名稱、愛、口感、想學、不吃。「過敏」等飲食限制畫面完成後再接。
 export function CardView({ card, onDone, onMore, saveState }: { card: TasteCard; onDone: () => void; onMore: () => void; saveState: 'saving' | 'error' | 'saved' }) {
   const intl = useIntl();
   const name = parseCardTitle(card.titleCode);
