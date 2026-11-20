@@ -58,3 +58,22 @@ export interface DietaryRestriction {
   deprecated?: boolean;
   replacedBy?: string;
 }
+
+export type UiLocale = 'zh-TW';
+export type Hemisphere = 'north' | 'south';
+export type SeasonKey = 'spring' | 'summer' | 'autumn' | 'winter';
+
+// 地區設定（05 RegionProfile）。節日等資料做到推薦功能時再補，目前 holidays 先是空的
+export interface RegionProfile {
+  code: RegionCode;
+  name: LocalizedText;
+  hemisphere: Hemisphere;
+  defaultTimezone: string;
+  defaultLocale: UiLocale;
+  defaultUnits: { temperature: 'C' | 'F'; measure: 'metric' | 'us' };
+  seasons: { key: SeasonKey; months: number[] }[];
+  usesSolarTerms: boolean;
+  holidays: never[];
+  commonPantryIngredientIds: string[];
+  dataStatus: 'full' | 'partial';
+}

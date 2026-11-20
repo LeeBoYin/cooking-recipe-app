@@ -23,3 +23,6 @@ export function allergenWithAncestors(id: string): string[] {
   }
   return out;
 }
+
+export * from './regions.ts';
+export * from './pantry.ts';

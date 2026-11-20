@@ -139,7 +139,7 @@ flowchart LR
 | 動畫 | Motion（原 Framer Motion） | 微互動、轉場 |
 | 角色動畫 | Rive | 大廚的眨眼、帽子飄動、嘴形與燈泡顏色；Rive 的狀態機適合「依情境換表情」（見 [17](17-visual-design.md#八靈感大廚)） |
 | 圖表 | 輕量圖表庫（如 Recharts 或自繪 SVG） | 口味雷達、統計圖 |
-| 路由 | TanStack Router 或 React Router | 型別安全路由 |
+| 路由 | React Router | 每個畫面有自己的網址：返回鍵與重新整理正常，邀請連結與推播可以直接開到某一頁 |
 | 非同步狀態 | TanStack Query | AI 與伺服器請求的快取、重試 |
 | UI 狀態 | Zustand | 輕量 |
 | 多語系 | 只做繁體中文（已決定），但文字一開始就抽到語系檔；字典資料用 `LocalizedText` 分語系存（見 [15](15-regions-i18n.md)） | 之後擴充不用大改；產品名、角色名也從語系檔讀，方便改名 |
