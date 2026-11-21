@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { NavLink, Outlet } from 'react-router';
+import { Outlet } from 'react-router';
 import { useCurrentKitchen } from '../../data/hooks.ts';
 import { Icon } from '../shell/Icon.tsx';
+import { SegmentNav } from '../shell/SegmentNav.tsx';
 import { KitchenSwitcher } from './KitchenSwitcher.tsx';
 
 // 廚房：左邊是目前所在的廚房（點一下切換），右邊切換「食材」與「廚具」（02 資訊架構）
@@ -10,10 +11,6 @@ export function KitchenPage() {
   const intl = useIntl();
   const { kitchen, error } = useCurrentKitchen();
   const [switching, setSwitching] = useState(false);
-  const tab = ({ isActive }: { isActive: boolean }) =>
-    `flex h-10 w-16 items-center justify-center rounded-card text-body no-underline ${
-      isActive ? 'bg-surface font-bold text-ink' : 'text-ink-muted'
-    }`;
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3">
@@ -35,13 +32,13 @@ export function KitchenPage() {
             <FormattedMessage id="common.loading" />
           )}
         </h1>
-        <nav
-          aria-label={intl.formatMessage({ id: 'kitchen.tabs.aria' })}
-          className="flex h-11 shrink-0 gap-0 rounded-chef bg-photo-empty p-0.5"
-        >
-          <NavLink to="/kitchen" end className={tab}><FormattedMessage id="kitchen.tab.pantry" /></NavLink>
-          <NavLink to="/kitchen/equipment" className={tab}><FormattedMessage id="kitchen.tab.equipment" /></NavLink>
-        </nav>
+        <SegmentNav
+          ariaLabel={intl.formatMessage({ id: 'kitchen.tabs.aria' })}
+          items={[
+            { to: '/kitchen', end: true, label: <FormattedMessage id="kitchen.tab.pantry" /> },
+            { to: '/kitchen/equipment', label: <FormattedMessage id="kitchen.tab.equipment" /> },
+          ]}
+        />
       </div>
       <Outlet />
       {switching && <KitchenSwitcher currentId={kitchen?.id} onClose={() => setSwitching(false)} />}
