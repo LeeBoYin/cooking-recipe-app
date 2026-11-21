@@ -4,7 +4,22 @@
 export type UnitCode =
   | 'g' | 'kg' | 'oz' | 'lb' | 'tw_jin' | 'tw_liang' | 'cn_jin'
   | 'ml' | 'l' | 'tsp' | 'tbsp' | 'cup' | 'cup_jp' | 'rice_cup' | 'fl_oz' | 'qt'
-  | 'cm' | 'inch';
+  | 'cm' | 'inch'
+  // 不換算（只跟著份量放大縮小）：個、顆、包、瓣、片、根、把、塊、盒、罐、人份、少許、適量
+  | 'piece' | 'whole' | 'pack' | 'clove' | 'slice' | 'stalk' | 'bunch' | 'block' | 'box' | 'can' | 'serving' | 'pinch' | 'to_taste';
+
+export const UNIT_CODES: readonly UnitCode[] = [
+  'g', 'kg', 'oz', 'lb', 'tw_jin', 'tw_liang', 'cn_jin',
+  'ml', 'l', 'tsp', 'tbsp', 'cup', 'cup_jp', 'rice_cup', 'fl_oz', 'qt',
+  'cm', 'inch',
+  'piece', 'whole', 'pack', 'clove', 'slice', 'stalk', 'bunch', 'block', 'box', 'can', 'serving', 'pinch', 'to_taste',
+];
+
+// 可以在公制與美制之間換算的單位；其他（個、瓣、適量…）不換算
+export type MeasureUnit = 'g' | 'kg' | 'oz' | 'lb' | 'tw_jin' | 'tw_liang' | 'cn_jin' | 'ml' | 'l' | 'tsp' | 'tbsp' | 'cup' | 'cup_jp' | 'rice_cup' | 'fl_oz' | 'qt' | 'cm' | 'inch';
+export function isMeasureUnit(unit: UnitCode): unit is MeasureUnit {
+  return unit in GRAMS || unit in MILLILITERS || unit in CENTIMETERS;
+}
 
 export type UnitSystem = 'metric' | 'us';
 // system：主要顯示的單位；both：括號裡再放另一種（例：1 杯（240 毫升））
@@ -20,7 +35,7 @@ const CENTIMETERS: Partial<Record<UnitCode, number>> = { cm: 1, inch: 2.54 };
 
 type Kind = 'weight' | 'volume' | 'length';
 
-function kindOf(unit: UnitCode): Kind {
+function kindOf(unit: MeasureUnit): Kind {
   if (unit in GRAMS) return 'weight';
   if (unit in MILLILITERS) return 'volume';
   return 'length';
@@ -28,11 +43,11 @@ function kindOf(unit: UnitCode): Kind {
 
 const BASE: Record<Kind, Partial<Record<UnitCode, number>>> = { weight: GRAMS, volume: MILLILITERS, length: CENTIMETERS };
 
-function toBase(amount: number, unit: UnitCode): number {
+function toBase(amount: number, unit: MeasureUnit): number {
   return amount * (BASE[kindOf(unit)][unit] as number);
 }
 
-function fromBase(base: number, unit: UnitCode): number {
+function fromBase(base: number, unit: MeasureUnit): number {
   return base / (BASE[kindOf(unit)][unit] as number);
 }
 
@@ -49,7 +64,7 @@ export function parseTemperaturePref(value: string | null | undefined): Temperat
 
 // 這個單位換到指定的制度後，用哪個單位表示。同一個制度內，保留使用者原本的單位
 // （大匙、小匙、杯、米杯在公制也照用；台斤、兩在公制保留，另外附公克）
-function targetUnit(baseAmount: number, unit: UnitCode, system: UnitSystem): UnitCode {
+function targetUnit(baseAmount: number, unit: MeasureUnit, system: UnitSystem): MeasureUnit {
   const kind = kindOf(unit);
   if (system === 'metric') {
     if (kind === 'weight') return unit === 'tw_jin' || unit === 'tw_liang' ? unit : baseAmount >= 1000 ? 'kg' : 'g';
@@ -73,6 +88,11 @@ export type Measured = { amount: number; amountMax?: number | undefined; unit: U
 
 // 先依倍率放大縮小，再換到指定的制度（還沒進位）
 export function scaleToSystem(q: Measured, factor: number, system: UnitSystem): Measured {
+  if (!isMeasureUnit(q.unit)) {
+    const out: Measured = { amount: q.amount * factor, unit: q.unit };
+    if (q.amountMax !== undefined) out.amountMax = q.amountMax * factor;
+    return out;
+  }
   const base = toBase(q.amount * factor, q.unit);
   const unit = targetUnit(base, q.unit, system);
   const out: Measured = { amount: fromBase(base, unit), unit };
@@ -144,6 +164,11 @@ function label(m: Measured, q: QuantityInput, labels: UnitLabels): string {
 
 // 一個「數量＋單位」的顯示文字。factor 是份量倍率
 export function formatQuantity(q: QuantityInput, factor: number, pref: MeasurePref, labels: UnitLabels, note = true): string {
+  if (!isMeasureUnit(q.unit)) {
+    // 個、瓣、適量…：不換算，只跟著份量放大縮小
+    if (factor === 1 || q.unit === 'to_taste' || q.unit === 'pinch') return q.raw;
+    return `${rangeText(scaleToSystem(q, factor, pref.system))} ${labels[q.unit]}`;
+  }
   const primary = scaleToSystem(q, factor, pref.system);
   const same = primary.unit === q.unit && factor === 1;
   let text = same ? q.raw : `${rangeText(primary)} ${label(primary, q, labels)}`;

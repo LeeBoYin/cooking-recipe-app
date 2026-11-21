@@ -18,6 +18,9 @@ on:
       - "packages/taste/data/**"
       - "packages/taste/src/**"
       - "scripts/dictionaries-sql.ts"
+      - "scripts/backfill-ingredients-sql.ts"
+      - "scripts/unparsed-recipes.sql"
+      - "packages/core/src/**"
       - ".github/workflows/deploy-db.yml"
   push:
     branches: [main]
@@ -30,6 +33,9 @@ on:
       - "packages/taste/data/**"
       - "packages/taste/src/**"
       - "scripts/dictionaries-sql.ts"
+      - "scripts/backfill-ingredients-sql.ts"
+      - "scripts/unparsed-recipes.sql"
+      - "packages/core/src/**"
       - ".github/workflows/deploy-db.yml"
   workflow_dispatch:
 
@@ -89,6 +95,13 @@ jobs:
           psql "$(cat supabase/.temp/pooler-url)" -v ON_ERROR_STOP=1 -f "$RUNNER_TEMP/dictionaries.sql"
         env:
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
+      - name: 回填舊食譜的食材解析（可重複執行）
+        run: |
+          psql "$(cat supabase/.temp/pooler-url)" -v ON_ERROR_STOP=1 -At -f scripts/unparsed-recipes.sql > "$RUNNER_TEMP/unparsed.json"
+          node scripts/backfill-ingredients-sql.ts < "$RUNNER_TEMP/unparsed.json" > "$RUNNER_TEMP/backfill.sql"
+          psql "$(cat supabase/.temp/pooler-url)" -v ON_ERROR_STOP=1 -q -f "$RUNNER_TEMP/backfill.sql"
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
 
   production:
     needs: staging
@@ -111,5 +124,12 @@ jobs:
         run: |
           node scripts/dictionaries-sql.ts > "$RUNNER_TEMP/dictionaries.sql"
           psql "$(cat supabase/.temp/pooler-url)" -v ON_ERROR_STOP=1 -f "$RUNNER_TEMP/dictionaries.sql"
+        env:
+          PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PRODUCTION }}
+      - name: 回填舊食譜的食材解析（可重複執行）
+        run: |
+          psql "$(cat supabase/.temp/pooler-url)" -v ON_ERROR_STOP=1 -At -f scripts/unparsed-recipes.sql > "$RUNNER_TEMP/unparsed.json"
+          node scripts/backfill-ingredients-sql.ts < "$RUNNER_TEMP/unparsed.json" > "$RUNNER_TEMP/backfill.sql"
+          psql "$(cat supabase/.temp/pooler-url)" -v ON_ERROR_STOP=1 -q -f "$RUNNER_TEMP/backfill.sql"
         env:
           PGPASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_PRODUCTION }}

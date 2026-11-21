@@ -22,9 +22,12 @@ export {
   type ChefPersona, type TimeBand, type ChefCatalog, type ChefLineInput,
 } from './chef/pick.ts';
 export {
-  parseMeasurePref, parseTemperaturePref, scaleToSystem, fractionText, roundedText, formatQuantity, convertTemperature, formatTemperature,
+  parseMeasurePref, parseTemperaturePref, UNIT_CODES, isMeasureUnit, scaleToSystem, fractionText, roundedText, formatQuantity, convertTemperature, formatTemperature,
   type UnitCode, type UnitSystem, type MeasurePref, type TemperaturePref, type Temperature, type UnitLabels, type Measured, type QuantityInput,
 } from './units/units.ts';
 export {
-  parseIngredient, renderIngredient, ingredientName, haveInKitchen, type QuantityToken, type IngredientSegment,
+  parseIngredient, renderIngredient, ingredientName, haveInKitchen, type QuantityToken, type IngredientSegment, type StoredQuantity,
 } from './units/ingredient-text.ts';
+export {
+  buildIngredientIndex, matchIngredient, parseIngredientLine, type DictIngredient, type IngredientIndex, type ParsedIngredient,
+} from './units/ingredient-line.ts';

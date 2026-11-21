@@ -9,6 +9,8 @@ const labels: UnitLabels = {
   g: '克', kg: '公斤', oz: '盎司', lb: '磅', tw_jin: '台斤', tw_liang: '兩', cn_jin: '斤',
   ml: '毫升', l: '公升', tsp: '小匙', tbsp: '大匙', cup: '杯', cup_jp: '杯', rice_cup: '米杯', fl_oz: '液量盎司', qt: '夸脫',
   cm: '公分', inch: '吋',
+  piece: '個', whole: '顆', pack: '包', clove: '瓣', slice: '片', stalk: '根', bunch: '把', block: '塊', box: '盒', can: '罐',
+  serving: '人份', pinch: '少許', to_taste: '適量',
 };
 const metric = parseMeasurePref('metric');
 const us = parseMeasurePref('us');
