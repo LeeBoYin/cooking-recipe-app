@@ -55,6 +55,7 @@ export interface OpenedInvite {
   email: string;
   code: string; // 6 碼，1 小時內有效
   expiresAt: string;
+  inviterName: string | null; // 邀請者的暱稱；沒有就不顯示「〇〇邀請你」
 }
 
 // 打開邀請連結：驗證並產生 6 碼邀請碼。每次呼叫都會讓前一組邀請碼作廢，所以同一個 token 只呼叫一次。
@@ -68,8 +69,8 @@ export function openInvite(token: string): Promise<Result<OpenedInvite>> {
   return p;
 }
 
-export function redeemInviteCode(code: string): Promise<Result<{ email: string }>> {
-  return call<{ email: string }>({ action: 'redeem_code', code });
+export function redeemInviteCode(code: string): Promise<Result<{ email: string; inviterName: string | null }>> {
+  return call<{ email: string; inviterName: string | null }>({ action: 'redeem_code', code });
 }
 
 export type Credential = { token: string } | { code: string };

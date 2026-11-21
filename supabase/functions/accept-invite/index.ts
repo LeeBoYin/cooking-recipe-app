@@ -2,7 +2,7 @@
 // 動作（body.action，沒填當作 signup）：
 // - signup：密碼註冊。驗證邀請（token 或邀請碼）→ 用 admin API 建立已確認 email 的使用者（不寄信）→
 //   一個資料庫交易認領邀請並建立註冊資料。任何一步失敗就刪掉剛建立的使用者，不留下一半的資料。
-// - open：打開邀請連結時產生 6 碼邀請碼（1 小時內有效，只存雜湊，重新產生時舊的作廢）。
+// - open：打開邀請連結時產生 6 碼邀請碼（1 小時內有效，只存雜湊，重新產生時舊的作廢），一起回邀請者的暱稱。
 // - redeem_code：從主畫面打開 App 時，用邀請碼換回邀請（email）；同一個來源錯 5 次暫停 15 分鐘。
 // - reset_password：用管理員產生的重設連結改密碼（24 小時、只能用一次）。
 // 回應與紀錄不含 email、token、邀請碼。
@@ -34,6 +34,16 @@ function json(body: unknown, status = 200): Response {
 }
 
 type Db = SupabaseClient;
+
+// 邀請者的暱稱（公開身分）；沒有邀請者、查不到就回 null，不讓邀請頁失敗
+async function inviterName(client: Db, inviteId: string): Promise<string | null> {
+  const { data, error } = await client.rpc('invite_inviter_name', { p_invite_id: inviteId });
+  if (error) {
+    console.error('accept-invite: inviter name failed', error.code);
+    return null;
+  }
+  return typeof data === 'string' ? data : null;
+}
 
 async function lookupByToken(client: Db, token: string) {
   return await client
@@ -143,7 +153,7 @@ async function open(client: Db, raw: unknown): Promise<Response> {
       p_invite_id: invite.id,
       p_code_hash: await hashCode(code),
     });
-    if (!error) return json({ ok: true, code, email: invite.email, expiresAt });
+    if (!error) return json({ ok: true, code, email: invite.email, expiresAt, inviterName: await inviterName(client, invite.id) });
     if (error.code === '23505') continue;
     if (error.message.includes('invite_not_usable')) return json({ error: 'invalid_invite' }, 400);
     console.error('accept-invite: set code failed', error.code);
@@ -157,7 +167,7 @@ async function redeemCode(client: Db, req: Request, raw: unknown): Promise<Respo
   if (!parsed.ok) return json({ error: parsed.error }, 400);
   const r = await redeem(client, req, parsed.code);
   if ('response' in r) return r.response;
-  return json({ ok: true, email: r.row.email });
+  return json({ ok: true, email: r.row.email, inviterName: await inviterName(client, r.row.invite_id!) });
 }
 
 async function resetPassword(client: Db, raw: unknown): Promise<Response> {

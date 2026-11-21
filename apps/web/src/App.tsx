@@ -40,6 +40,9 @@ import { UpdatePrompt } from './pwa/UpdatePrompt.tsx';
 // 開發用的 icon 總覽，正式建置會整段拿掉
 const IconsPage = import.meta.env.DEV ? lazy(() => import('./features/dev/IconsPage.tsx').then((m) => ({ default: m.IconsPage }))) : null;
 
+// 管理後台：獨立的區塊，只有進 /admin 才下載（不進預先快取）
+const AdminApp = lazy(() => import('./features/admin/AdminApp.tsx'));
+
 // 登入後 onboarding_completed_at 還是空的，就先走新手引導（12 第三節）
 function OnboardingGate() {
   const settings = useMySettings();
@@ -60,6 +63,8 @@ export function App() {
           <PhotoSync />
           <Routes>
             {IconsPage && <Route path="dev/icons" element={<Suspense><IconsPage /></Suspense>} />}
+            {/* 後台自己確認管理員與兩步驟驗證，不走新手引導 */}
+            <Route path="admin/*" element={<Suspense fallback={null}><AdminApp /></Suspense>} />
             <Route element={<OnboardingGate />}>
             <Route path="onboarding" element={<Onboarding redo />} />
             <Route element={<AppShell />}>

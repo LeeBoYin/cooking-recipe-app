@@ -215,8 +215,8 @@
 | `ai` | 已登入、啟用中的使用者 | 任務：首頁點子、對話、展開做法、口述整理、用說的改食譜、從網址匯入、發佈後整理（標籤、難易度、一句話）、正規化、靈感彩蛋。每個任務的模型與 effort 讀設定檔（見 [03 模型選擇](03-ai-design.md#模型選擇)）。依序檢查帳號狀態、速率、合理使用上限、預算；口味檔案過期時先用 `core` 重算；組 prompt、呼叫 Claude、驗證輸出、過敏原與安全二次檢查、寫用量紀錄 |
 | `accept-invite` | 持有邀請連結或邀請碼的人 | 新註冊（密碼）或已有帳號的人接受家人邀請；建立帳號與初始資料（見第八節）。密碼註冊：驗證 token（存在、沒撤銷、沒用過、沒過期、email 相符，不分大小寫）→ 用 admin API 建立已確認 email 的使用者（不寄信）→ `complete_invite_signup`；失敗時刪掉剛建的使用者，回應與紀錄不含 email 與 token。用 `body.action` 分四個動作（沒填當作 `signup`）：
 - `signup`：同上，驗證邀請的憑證可以是連結的 `token`，也可以是 6 碼 `code`（走 `redeem_invite_code`，一樣計錯誤次數）。
-- `open`：打開邀請連結時，驗證 token 後產生 6 碼邀請碼（字母表去掉 0/O、1/I/L，1 小時內有效，只存雜湊，重新產生時舊的作廢），回傳邀請碼與邀請的 email。
-- `redeem_code`：在主畫面的 App 用邀請碼換回那筆邀請（回傳 email，讓註冊畫面帶入）；來源錯 5 次暫停 15 分鐘，回應 `code_locked` 與 `lockedUntil`（HTTP 429）。「來源」是連線 IP（優先 `cf-connecting-ip`）的 SHA-256，只存雜湊。
+- `open`：打開邀請連結時，驗證 token 後產生 6 碼邀請碼（字母表去掉 0/O、1/I/L，1 小時內有效，只存雜湊，重新產生時舊的作廢），回傳邀請碼、邀請的 email 與邀請者的暱稱（`inviterName`，沒有邀請者時是空值；用 `invite_inviter_name` 取，只回暱稱），邀請頁顯示「〇〇邀請你一起用…」。
+- `redeem_code`：在主畫面的 App 用邀請碼換回那筆邀請（回傳 email 與 `inviterName`，讓註冊畫面帶入）；來源錯 5 次暫停 15 分鐘，回應 `code_locked` 與 `lockedUntil`（HTTP 429）。「來源」是連線 IP（優先 `cf-connecting-ip`）的 SHA-256，只存雜湊。
 - `reset_password`：用管理員產生的重設連結（`token`）與新密碼改密碼：`claim_password_reset_link` → admin API 改密碼，失敗就 `release_password_reset_link`；連結不存在、過期、用過或帳號已停用都回 `invalid_link`。
 
 這個函式不開 JWT 驗證。|

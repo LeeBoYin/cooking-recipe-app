@@ -17,7 +17,7 @@ const ERROR_MESSAGE: Partial<Record<InviteError, string>> = {
 
 // ③ 建立帳號（12 ③、02 K）：email 已帶入、不能改；設定密碼，或用 Google 登入。
 // 成功後登入狀態改變，App 自動換成新手引導。
-export function SignupForm({ email, credential }: { email: string; credential: Credential }) {
+export function SignupForm({ email, credential, inviterName = null }: { email: string; credential: Credential; inviterName?: string | null }) {
   const intl = useIntl();
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
@@ -50,6 +50,11 @@ export function SignupForm({ email, credential }: { email: string; credential: C
 
   return (
     <AuthLayout title={intl.formatMessage({ id: 'signup.title' })} mood="happy">
+      {inviterName && (
+        <p className="m-0 text-center text-body font-bold">
+          <FormattedMessage id="signup.invitedBy" values={{ name: inviterName }} />
+        </p>
+      )}
       <p className="m-0 text-center text-caption text-ink-muted"><FormattedMessage id="signup.lead" /></p>
       <form onSubmit={(e) => void onSubmit(e)} className="flex flex-col gap-3 rounded-card bg-surface p-4" noValidate>
         <label className="flex flex-col gap-1">
