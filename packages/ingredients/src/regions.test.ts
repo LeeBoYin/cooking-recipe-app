@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { REGION_CODE_PATTERN, allergens, searchIngredients, commonIngredientIdsFor, getRegionProfile, ingredients, regionChain, regionProfiles, seasoningIngredientIds, stapleIngredientIdsFor } from './index.ts';
+import { REGION_CODE_PATTERN, allergens, searchIngredients, commonIngredientIdsFor, getRegionProfile, ingredients, regionChain, pantrySeasoningIdsFor, regionProfiles, stapleIngredientIdsFor } from './index.ts';
 
 describe('地區', () => {
   it('支援台灣、美國加州、日本，代碼格式正確、不重複', () => {
@@ -74,10 +74,22 @@ describe('常備食材', () => {
     expect(stapleIngredientIdsFor('JP')).not.toEqual(stapleIngredientIdsFor('TW'));
   });
 
-  it('醬料櫃約 30–40 種（目前各地區共用同一份）', () => {
-    const sauces = seasoningIngredientIds();
-    expect(sauces.length).toBeGreaterThanOrEqual(25);
-    expect(sauces.length).toBeLessThanOrEqual(40);
+  it('醬料櫃：每個地區約 25–40 種、ID 都在字典裡、不重複，各地區不同', () => {
+    const ids = new Set(ingredients.map((i) => i.id));
+    for (const region of ['TW', 'US-CA', 'JP']) {
+      const sauces = pantrySeasoningIdsFor(region);
+      expect(sauces.length, region).toBeGreaterThanOrEqual(25);
+      expect(sauces.length, region).toBeLessThanOrEqual(40);
+      expect(new Set(sauces).size).toBe(sauces.length);
+      for (const id of sauces) expect(ids, id).toContain(id);
+    }
+    expect(pantrySeasoningIdsFor('JP')).toContain('tonkatsu-sauce');
+    expect(pantrySeasoningIdsFor('US-CA')).toContain('bbq-sauce');
+  });
+
+  it('沒有醬料清單的地區（例如韓國）退回用台灣的', () => {
+    expect(pantrySeasoningIdsFor('KR')).toEqual(pantrySeasoningIdsFor('TW'));
+    expect(pantrySeasoningIdsFor('JP')).not.toEqual(pantrySeasoningIdsFor('TW'));
   });
 });
 
