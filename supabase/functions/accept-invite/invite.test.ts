@@ -40,6 +40,15 @@ const body = (over: Record<string, unknown> = {}) => ({
   token: 'x'.repeat(43), email: ' A@X.test ', password: 'longenough1', ...over,
 });
 
+Deno.test('parseSignupBody：地區認得國碼加子區（US-CA），其他格式退回預設', () => {
+  const region = (v: string) => {
+    const r = parseSignupBody(body({ displayName: 'x', region: v }));
+    return r.ok ? r.value.region : null;
+  };
+  assertEquals(['US-CA', 'JP', 'US-CA1'].map(region), ['US-CA', 'JP', 'US-CA1']);
+  assertEquals(['us-ca', 'US-', 'USA', 'US-CALI', ''].map(region), ['TW', 'TW', 'TW', 'TW', 'TW']);
+});
+
 Deno.test('parseSignupBody：正常與預設值', () => {
   const r = parseSignupBody(body());
   assertEquals(r.ok && r.value.email, 'a@x.test');
