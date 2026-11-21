@@ -21,6 +21,7 @@ import { Icon } from '../shell/Icon.tsx';
 import { Avatar } from './Avatar.tsx';
 import { AvatarCropper } from './AvatarCropper.tsx';
 import { cardTitleText } from '../taste/cardTitle.ts';
+import { SettingsSheet, type SettingsSheetKind } from './SettingsSheets.tsx';
 import { maskEmail } from './tasteMap.ts';
 
 const ONBOARDING_HINT = 'me.onboarding_card';
@@ -58,6 +59,7 @@ export function MePage() {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
   const [installOpen, setInstallOpen] = useState(false);
+  const [sheet, setSheet] = useState<SettingsSheetKind | null>(null);
   // 還沒從主畫面打開、而且這個瀏覽器能教或能裝，才顯示入口
   const [canInstall] = useState(() => installMode() !== null);
 
@@ -208,9 +210,9 @@ export function MePage() {
       </div>
 
       <div className="overflow-hidden rounded-card bg-surface">
-        <Row to="/me/settings" label={intl.formatMessage({ id: 'me.servings' })} value={st ? intl.formatMessage({ id: 'settings.servings.value' }, { count: st.household_size }) : undefined} />
-        <Row to="/me/settings" label={intl.formatMessage({ id: 'me.units' })} value={unitsText} />
-        <Row to="/me/settings" label={intl.formatMessage({ id: 'me.persona' })} value={st ? intl.formatMessage({ id: `settings.persona.${st.chef_persona}` }) : undefined} />
+        <Row onClick={() => setSheet('servings')} label={intl.formatMessage({ id: 'me.servings' })} value={st ? intl.formatMessage({ id: 'settings.servings.value' }, { count: st.household_size }) : undefined} />
+        <Row onClick={() => setSheet('units')} label={intl.formatMessage({ id: 'me.units' })} value={unitsText} />
+        <Row onClick={() => setSheet('persona')} label={intl.formatMessage({ id: 'me.persona' })} value={st ? intl.formatMessage({ id: `settings.persona.${st.chef_persona}` }) : undefined} />
       </div>
 
       <div className="overflow-hidden rounded-card bg-surface">
@@ -221,6 +223,7 @@ export function MePage() {
         <Row danger label={intl.formatMessage({ id: 'signOut' })} onClick={() => void signOut()} />
       </div>
 
+      {sheet && <SettingsSheet kind={sheet} onClose={() => setSheet(null)} />}
       {installOpen && <InstallSheet onClose={() => setInstallOpen(false)} />}
 
       {picked && (
