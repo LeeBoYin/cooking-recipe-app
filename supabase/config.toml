@@ -178,7 +178,9 @@ enable_refresh_token_rotation = true
 # Requires enable_refresh_token_rotation = true.
 refresh_token_reuse_interval = 10
 # Allow/disallow new user signups to your project. Existing users can still sign in.
-enable_signup = false
+# 要開：Google 登入的新使用者也算「新註冊」，關掉就連受邀的人都進不來。
+# 公開的密碼註冊（/auth/v1/signup）由下面的 before_user_created hook 擋掉，只放行 accept-invite 用 admin API 建立的。
+enable_signup = true
 # Allow/disallow anonymous sign-ins to your project.
 enable_anonymous_sign_ins = false
 # Allow/disallow testing manual linking of accounts
@@ -287,9 +289,11 @@ max_frequency = "5s"
 # inactivity_timeout = "8h"
 
 # This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
-# [auth.hook.before_user_created]
-# enabled = true
-# uri = "pg-functions://postgres/auth/before-user-created-hook"
+# 邀請制：Google 登入要有對應的邀請，公開的密碼註冊一律拒絕（supabase/migrations/…_invite_codes_google_reset.sql）。
+# 雲端專案在 Dashboard 的 Authentication → Auth Hooks 設定，CI 不會推 Auth 設定。
+[auth.hook.before_user_created]
+enabled = true
+uri = "pg-functions://postgres/public/hook_before_user_created"
 
 # This hook runs before a token is issued and allows you to add additional claims based on the authentication method used.
 # [auth.hook.custom_access_token]

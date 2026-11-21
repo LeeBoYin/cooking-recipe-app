@@ -771,12 +771,10 @@ interface Invite {                    // 邀請（M1 起），只存在後端
   befriendInviter: boolean;           // 預設 true：註冊後和邀請者成為好友；M1a 只存旗標，M2 建好友關係時照旗標補上
   expiresAt: string;                  // 預設 14 天後
   linkRegeneratedAt?: string;         // 最近一次「重新產生連結」的時間；舊連結同時失效
-  installCode?: {                     // iPhone 先安裝時用的 6 碼邀請碼：打開邀請連結時產生，在主畫面的 App 輸入
+  installCode?: {                     // iPhone 先安裝時用的 6 碼邀請碼：打開邀請連結時產生，在主畫面的 App 輸入（資料庫存成 invites 的 code_hash、code_expires_at 兩欄）
     codeHash: string;                 // 只存雜湊
-    expiresAt: Instant;               // 1 小時後
-    failedAttempts: number;           // 輸入錯誤 5 次暫停 15 分鐘
-    lockedUntil?: Instant;
-  };
+    expiresAt: Instant;               // 1 小時後；邀請用掉、撤銷或過期時一起失效
+  };                                  // 輸入錯誤的次數不記在邀請上，記在 invite_code_attempts（依來源的雜湊：錯 5 次暫停 15 分鐘）
   acceptedAt?: string;
   acceptedUserId?: string;
   acceptedVia?: 'password' | 'google';   // 不做 Apple 登入
