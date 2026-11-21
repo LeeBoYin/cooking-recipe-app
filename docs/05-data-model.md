@@ -293,6 +293,11 @@ interface Holiday {
   dishIdeas: string[];                // 對應 BaseDish 的 ID（湯圓、粽子、火雞）
   leadDays: number;                   // 節日前幾天開始出現在季節靈感
 }
+
+// rule 的格式：'nth-weekday:月:星期:第幾個'（星期 0 = 週日，例 'nth-weekday:11:4:4' = 11 月第 4 個星期四）、
+// 'last-weekday:月:星期'（例 'last-weekday:5:1' = 5 月最後一個星期一）、
+// 或以小寫英文命名的規則（例 'jp-doyo-ushi:summer'，土用丑日），由日期計算模組認得才生效。
+// 食材字典的 aliases 可以放其他語言（'en'、'ja'），搜尋時比對所有語言。
 ```
 
 ### BaseDish — 基礎菜色庫（全站共用，唯讀）

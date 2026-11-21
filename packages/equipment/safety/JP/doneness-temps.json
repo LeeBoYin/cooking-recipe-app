@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 1,
+  "region": "JP",
+  "source": {
+    "name": "厚生労働省「大量調理施設衛生管理マニュアル」（加熱調理食品：中心部 75℃ 1 分間以上）",
+    "urls": [
+      "https://www.mhlw.go.jp/file/06-Seisakujouhou-11130500-Shokuhinanzenbu/0000139151.pdf",
+      "https://www.mhlw.go.jp/stf/seisakunitsuite/bunya/0000049964.html"
+    ],
+    "reviewStatus": "pending-review",
+    "note": "日本沒有按肉類分項的家庭標準；這裡把大量調理施設的通用標準套用到每一類（取保守值）。原文 PDF 沒能直接讀取，數值依搜尋摘要與厚勞省「お肉はよく焼いて食べよう」頁（絞肉：多くの病原体は75℃で1分間以上の加熱で死滅する）整理，要對照原文。"
+  },
+  "rows": [
+    {
+      "id": "poultry",
+      "name": {
+        "zh-TW": "禽肉（雞、鴨、絞肉）"
+      },
+      "minTempC": 75,
+      "holdMinutes": 1
+    },
+    {
+      "id": "ground-meat",
+      "name": {
+        "zh-TW": "絞肉（豬、牛、羊）"
+      },
+      "minTempC": 75,
+      "holdMinutes": 1
+    },
+    {
+      "id": "whole-cut-meat",
+      "name": {
+        "zh-TW": "豬、牛、羊的肉排與整塊肉"
+      },
+      "minTempC": 75,
+      "holdMinutes": 1
+    },
+    {
+      "id": "fish-seafood",
+      "name": {
+        "zh-TW": "魚類與海鮮"
+      },
+      "minTempC": 75,
+      "holdMinutes": 1
+    },
+    {
+      "id": "egg",
+      "name": {
+        "zh-TW": "蛋料理"
+      },
+      "minTempC": 75,
+      "holdMinutes": 1
+    },
+    {
+      "id": "leftovers",
+      "name": {
+        "zh-TW": "剩菜、焗烤料理再加熱"
+      },
+      "minTempC": 75,
+      "holdMinutes": 1
+    },
+    {
+      "id": "bivalve-norovirus",
+      "name": {
+        "zh-TW": "二枚貝等（有諾羅病毒汙染疑慮的食材）"
+      },
+      "minTempC": 85,
+      "maxTempC": 90,
+      "holdSeconds": 90,
+      "note": "85～90℃ 維持 90 秒以上"
+    }
+  ],
+  "pending": [
+    {
+      "id": "raw-egg",
+      "name": {
+        "zh-TW": "生蛋（生蛋拌飯等）的處理條件"
+      },
+      "status": "待補",
+      "note": "找不到可直接引用的官方頁面（厚勞省／農水省的生食用雞蛋、賞味期限與冷藏條件）；補完前不開放「生蛋」的建議。"
+    },
+    {
+      "id": "raw-meat",
+      "name": {
+        "zh-TW": "生肉類（生食用牛肉等）"
+      },
+      "status": "待補",
+      "note": "厚勞省頁面載明生的豬肉與內臟不得作為生食用販售、牛肝不得生食；牛肉生食的規格基準沒有直接讀到，一律提醒要加熱。"
+    }
+  ]
+}

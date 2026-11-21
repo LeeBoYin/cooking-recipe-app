@@ -2096,5 +2096,355 @@
         }
       }
     ]
+  },
+  {
+    "id": "card_tonkatsu",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "日式炸豬排"
+    },
+    "description": {
+      "zh-TW": "厚切豬排裹麵包粉酥炸，配高麗菜絲和豬排醬"
+    },
+    "regions": [
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.japan.yoshoku": 0.8,
+      "protein.pork": 0.6,
+      "form.fried": 0.7,
+      "texture.crispy": 0.7,
+      "taste.sweet": 0.2,
+      "taste.umami": 0.4,
+      "richness.oily": 0.4
+    },
+    "excludedAllergenIds": [
+      "wheat",
+      "egg"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "no-pork",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_karaage",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "日式唐揚炸雞"
+    },
+    "description": {
+      "zh-TW": "雞腿肉用醬油薑蒜醃過，裹粉炸得外酥內多汁"
+    },
+    "regions": [
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.japan.izakaya": 0.8,
+      "protein.chicken": 0.6,
+      "form.fried": 0.7,
+      "texture.crispy": 0.6,
+      "texture.tender": 0.4,
+      "taste.umami": 0.4
+    },
+    "excludedAllergenIds": [
+      "soy",
+      "wheat"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_japanese_curry",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "日式咖哩飯"
+    },
+    "description": {
+      "zh-TW": "咖哩塊燉出的濃稠醬汁，有馬鈴薯、紅蘿蔔，微甜不辣"
+    },
+    "regions": [
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.japan.yoshoku": 0.8,
+      "seasoning.curry_spice": 0.4,
+      "spice_type.curry_spicy": 0.3,
+      "taste.sweet": 0.3,
+      "form.rice": 0.6,
+      "form.stew_braise": 0.5,
+      "richness.rich": 0.5
+    },
+    "excludedAllergenIds": [
+      "wheat",
+      "milk",
+      "soy"
+    ]
+  },
+  {
+    "id": "card_okonomiyaki",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "大阪燒"
+    },
+    "description": {
+      "zh-TW": "高麗菜和豬肉混進麵糊煎成圓餅，淋醬和美乃滋"
+    },
+    "regions": [
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.japan.yoshoku": 0.7,
+      "taste.sweet": 0.3,
+      "taste.umami": 0.4,
+      "form.fried": 0.3,
+      "texture.tender": 0.3
+    },
+    "excludedAllergenIds": [
+      "wheat",
+      "egg"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "no-pork",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_nikujaga",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "馬鈴薯燉肉"
+    },
+    "description": {
+      "zh-TW": "牛肉和馬鈴薯用醬油與味醂燉得入味，家常暖胃"
+    },
+    "regions": [
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.japan.washoku": 0.8,
+      "seasoning.soy_sauce": 0.5,
+      "taste.sweet": 0.4,
+      "taste.umami": 0.4,
+      "protein.beef": 0.4,
+      "form.stew_braise": 0.6,
+      "texture.tender": 0.5
+    },
+    "excludedAllergenIds": [
+      "soy"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "no-beef",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_miso_soup",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "味噌湯"
+    },
+    "description": {
+      "zh-TW": "柴魚昆布高湯加味噌，配豆腐和海帶芽，日式早餐必備"
+    },
+    "regions": [
+      "JP"
+    ],
+    "mapping": {
+      "cuisine.japan.washoku": 0.8,
+      "seasoning.miso_dashi": 0.8,
+      "taste.umami": 0.5,
+      "form.soup": 0.6,
+      "protein.tofu_soy": 0.4
+    },
+    "excludedAllergenIds": [
+      "soy",
+      "fish"
+    ]
+  },
+  {
+    "id": "card_cheeseburger",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "美式起司漢堡"
+    },
+    "description": {
+      "zh-TW": "厚牛肉餅煎得焦香，夾起司、生菜和番茄"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "mapping": {
+      "cuisine.american": 0.8,
+      "protein.beef": 0.6,
+      "taste.salty": 0.3,
+      "taste.umami": 0.4,
+      "form.grill": 0.3,
+      "richness.rich": 0.5,
+      "richness.oily": 0.4
+    },
+    "excludedAllergenIds": [
+      "wheat",
+      "milk"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "no-beef",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_mac_and_cheese",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "焗起司通心粉"
+    },
+    "description": {
+      "zh-TW": "通心粉裹滿濃濃的切達起司醬，綿密濃郁"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "mapping": {
+      "cuisine.american": 0.8,
+      "seasoning.tomato_cheese": 0.4,
+      "seasoning.butter_herb": 0.3,
+      "taste.salty": 0.3,
+      "richness.rich": 0.7,
+      "form.noodles": 0.5,
+      "texture.smooth": 0.5
+    },
+    "excludedAllergenIds": [
+      "milk",
+      "wheat"
+    ],
+    "excludedRestrictionIds": [
+      "vegan"
+    ]
+  },
+  {
+    "id": "card_chili_con_carne",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "墨西哥肉醬豆湯"
+    },
+    "description": {
+      "zh-TW": "牛絞肉、黑豆和番茄燉成，微辣濃稠，配玉米脆片"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "mapping": {
+      "cuisine.american.tex_mex": 0.8,
+      "spice_type.mexican_chili": 0.5,
+      "taste.spicy": 0.3,
+      "protein.beef": 0.5,
+      "form.stew_braise": 0.6,
+      "richness.rich": 0.5
+    },
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "no-beef",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_avocado_toast",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "酪梨吐司"
+    },
+    "description": {
+      "zh-TW": "烤吐司抹上熟透的酪梨，加半熟蛋或檸檬，簡單清爽"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "mapping": {
+      "cuisine.american": 0.6,
+      "taste.sour": 0.2,
+      "texture.smooth": 0.4,
+      "protein.egg": 0.2,
+      "form.dessert_baking": 0.1
+    },
+    "excludedAllergenIds": [
+      "wheat"
+    ]
+  },
+  {
+    "id": "card_roast_turkey",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "感恩節烤火雞"
+    },
+    "description": {
+      "zh-TW": "整隻火雞抹奶油烤到金黃，配馬鈴薯泥和肉汁"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "mapping": {
+      "cuisine.american": 0.8,
+      "seasoning.butter_herb": 0.6,
+      "protein.chicken": 0.5,
+      "form.grill": 0.4,
+      "texture.tender": 0.4,
+      "richness.rich": 0.4
+    },
+    "excludedAllergenIds": [
+      "milk"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian",
+      "pescatarian"
+    ]
+  },
+  {
+    "id": "card_baked_salmon",
+    "type": "dish_card",
+    "title": {
+      "zh-TW": "烤箱香草鮭魚"
+    },
+    "description": {
+      "zh-TW": "鮭魚淋橄欖油和檸檬，和青花菜一起進烤箱"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "mapping": {
+      "cuisine.american": 0.5,
+      "cuisine.mediterranean": 0.4,
+      "protein.fish": 0.6,
+      "seasoning.butter_herb": 0.4,
+      "form.grill": 0.3,
+      "taste.sour": 0.2
+    },
+    "excludedAllergenIds": [
+      "fish"
+    ],
+    "excludedRestrictionIds": [
+      "vegetarian",
+      "vegan",
+      "buddhist-vegetarian"
+    ]
   }
 ]

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  DISHWASHER_SAFE, EQUIPMENT_CATEGORIES, canDo, doableTechniques, equipmentTypes, onboardingModeFor, techniques, techniquesOf,
+  DISHWASHER_SAFE, EQUIPMENT_CATEGORIES, canDo, equipmentAvailableIn, doableTechniques, equipmentTypes, onboardingModeFor, techniques, techniquesOf,
 } from './index.ts';
 
 const DICT_ID = /^[a-z0-9]+(-[a-z0-9]+)*$/;
@@ -20,9 +20,9 @@ describe('廚具', () => {
   const techniqueIds = new Set(techniques.map((t) => t.id));
   const count = (pred: (e: (typeof equipmentTypes)[number]) => boolean) => equipmentTypes.filter(pred).length;
 
-  it('68 種，ID 格式正確且不重複，都有繁中名稱', () => {
-    expect(equipmentTypes).toHaveLength(68);
-    expect(new Set(equipmentTypes.map((e) => e.id)).size).toBe(68);
+  it('70 種，ID 格式正確且不重複，都有繁中名稱', () => {
+    expect(equipmentTypes).toHaveLength(70);
+    expect(new Set(equipmentTypes.map((e) => e.id)).size).toBe(70);
     for (const e of equipmentTypes) {
       expect(e.id).toMatch(DICT_ID);
       expect(e.name['zh-TW'].trim()).not.toBe('');
@@ -56,7 +56,7 @@ describe('廚具', () => {
 
   it('洗碗機標記的數量和 07 一致', () => {
     expect([count((e) => e.dishwasherSafe === 'yes'), count((e) => e.dishwasherSafe === 'partial'),
-      count((e) => e.dishwasherSafe === 'no'), count((e) => e.dishwasherSafe === 'n/a')]).toEqual([12, 30, 12, 14]);
+      count((e) => e.dishwasherSafe === 'no'), count((e) => e.dishwasherSafe === 'n/a')]).toEqual([12, 30, 14, 14]);
   });
 
   it('新手盤點：台灣出現 48 種、其中 10 種預設勾選', () => {
@@ -70,6 +70,24 @@ describe('廚具', () => {
     expect(onboardingModeFor(oven, 'US')).toBe('default-on');
     expect(onboardingModeFor(oven, 'TW')).toBe('show');
     expect(onboardingModeFor(oven, 'JP')).toBe('show');
+  });
+
+  it('美國加州吃到標 US 的設定；日本有自己的預設', () => {
+    const get = (id: string) => equipmentTypes.find((e) => e.id === id)!;
+    expect(onboardingModeFor(get('oven'), 'US-CA')).toBe('default-on');
+    expect(onboardingModeFor(get('dishwasher'), 'US-CA')).toBe('default-on');
+    expect(onboardingModeFor(get('fish-grill'), 'JP')).toBe('default-on');
+    expect(onboardingModeFor(get('electric-rice-cooker'), 'JP')).toBe('default-on');
+    expect(onboardingModeFor(get('tatung-rice-cooker'), 'JP')).toBe('hidden');
+    expect(onboardingModeFor(get('fish-grill'), 'TW')).toBe('hidden');
+  });
+
+  it('只有日本才有的廚具標了 regions；US-CA 也算 US', () => {
+    const fish = equipmentTypes.find((e) => e.id === 'fish-grill')!;
+    expect(equipmentAvailableIn(fish, 'JP')).toBe(true);
+    expect(equipmentAvailableIn(fish, 'TW')).toBe(false);
+    expect(equipmentAvailableIn({ ...fish, regions: ['US'] }, 'US-CA')).toBe(true);
+    expect(equipmentAvailableIn(equipmentTypes.find((e) => e.id === 'wok')!, 'US-CA')).toBe(true);
   });
 });
 

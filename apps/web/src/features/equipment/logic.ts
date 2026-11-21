@@ -1,5 +1,5 @@
 // 廚具畫面的純邏輯：分組、搜尋字典、盤點圖示牆的預設勾選。
-import { equipmentTypes, onboardingModeFor, type EquipmentCategory, type EquipmentType } from '@zhusha/equipment';
+import { equipmentAvailableIn, equipmentTypes, onboardingModeFor, type EquipmentCategory, type EquipmentType } from '@zhusha/equipment';
 import { getEquipmentType } from '@zhusha/equipment';
 import type { KitchenEquipment } from '../../data/equipment.ts';
 
@@ -34,7 +34,7 @@ export function detailTags(item: KitchenEquipment): string[] {
 }
 
 function availableIn(type: EquipmentType, region: string): boolean {
-  return !type.deprecated && (!type.regions || type.regions.length === 0 || type.regions.includes(region));
+  return !type.deprecated && equipmentAvailableIn(type, region);
 }
 
 function norm(s: string): string {

@@ -63,7 +63,25 @@ export type UiLocale = 'zh-TW';
 export type Hemisphere = 'north' | 'south';
 export type SeasonKey = 'spring' | 'summer' | 'autumn' | 'winter';
 
-// 地區設定（05 RegionProfile）。節日等資料做到推薦功能時再補，目前 holidays 先是空的
+// 節日（05 Holiday）。日期規則 rule 的格式：
+//   'nth-weekday:月:星期:第幾個'  例 'nth-weekday:11:4:4' = 11 月第 4 個星期四（星期 0 = 週日）
+//   'last-weekday:月:星期'        例 'last-weekday:5:1' = 5 月最後一個星期一
+//   其他以小寫英文與連字號命名的規則，例 'jp-doyo-ushi:summer'，由日期計算模組認得時才生效
+export type HolidayDate =
+  | { type: 'fixed'; month: number; day: number }
+  | { type: 'lunar'; month: number; day: number }
+  | { type: 'solar_term'; term: string }
+  | { type: 'rule'; rule: string };
+
+export interface Holiday {
+  id: string;
+  name: LocalizedText;
+  date: HolidayDate;
+  dishIdeas: string[]; // 對應 BaseDish 的 ID
+  leadDays: number; // 節日前幾天開始出現在季節靈感
+}
+
+// 地區設定（05 RegionProfile）
 export interface RegionProfile {
   code: RegionCode;
   name: LocalizedText;
@@ -73,7 +91,7 @@ export interface RegionProfile {
   defaultUnits: { temperature: 'C' | 'F'; measure: 'metric' | 'us' };
   seasons: { key: SeasonKey; months: number[] }[];
   usesSolarTerms: boolean;
-  holidays: never[];
+  holidays: Holiday[];
   commonPantryIngredientIds: string[];
   stapleIngredientIds: string[];
   dataStatus: 'full' | 'partial';

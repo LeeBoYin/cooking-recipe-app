@@ -8,6 +8,13 @@
       "zh-TW": [
         "生抽",
         "薄鹽醬油"
+      ],
+      "ja": [
+        "しょうゆ",
+        "醤油"
+      ],
+      "en": [
+        "soy sauce"
       ]
     },
     "family": "soy-sauce-family",
@@ -53,6 +60,9 @@
     "aliases": {
       "zh-TW": [
         "味霖"
+      ],
+      "ja": [
+        "みりん"
       ]
     },
     "family": "cooking-wine-family",
@@ -99,6 +109,12 @@
       "zh-TW": [
         "黑麻油",
         "香油"
+      ],
+      "ja": [
+        "ごま油"
+      ],
+      "en": [
+        "sesame oil"
       ]
     },
     "family": "sesame-oil-family",
@@ -122,6 +138,12 @@
       "zh-TW": [
         "食鹽",
         "海鹽"
+      ],
+      "ja": [
+        "塩"
+      ],
+      "en": [
+        "salt"
       ]
     },
     "family": "salt-family",
@@ -142,6 +164,12 @@
       "zh-TW": [
         "砂糖",
         "白糖"
+      ],
+      "ja": [
+        "砂糖"
+      ],
+      "en": [
+        "sugar"
       ]
     },
     "family": "sugar-family",
@@ -178,6 +206,10 @@
     "aliases": {
       "zh-TW": [
         "黑胡椒粒"
+      ],
+      "en": [
+        "black pepper",
+        "pepper"
       ]
     },
     "family": "pepper-family",
@@ -196,7 +228,14 @@
       "zh-TW": "蜂蜜"
     },
     "aliases": {
-      "zh-TW": []
+      "zh-TW": [],
+      "ja": [
+        "はちみつ",
+        "蜂蜜"
+      ],
+      "en": [
+        "honey"
+      ]
     },
     "family": "honey-family",
     "traits": [
@@ -219,6 +258,12 @@
       "zh-TW": [
         "蒜頭",
         "蒜"
+      ],
+      "ja": [
+        "にんにく"
+      ],
+      "en": [
+        "garlic"
       ]
     },
     "family": "allium-family",
@@ -243,6 +288,15 @@
       "zh-TW": [
         "蔥",
         "蔥花"
+      ],
+      "ja": [
+        "長ねぎ",
+        "ねぎ",
+        "青ねぎ"
+      ],
+      "en": [
+        "green onion",
+        "scallion"
       ]
     },
     "family": "allium-family",
@@ -263,7 +317,14 @@
       "zh-TW": "洋蔥"
     },
     "aliases": {
-      "zh-TW": []
+      "zh-TW": [],
+      "ja": [
+        "玉ねぎ",
+        "たまねぎ"
+      ],
+      "en": [
+        "onion"
+      ]
     },
     "family": "allium-family",
     "traits": [
@@ -276,7 +337,14 @@
     "flavorTags": [
       "sweet",
       "aromatic"
-    ]
+    ],
+    "seasonMonths": {
+      "JP": [
+        3,
+        4,
+        5
+      ]
+    }
   },
   {
     "id": "ginger",
@@ -288,6 +356,13 @@
         "老薑",
         "嫩薑",
         "生薑"
+      ],
+      "ja": [
+        "しょうが",
+        "生姜"
+      ],
+      "en": [
+        "ginger"
       ]
     },
     "family": "ginger-family",
@@ -310,6 +385,10 @@
       "zh-TW": [
         "紅辣椒",
         "朝天椒"
+      ],
+      "ja": [
+        "唐辛子",
+        "とうがらし"
       ]
     },
     "family": "chili-family",
@@ -351,6 +430,12 @@
       "zh-TW": [
         "甘藍",
         "包心菜"
+      ],
+      "ja": [
+        "キャベツ"
+      ],
+      "en": [
+        "cabbage"
       ]
     },
     "family": "cabbage-family",
@@ -369,6 +454,22 @@
         1,
         2,
         3
+      ],
+      "JP": [
+        3,
+        4,
+        5,
+        11,
+        12
+      ],
+      "US-CA": [
+        1,
+        2,
+        3,
+        4,
+        10,
+        11,
+        12
       ]
     }
   },
@@ -381,6 +482,12 @@
       "zh-TW": [
         "牛番茄",
         "大番茄"
+      ],
+      "ja": [
+        "トマト"
+      ],
+      "en": [
+        "tomato"
       ]
     },
     "family": "tomato-family",
@@ -401,6 +508,18 @@
         2,
         3,
         4
+      ],
+      "JP": [
+        7,
+        8,
+        9
+      ],
+      "US-CA": [
+        6,
+        7,
+        8,
+        9,
+        10
       ]
     }
   },
@@ -410,7 +529,14 @@
       "zh-TW": "茄子"
     },
     "aliases": {
-      "zh-TW": []
+      "zh-TW": [],
+      "ja": [
+        "なす",
+        "茄子"
+      ],
+      "en": [
+        "eggplant"
+      ]
     },
     "family": "eggplant-family",
     "traits": [],
@@ -425,6 +551,18 @@
         7,
         8,
         9
+      ],
+      "JP": [
+        6,
+        7,
+        8,
+        9
+      ],
+      "US-CA": [
+        7,
+        8,
+        9,
+        10
       ]
     }
   },
@@ -436,6 +574,10 @@
     "aliases": {
       "zh-TW": [
         "鮮香菇"
+      ],
+      "ja": [
+        "しいたけ",
+        "椎茸"
       ]
     },
     "family": "mushroom-family",
@@ -446,7 +588,17 @@
     "recentDays": 5,
     "flavorTags": [
       "umami"
-    ]
+    ],
+    "seasonMonths": {
+      "JP": [
+        3,
+        4,
+        5,
+        9,
+        10,
+        11
+      ]
+    }
   },
   {
     "id": "tofu",
@@ -457,6 +609,13 @@
       "zh-TW": [
         "板豆腐",
         "嫩豆腐"
+      ],
+      "ja": [
+        "豆腐",
+        "とうふ"
+      ],
+      "en": [
+        "tofu"
       ]
     },
     "family": "tofu-family",
@@ -477,6 +636,14 @@
     "aliases": {
       "zh-TW": [
         "蛋"
+      ],
+      "ja": [
+        "卵",
+        "たまご"
+      ],
+      "en": [
+        "egg",
+        "eggs"
       ]
     },
     "family": "egg-family",
@@ -501,6 +668,13 @@
       "zh-TW": [
         "鮮奶",
         "鮮乳"
+      ],
+      "ja": [
+        "牛乳",
+        "ぎゅうにゅう"
+      ],
+      "en": [
+        "milk"
       ]
     },
     "family": "milk-family",
@@ -525,6 +699,10 @@
       "zh-TW": [
         "豬五花",
         "三層肉"
+      ],
+      "ja": [
+        "豚バラ肉",
+        "豚バラ"
       ]
     },
     "family": "pork-family",
@@ -546,6 +724,12 @@
     "aliases": {
       "zh-TW": [
         "絞肉"
+      ],
+      "ja": [
+        "豚ひき肉"
+      ],
+      "en": [
+        "ground pork"
       ]
     },
     "family": "pork-family",
@@ -568,6 +752,13 @@
       "zh-TW": [
         "去骨雞腿",
         "雞腿"
+      ],
+      "ja": [
+        "鶏もも肉",
+        "もも肉"
+      ],
+      "en": [
+        "chicken thigh"
       ]
     },
     "family": "chicken-family",
@@ -589,6 +780,10 @@
     "aliases": {
       "zh-TW": [
         "火鍋牛肉片"
+      ],
+      "ja": [
+        "牛薄切り肉",
+        "牛こま"
       ]
     },
     "family": "beef-family",
@@ -611,6 +806,14 @@
       "zh-TW": [
         "蝦",
         "白蝦"
+      ],
+      "ja": [
+        "えび",
+        "海老"
+      ],
+      "en": [
+        "shrimp",
+        "prawn"
       ]
     },
     "family": "shrimp-family",
@@ -639,6 +842,14 @@
     "aliases": {
       "zh-TW": [
         "鮭魚排"
+      ],
+      "ja": [
+        "鮭",
+        "さけ",
+        "サーモン"
+      ],
+      "en": [
+        "salmon"
       ]
     },
     "family": "salmon-family",
@@ -652,7 +863,14 @@
     "recentDays": 2,
     "allergenIds": [
       "fish"
-    ]
+    ],
+    "seasonMonths": {
+      "JP": [
+        9,
+        10,
+        11
+      ]
+    }
   },
   {
     "id": "rice",
@@ -662,6 +880,14 @@
     "aliases": {
       "zh-TW": [
         "米"
+      ],
+      "ja": [
+        "米",
+        "お米",
+        "コメ"
+      ],
+      "en": [
+        "rice"
       ]
     },
     "family": "rice-family",
@@ -698,6 +924,13 @@
     "aliases": {
       "zh-TW": [
         "中筋麵粉"
+      ],
+      "ja": [
+        "小麦粉"
+      ],
+      "en": [
+        "flour",
+        "all-purpose flour"
       ]
     },
     "family": "wheat-flour-family",
@@ -718,6 +951,13 @@
       "zh-TW": [
         "花生米",
         "土豆"
+      ],
+      "ja": [
+        "落花生",
+        "ピーナッツ"
+      ],
+      "en": [
+        "peanut"
       ]
     },
     "family": "peanut-family",
@@ -738,6 +978,13 @@
       "zh-TW": [
         "沙拉油",
         "植物油"
+      ],
+      "ja": [
+        "サラダ油"
+      ],
+      "en": [
+        "vegetable oil",
+        "canola oil"
       ]
     },
     "family": "cooking-oil-family",
@@ -755,6 +1002,9 @@
       "zh-TW": [
         "醋",
         "穀物醋"
+      ],
+      "ja": [
+        "酢"
       ]
     },
     "family": "vinegar-family",
@@ -871,6 +1121,12 @@
     "aliases": {
       "zh-TW": [
         "蕃茄醬"
+      ],
+      "ja": [
+        "ケチャップ"
+      ],
+      "en": [
+        "ketchup"
       ]
     },
     "family": "tomato-sauce-family",
@@ -892,6 +1148,13 @@
       "zh-TW": [
         "沙拉醬",
         "蛋黃醬"
+      ],
+      "ja": [
+        "マヨネーズ"
+      ],
+      "en": [
+        "mayonnaise",
+        "mayo"
       ]
     },
     "family": "mayonnaise-family",
@@ -990,6 +1253,10 @@
     "aliases": {
       "zh-TW": [
         "味增"
+      ],
+      "ja": [
+        "みそ",
+        "味噌"
       ]
     },
     "family": "fermented-paste-family",
@@ -1173,6 +1440,13 @@
       "zh-TW": [
         "洋芋",
         "土豆"
+      ],
+      "ja": [
+        "じゃがいも",
+        "ジャガイモ"
+      ],
+      "en": [
+        "potato"
       ]
     },
     "family": "potato-family",
@@ -1191,6 +1465,12 @@
       "zh-TW": [
         "胡蘿蔔",
         "紅菜頭"
+      ],
+      "ja": [
+        "にんじん"
+      ],
+      "en": [
+        "carrot"
       ]
     },
     "family": "carrot-family",
@@ -1201,7 +1481,22 @@
     "recentDays": 14,
     "flavorTags": [
       "sweet"
-    ]
+    ],
+    "seasonMonths": {
+      "JP": [
+        10,
+        11,
+        12
+      ],
+      "US-CA": [
+        1,
+        2,
+        3,
+        10,
+        11,
+        12
+      ]
+    }
   },
   {
     "id": "sweet-potato",
@@ -1212,6 +1507,13 @@
       "zh-TW": [
         "番薯",
         "蕃薯"
+      ],
+      "ja": [
+        "さつまいも"
+      ],
+      "en": [
+        "sweet potato",
+        "yam"
       ]
     },
     "family": "sweet-potato-family",
@@ -1222,7 +1524,15 @@
     "recentDays": 14,
     "flavorTags": [
       "sweet"
-    ]
+    ],
+    "seasonMonths": {
+      "JP": [
+        10,
+        11,
+        12,
+        1
+      ]
+    }
   },
   {
     "id": "glass-noodles",
@@ -1266,6 +1576,14 @@
       "zh-TW": [
         "意麵",
         "直麵"
+      ],
+      "ja": [
+        "スパゲッティ",
+        "パスタ"
+      ],
+      "en": [
+        "spaghetti",
+        "pasta"
       ]
     },
     "family": "pasta-family",
@@ -1286,6 +1604,10 @@
       "zh-TW": [
         "速食麵",
         "杯麵"
+      ],
+      "ja": [
+        "インスタントラーメン",
+        "カップ麺"
       ]
     },
     "family": "instant-noodle-family",
@@ -1305,6 +1627,10 @@
     "aliases": {
       "zh-TW": [
         "燕麥片"
+      ],
+      "en": [
+        "oats",
+        "oatmeal"
       ]
     },
     "family": "oat-family",
@@ -1325,6 +1651,9 @@
       "zh-TW": [
         "香菇乾",
         "冬菇"
+      ],
+      "ja": [
+        "干ししいたけ"
       ]
     },
     "family": "mushroom-family",
@@ -1388,6 +1717,10 @@
       "zh-TW": [
         "紫菜",
         "海苔片"
+      ],
+      "ja": [
+        "のり",
+        "海苔"
       ]
     },
     "family": "seaweed-family",
@@ -1464,6 +1797,10 @@
     "aliases": {
       "zh-TW": [
         "赤小豆"
+      ],
+      "ja": [
+        "あずき",
+        "小豆"
       ]
     },
     "family": "bean-family",
@@ -1495,6 +1832,10 @@
       "zh-TW": [
         "芝麻",
         "黑芝麻"
+      ],
+      "ja": [
+        "ごま",
+        "胡麻"
       ]
     },
     "family": "sesame-family",
@@ -1517,6 +1858,12 @@
     "aliases": {
       "zh-TW": [
         "鮪魚罐"
+      ],
+      "ja": [
+        "ツナ缶"
+      ],
+      "en": [
+        "canned tuna"
       ]
     },
     "family": "tuna-family",
@@ -1542,6 +1889,12 @@
     "aliases": {
       "zh-TW": [
         "玉米粒罐頭"
+      ],
+      "ja": [
+        "コーン缶"
+      ],
+      "en": [
+        "canned corn"
       ]
     },
     "family": "corn-family",
@@ -1562,6 +1915,10 @@
       "zh-TW": [
         "整粒番茄罐頭",
         "茄汁"
+      ],
+      "en": [
+        "canned tomatoes",
+        "diced tomatoes"
       ]
     },
     "family": "tomato-family",
@@ -1584,6 +1941,10 @@
         "水餃",
         "餃子",
         "鍋貼"
+      ],
+      "ja": [
+        "冷凍餃子",
+        "ぎょうざ"
       ]
     },
     "family": "dumpling-family",
@@ -1608,6 +1969,10 @@
       "zh-TW": [
         "毛豆",
         "毛豆仁"
+      ],
+      "ja": [
+        "枝豆",
+        "えだまめ"
       ]
     },
     "family": "bean-family",
@@ -1628,12 +1993,2119 @@
       "zh-TW": [
         "冷凍三色豆",
         "三色豆"
+      ],
+      "en": [
+        "frozen mixed vegetables"
       ]
     },
     "family": "mixed-vegetable-family",
     "traits": [],
     "category": "vegetable",
     "defaultStorage": "freezer",
+    "isPerishable": false
+  },
+  {
+    "id": "chicken-breast",
+    "name": {
+      "zh-TW": "雞胸肉"
+    },
+    "aliases": {
+      "zh-TW": [
+        "雞胸"
+      ],
+      "en": [
+        "chicken breast"
+      ],
+      "ja": [
+        "鶏むね肉",
+        "むね肉"
+      ]
+    },
+    "family": "chicken-family",
+    "traits": [
+      "animal",
+      "meat",
+      "poultry"
+    ],
+    "category": "poultry",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 2
+  },
+  {
+    "id": "spinach",
+    "name": {
+      "zh-TW": "菠菜"
+    },
+    "aliases": {
+      "zh-TW": [
+        "菠薐菜"
+      ],
+      "en": [
+        "spinach"
+      ],
+      "ja": [
+        "ほうれん草",
+        "ホウレンソウ"
+      ]
+    },
+    "family": "spinach-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 4,
+    "flavorTags": [
+      "bitter"
+    ],
+    "seasonMonths": {
+      "JP": [
+        11,
+        12,
+        1,
+        2
+      ],
+      "US-CA": [
+        3,
+        4,
+        5,
+        10,
+        11
+      ]
+    }
+  },
+  {
+    "id": "lettuce",
+    "name": {
+      "zh-TW": "萵苣"
+    },
+    "aliases": {
+      "zh-TW": [
+        "生菜",
+        "美生菜",
+        "羅蔓生菜"
+      ],
+      "en": [
+        "lettuce",
+        "romaine"
+      ],
+      "ja": [
+        "レタス"
+      ]
+    },
+    "family": "lettuce-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5
+  },
+  {
+    "id": "cucumber",
+    "name": {
+      "zh-TW": "小黃瓜"
+    },
+    "aliases": {
+      "zh-TW": [
+        "黃瓜",
+        "胡瓜"
+      ],
+      "en": [
+        "cucumber"
+      ],
+      "ja": [
+        "きゅうり"
+      ]
+    },
+    "family": "cucumber-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "seasonMonths": {
+      "JP": [
+        6,
+        7,
+        8
+      ],
+      "US-CA": [
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  },
+  {
+    "id": "pumpkin",
+    "name": {
+      "zh-TW": "南瓜"
+    },
+    "aliases": {
+      "zh-TW": [
+        "栗子南瓜",
+        "日本南瓜"
+      ],
+      "en": [
+        "pumpkin",
+        "kabocha",
+        "squash"
+      ],
+      "ja": [
+        "かぼちゃ",
+        "南瓜"
+      ]
+    },
+    "family": "pumpkin-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "pantry",
+    "isPerishable": true,
+    "recentDays": 14,
+    "flavorTags": [
+      "sweet"
+    ],
+    "seasonMonths": {
+      "JP": [
+        7,
+        8,
+        9,
+        12
+      ],
+      "US-CA": [
+        9,
+        10,
+        11
+      ]
+    }
+  },
+  {
+    "id": "cilantro",
+    "name": {
+      "zh-TW": "香菜"
+    },
+    "aliases": {
+      "zh-TW": [
+        "芫荽",
+        "胡荽"
+      ],
+      "en": [
+        "cilantro",
+        "coriander"
+      ],
+      "ja": [
+        "パクチー"
+      ]
+    },
+    "family": "cilantro-family",
+    "traits": [],
+    "category": "herb",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "flavorTags": [
+      "aromatic"
+    ]
+  },
+  {
+    "id": "almond",
+    "name": {
+      "zh-TW": "杏仁"
+    },
+    "aliases": {
+      "zh-TW": [
+        "杏仁果",
+        "甜杏仁",
+        "大杏仁"
+      ],
+      "en": [
+        "almond"
+      ],
+      "ja": [
+        "アーモンド"
+      ]
+    },
+    "family": "almond-family",
+    "traits": [],
+    "category": "nut-seed",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "allergenIds": [
+      "almond"
+    ]
+  },
+  {
+    "id": "walnut",
+    "name": {
+      "zh-TW": "核桃"
+    },
+    "aliases": {
+      "zh-TW": [
+        "胡桃"
+      ],
+      "en": [
+        "walnut"
+      ],
+      "ja": [
+        "くるみ",
+        "クルミ"
+      ]
+    },
+    "family": "walnut-family",
+    "traits": [],
+    "category": "nut-seed",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "allergenIds": [
+      "walnut"
+    ]
+  },
+  {
+    "id": "olive-oil",
+    "name": {
+      "zh-TW": "橄欖油"
+    },
+    "aliases": {
+      "zh-TW": [
+        "初榨橄欖油",
+        "橄欖油"
+      ],
+      "en": [
+        "olive oil"
+      ],
+      "ja": [
+        "オリーブオイル"
+      ]
+    },
+    "family": "olive-oil-family",
+    "traits": [],
+    "category": "oil",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "aromatic"
+    ]
+  },
+  {
+    "id": "butter",
+    "name": {
+      "zh-TW": "奶油"
+    },
+    "aliases": {
+      "zh-TW": [
+        "無鹽奶油",
+        "有鹽奶油",
+        "牛油"
+      ],
+      "en": [
+        "butter"
+      ]
+    },
+    "family": "butter-family",
+    "traits": [
+      "animal",
+      "dairy"
+    ],
+    "category": "dairy",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 30,
+    "flavorTags": [
+      "aromatic"
+    ],
+    "allergenIds": [
+      "milk"
+    ]
+  },
+  {
+    "id": "cheddar-cheese",
+    "name": {
+      "zh-TW": "切達起司"
+    },
+    "aliases": {
+      "zh-TW": [
+        "起司",
+        "起司片",
+        "乳酪",
+        "cheese"
+      ],
+      "en": [
+        "cheddar",
+        "cheese",
+        "shredded cheese"
+      ]
+    },
+    "family": "cheese-family",
+    "traits": [
+      "animal",
+      "dairy"
+    ],
+    "category": "dairy",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 14,
+    "flavorTags": [
+      "salty",
+      "umami"
+    ],
+    "allergenIds": [
+      "milk"
+    ]
+  },
+  {
+    "id": "yogurt",
+    "name": {
+      "zh-TW": "優格"
+    },
+    "aliases": {
+      "zh-TW": [
+        "原味優格",
+        "優酪乳",
+        "希臘優格"
+      ],
+      "en": [
+        "yogurt",
+        "greek yogurt"
+      ]
+    },
+    "family": "yogurt-family",
+    "traits": [
+      "animal",
+      "dairy"
+    ],
+    "category": "dairy",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 10,
+    "flavorTags": [
+      "sour"
+    ],
+    "allergenIds": [
+      "milk"
+    ]
+  },
+  {
+    "id": "bread",
+    "name": {
+      "zh-TW": "吐司麵包"
+    },
+    "aliases": {
+      "zh-TW": [
+        "吐司",
+        "麵包",
+        "白吐司",
+        "土司"
+      ],
+      "en": [
+        "bread",
+        "sandwich bread",
+        "toast"
+      ],
+      "ja": [
+        "食パン"
+      ]
+    },
+    "family": "bread-family",
+    "traits": [],
+    "category": "grain",
+    "defaultStorage": "pantry",
+    "isPerishable": true,
+    "recentDays": 5,
+    "allergenIds": [
+      "wheat"
+    ]
+  },
+  {
+    "id": "tortilla",
+    "name": {
+      "zh-TW": "墨西哥薄餅"
+    },
+    "aliases": {
+      "zh-TW": [
+        "玉米薄餅",
+        "麵粉薄餅",
+        "塔可餅皮"
+      ],
+      "en": [
+        "tortilla"
+      ]
+    },
+    "family": "tortilla-family",
+    "traits": [],
+    "category": "grain",
+    "defaultStorage": "pantry",
+    "isPerishable": true,
+    "recentDays": 14,
+    "allergenIds": [
+      "wheat"
+    ]
+  },
+  {
+    "id": "macaroni",
+    "name": {
+      "zh-TW": "通心粉"
+    },
+    "aliases": {
+      "zh-TW": [
+        "彎管麵",
+        "短麵"
+      ],
+      "en": [
+        "macaroni",
+        "elbow pasta"
+      ]
+    },
+    "family": "pasta-family",
+    "traits": [],
+    "category": "noodle",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "allergenIds": [
+      "wheat"
+    ]
+  },
+  {
+    "id": "ground-beef",
+    "name": {
+      "zh-TW": "牛絞肉"
+    },
+    "aliases": {
+      "zh-TW": [
+        "牛肉末",
+        "漢堡肉"
+      ],
+      "en": [
+        "ground beef",
+        "hamburger meat"
+      ]
+    },
+    "family": "beef-family",
+    "traits": [
+      "animal",
+      "meat",
+      "beef"
+    ],
+    "category": "meat",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 2,
+    "flavorTags": [
+      "umami"
+    ]
+  },
+  {
+    "id": "steak",
+    "name": {
+      "zh-TW": "牛排"
+    },
+    "aliases": {
+      "zh-TW": [
+        "菲力",
+        "肋眼",
+        "沙朗",
+        "牛小排"
+      ],
+      "en": [
+        "steak",
+        "beef steak",
+        "ribeye",
+        "sirloin"
+      ]
+    },
+    "family": "beef-family",
+    "traits": [
+      "animal",
+      "meat",
+      "beef"
+    ],
+    "category": "meat",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 3,
+    "flavorTags": [
+      "umami"
+    ]
+  },
+  {
+    "id": "bacon",
+    "name": {
+      "zh-TW": "培根"
+    },
+    "aliases": {
+      "zh-TW": [
+        "煙燻培根"
+      ],
+      "en": [
+        "bacon"
+      ]
+    },
+    "family": "bacon-family",
+    "traits": [
+      "animal",
+      "meat",
+      "pork"
+    ],
+    "category": "meat",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 7,
+    "flavorTags": [
+      "salty",
+      "umami"
+    ]
+  },
+  {
+    "id": "pork-chop",
+    "name": {
+      "zh-TW": "豬排肉"
+    },
+    "aliases": {
+      "zh-TW": [
+        "豬里肌排",
+        "帶骨豬排",
+        "豬肉排"
+      ],
+      "en": [
+        "pork chop"
+      ],
+      "ja": [
+        "とんかつ用豚肉",
+        "豚ロース"
+      ]
+    },
+    "family": "pork-family",
+    "traits": [
+      "animal",
+      "meat",
+      "pork"
+    ],
+    "category": "meat",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 3
+  },
+  {
+    "id": "pork-ribs",
+    "name": {
+      "zh-TW": "豬肋排"
+    },
+    "aliases": {
+      "zh-TW": [
+        "豬排骨",
+        "肋排",
+        "小排"
+      ],
+      "en": [
+        "pork ribs",
+        "baby back ribs"
+      ],
+      "ja": [
+        "スペアリブ"
+      ]
+    },
+    "family": "pork-family",
+    "traits": [
+      "animal",
+      "meat",
+      "pork"
+    ],
+    "category": "meat",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 3
+  },
+  {
+    "id": "turkey-breast",
+    "name": {
+      "zh-TW": "火雞胸肉"
+    },
+    "aliases": {
+      "zh-TW": [
+        "火雞肉"
+      ],
+      "en": [
+        "turkey breast",
+        "turkey"
+      ]
+    },
+    "family": "turkey-family",
+    "traits": [
+      "animal",
+      "meat",
+      "poultry"
+    ],
+    "category": "poultry",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 2
+  },
+  {
+    "id": "broccoli",
+    "name": {
+      "zh-TW": "青花菜"
+    },
+    "aliases": {
+      "zh-TW": [
+        "綠花椰菜",
+        "花椰菜",
+        "西蘭花"
+      ],
+      "en": [
+        "broccoli"
+      ],
+      "ja": [
+        "ブロッコリー"
+      ]
+    },
+    "family": "broccoli-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5
+  },
+  {
+    "id": "bell-pepper",
+    "name": {
+      "zh-TW": "甜椒"
+    },
+    "aliases": {
+      "zh-TW": [
+        "彩椒",
+        "紅甜椒",
+        "黃甜椒"
+      ],
+      "en": [
+        "bell pepper",
+        "capsicum"
+      ],
+      "ja": [
+        "パプリカ"
+      ]
+    },
+    "family": "bell-pepper-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 7,
+    "flavorTags": [
+      "sweet"
+    ],
+    "seasonMonths": {
+      "US-CA": [
+        7,
+        8,
+        9,
+        10
+      ]
+    }
+  },
+  {
+    "id": "avocado",
+    "name": {
+      "zh-TW": "酪梨"
+    },
+    "aliases": {
+      "zh-TW": [
+        "牛油果"
+      ],
+      "en": [
+        "avocado"
+      ],
+      "ja": [
+        "アボカド"
+      ]
+    },
+    "family": "avocado-family",
+    "traits": [],
+    "category": "fruit",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "seasonMonths": {
+      "US-CA": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  },
+  {
+    "id": "lemon",
+    "name": {
+      "zh-TW": "檸檬"
+    },
+    "aliases": {
+      "zh-TW": [
+        "黃檸檬"
+      ],
+      "en": [
+        "lemon"
+      ],
+      "ja": [
+        "レモン"
+      ]
+    },
+    "family": "lemon-family",
+    "traits": [],
+    "category": "fruit",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 14,
+    "flavorTags": [
+      "sour",
+      "aromatic"
+    ],
+    "seasonMonths": {
+      "US-CA": [
+        11,
+        12,
+        1,
+        2,
+        3,
+        4
+      ]
+    }
+  },
+  {
+    "id": "lime",
+    "name": {
+      "zh-TW": "萊姆"
+    },
+    "aliases": {
+      "zh-TW": [
+        "青檸",
+        "綠檸檬"
+      ],
+      "en": [
+        "lime"
+      ]
+    },
+    "family": "lemon-family",
+    "traits": [],
+    "category": "fruit",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 14,
+    "flavorTags": [
+      "sour",
+      "aromatic"
+    ]
+  },
+  {
+    "id": "corn",
+    "name": {
+      "zh-TW": "玉米"
+    },
+    "aliases": {
+      "zh-TW": [
+        "甜玉米",
+        "玉米筍"
+      ],
+      "en": [
+        "corn",
+        "sweet corn"
+      ],
+      "ja": [
+        "とうもろこし"
+      ]
+    },
+    "family": "corn-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "flavorTags": [
+      "sweet"
+    ],
+    "seasonMonths": {
+      "JP": [
+        6,
+        7,
+        8
+      ],
+      "US-CA": [
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  },
+  {
+    "id": "button-mushroom",
+    "name": {
+      "zh-TW": "蘑菇"
+    },
+    "aliases": {
+      "zh-TW": [
+        "洋菇",
+        "白蘑菇",
+        "口蘑"
+      ],
+      "en": [
+        "mushroom",
+        "button mushroom"
+      ],
+      "ja": [
+        "マッシュルーム"
+      ]
+    },
+    "family": "mushroom-family",
+    "traits": [],
+    "category": "mushroom",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "flavorTags": [
+      "umami"
+    ]
+  },
+  {
+    "id": "apple",
+    "name": {
+      "zh-TW": "蘋果"
+    },
+    "aliases": {
+      "zh-TW": [
+        "青蘋果",
+        "富士蘋果"
+      ],
+      "en": [
+        "apple"
+      ],
+      "ja": [
+        "りんご"
+      ]
+    },
+    "family": "apple-family",
+    "traits": [],
+    "category": "fruit",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 14,
+    "flavorTags": [
+      "sweet"
+    ],
+    "seasonMonths": {
+      "JP": [
+        10,
+        11,
+        12
+      ],
+      "US-CA": [
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  },
+  {
+    "id": "banana",
+    "name": {
+      "zh-TW": "香蕉"
+    },
+    "aliases": {
+      "zh-TW": [],
+      "en": [
+        "banana"
+      ],
+      "ja": [
+        "バナナ"
+      ]
+    },
+    "family": "banana-family",
+    "traits": [],
+    "category": "fruit",
+    "defaultStorage": "pantry",
+    "isPerishable": true,
+    "recentDays": 5,
+    "flavorTags": [
+      "sweet"
+    ]
+  },
+  {
+    "id": "mustard",
+    "name": {
+      "zh-TW": "黃芥末醬"
+    },
+    "aliases": {
+      "zh-TW": [
+        "美式黃芥末",
+        "芥末醬",
+        "第戎芥末"
+      ],
+      "en": [
+        "mustard"
+      ]
+    },
+    "family": "mustard-family",
+    "traits": [],
+    "category": "sauce",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "sour"
+    ]
+  },
+  {
+    "id": "bbq-sauce",
+    "name": {
+      "zh-TW": "BBQ 烤肉醬"
+    },
+    "aliases": {
+      "zh-TW": [
+        "燒烤醬",
+        "美式烤肉醬"
+      ],
+      "en": [
+        "bbq sauce",
+        "barbecue sauce"
+      ]
+    },
+    "family": "bbq-sauce-family",
+    "traits": [],
+    "category": "sauce",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "sweet",
+      "salty"
+    ],
+    "allergenIds": [
+      "soy"
+    ]
+  },
+  {
+    "id": "hot-sauce",
+    "name": {
+      "zh-TW": "辣椒醬（塔巴斯科）"
+    },
+    "aliases": {
+      "zh-TW": [
+        "Tabasco",
+        "美式辣醬",
+        "Sriracha"
+      ],
+      "en": [
+        "hot sauce",
+        "tabasco",
+        "sriracha"
+      ]
+    },
+    "family": "hot-sauce-family",
+    "traits": [],
+    "category": "sauce",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "spicy",
+      "sour"
+    ]
+  },
+  {
+    "id": "pasta-sauce",
+    "name": {
+      "zh-TW": "義大利麵醬"
+    },
+    "aliases": {
+      "zh-TW": [
+        "番茄麵醬",
+        "紅醬",
+        "罐裝麵醬"
+      ],
+      "en": [
+        "pasta sauce",
+        "marinara"
+      ]
+    },
+    "family": "pasta-sauce-family",
+    "traits": [],
+    "category": "sauce",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "flavorTags": [
+      "umami",
+      "sour"
+    ]
+  },
+  {
+    "id": "chicken-broth",
+    "name": {
+      "zh-TW": "雞高湯"
+    },
+    "aliases": {
+      "zh-TW": [
+        "高湯",
+        "雞湯塊",
+        "盒裝高湯"
+      ],
+      "en": [
+        "chicken broth",
+        "chicken stock",
+        "stock"
+      ]
+    },
+    "family": "broth-family",
+    "traits": [],
+    "category": "sauce",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "flavorTags": [
+      "umami"
+    ]
+  },
+  {
+    "id": "black-beans-can",
+    "name": {
+      "zh-TW": "黑豆罐頭"
+    },
+    "aliases": {
+      "zh-TW": [
+        "黑豆",
+        "黑腰豆罐頭"
+      ],
+      "en": [
+        "black beans",
+        "canned beans"
+      ]
+    },
+    "family": "bean-can-family",
+    "traits": [],
+    "category": "tofu-bean",
+    "defaultStorage": "pantry",
+    "isPerishable": false
+  },
+  {
+    "id": "chickpea-can",
+    "name": {
+      "zh-TW": "鷹嘴豆罐頭"
+    },
+    "aliases": {
+      "zh-TW": [
+        "鷹嘴豆",
+        "雪蓮子"
+      ],
+      "en": [
+        "chickpeas",
+        "garbanzo"
+      ]
+    },
+    "family": "bean-can-family",
+    "traits": [],
+    "category": "tofu-bean",
+    "defaultStorage": "pantry",
+    "isPerishable": false
+  },
+  {
+    "id": "peanut-butter",
+    "name": {
+      "zh-TW": "花生醬"
+    },
+    "aliases": {
+      "zh-TW": [
+        "顆粒花生醬",
+        "滑順花生醬"
+      ],
+      "en": [
+        "peanut butter"
+      ]
+    },
+    "family": "peanut-family",
+    "traits": [],
+    "category": "sauce",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "flavorTags": [
+      "sweet"
+    ],
+    "allergenIds": [
+      "peanut"
+    ]
+  },
+  {
+    "id": "raisins",
+    "name": {
+      "zh-TW": "葡萄乾"
+    },
+    "aliases": {
+      "zh-TW": [
+        "提子乾"
+      ],
+      "en": [
+        "raisins"
+      ]
+    },
+    "family": "raisin-family",
+    "traits": [],
+    "category": "dried-goods",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "flavorTags": [
+      "sweet"
+    ]
+  },
+  {
+    "id": "frozen-peas",
+    "name": {
+      "zh-TW": "冷凍青豆仁"
+    },
+    "aliases": {
+      "zh-TW": [
+        "青豆仁",
+        "冷凍豌豆"
+      ],
+      "en": [
+        "frozen peas",
+        "peas"
+      ]
+    },
+    "family": "pea-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "freezer",
+    "isPerishable": false,
+    "flavorTags": [
+      "sweet"
+    ]
+  },
+  {
+    "id": "frozen-berries",
+    "name": {
+      "zh-TW": "冷凍莓果"
+    },
+    "aliases": {
+      "zh-TW": [
+        "冷凍藍莓",
+        "冷凍綜合莓果"
+      ],
+      "en": [
+        "frozen berries",
+        "blueberries"
+      ]
+    },
+    "family": "berry-family",
+    "traits": [],
+    "category": "fruit",
+    "defaultStorage": "freezer",
+    "isPerishable": false,
+    "flavorTags": [
+      "sweet",
+      "sour"
+    ]
+  },
+  {
+    "id": "dashi-powder",
+    "name": {
+      "zh-TW": "和風高湯粉"
+    },
+    "aliases": {
+      "zh-TW": [
+        "柴魚高湯粉",
+        "鰹魚粉",
+        "日式高湯粉"
+      ],
+      "ja": [
+        "だしの素",
+        "ほんだし",
+        "顆粒だし"
+      ]
+    },
+    "family": "bouillon-family",
+    "traits": [],
+    "category": "seasoning",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "umami"
+    ],
+    "allergenIds": [
+      "fish",
+      "soy",
+      "wheat"
+    ]
+  },
+  {
+    "id": "katsuobushi",
+    "name": {
+      "zh-TW": "柴魚片"
+    },
+    "aliases": {
+      "zh-TW": [
+        "鰹節",
+        "木魚花"
+      ],
+      "ja": [
+        "かつおぶし",
+        "鰹節",
+        "花かつお"
+      ]
+    },
+    "family": "katsuobushi-family",
+    "traits": [
+      "animal",
+      "seafood"
+    ],
+    "category": "dried-goods",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "flavorTags": [
+      "umami"
+    ],
+    "allergenIds": [
+      "fish"
+    ]
+  },
+  {
+    "id": "kombu",
+    "name": {
+      "zh-TW": "昆布"
+    },
+    "aliases": {
+      "zh-TW": [
+        "海帶",
+        "高湯昆布"
+      ],
+      "ja": [
+        "こんぶ",
+        "昆布",
+        "だし昆布"
+      ]
+    },
+    "family": "kombu-family",
+    "traits": [],
+    "category": "dried-goods",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "flavorTags": [
+      "umami"
+    ]
+  },
+  {
+    "id": "wakame",
+    "name": {
+      "zh-TW": "海帶芽"
+    },
+    "aliases": {
+      "zh-TW": [
+        "乾燥海帶芽",
+        "裙帶菜"
+      ],
+      "ja": [
+        "わかめ",
+        "ワカメ"
+      ]
+    },
+    "family": "wakame-family",
+    "traits": [],
+    "category": "dried-goods",
+    "defaultStorage": "pantry",
+    "isPerishable": false
+  },
+  {
+    "id": "hijiki",
+    "name": {
+      "zh-TW": "羊栖菜"
+    },
+    "aliases": {
+      "zh-TW": [
+        "鹿尾菜"
+      ],
+      "ja": [
+        "ひじき"
+      ]
+    },
+    "family": "hijiki-family",
+    "traits": [],
+    "category": "dried-goods",
+    "defaultStorage": "pantry",
+    "isPerishable": false
+  },
+  {
+    "id": "natto",
+    "name": {
+      "zh-TW": "納豆"
+    },
+    "aliases": {
+      "zh-TW": [],
+      "ja": [
+        "なっとう",
+        "納豆"
+      ]
+    },
+    "family": "natto-family",
+    "traits": [],
+    "category": "tofu-bean",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 14,
+    "flavorTags": [
+      "umami"
+    ],
+    "allergenIds": [
+      "soy"
+    ]
+  },
+  {
+    "id": "aburaage",
+    "name": {
+      "zh-TW": "油豆腐皮"
+    },
+    "aliases": {
+      "zh-TW": [
+        "油揚",
+        "豆皮",
+        "稻荷豆皮"
+      ],
+      "ja": [
+        "油揚げ",
+        "あぶらあげ"
+      ]
+    },
+    "family": "tofu-family",
+    "traits": [],
+    "category": "tofu-bean",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "allergenIds": [
+      "soy"
+    ]
+  },
+  {
+    "id": "konnyaku",
+    "name": {
+      "zh-TW": "蒟蒻"
+    },
+    "aliases": {
+      "zh-TW": [
+        "魔芋",
+        "蒟蒻絲",
+        "白滝"
+      ],
+      "ja": [
+        "こんにゃく",
+        "しらたき"
+      ]
+    },
+    "family": "konnyaku-family",
+    "traits": [],
+    "category": "processed",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 30
+  },
+  {
+    "id": "daikon",
+    "name": {
+      "zh-TW": "白蘿蔔"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蘿蔔",
+        "大根"
+      ],
+      "ja": [
+        "大根",
+        "だいこん"
+      ]
+    },
+    "family": "radish-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 7,
+    "flavorTags": [
+      "sweet"
+    ],
+    "seasonMonths": {
+      "JP": [
+        10,
+        11,
+        12,
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "id": "napa-cabbage",
+    "name": {
+      "zh-TW": "大白菜"
+    },
+    "aliases": {
+      "zh-TW": [
+        "白菜",
+        "結球白菜"
+      ],
+      "ja": [
+        "白菜",
+        "はくさい"
+      ]
+    },
+    "family": "napa-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 10,
+    "flavorTags": [
+      "sweet"
+    ],
+    "seasonMonths": {
+      "JP": [
+        11,
+        12,
+        1,
+        2
+      ],
+      "US-CA": [
+        10,
+        11,
+        12,
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  {
+    "id": "enoki",
+    "name": {
+      "zh-TW": "金針菇"
+    },
+    "aliases": {
+      "zh-TW": [
+        "金菇"
+      ],
+      "ja": [
+        "えのき",
+        "えのきだけ"
+      ]
+    },
+    "family": "mushroom-family",
+    "traits": [],
+    "category": "mushroom",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "flavorTags": [
+      "umami"
+    ]
+  },
+  {
+    "id": "shimeji",
+    "name": {
+      "zh-TW": "鴻喜菇"
+    },
+    "aliases": {
+      "zh-TW": [
+        "玉米菇",
+        "滑菇"
+      ],
+      "ja": [
+        "しめじ",
+        "ぶなしめじ"
+      ]
+    },
+    "family": "mushroom-family",
+    "traits": [],
+    "category": "mushroom",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "flavorTags": [
+      "umami"
+    ],
+    "seasonMonths": {
+      "JP": [
+        9,
+        10,
+        11
+      ]
+    }
+  },
+  {
+    "id": "burdock",
+    "name": {
+      "zh-TW": "牛蒡"
+    },
+    "aliases": {
+      "zh-TW": [],
+      "ja": [
+        "ごぼう",
+        "牛蒡"
+      ]
+    },
+    "family": "burdock-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "pantry",
+    "isPerishable": true,
+    "recentDays": 10,
+    "seasonMonths": {
+      "JP": [
+        11,
+        12,
+        1,
+        2
+      ]
+    }
+  },
+  {
+    "id": "shiso",
+    "name": {
+      "zh-TW": "紫蘇"
+    },
+    "aliases": {
+      "zh-TW": [
+        "青紫蘇",
+        "日本紫蘇"
+      ],
+      "ja": [
+        "大葉",
+        "しそ",
+        "青じそ"
+      ]
+    },
+    "family": "shiso-family",
+    "traits": [],
+    "category": "herb",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "flavorTags": [
+      "aromatic"
+    ]
+  },
+  {
+    "id": "myoga",
+    "name": {
+      "zh-TW": "茗荷"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蘘荷"
+      ],
+      "ja": [
+        "みょうが",
+        "茗荷"
+      ]
+    },
+    "family": "myoga-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 5,
+    "flavorTags": [
+      "aromatic"
+    ],
+    "seasonMonths": {
+      "JP": [
+        7,
+        8,
+        9
+      ]
+    }
+  },
+  {
+    "id": "wasabi",
+    "name": {
+      "zh-TW": "山葵"
+    },
+    "aliases": {
+      "zh-TW": [
+        "日式芥末",
+        "哇沙米",
+        "綠芥末"
+      ],
+      "ja": [
+        "わさび",
+        "ワサビ"
+      ]
+    },
+    "family": "wasabi-family",
+    "traits": [],
+    "category": "spice",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "spicy"
+    ]
+  },
+  {
+    "id": "yuzu",
+    "name": {
+      "zh-TW": "柚子"
+    },
+    "aliases": {
+      "zh-TW": [
+        "日本柚子"
+      ],
+      "ja": [
+        "ゆず",
+        "柚子"
+      ]
+    },
+    "family": "yuzu-family",
+    "traits": [],
+    "category": "fruit",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 14,
+    "flavorTags": [
+      "sour",
+      "aromatic"
+    ],
+    "seasonMonths": {
+      "JP": [
+        10,
+        11,
+        12
+      ]
+    }
+  },
+  {
+    "id": "green-pepper",
+    "name": {
+      "zh-TW": "青椒"
+    },
+    "aliases": {
+      "zh-TW": [
+        "青辣椒（不辣）",
+        "綠甜椒"
+      ],
+      "ja": [
+        "ピーマン"
+      ]
+    },
+    "family": "bell-pepper-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 7,
+    "flavorTags": [
+      "bitter"
+    ],
+    "seasonMonths": {
+      "JP": [
+        6,
+        7,
+        8,
+        9
+      ]
+    }
+  },
+  {
+    "id": "bean-sprouts",
+    "name": {
+      "zh-TW": "豆芽菜"
+    },
+    "aliases": {
+      "zh-TW": [
+        "綠豆芽",
+        "黃豆芽"
+      ],
+      "ja": [
+        "もやし"
+      ]
+    },
+    "family": "sprout-family",
+    "traits": [],
+    "category": "vegetable",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 3
+  },
+  {
+    "id": "pork-slices",
+    "name": {
+      "zh-TW": "豬肉片"
+    },
+    "aliases": {
+      "zh-TW": [
+        "豬梅花肉片",
+        "豬肉薄片",
+        "火鍋豬肉片"
+      ],
+      "ja": [
+        "豚こま",
+        "豚薄切り肉",
+        "豚バラ薄切り"
+      ]
+    },
+    "family": "pork-family",
+    "traits": [
+      "animal",
+      "meat",
+      "pork"
+    ],
+    "category": "meat",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 3
+  },
+  {
+    "id": "mackerel",
+    "name": {
+      "zh-TW": "鯖魚"
+    },
+    "aliases": {
+      "zh-TW": [
+        "青花魚",
+        "挪威鯖魚"
+      ],
+      "ja": [
+        "さば",
+        "鯖"
+      ]
+    },
+    "family": "mackerel-family",
+    "traits": [
+      "animal",
+      "seafood"
+    ],
+    "category": "seafood",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 2,
+    "flavorTags": [
+      "umami"
+    ],
+    "allergenIds": [
+      "fish"
+    ],
+    "seasonMonths": {
+      "JP": [
+        9,
+        10,
+        11,
+        12
+      ]
+    }
+  },
+  {
+    "id": "unagi",
+    "name": {
+      "zh-TW": "鰻魚"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蒲燒鰻",
+        "鰻魚蒲燒"
+      ],
+      "ja": [
+        "うなぎ",
+        "鰻"
+      ]
+    },
+    "family": "eel-family",
+    "traits": [
+      "animal",
+      "seafood"
+    ],
+    "category": "seafood",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
+    "recentDays": 3,
+    "flavorTags": [
+      "sweet",
+      "umami"
+    ],
+    "allergenIds": [
+      "fish"
+    ]
+  },
+  {
+    "id": "potato-starch",
+    "name": {
+      "zh-TW": "太白粉（馬鈴薯澱粉）"
+    },
+    "aliases": {
+      "zh-TW": [
+        "片栗粉",
+        "馬鈴薯太白粉"
+      ],
+      "ja": [
+        "片栗粉",
+        "かたくりこ"
+      ]
+    },
+    "family": "starch-family",
+    "traits": [],
+    "category": "dried-goods",
+    "defaultStorage": "pantry",
+    "isPerishable": false
+  },
+  {
+    "id": "panko",
+    "name": {
+      "zh-TW": "日式麵包粉"
+    },
+    "aliases": {
+      "zh-TW": [
+        "麵包粉",
+        "炸豬排粉"
+      ],
+      "ja": [
+        "パン粉"
+      ]
+    },
+    "family": "bread-crumb-family",
+    "traits": [],
+    "category": "dried-goods",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "allergenIds": [
+      "wheat"
+    ]
+  },
+  {
+    "id": "curry-roux",
+    "name": {
+      "zh-TW": "咖哩塊"
+    },
+    "aliases": {
+      "zh-TW": [
+        "日式咖哩塊",
+        "咖哩磚"
+      ],
+      "ja": [
+        "カレールウ",
+        "カレールー"
+      ]
+    },
+    "family": "curry-roux-family",
+    "traits": [],
+    "category": "processed",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "flavorTags": [
+      "umami",
+      "spicy"
+    ],
+    "allergenIds": [
+      "wheat",
+      "milk",
+      "soy"
+    ]
+  },
+  {
+    "id": "udon",
+    "name": {
+      "zh-TW": "烏龍麵"
+    },
+    "aliases": {
+      "zh-TW": [
+        "冷凍烏龍麵",
+        "烏冬"
+      ],
+      "ja": [
+        "うどん",
+        "饂飩"
+      ]
+    },
+    "family": "wheat-noodle-family",
+    "traits": [],
+    "category": "noodle",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "allergenIds": [
+      "wheat"
+    ]
+  },
+  {
+    "id": "soba",
+    "name": {
+      "zh-TW": "蕎麥麵"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蕎麥冷麵",
+        "日式蕎麥麵"
+      ],
+      "ja": [
+        "そば",
+        "蕎麦"
+      ]
+    },
+    "family": "soba-family",
+    "traits": [],
+    "category": "noodle",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "allergenIds": [
+      "buckwheat",
+      "wheat"
+    ]
+  },
+  {
+    "id": "somen",
+    "name": {
+      "zh-TW": "素麵"
+    },
+    "aliases": {
+      "zh-TW": [
+        "細麵線",
+        "日式素麵"
+      ],
+      "ja": [
+        "そうめん",
+        "素麺"
+      ]
+    },
+    "family": "wheat-noodle-family",
+    "traits": [],
+    "category": "noodle",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "allergenIds": [
+      "wheat"
+    ]
+  },
+  {
+    "id": "ponzu",
+    "name": {
+      "zh-TW": "柑橘醋醬油"
+    },
+    "aliases": {
+      "zh-TW": [
+        "柚子醋",
+        "橙醋"
+      ],
+      "ja": [
+        "ポン酢",
+        "ぽん酢"
+      ]
+    },
+    "family": "ponzu-family",
+    "traits": [],
+    "category": "sauce",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "sour",
+      "salty"
+    ],
+    "allergenIds": [
+      "soy",
+      "wheat"
+    ]
+  },
+  {
+    "id": "tonkatsu-sauce",
+    "name": {
+      "zh-TW": "豬排醬"
+    },
+    "aliases": {
+      "zh-TW": [
+        "日式豬排醬",
+        "中濃醬"
+      ],
+      "ja": [
+        "とんかつソース",
+        "中濃ソース",
+        "ウスターソース"
+      ]
+    },
+    "family": "tonkatsu-sauce-family",
+    "traits": [],
+    "category": "sauce",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "sweet",
+      "sour"
+    ],
+    "allergenIds": [
+      "soy",
+      "wheat"
+    ]
+  },
+  {
+    "id": "sake",
+    "name": {
+      "zh-TW": "清酒"
+    },
+    "aliases": {
+      "zh-TW": [
+        "日本酒",
+        "料理清酒"
+      ],
+      "ja": [
+        "酒",
+        "日本酒",
+        "料理酒"
+      ]
+    },
+    "family": "cooking-wine-family",
+    "traits": [
+      "alcohol"
+    ],
+    "category": "sauce",
+    "defaultStorage": "seasoning",
+    "isPerishable": false,
+    "flavorTags": [
+      "aromatic"
+    ]
+  },
+  {
+    "id": "umeboshi",
+    "name": {
+      "zh-TW": "梅乾"
+    },
+    "aliases": {
+      "zh-TW": [
+        "醃梅",
+        "日式梅干"
+      ],
+      "ja": [
+        "梅干し",
+        "うめぼし"
+      ]
+    },
+    "family": "umeboshi-family",
+    "traits": [],
+    "category": "dried-goods",
+    "defaultStorage": "pantry",
+    "isPerishable": false,
+    "flavorTags": [
+      "sour",
+      "salty"
+    ]
+  },
+  {
+    "id": "mochi",
+    "name": {
+      "zh-TW": "年糕（麻糬）"
+    },
+    "aliases": {
+      "zh-TW": [
+        "麻糬",
+        "切餅",
+        "日式年糕"
+      ],
+      "ja": [
+        "餅",
+        "もち",
+        "切り餅"
+      ]
+    },
+    "family": "rice-cake-family",
+    "traits": [],
+    "category": "grain",
+    "defaultStorage": "pantry",
     "isPerishable": false
   }
 ]

@@ -17,7 +17,7 @@ export function searchIngredients(query: string, limit = 8): Ingredient[] {
   const scored: { item: Ingredient; score: number }[] = [];
   for (const item of ingredients) {
     if (item.deprecated) continue;
-    const names = [item.name['zh-TW'], ...item.aliases['zh-TW']].map((n) => n.toLowerCase());
+    const names = [...Object.values(item.name), ...Object.values(item.aliases).flat()].map((n) => n.toLowerCase());
     let score = -1;
     for (const n of names) {
       if (n === q) score = Math.max(score, 3);

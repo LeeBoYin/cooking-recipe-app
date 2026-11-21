@@ -1210,5 +1210,1147 @@
       "technique": 1,
       "failureRisk": 1
     }
+  },
+  {
+    "id": "miso-soup",
+    "name": {
+      "zh-TW": "味噌湯"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "tofu",
+      "wakame",
+      "scallion",
+      "miso",
+      "dashi-powder"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "nikujaga",
+    "name": {
+      "zh-TW": "馬鈴薯燉肉"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "potato",
+      "carrot",
+      "onion",
+      "beef-slices",
+      "soy-sauce",
+      "mirin",
+      "sugar",
+      "dashi-powder"
+    ],
+    "techniques": [
+      "soy-braise"
+    ],
+    "equipmentTypeIds": [
+      "saucepan",
+      "stockpot"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "karaage",
+    "name": {
+      "zh-TW": "日式炸雞"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.izakaya"
+    ],
+    "ingredientIds": [
+      "chicken-thigh",
+      "soy-sauce",
+      "ginger",
+      "garlic",
+      "potato-starch",
+      "cooking-oil",
+      "sake"
+    ],
+    "techniques": [
+      "marinate",
+      "deep-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan",
+      "deep-fryer"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 2,
+      "time": 3,
+      "technique": 3,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "tonkatsu",
+    "name": {
+      "zh-TW": "炸豬排"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.yoshoku"
+    ],
+    "ingredientIds": [
+      "pork-chop",
+      "flour",
+      "egg",
+      "panko",
+      "cooking-oil",
+      "tonkatsu-sauce",
+      "cabbage"
+    ],
+    "techniques": [
+      "deep-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan",
+      "deep-fryer"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 2,
+      "time": 3,
+      "technique": 3,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "japanese-curry-rice",
+    "name": {
+      "zh-TW": "日式咖哩飯"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.yoshoku"
+    ],
+    "ingredientIds": [
+      "curry-roux",
+      "potato",
+      "carrot",
+      "onion",
+      "pork-slices",
+      "rice"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "stockpot"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "okonomiyaki",
+    "name": {
+      "zh-TW": "大阪燒"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.yoshoku"
+    ],
+    "ingredientIds": [
+      "flour",
+      "cabbage",
+      "egg",
+      "pork-slices",
+      "tonkatsu-sauce",
+      "mayonnaise"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 3,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "hiyayakko",
+    "name": {
+      "zh-TW": "冷豆腐"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "tofu",
+      "scallion",
+      "katsuobushi",
+      "ginger",
+      "soy-sauce"
+    ],
+    "techniques": [
+      "toss"
+    ],
+    "equipmentTypeIds": [],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "natto-rice",
+    "name": {
+      "zh-TW": "納豆飯"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "natto",
+      "rice",
+      "scallion",
+      "soy-sauce"
+    ],
+    "techniques": [
+      "toss"
+    ],
+    "equipmentTypeIds": [],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "grilled-mackerel",
+    "name": {
+      "zh-TW": "鹽烤鯖魚"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "mackerel",
+      "salt",
+      "daikon"
+    ],
+    "techniques": [
+      "grill"
+    ],
+    "equipmentTypeIds": [
+      "fish-grill",
+      "toaster-oven"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 2,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "kabocha-nimono",
+    "name": {
+      "zh-TW": "南瓜煮物"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "pumpkin",
+      "soy-sauce",
+      "mirin",
+      "sugar",
+      "dashi-powder"
+    ],
+    "techniques": [
+      "soy-braise"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "unagi-don",
+    "name": {
+      "zh-TW": "鰻魚飯"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "unagi",
+      "rice",
+      "soy-sauce",
+      "mirin",
+      "sugar"
+    ],
+    "techniques": [
+      "grill"
+    ],
+    "equipmentTypeIds": [
+      "fish-grill",
+      "toaster-oven"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 2,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "chirashizushi",
+    "name": {
+      "zh-TW": "散壽司"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "rice",
+      "white-vinegar",
+      "sugar",
+      "egg",
+      "shrimp",
+      "cucumber"
+    ],
+    "techniques": [
+      "toss"
+    ],
+    "equipmentTypeIds": [],
+    "difficulty": {
+      "ingredients": 3,
+      "equipment": 1,
+      "time": 3,
+      "technique": 3,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "ehomaki",
+    "name": {
+      "zh-TW": "惠方卷"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "rice",
+      "white-vinegar",
+      "sugar",
+      "seaweed",
+      "egg",
+      "cucumber"
+    ],
+    "techniques": [
+      "toss"
+    ],
+    "equipmentTypeIds": [
+      "sushi-mat"
+    ],
+    "difficulty": {
+      "ingredients": 3,
+      "equipment": 2,
+      "time": 3,
+      "technique": 4,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "zoni",
+    "name": {
+      "zh-TW": "雜煮"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "mochi",
+      "daikon",
+      "carrot",
+      "chicken-thigh",
+      "dashi-powder",
+      "soy-sauce"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "nanakusa-gayu",
+    "name": {
+      "zh-TW": "七草粥"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "rice",
+      "daikon",
+      "spinach",
+      "salt"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "saucepan",
+      "clay-pot"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "toshikoshi-soba",
+    "name": {
+      "zh-TW": "跨年蕎麥麵"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "soba",
+      "scallion",
+      "dashi-powder",
+      "soy-sauce",
+      "mirin"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "tsukimi-udon",
+    "name": {
+      "zh-TW": "月見烏龍麵"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "udon",
+      "egg",
+      "scallion",
+      "dashi-powder",
+      "soy-sauce",
+      "mirin"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "somen",
+    "name": {
+      "zh-TW": "涼拌素麵"
+    },
+    "regions": [
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.japan.washoku"
+    ],
+    "ingredientIds": [
+      "somen",
+      "cucumber",
+      "myoga",
+      "shiso",
+      "soy-sauce",
+      "dashi-powder"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "grilled-cheese",
+    "name": {
+      "zh-TW": "烤起司三明治"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "bread",
+      "cheddar-cheese",
+      "butter"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "scrambled-eggs",
+    "name": {
+      "zh-TW": "美式炒蛋"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "egg",
+      "butter",
+      "milk",
+      "salt",
+      "black-pepper"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "french-toast",
+    "name": {
+      "zh-TW": "法式吐司"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "bread",
+      "egg",
+      "milk",
+      "butter",
+      "sugar"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 2,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "avocado-toast",
+    "name": {
+      "zh-TW": "酪梨吐司"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "bread",
+      "avocado",
+      "lemon",
+      "egg",
+      "salt"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 1,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "cheeseburger",
+    "name": {
+      "zh-TW": "起司漢堡"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "ground-beef",
+      "bread",
+      "cheddar-cheese",
+      "lettuce",
+      "tomato",
+      "onion",
+      "ketchup",
+      "mustard"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan",
+      "grill-pan",
+      "charcoal-grill"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "mac-and-cheese",
+    "name": {
+      "zh-TW": "焗起司通心粉"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "macaroni",
+      "cheddar-cheese",
+      "milk",
+      "butter",
+      "flour"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "chicken-quesadilla",
+    "name": {
+      "zh-TW": "雞肉起司墨西哥餅"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american.tex_mex"
+    ],
+    "ingredientIds": [
+      "tortilla",
+      "chicken-breast",
+      "cheddar-cheese",
+      "bell-pepper",
+      "onion"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "chili-con-carne",
+    "name": {
+      "zh-TW": "墨西哥肉醬豆湯"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american.tex_mex"
+    ],
+    "ingredientIds": [
+      "ground-beef",
+      "black-beans-can",
+      "canned-tomato",
+      "onion",
+      "garlic",
+      "chili-pepper"
+    ],
+    "techniques": [
+      "braise"
+    ],
+    "equipmentTypeIds": [
+      "stockpot"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 4,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "spaghetti-meat-sauce",
+    "name": {
+      "zh-TW": "肉醬義大利麵"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.mediterranean.italian"
+    ],
+    "ingredientIds": [
+      "spaghetti",
+      "ground-beef",
+      "pasta-sauce",
+      "onion",
+      "garlic",
+      "olive-oil"
+    ],
+    "techniques": [
+      "boil",
+      "braise"
+    ],
+    "equipmentTypeIds": [
+      "stockpot",
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "caesar-chicken-salad",
+    "name": {
+      "zh-TW": "凱薩雞肉沙拉"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "lettuce",
+      "chicken-breast",
+      "cheddar-cheese",
+      "lemon",
+      "olive-oil",
+      "bread"
+    ],
+    "techniques": [
+      "pan-fry",
+      "toss"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "garlic-butter-shrimp",
+    "name": {
+      "zh-TW": "蒜香奶油蝦"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "shrimp",
+      "butter",
+      "garlic",
+      "lemon"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 1,
+      "time": 1,
+      "technique": 2,
+      "failureRisk": 2
+    }
+  },
+  {
+    "id": "baked-salmon-broccoli",
+    "name": {
+      "zh-TW": "烤鮭魚與青花菜"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "salmon",
+      "broccoli",
+      "olive-oil",
+      "lemon",
+      "salt"
+    ],
+    "techniques": [
+      "roast"
+    ],
+    "equipmentTypeIds": [
+      "oven",
+      "toaster-oven"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 2,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "roast-chicken-potatoes",
+    "name": {
+      "zh-TW": "烤雞腿與馬鈴薯"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "chicken-thigh",
+      "potato",
+      "olive-oil",
+      "garlic",
+      "lemon"
+    ],
+    "techniques": [
+      "roast"
+    ],
+    "equipmentTypeIds": [
+      "oven"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 2,
+      "time": 4,
+      "technique": 2,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "baked-bbq-ribs",
+    "name": {
+      "zh-TW": "烤箱 BBQ 肋排"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american.bbq"
+    ],
+    "ingredientIds": [
+      "pork-ribs",
+      "bbq-sauce",
+      "salt",
+      "black-pepper"
+    ],
+    "techniques": [
+      "roast"
+    ],
+    "equipmentTypeIds": [
+      "oven"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 2,
+      "time": 5,
+      "technique": 3,
+      "failureRisk": 3
+    }
+  },
+  {
+    "id": "mashed-potatoes",
+    "name": {
+      "zh-TW": "馬鈴薯泥"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "potato",
+      "butter",
+      "milk",
+      "salt"
+    ],
+    "techniques": [
+      "boil"
+    ],
+    "equipmentTypeIds": [
+      "saucepan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 2,
+      "technique": 1,
+      "failureRisk": 1
+    }
+  },
+  {
+    "id": "roast-turkey-breast",
+    "name": {
+      "zh-TW": "烤火雞胸"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "turkey-breast",
+      "butter",
+      "garlic",
+      "olive-oil",
+      "salt",
+      "black-pepper"
+    ],
+    "techniques": [
+      "roast"
+    ],
+    "equipmentTypeIds": [
+      "oven"
+    ],
+    "difficulty": {
+      "ingredients": 3,
+      "equipment": 2,
+      "time": 4,
+      "technique": 3,
+      "failureRisk": 4
+    }
+  },
+  {
+    "id": "pumpkin-soup",
+    "name": {
+      "zh-TW": "南瓜濃湯"
+    },
+    "regions": [
+      "US-CA"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "pumpkin",
+      "onion",
+      "butter",
+      "chicken-broth",
+      "milk"
+    ],
+    "techniques": [
+      "boil",
+      "blend"
+    ],
+    "equipmentTypeIds": [
+      "saucepan",
+      "immersion-blender",
+      "blender"
+    ],
+    "difficulty": {
+      "ingredients": 2,
+      "equipment": 2,
+      "time": 3,
+      "technique": 2,
+      "failureRisk": 1
+    }
   }
 ]

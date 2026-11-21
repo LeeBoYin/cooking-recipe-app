@@ -29,7 +29,8 @@
     "parentId": "crustacean",
     "displayLevelByRegion": {
       "TW": "parent",
-      "US": "parent"
+      "US": "parent",
+      "JP": "self"
     }
   },
   {
@@ -45,7 +46,8 @@
     "parentId": "crustacean",
     "displayLevelByRegion": {
       "TW": "parent",
-      "US": "parent"
+      "US": "parent",
+      "JP": "self"
     }
   },
   {
@@ -72,7 +74,8 @@
     },
     "regions": [
       "TW",
-      "US"
+      "US",
+      "JP"
     ]
   },
   {
@@ -88,7 +91,8 @@
     },
     "regions": [
       "TW",
-      "US"
+      "US",
+      "JP"
     ]
   },
   {
@@ -103,7 +107,8 @@
     },
     "regions": [
       "TW",
-      "US"
+      "US",
+      "JP"
     ]
   },
   {
@@ -118,7 +123,8 @@
     },
     "regions": [
       "TW",
-      "US"
+      "US",
+      "JP"
     ]
   },
   {
@@ -147,7 +153,8 @@
     "parentId": "tree-nut",
     "displayLevelByRegion": {
       "TW": "parent",
-      "US": "parent"
+      "US": "parent",
+      "JP": "self"
     }
   },
   {
@@ -161,7 +168,8 @@
     "parentId": "tree-nut",
     "displayLevelByRegion": {
       "TW": "parent",
-      "US": "parent"
+      "US": "parent",
+      "JP": "self"
     }
   },
   {
@@ -176,7 +184,8 @@
     },
     "regions": [
       "TW",
-      "US"
+      "US",
+      "JP"
     ]
   },
   {
@@ -203,13 +212,14 @@
         "麵粉"
       ]
     },
-    "parentId": "gluten-grain",
     "regions": [
       "US"
     ],
+    "parentId": "gluten-grain",
     "displayLevelByRegion": {
       "TW": "parent",
-      "US": "self"
+      "US": "self",
+      "JP": "self"
     }
   },
   {
@@ -224,7 +234,8 @@
     },
     "regions": [
       "TW",
-      "US"
+      "US",
+      "JP"
     ]
   },
   {
@@ -249,6 +260,50 @@
     },
     "regions": [
       "TW"
+    ]
+  },
+  {
+    "id": "cashew",
+    "name": {
+      "zh-TW": "腰果"
+    },
+    "aliases": {
+      "zh-TW": [
+        "腰果仁"
+      ],
+      "en": [
+        "cashew"
+      ],
+      "ja": [
+        "カシューナッツ"
+      ]
+    },
+    "parentId": "tree-nut",
+    "displayLevelByRegion": {
+      "JP": "self"
+    }
+  },
+  {
+    "id": "buckwheat",
+    "name": {
+      "zh-TW": "蕎麥"
+    },
+    "aliases": {
+      "zh-TW": [
+        "蕎麥麵",
+        "蕎麥粉"
+      ],
+      "en": [
+        "buckwheat",
+        "soba"
+      ],
+      "ja": [
+        "そば",
+        "蕎麦"
+      ]
+    },
+    "regions": [
+      "JP"
     ]
   }
 ]
