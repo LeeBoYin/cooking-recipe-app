@@ -155,7 +155,7 @@ export function RecipePage() {
   const more = top.length - 2;
 
   return (
-    <div className="flex flex-col gap-3.5 pb-28">
+    <div className="flex flex-col gap-3.5 pb-6">
       <div className="flex items-center justify-between">
         <button
           type="button"
@@ -165,9 +165,14 @@ export function RecipePage() {
         >
           <Icon name="back" />
         </button>
-        <Link to={`/recipes/${r.id}/edit`} className="flex h-11 items-center justify-center rounded-card bg-bulb px-5 text-body font-bold text-ink no-underline">
-          <FormattedMessage id="recipe.view.edit" />
-        </Link>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={() => void shareText()} className="flex h-11 items-center justify-center rounded-card border border-line bg-surface px-4 font-[inherit] text-body font-bold text-ink">
+            <FormattedMessage id="recipe.view.share" />
+          </button>
+          <Link to={`/recipes/${r.id}/edit`} className="flex h-11 items-center justify-center rounded-card bg-bulb px-5 text-body font-bold text-ink no-underline">
+            <FormattedMessage id="recipe.view.edit" />
+          </Link>
+        </div>
       </div>
 
       {justPublished && id && <PublishedNote recipeId={id} />}
@@ -330,12 +335,6 @@ export function RecipePage() {
         </section>
       )}
 
-
-      <div className="fixed inset-x-0 bottom-0 z-10 mx-auto flex max-w-[560px] gap-2.5 border-t border-line bg-bg px-4 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
-        <button type="button" onClick={() => void shareText()} className="flex h-12 flex-1 items-center justify-center rounded-card border border-line bg-surface font-[inherit] text-body font-bold text-ink">
-          <FormattedMessage id="recipe.view.share" />
-        </button>
-      </div>
 
       {buyOpen && <ShoppingSheet title={title} lines={ingredientLines} onClose={() => setBuyOpen(false)} />}
 
