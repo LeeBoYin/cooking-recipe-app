@@ -64,3 +64,21 @@
 
 - WebP 轉檔程式第一次載入約 1 秒，第一次轉檔約 2.4 秒（之後每張約 0.2 秒），所以打開編輯頁時先預載。
 - **結論**：iPhone 用 WebP 轉檔程式，大小約是 JPEG 的 40%，速度可以接受；已寫進 [04 ADR-06](../docs/04-architecture.md#adr-06照片在客戶端處理再上傳物件儲存)。免費方案 1 GB 約可放 2,000–3,000 張相機照片。
+
+## 04 邀請註冊在不寄信的設定下能跑完（2026-11-21，測試專案）
+
+對應 M1a-01a。`accept-invite` 暫時部署到測試專案、套用 `invites` 的 SQL，走一遍「產生邀請 → 註冊 → 密碼登入」，驗證完把資料表與函式都清掉、刪掉測試帳號與函式（之後由 CI 正式部署）。
+
+| 項目 | 結果 |
+|------|------|
+| 公開註冊關閉（`enable_signup = false`）時，用 admin API 建立使用者 | ✅ 能建立；直接打 `/auth/v1/signup` 回 `signup_disabled` |
+| `createUser({ email_confirm: true })` 不寄任何信 | ✅ `confirmation_sent_at`、`recovery_sent_at`、`email_change_sent_at` 都是空的 |
+| 註冊完成後用密碼登入 | ✅ 取得 session，email 已確認 |
+| 邀請標成已接受、建立自己的廚房 | ✅ |
+| 中途失敗不留下一半的資料 | ✅ 本機強迫 `setup_new_user` 失敗：Auth 使用者與註冊資料都不在，邀請仍是待接受 |
+
+**發現的坑：服務權限在雲端沒有資料表的預設讀寫權限**，本機卻有（本機預設較寬鬆），所以本機測試過不了的事，雲端才會出錯：
+- Edge Function 用 `service_role` 讀 `invites`，要明確 `grant select`（和 `photos` 一樣）。
+- `check_kitchen_has_admin` 是延後到交易結束才跑的觸發器，用的是最外層呼叫者的身分；服務權限沒有 `kitchen_members` 的讀取權限，註冊會報 `permission denied`。改成 `SECURITY DEFINER`。pgTAP 用「收回服務權限的資料表權限」模擬雲端，測得到這個問題。
+- 這次沒有改 `supabase/config.toml` 的 Auth 設定（`enable_signup = false`、`enable_confirmations = false` 已經是這樣）；函式用 admin API 建立使用者，不依賴「Confirm email」開關。測試專案 Auth 後台的這個開關沒有讀出來確認，不影響結果。
+- 用 `supabase db query --remote=<ref> --yes` 改雲端資料表後，PostgREST 的 schema 快取不會自動更新，要跑 `notify pgrst, 'reload schema'`；正式部署用 migration 不會有這個問題。

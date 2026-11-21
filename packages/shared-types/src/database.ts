@@ -291,6 +291,26 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"invites": {
+                  Row: {
+                    "accepted_at": string | null,"accepted_user_id": string | null,"accepted_via": string | null,"befriend_inviter": boolean,"created_at": string,"email": string,"expires_at": string,"id": string,"invited_by": string | null,"kitchen_id": string | null,"link_regenerated_at": string | null,"note": string | null,"plan": string,"status": string,"token_hash": string,"type": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accepted_at"?: string | null,"accepted_user_id"?: string | null,"accepted_via"?: string | null,"befriend_inviter"?: boolean,"created_at"?: string,"email": string,"expires_at"?: string,"id": string,"invited_by"?: string | null,"kitchen_id"?: string | null,"link_regenerated_at"?: string | null,"note"?: string | null,"plan"?: string,"status"?: string,"token_hash": string,"type"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "accepted_at"?: string | null,"accepted_user_id"?: string | null,"accepted_via"?: string | null,"befriend_inviter"?: boolean,"created_at"?: string,"email"?: string,"expires_at"?: string,"id"?: string,"invited_by"?: string | null,"kitchen_id"?: string | null,"link_regenerated_at"?: string | null,"note"?: string | null,"plan"?: string,"status"?: string,"token_hash"?: string,"type"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "invites_kitchen_id_fkey"
+      columns: ["kitchen_id"]
+isOneToOne: false
+      referencedRelation: "kitchens"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"kitchen_equipment": {
                   Row: {
                     "acquired_at": string | null,"brand": string | null,"capacity_unit": string | null,"capacity_value": number | null,"created_at": string,"created_by": string | null,"description": string | null,"dishwasher_safe": boolean | null,"enabled_optional_techniques": (string)[],"equipment_type_id": string | null,"id": string,"kitchen_id": string,"model": string | null,"raw_name": string,"updated_at": string,"updated_by": string | null
@@ -479,17 +499,23 @@ isOneToOne: false
                   ]
                 },"user_profiles": {
                   Row: {
-                    "ai_paused": boolean,"created_at": string,"last_active_at": string | null,"role": string,"status": string,"updated_at": string,"user_id": string
+                    "ai_paused": boolean,"created_at": string,"invite_id": string | null,"last_active_at": string | null,"role": string,"status": string,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "ai_paused"?: boolean,"created_at"?: string,"last_active_at"?: string | null,"role"?: string,"status"?: string,"updated_at"?: string,"user_id": string
+                    "ai_paused"?: boolean,"created_at"?: string,"invite_id"?: string | null,"last_active_at"?: string | null,"role"?: string,"status"?: string,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "ai_paused"?: boolean,"created_at"?: string,"last_active_at"?: string | null,"role"?: string,"status"?: string,"updated_at"?: string,"user_id"?: string
+                    "ai_paused"?: boolean,"created_at"?: string,"invite_id"?: string | null,"last_active_at"?: string | null,"role"?: string,"status"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
-                    
+                    {
+      foreignKeyName: "user_profiles_invite_id_fkey"
+      columns: ["invite_id"]
+isOneToOne: false
+      referencedRelation: "invites"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"user_settings": {
                   Row: {
@@ -570,6 +596,14 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"complete_invite_signup":
+{ Args: { "p_display_name"?: string,"p_invite_id": string,"p_region"?: string,"p_timezone"?: string,"p_user_id": string }; Returns: string
+                           },
+"create_invite":
+{ Args: { "p_befriend_inviter"?: boolean,"p_email": string,"p_id": string,"p_invited_by"?: string,"p_kitchen_id"?: string,"p_note"?: string,"p_plan"?: string,"p_type"?: string }; Returns: {
+              "expires_at": string,"invite_id": string,"token": string
+            }[]
+                           },
 "delete_recipe":
 { Args: { "p_id": string }; Returns: {
               "ai_tags": Json | null,
