@@ -38,6 +38,25 @@ async function run(client: SupabaseClient, admin: string, req: AdminRequest): Pr
       return await rpc('admin_get_config', {});
     case 'get_ai_models':
       return { data: publicTaskList() }; // 設定檔唯讀顯示，不經資料庫
+    case 'get_ai_protection':
+      return await rpc('admin_get_ai_protection', {});
+    case 'get_ai_usage':
+      return await rpc('admin_get_ai_usage', {});
+    case 'update_ai_protection':
+      return await rpc('admin_update_ai_protection', { p_protection: req.protection });
+    case 'set_user_fair_use':
+      return await rpc('admin_set_user_fair_use', {
+        p_user_id: req.userId,
+        p_daily_usd: req.dailyUsd,
+        p_monthly_usd: req.monthlyUsd,
+        p_clear: req.clear,
+      });
+    case 'set_user_ai_paused':
+      return await rpc('admin_set_user_ai_paused', { p_user_id: req.userId, p_paused: req.paused });
+    case 'list_ai_alerts':
+      return await rpc('admin_list_ai_alerts', { p_status: req.status, p_limit: req.limit, p_before: req.before });
+    case 'resolve_ai_alert':
+      return await rpc('admin_resolve_ai_alert', { p_alert_id: req.alertId, p_resolution: req.resolution });
     case 'list_users':
       return await rpc('admin_list_users', {});
     case 'set_user_plan':

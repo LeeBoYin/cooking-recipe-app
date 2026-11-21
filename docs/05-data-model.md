@@ -817,12 +817,21 @@ interface AppConfig {                 // 後端設定，在管理後台的「系
   aiEnabled: boolean;                 // AI 總開關，預設 true；關閉後所有 AI 功能改用不用 AI 的推薦
   aiMonthlyBudgetUsd: number;         // AI 每月預算，預設 18（每月營運總額 US$20）；100% 改用不用 AI 的推薦
   aiBudgetAlertRatio: number;         // 提醒門檻，預設 0.8：提醒管理員，並把首頁點子降級成 Haiku 5.5、靈感彩蛋改用模板
-  aiProtection: {                     // 用量保護；使用者看不到這些數值
-    perMinute: number;                // 每人每分鐘呼叫上限，例 6
-    perHour: number;                  // 每人每小時呼叫上限，例 60
-    fairUse: Record<'free' | 'plus', { dailyUsd: number; monthlyUsd: number }>;   // 合理使用上限，依 M1 實測的每次成本訂
-    maxChars: { chat: number; dictation: number; other: number };   // 自由文字上限，例 500／1,000／200
-    maxTurnsPerConversation: number;  // 每段對話的輪數上限，例 20
+  aiProtection: {                     // 用量保護；使用者看不到這些數值；資料庫用 pg_jsonschema 檢查（M1a-04）
+    schemaVersion: 1;
+    perMinute: number;                // 每人每分鐘呼叫上限，預設 6
+    perHour: number;                  // 每人每小時呼叫上限，預設 60（不低於 perMinute）
+    fairUse: Record<'free' | 'plus', { dailyUsd: number; monthlyUsd: number }>;   // 合理使用上限，預設 free 1.5／5、plus 3／10；個人覆寫在 entitlements.fair_use_override
+    anomaly: {                        // 異常偵測的門檻（只標記，不擋人）
+      rateBlockAlerts: number;        // 一小時被速率限制擋下幾次就通知，預設 10
+      repeatedInputCount: number;     // 同一個輸入一小時內幾次，預設 10
+      oversizedStreak: number;        // 連續幾次輸入長度貼著上限，預設 10
+      oversizedRatio: number;         // 貼著上限的比例，預設 0.95
+      burstCalls: number;             // 短時間內的呼叫次數，預設 20
+      burstDevices: number;           // 同時有幾個裝置，預設 3
+      burstWindowMinutes: number;     // 短時間是幾分鐘，預設 10
+    };
+    consoleHardCapUsd: number;        // Claude Console 設的硬上限，預設 20；只用來在後台對照預算，不打 API
   };
 }
 
@@ -830,7 +839,8 @@ interface AiRateCounter {             // 速率限制的計數，只存在後端
   userId: string;
   window: 'minute' | 'hour';
   windowStart: Instant;               // 例：該分鐘或該小時的開始
-  count: number;                      // 原子遞增；(userId, window, windowStart) 唯一
+  count: number;                      // 條件式原子遞增（超過上限不加）；(userId, window, windowStart) 唯一
+  blocked: number;                    // 這個視窗被擋下的次數（異常偵測用）
 }
 
 interface BackgroundJob {             // 背景任務佇列（發佈後整理、食材正規化、照片清理…），只存在後端
@@ -861,9 +871,9 @@ interface UserIngredientMapping {     // 使用者自己的修正，只影響自
 
 interface AiUsageAlert {              // 異常使用紀錄，只存在後端；後台「AI 用量與成本」的異常使用清單
   id: string;
-  userId: string;
-  kind: 'rate_limited' | 'fair_use_daily' | 'fair_use_monthly' | 'repeated_input' | 'oversized_input' | 'multi_device_burst';
-  detail?: string;
+  userId?: string;
+  kind: 'rate_limited' | 'fair_use_daily' | 'fair_use_monthly' | 'repeated_input' | 'oversized_input' | 'multi_device_burst' | 'budget_80' | 'budget_100';   // budget_* 是全站提醒，userId 為空
+  detail?: object;                    // 只有數字（次數、金額），不含輸入內容
   createdAt: string;
   resolvedAt?: string;
   resolvedBy?: string;                // 處理的管理員
@@ -878,9 +888,13 @@ interface AiUsageRecord {             // 每次呼叫 AI 一筆，只存在後�
   inputTokens: number;
   outputTokens: number;
   cacheReadTokens: number;
-  estimatedCostUsd: number;
+  cacheWriteTokens: number;
+  inputHash?: string;                 // 輸入的 SHA-256 前 32 碼，只用來比對重複；不存內容
+  inputRatio?: number;                // 輸入長度占上限的百分比 0–100
+  sessionId?: string;                 // 登入工作階段（代表一個裝置）
+  estimatedCostUsd: number;           // 用模型價格表算，8 位小數
   latencyMs: number;
-  result: 'ok' | 'refusal' | 'error' | 'rate_limited' | 'fair_use' | 'over_budget';
+  ok: boolean;                        // 被用量保護擋下的請求不呼叫 Claude，不會有用量紀錄；速率被擋的次數記在計數上
   createdAt: string;
 }
 

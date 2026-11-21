@@ -71,3 +71,25 @@ Deno.test('parseRequest：方案與 AI 設定', () => {
   assertEquals(parseRequest({ action: 'update_config', aiMonthlyBudgetUsd: -1 }).ok, false);
   assertEquals(parseRequest({ action: 'update_config', aiMonthlyBudgetUsd: '18' }).ok, false);
 });
+
+Deno.test('parseRequest：AI 用量保護', () => {
+  assertEquals(parseRequest({ action: 'get_ai_usage' }).ok, true);
+  assertEquals(parseRequest({ action: 'get_ai_protection' }).ok, true);
+  assertEquals(parseRequest({ action: 'update_ai_protection', protection: { perMinute: 6 } }).ok, true);
+  assertEquals(parseRequest({ action: 'update_ai_protection', protection: [] }).ok, false);
+  assertEquals(parseRequest({ action: 'update_ai_protection' }).ok, false);
+  assertEquals(parseRequest({ action: 'set_user_fair_use', userId: ID, dailyUsd: 3 }), {
+    ok: true,
+    value: { action: 'set_user_fair_use', userId: ID, dailyUsd: 3, monthlyUsd: null, clear: false },
+  });
+  assertEquals(parseRequest({ action: 'set_user_fair_use', userId: ID, clear: true }).ok, true);
+  assertEquals(parseRequest({ action: 'set_user_fair_use', userId: ID }).ok, false); // 什麼都沒改
+  assertEquals(parseRequest({ action: 'set_user_fair_use', userId: ID, dailyUsd: -1 }).ok, false);
+  assertEquals(parseRequest({ action: 'set_user_ai_paused', userId: ID, paused: true }).ok, true);
+  assertEquals(parseRequest({ action: 'set_user_ai_paused', userId: ID, paused: 'yes' }).ok, false);
+  assertEquals(parseRequest({ action: 'list_ai_alerts' }), { ok: true, value: { action: 'list_ai_alerts', status: 'open', limit: 50, before: null } });
+  assertEquals(parseRequest({ action: 'list_ai_alerts', status: 'x' }).ok, false);
+  assertEquals(parseRequest({ action: 'resolve_ai_alert', alertId: ID, resolution: 'ai_paused' }).ok, true);
+  assertEquals(parseRequest({ action: 'resolve_ai_alert', alertId: ID, resolution: 'nope' }).ok, false);
+  assertEquals(mapDbError('alert_not_found'), { error: 'alert_not_found', status: 404 });
+});

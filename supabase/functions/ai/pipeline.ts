@@ -62,6 +62,8 @@ export interface TaskDefinition<I = unknown> {
   parseInput(raw: unknown): { ok: true; value: I } | { ok: false };
   buildPrompt(input: I, ctx: AiContext): PromptParts;
   outputSchema: JsonSchema;
+  // 自由文字的長度與上限（字數），給異常偵測看「輸入長度是不是一直貼著上限」；沒有自由文字的任務不用填
+  inputSize?(input: I): { length: number; limit: number };
 }
 
 export interface ClaudeRequest {
@@ -99,13 +101,29 @@ export interface Deps {
   // 回傳錯誤代號就擋下（rate_limited／over_limit／budget_exhausted），回傳 null 放行。
   // 也可以改寫這次用的設定（例如預算快用完時把首頁點子降成 Haiku）。
   guard?(call: { userId: string; task: TaskName; ctx: AiContext; config: TaskConfig }): Promise<AiErrorCode | { config: TaskConfig } | null>;
-  // 【M1a-04】每次呼叫 Claude 之後（成功或失敗）把 token 用量交出去寫紀錄
-  onUsage?(record: { userId: string; task: TaskName; model: string; usage: Usage; ok: boolean }): Promise<void>;
+  // 【M1a-04】每次呼叫 Claude 之後（成功或失敗）把用量交出去寫紀錄；inputHash 與 inputRatio 給異常偵測，不含輸入內容
+  onUsage?(record: {
+    userId: string;
+    task: TaskName;
+    model: string;
+    usage: Usage;
+    ok: boolean;
+    latencyMs: number;
+    inputHash: string;
+    inputRatio: number | null;
+  }): Promise<void>;
 }
 
 export type AiResult =
   | { ok: true; output: unknown; usage: Usage; model: string }
   | { ok: false; error: AiErrorCode };
+
+// 輸入的 SHA-256 前 32 碼（十六進位），只用來比對「是不是同樣的輸入」；不存內容
+export async function hashInput(raw: unknown): Promise<string> {
+  const bytes = new TextEncoder().encode(JSON.stringify(raw) ?? '');
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return [...new Uint8Array(digest)].slice(0, 16).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
 
 const fail = (error: AiErrorCode): AiResult => ({ ok: false, error });
 
@@ -138,6 +156,10 @@ export async function runAi(deps: Deps, userId: string, rawTask: unknown, rawInp
   // 5. 組 prompt、呼叫 Claude
   const prompt = def.buildPrompt(parsed.value, ctx);
   const system = [{ text: prompt.stable, cache: true }, ...(prompt.volatile ? [{ text: prompt.volatile, cache: false }] : [])];
+  const inputHash = await hashInput(rawInput);
+  const size = def.inputSize?.(parsed.value as never);
+  const inputRatio = size && size.limit > 0 ? Math.min(100, Math.round((size.length / size.limit) * 100)) : null;
+  const startedAt = Date.now();
   let response: ClaudeResponse;
   try {
     response = await deps.claude({
@@ -153,7 +175,16 @@ export async function runAi(deps: Deps, userId: string, rawTask: unknown, rawInp
     if (e instanceof UpstreamError) return fail('upstream_error');
     throw e;
   }
-  await deps.onUsage?.({ userId, task, model: response.model, usage: response.usage, ok: response.stopReason === 'end_turn' });
+  await deps.onUsage?.({
+    userId,
+    task,
+    model: response.model,
+    usage: response.usage,
+    ok: response.stopReason === 'end_turn',
+    latencyMs: Date.now() - startedAt,
+    inputHash,
+    inputRatio,
+  });
 
   // 6. stop_reason：拒答與截斷都不用半截的輸出
   if (response.stopReason === 'refusal') return fail('refused');
