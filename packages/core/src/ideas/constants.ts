@@ -15,7 +15,6 @@ export const OWN_UNTAGGED = 0.3; // 沒標「值得再做」「家人最愛」�
 export const LONG_AGO_FROM_DAYS = 30; // 30 天內是 0
 export const LONG_AGO_TO_DAYS = 180; // 180 天以上是 1
 export const EXPIRY_SOON_DAYS = 3; // 幾天內到期算「手邊優先」
-export const DEFAULT_RECENT_DAYS = 7; // 食材字典沒寫時，剛買幾天內算「最近買的」
 
 // 食材覆蓋率只看「主要食材」：調味、醬料、香料、油不算
 export const SEASONING_CATEGORIES: readonly string[] = ['seasoning', 'sauce', 'spice', 'oil'];

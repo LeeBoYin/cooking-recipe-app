@@ -9,7 +9,6 @@ export interface IdeaIngredient {
   traits: string[];
   allergenIds: string[];
   seasonMonths?: Partial<Record<string, number[]>> | undefined;
-  recentDays?: number | undefined;
   flavorTags?: string[] | undefined;
 }
 
@@ -26,7 +25,6 @@ export interface IdeaPantryItem {
   ingredientId: string;
   wantToUseSoon: boolean;
   expiresOn?: string | null; // YYYY-MM-DD，廚房時區
-  addedOn?: string | null; // YYYY-MM-DD
 }
 
 export interface IdeaBaseDish {

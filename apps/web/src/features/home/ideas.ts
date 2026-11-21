@@ -25,7 +25,6 @@ export const ideaIngredients: ReadonlyMap<string, IdeaIngredient> = new Map(
       traits: i.traits,
       allergenIds: [...new Set((i.allergenIds ?? []).flatMap((a) => allergenWithAncestors(a)))],
       seasonMonths: i.seasonMonths,
-      recentDays: i.recentDays,
       flavorTags: i.flavorTags,
     },
   ]),
@@ -87,7 +86,6 @@ export function buildInput(s: IdeaSources): IdeaInput {
         ingredientId: p.ingredient_id as string,
         wantToUseSoon: p.want_to_use_soon,
         expiresOn: p.expires_at,
-        addedOn: p.added_on,
       })),
     // 廚房沒記任何廚具時不檢查（空的清單不當成「什麼都做不到」）
     canDoTechnique: (t) => (s.equipment.length === 0 ? null : canDo(t, s.equipment)),

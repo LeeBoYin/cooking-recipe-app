@@ -1,4 +1,4 @@
-// 食材頁用的純邏輯：字典查詢、搜尋、最近買的、常買排序。不碰網路與畫面。
+// 食材頁用的純邏輯：字典查詢、搜尋、常買排序。不碰網路與畫面。
 import ingredientsData from '../data/ingredients.json' with { type: 'json' };
 import type { Ingredient } from './types.ts';
 
@@ -27,14 +27,6 @@ export function searchIngredients(query: string, limit = 8): Ingredient[] {
     if (score > 0) scored.push({ item, score });
   }
   return scored.sort((a, b) => b.score - a.score).slice(0, limit).map((s) => s.item);
-}
-
-// 「最近買的」：只有生鮮、在字典的天數內。added_on 是 YYYY-MM-DD；today 也是（以廚房時區算好的當地日期）
-export function isRecentlyBought(ingredientId: string | null, addedOn: string, today: string): boolean {
-  const days = getIngredient(ingredientId)?.recentDays;
-  if (!days) return false;
-  const diff = (Date.parse(today) - Date.parse(addedOn)) / 86_400_000;
-  return diff >= 0 && diff < days;
 }
 
 // 常買清單：先照過去加入的次數排（多的在前，同次數照字典順序），再用地區的常見食材補在後面。次數只用來排序
