@@ -31,7 +31,7 @@ export function TrashPantry() {
                   type="button"
                   disabled={restore.isPending}
                   onClick={() => restore.mutate(item.id)}
-                  className="min-h-11 border-0 bg-transparent px-2 text-caption font-bold text-ink underline underline-offset-4"
+                  className="h-9 shrink-0 rounded-full border border-line bg-surface px-3 text-caption font-[inherit] text-ink disabled:opacity-50"
                 >
                   <FormattedMessage id="pantry.restore" />
                 </button>

@@ -6,7 +6,7 @@ import { baseDishes } from '@zhusha/taste';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
 import { ideaOf, type Bookmark } from '../../data/bookmarks.ts';
-import { useCurrentKitchen, useMyBookmarks } from '../../data/hooks.ts';
+import { useCurrentKitchen, useMyBookmarks, useUnbookmark } from '../../data/hooks.ts';
 import { localDate, groupByMonth } from './timeline.ts';
 import { todayIn } from '../pantry/dates.ts';
 
@@ -70,6 +70,7 @@ function SavedCard({ bookmark }: { bookmark: Bookmark }) {
   const idea = ideaOf(bookmark);
   const cooked = bookmark.cooked_recipe_id;
   const difficulty = difficultyOf(idea.baseDishId);
+  const unbookmark = useUnbookmark();
   const tag = 'rounded-tag px-2 py-0.5 text-small font-bold';
   return (
     <article className="relative flex gap-3 rounded-card bg-surface p-2.5">
@@ -105,6 +106,15 @@ function SavedCard({ bookmark }: { bookmark: Bookmark }) {
             <FormattedMessage id="idea.sheet.record" />
           </Link>
         )}
+        <button
+          type="button"
+          disabled={unbookmark.isPending}
+          onClick={() => unbookmark.mutate(bookmark.id)}
+          className="relative z-10 mt-0.5 h-9 self-start rounded-full border border-line bg-bg px-3 text-caption font-[inherit] text-ink-muted disabled:opacity-50"
+        >
+          <FormattedMessage id="recipes.saved.remove" />
+        </button>
+        {unbookmark.isError && <span role="alert" className="text-small text-error"><FormattedMessage id="recipes.saved.removeError" /></span>}
       </div>
     </article>
   );
