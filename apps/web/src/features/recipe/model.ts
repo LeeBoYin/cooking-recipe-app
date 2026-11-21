@@ -196,9 +196,9 @@ export function allPhotos(form: EditorForm): EditorPhoto[] {
   return [...form.photos, ...form.steps.flatMap((s) => (s.photo ? [s.photo] : []))];
 }
 
-// 發佈：要有標題或至少一張照片
+// 發佈：要有菜名，也要至少一張照片
 export function hasContent(form: EditorForm): boolean {
-  return form.title.trim() !== '' || allPhotos(form).length > 0;
+  return form.title.trim() !== '' && allPhotos(form).length > 0;
 }
 
 export function canAddPhoto(form: EditorForm): boolean {

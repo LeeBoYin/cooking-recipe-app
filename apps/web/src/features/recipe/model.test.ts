@@ -100,11 +100,13 @@ describe('照片清單', () => {
 });
 
 describe('發佈與空白判斷', () => {
-  it('有標題或有照片就能發佈', () => {
+  it('有照片和菜名才能發佈', () => {
     expect(hasContent(emptyForm())).toBe(false);
-    expect(hasContent({ ...emptyForm(), title: '番茄炒蛋' })).toBe(true);
-    expect(hasContent({ ...emptyForm(), photos: [photo('a')] })).toBe(true);
-    expect(hasContent({ ...emptyForm(), steps: [{ id: 's', text: '', photo: photo('a') }] })).toBe(true);
+    expect(hasContent({ ...emptyForm(), title: '番茄炒蛋' })).toBe(false);
+    expect(hasContent({ ...emptyForm(), photos: [photo('a')] })).toBe(false);
+    expect(hasContent({ ...emptyForm(), title: '  ', photos: [photo('a')] })).toBe(false);
+    expect(hasContent({ ...emptyForm(), title: '番茄炒蛋', photos: [photo('a')] })).toBe(true);
+    expect(hasContent({ ...emptyForm(), title: '番茄炒蛋', steps: [{ id: 's', text: '', photo: photo('a') }] })).toBe(true);
   });
   it('什麼都沒寫不留空草稿', () => {
     expect(isBlank(emptyForm())).toBe(true);

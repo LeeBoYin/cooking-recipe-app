@@ -1124,7 +1124,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 - 列舉值用 `text` 加 `CHECK`，不用 Postgres 的 `ENUM` 型別：之後加選項只要改約束，不用處理 `ENUM` 不好修改的問題。
 - 難易度的五個面向在 1–5；`overall` 在 1–10。
 - `DietaryProfile` 的 `userId`、`householdProfileId` 恰好一個有值；`Photo` 依 `ownerType` 檢查對應的欄位有值。
-- 已發佈的食譜要有標題或至少一張照片：在發佈的 API 檢查（照片在另一張表，資料庫約束做不到）。
+- 已發佈的食譜要有標題，也要至少一張照片（食譜上方或步驟的照片都算；舊的已發佈食譜不受影響）：在發佈的 API 檢查（照片在另一張表，資料庫約束做不到）。
 - 照片張數依 `AppConfig.photoLimits` 檢查（每篇食譜上方 5 張、每個步驟 1 張、每次又做了一次 3 張，各自計算），步驟最多 `AppConfig.maxSteps` 步：食譜與步驟的照片只經 `save_recipe` 的 `p_photos` 寫入，由照片表的觸發器檢查，先鎖住那篇食譜，同時送出也不會超過。每篇食譜只有一張封面（上方照片的第一張）。
 - 草稿一律只有作者看得到：RLS 判斷 `status = 'draft'` 時只放行作者，不看 `visibility`。
 
