@@ -203,7 +203,7 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
   }
 
   const status = (() => {
-    if (ed.saveState === 'error') return { text: 'recipe.status.error', dot: 'error' as const };
+    if (ed.saveState === 'error') return { text: ed.saveFailedOnServer ? 'recipe.status.errorServer' : 'recipe.status.error', dot: 'error' as const };
     if (!ed.isDraft) return ed.dirty ? { text: 'recipe.status.dirty', dot: 'bulb' as const } : null;
     if (ed.saveState === 'saving') return { text: 'recipe.status.saving', dot: null };
     if (ed.recipe) return { text: 'recipe.status.draft', dot: 'check' as const };
