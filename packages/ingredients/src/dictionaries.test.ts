@@ -50,10 +50,6 @@ describe('食材', () => {
     }
   });
 
-  it('只有生鮮才有「最近買的」天數', () => {
-    for (const i of ingredients) if (!i.isPerishable) expect(i.recentDays, i.id).toBeUndefined();
-  });
-
   it('當季月份在 1–12', () => {
     for (const i of ingredients)
       for (const months of Object.values(i.seasonMonths ?? {}))

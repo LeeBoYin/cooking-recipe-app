@@ -30,7 +30,6 @@ export interface Ingredient {
   category: IngredientCategory;
   defaultStorage: StorageZone;
   isPerishable: boolean;
-  recentDays?: number; // 不再使用；資料先留著，之後清掉（08）
   densityGPerMl?: number;
   seasonMonths?: Partial<Record<RegionCode, number[]>>;
   flavorTags?: FlavorTag[];

@@ -8,9 +8,42 @@
     <meta name="apple-mobile-web-app-title" content="煮啥" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>今仔日煮啥</title>
+    <style>
+      #splash {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        background: #f4ede2;
+        color: #2b2622;
+        font-family: -apple-system, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+        transition: opacity 0.25s ease-out;
+      }
+      #splash.splash-out { opacity: 0; pointer-events: none; }
+      #splash p { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.08em; }
+      @media (prefers-reduced-motion: reduce) {
+        #splash { transition: none; }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <div id="splash" aria-hidden="true">
+      <svg width="96" height="114" viewBox="0 0 64 76">
+        <path d="M17 19c-6 0-8-6-4-10 3-3 7-2 9 0 1-5 8-7 12-4 3-3 10-2 11 3 5-1 9 5 5 9-1 1-2 2-4 2z" fill="#fff" stroke="#2b2622" stroke-width="2.6" stroke-linejoin="round" />
+        <path d="M19 18.5l26 .4-.3 5.2-25.5-.3z" fill="#fff" stroke="#2b2622" stroke-width="2.6" stroke-linejoin="round" />
+        <path d="M32 26.5c-12 .2-19.5 8.4-19 18.2.3 6.6 4.2 10.6 8.2 14.4l.2 6h21.4l.1-6c4.2-3.9 8.1-8 8.2-14.6.2-9.8-7.1-18.2-19.1-18z" fill="#f2b705" stroke="#2b2622" stroke-width="2.6" stroke-linejoin="round" />
+        <path d="M26.5 48.5q5.5 6.5 11 0z" fill="#2b2622" stroke="#2b2622" stroke-width="2" stroke-linejoin="round" />
+        <circle cx="26.5" cy="42.5" r="2.4" fill="#2b2622" />
+        <circle cx="37.5" cy="42.5" r="2.4" fill="#2b2622" />
+        <path d="M22.5 67.5h19M24.5 71.5h15" stroke="#6e655c" stroke-width="3" stroke-linecap="round" />
+      </svg>
+      <p>今仔日煮啥</p>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

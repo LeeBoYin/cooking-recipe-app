@@ -22,7 +22,7 @@ select private.import_dictionaries($json${
   "ingredients": [
     { "id": "shrimp", "name": { "zh-TW": "蝦仁" }, "aliases": { "zh-TW": ["蝦"] }, "family": "shrimp-family",
       "traits": ["animal", "seafood", "shellfish"], "category": "seafood", "defaultStorage": "freezer",
-      "isPerishable": true, "recentDays": 2, "allergenIds": ["shrimp"] },
+      "isPerishable": true, "allergenIds": ["shrimp"] },
     { "id": "salt", "name": { "zh-TW": "鹽" }, "family": "salt-family", "category": "seasoning",
       "defaultStorage": "seasoning", "isPerishable": false }
   ],
