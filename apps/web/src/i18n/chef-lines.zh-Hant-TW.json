@@ -146,5 +146,13 @@
   "chef.line.tasteReact.next.warm.1": "好，換下一道。",
   "chef.line.tasteReact.next.coach.1": "好，下一題！",
   "chef.line.tasteReact.next.punny.1": "好，換個口味。",
-  "chef.line.tasteReact.next.minimal.1": "下一題。"
+  "chef.line.tasteReact.next.minimal.1": "下一題。",
+  "chef.line.ideasSlowDown.warm.1": "點子想太快，燈泡有點燙。先看看這幾個，我緩一緩。",
+  "chef.line.ideasSlowDown.coach.1": "燈泡燙到了，先休息一下！先看看這幾個。",
+  "chef.line.ideasSlowDown.punny.1": "我的點子過熱，「煮」不動了。先看看這幾個。",
+  "chef.line.ideasSlowDown.minimal.1": "燈泡有點燙，先看這幾個。",
+  "chef.line.ideasDailyLimit.warm.1": "今天點子想了好多，我先從你的食譜裡挑幾個給你。",
+  "chef.line.ideasDailyLimit.coach.1": "今天靈感用得好兇！先從你的食譜挑幾個。",
+  "chef.line.ideasDailyLimit.punny.1": "今天的點子「煮」得差不多了，先從你的食譜裡挑。",
+  "chef.line.ideasDailyLimit.minimal.1": "今天點子夠多了，先從你的食譜挑。"
 }

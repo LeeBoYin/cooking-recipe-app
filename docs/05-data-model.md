@@ -722,19 +722,22 @@ interface TasteProfileSnapshot {      // 由後端用 core 套件計算（不信
   data: TasteProfile;                 // 見 03 AI 設計
 }
 
-interface AiSuggestionCache {       // 存在後端，換手機也看得到上次的點子；只有本人能讀
+interface AiSuggestionCache {       // 存在後端，換手機也看得到上次的點子；只有本人能讀，只由 ai 函式寫
   id: string;
   userId: string;
-  kitchenId: string;                  // 產生時所在的廚房
-  conversationId?: string;            // kind 為 chat 時，屬於哪段對話
-  kind: 'home' | 'chat' | 'easter_egg' | 'observation';   // 首頁大廚點子、對話中的點子、靈感彩蛋、記錄時的一句話
-  inputHash: string;                  // 食材狀態＋口味檔案＋介面語言的雜湊；沒變就不重算（換介面語言就重算）
+  kitchenId?: string;                 // 產生時所在的廚房
+  conversationId?: string;            // kind 為 chat 時，屬於哪段對話（M1a-07 加）
+  kind: 'home' | 'chat' | 'easter_egg' | 'observation';   // 首頁大廚點子、對話中的點子、靈感彩蛋、記錄時的一句話；M1a-06 只用 home
+  inputHash: string;                  // 食材狀態、口味、廚具、地區與月份、時段與日期、語言，加上飲食限制與大廚的語氣的雜湊；沒變（或離上次不到 6 小時）就不重算
+  round: number;                      // home：同一個 6 小時內的第幾輪，0 是第一次產生，「換一組」加一，最多 2
   createdAt: string;
-  expiresAt: string;
-  payload: unknown;                   // 結構化輸出（點子卡片，不含做法）
-  drafts?: Record<string, { ingredients: RecipeIngredient[]; steps: RecipeStep[]; tips?: string }>;   // 依點子 ID 存「展開做法」的結果；同一個點子不重算
-  feedback: { ideaId: string; action: 'bookmarked' | 'recorded' | 'dismissed'; reason?: string; at: Instant }[];   // 每個點子各自的回饋（首頁一組最多 5 個點子），用來學口味
+  expiresAt: string;                  // 產生後一天；每人的首頁點子只留最近 6 筆
+  payload: unknown;                   // 結構化輸出（點子卡片，不含做法）：{ schemaVersion: 1, ideas: AiIdea[], chefComment: string | null, model: string }，見 03〈輸出格式〉
+  drafts?: Record<string, { ingredients: RecipeIngredient[]; steps: RecipeStep[]; tips?: string }>;   // 依點子 ID 存「展開做法」的結果；同一個點子不重算（M1a-09 才寫）
+  feedback: { ideaId: string; action: 'bookmarked' | 'recorded' | 'dismissed'; reason?: string; at: Instant }[];   // 每個點子各自的回饋（首頁一組最多 5 個點子），用來學口味（M1a-10 才寫）
 }
+// 飲食限制（過敏原、飲食原則、不吃的食物、不用料理酒）一改，由觸發器清掉這個人所有的點子快取：
+// 手機打開首頁會先顯示上次的點子，不能讓剛加了過敏原的人看到舊的點子。
 
 interface UserAchievement extends UserEntity {   // 解鎖類功能（徽章、護照）之後才做，初期不建這張表
   achievementId: string;              // 成就定義放在程式碼中；名稱與說明放在語系檔

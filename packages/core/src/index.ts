@@ -12,6 +12,7 @@ export {
 export { buildCard, EXPLORER_CODE, LIGHT_CODE, type TasteCard } from './taste/card.ts';
 export * from './ideas/types.ts';
 export * from './ideas/constants.ts';
+export * from './ideas/ai-types.ts';
 export {
   buildIdeaPool, confidentLikeCount, isTasteEnough, violatesLimits, mainIngredientIds, tasteSimilarity, dishDimensionKeys,
   longAgoValue, scoreBaseDish, scoreOwnRecipe,
@@ -21,6 +22,7 @@ export {
   CHEF_PERSONAS, DEFAULT_CHEF_PERSONA, isChefPersona, timeBand, hourInTimeZone, buildChefCatalog, pickChefLine,
   type ChefPersona, type TimeBand, type ChefCatalog, type ChefLineInput,
 } from './chef/pick.ts';
+export { FORBIDDEN_WORDING, forbiddenWordingHits, type ForbiddenWording } from './chef/wording.ts';
 export {
   parseMeasurePref, parseTemperaturePref, UNIT_CODES, isMeasureUnit, scaleToSystem, fractionText, roundedText, formatQuantity, convertTemperature, formatTemperature,
   type UnitCode, type UnitSystem, type MeasurePref, type TemperaturePref, type Temperature, type UnitLabels, type Measured, type QuantityInput,

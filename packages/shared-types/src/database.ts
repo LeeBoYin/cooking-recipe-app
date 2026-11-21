@@ -65,6 +65,26 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"ai_suggestion_cache": {
+                  Row: {
+                    "created_at": string,"drafts": NonNullable<Json>,"expires_at": string,"feedback": NonNullable<Json>,"id": string,"input_hash": string,"kind": string,"kitchen_id": string | null,"payload": NonNullable<Json>,"round": number,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"drafts"?: NonNullable<Json>,"expires_at": string,"feedback"?: NonNullable<Json>,"id": string,"input_hash": string,"kind": string,"kitchen_id"?: string | null,"payload": NonNullable<Json>,"round"?: number,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"drafts"?: NonNullable<Json>,"expires_at"?: string,"feedback"?: NonNullable<Json>,"id"?: string,"input_hash"?: string,"kind"?: string,"kitchen_id"?: string | null,"payload"?: NonNullable<Json>,"round"?: number,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ai_suggestion_cache_kitchen_id_fkey"
+      columns: ["kitchen_id"]
+isOneToOne: false
+      referencedRelation: "kitchens"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"ai_usage_alerts": {
                   Row: {
                     "created_at": string,"dedupe_key": string,"detail": NonNullable<Json>,"id": string,"kind": string,"resolution": string | null,"resolved_at": string | null,"resolved_by": string | null,"user_id": string | null
@@ -817,6 +837,12 @@ isOneToOne: false
                            },
 "ai_guard_check":
 { Args: { "p_background"?: boolean,"p_now"?: string,"p_user": string }; Returns: Json
+                           },
+"ai_home_cache_save":
+{ Args: { "p_input_hash": string,"p_kitchen": string,"p_payload": Json,"p_round": number,"p_ttl_hours"?: number,"p_user": string }; Returns: string
+                           },
+"ai_home_context":
+{ Args: { "p_user": string }; Returns: Json
                            },
 "ai_record_usage":
 { Args: { "p_cache_read_tokens": number,"p_cache_write_tokens": number,"p_cost_usd": number,"p_input_hash"?: string,"p_input_ratio"?: number,"p_input_tokens": number,"p_latency_ms"?: number,"p_model": string,"p_now"?: string,"p_ok": boolean,"p_output_tokens": number,"p_session_id"?: string,"p_task": string,"p_user": string }; Returns: undefined

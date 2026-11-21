@@ -95,7 +95,7 @@
 | `chef_conversations` | `id` | `user_id`（連動）；`kitchen_id`（空值） | M1a |
 | `preference_profiles` | `user_id` | `auth.users`（連動） | M0 |
 | `taste_profile_snapshots` | `user_id` | `auth.users`（連動） | M1a |
-| `ai_suggestion_cache` | `id` | `user_id`（連動）；`conversation_id`（空值） | M1a |
+| `ai_suggestion_cache` | `id` | `user_id`（連動）；`kitchen_id`（刪廚房時設空）；`conversation_id`（空值，M1a-07 加） | M1a-06（首頁點子；`drafts`、`feedback` 欄位先留，M1a-09、10 才寫） |
 | `share_links` | `id` | `recipe_id`（連動） | M2 |
 | `user_ingredient_mappings` | `(user_id, raw_text_normalized)` | `user_id`（連動） | M1a-05 |
 
@@ -220,6 +220,8 @@
 骨架（M1a-03）：請求 `{ task, input }`，回應 `{ data }` 或 `{ error: <代號> }`；不開閘道的 JWT 驗證，自己用 Auth 驗證 token。主流程在 `functions/ai/pipeline.ts`（Claude、資料庫與任務都由外面傳入，單元測試用假的回應）：已登入（401 `unauthorized`）→ 帳號啟用中、沒被暫停 AI、AI 總開關開著（`ai_get_context`：`account_inactive`／`ai_paused`／`ai_disabled`）→ 任務在白名單（`unknown_task`；已列出但還沒實作的任務與正式環境的內部任務是 `task_not_available`）→ 輸入格式與長度（`invalid_input`）→ 【用量保護的掛載點 `guard`：M1a-04 在這裡檢查速率 `rate_limited`、合理使用上限 `over_limit`、預算 `budget_exhausted`，也可以改寫這次的模型設定做降級】→ 組 prompt（`stable` 在最前面、加 `cache_control`；`volatile` 接在後面）→ 呼叫 Claude（官方 SDK，`output_config.format` 結構化輸出、`output_config.effort`，Haiku 5.5 的抽取類任務 `thinking: disabled`）→ `stop_reason`：`refusal` 是 `refused`、`max_tokens` 是 `truncated`、其他非正常結束與不是合法 JSON 或不符 schema 是 `invalid_output`、Claude 服務出錯是 `upstream_error`（前端一律走不用 AI 的退路）→ 回傳輸出與 token 用量（輸入、輸出、快取讀、快取寫），用量交給 `onUsage` 掛載點，寫進用量紀錄。
 
 用量保護（M1a-04，`functions/ai/usage.ts`＋資料庫函式）：`guard` 呼叫 `ai_guard_check`，回傳 `budget_exhausted`（全站用到 100%，含背景任務）、`over_limit`（個人合理使用上限，同時寫 `ai_usage_alerts`）、`rate_limited`（每分鐘 6／每小時 60，背景任務不算）；全站用到 80% 時依 `_shared/ai-models.ts` 的 `BUDGET_DEGRADE` 覆寫設定（首頁點子改 Haiku 5.5 關思考、靈感彩蛋回 `budget_exhausted` 讓前端用模板，對話不變）。檢查本身出錯時不放行（回 `server_error`，前端走不用 AI 的退路）。`onUsage` 用價格表（`MODEL_PRICES`，每百萬 token 的美元）算費用後呼叫 `ai_record_usage`，寫失敗只記錯誤代號、不影響回應。輸入的 SHA-256 前 32 碼與長度比例、JWT 的 `session_id` 供異常偵測用，不存內容。背景任務佇列在排隊前呼叫 `ai_budget_state()`（`ok`／`degraded`／`exhausted`），`exhausted` 時暫停。沒有設 `ANTHROPIC_API_KEY` 是 500 `not_configured`。紀錄只有任務與錯誤代號，不含使用者輸入與 AI 的回應。
+
+首頁點子（M1a-06，`functions/ai/home/`）：`index.ts` 遇到任務 `home_ideas` 時交給 `home/handler.ts`，其他任務照舊走 `runAi`。handler 先檢查帳號與開關，呼叫 `ai_home_context(p_user)`（只給 `service_role`，一次讀齊口味、飲食限制、現在廚房的食材與廚具、自己最近 200 篇已發佈的食譜、最近的首頁點子），用 `core` 的規則評分（`env.ts`，和手機同一份）算出前 15 名候選，再走新手門檻 → 快取 → `runAi`（任務定義是這一次才組好的 prompt 與 schema，所以用量保護、預算降級、停用都照常套用）→ `check.ts` 的程式再檢查 → `ai_home_cache_save`（每人只留最近 6 筆）。請求 `{ shuffle?: boolean }`，回應 `{ data: HomeIdeasResponse }`（`ok`、`not_enough`、`rules`，格式在 `core/ideas/ai-types.ts`）或錯誤代號；檢查後一個都不剩回 `invalid_output`。`dietary_profiles` 的過敏原、飲食原則、不吃的食物、不用料理酒一改，觸發器清掉這個人的點子快取。後端的程式直接用相對路徑匯入 `packages/`（本機 Edge Runtime 驗證過；雲端打包第一次部署時確認）。評估集與實跑指令見 `home/eval/`。
 
 模型設定檔在 `functions/_shared/ai-models.ts`：每個任務的模型、effort、思考開關（`adaptive`／`off`）、輸出上限；改這個檔就換模型。`admin` 函式的 `get_ai_models` 唯讀顯示它（不含內部任務）。任務的輸入檢查、prompt、輸出 schema 登記在 `functions/ai/tasks.ts`；目前只有內部測試用的 `_selftest`，只有環境變數 `AI_ALLOW_INTERNAL_TASKS=true`（本機與測試專案）才能呼叫，正式專案不設。輸出用 `_shared/json-schema.ts` 的小型驗證器檢查（不用 ajv：它靠 `new Function`，Edge Runtime 不保證能跑）。|
 | `accept-invite` | 持有邀請連結或邀請碼的人 | 新註冊（密碼）或已有帳號的人接受家人邀請；建立帳號與初始資料（見第八節）。密碼註冊：驗證 token（存在、沒撤銷、沒用過、沒過期、email 相符，不分大小寫）→ 用 admin API 建立已確認 email 的使用者（不寄信）→ `complete_invite_signup`；失敗時刪掉剛建的使用者，回應與紀錄不含 email 與 token。用 `body.action` 分四個動作（沒填當作 `signup`）：
