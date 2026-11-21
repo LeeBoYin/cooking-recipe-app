@@ -2,6 +2,12 @@ import { useState, type FormEvent } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Chef } from '../../chef/Chef.tsx';
 import { signIn, type SignInError } from '../../data/auth.ts';
+import { takeGoogleReturnError } from '../../data/invite.ts';
+import { CodePage } from './CodePage.tsx';
+import { ErrorLine, linkButton } from './AuthLayout.tsx';
+
+// Google 登入被擋下後會帶著錯誤回到網址；只在 App 開啟時讀一次
+const googleReturnError = takeGoogleReturnError();
 
 const ERROR_MESSAGE: Record<SignInError, string> = {
   invalid_credentials: 'signIn.error.invalidCredentials',
@@ -16,6 +22,8 @@ export function SignInPage() {
   const [error, setError] = useState<SignInError | null>(null);
   const [pending, setPending] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
+  const [showCode, setShowCode] = useState(false);
+  if (showCode) return <CodePage onBack={() => setShowCode(false)} />;
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -71,16 +79,9 @@ export function SignInPage() {
           />
         </label>
 
-        {error && (
-          <p role="alert" className="m-0 flex items-start gap-2 text-caption text-error">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true" className="mt-0.5 shrink-0">
-              <circle cx="12" cy="12" r="8.5" />
-              <path d="M12 7.5v5.5M12 16.5v.01" />
-            </svg>
-            <span>
-              <FormattedMessage id={ERROR_MESSAGE[error]} />
-            </span>
-          </p>
+        {error && <ErrorLine id={ERROR_MESSAGE[error]} />}
+        {!error && googleReturnError && (
+          <ErrorLine id={googleReturnError === 'invite_required' ? 'signIn.error.googleInviteRequired' : 'signIn.error.googleOther'} />
         )}
 
         <button
@@ -105,7 +106,10 @@ export function SignInPage() {
           <FormattedMessage id="signIn.forgotHelp" />
         </p>
       )}
-      <p className="mt-auto mb-0 pt-8 text-small text-ink-muted">
+      <button type="button" onClick={() => setShowCode(true)} className={`mt-1 ${linkButton}`}>
+        <FormattedMessage id="signIn.haveCode" />
+      </button>
+      <p className="mt-auto mb-0 max-w-[320px] pt-8 text-center text-small text-ink-muted">
         <FormattedMessage id="signIn.inviteOnly" />
       </p>
     </main>

@@ -74,7 +74,7 @@
 |------|------|------|-----|
 | [x] M1a-01a | **邀請（後端 ①）**：`invites`、`create_invite`、`accept-invite` Edge Function 的密碼註冊；先在測試專案驗證關閉自動寄信與註冊流程，結果寫進 `spikes/README.md`。M1a 只發一般邀請；`befriend_inviter` 只存旗標，M2 建好友關係時補上 | Sonnet | 16 第五、六節；12 第二節；02 K；05 Invite |
 | [x] M1a-01b | **邀請（後端 ②）**：6 碼邀請碼、Auth「建立使用者前」hook（Google 登入檢查邀請；先驗證免費方案可用）、`password_reset_links` | Sonnet | 16 第六節；02 K |
-| [ ] M1a-02 | **邀請與註冊（畫面）**：邀請連結入口、建立帳號、6 碼邀請碼、Google 登入、忘記密碼的說明 | Sonnet | 12 第二、三節；02 K |
+| [x] M1a-02 | **邀請與註冊（畫面）**：邀請連結入口、建立帳號、6 碼邀請碼、Google 登入、忘記密碼的說明 | Sonnet | 12 第二、三節；02 K |
 | [ ] M1a-12 | **管理後台基本版 ①**：`/admin` 外框、`system_admin` 的兩步驟驗證（TOTP）、使用者與邀請（不顯示「加入我的廚房」）、系統設定、操作紀錄 | Sonnet | 02 L；04 ADR-15；16 `admin` |
 | [ ] M1a-03 | **方案與 `entitlements`**、`app_config` 的 AI 設定、`ai` 函式骨架與模型設定檔 | Sonnet | 03；16 第六節 |
 | [ ] M1a-04 | **用量保護與異常清單**：速率限制、每人每日與每月上限、每月預算與 80%／100% 降級、Claude Console 花費上限的對照 | Sonnet | 03 成本與保護；02 L |

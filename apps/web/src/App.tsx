@@ -3,6 +3,9 @@ import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router';
 import { useMySettings } from './data/hooks.ts';
 import { Onboarding } from './features/onboarding/Onboarding.tsx';
 import { useSession } from './data/auth.ts';
+import { GoogleGate } from './features/auth/GoogleGate.tsx';
+import { InvitePage } from './features/auth/InvitePage.tsx';
+import { ResetPage } from './features/auth/ResetPage.tsx';
 import { SignInPage } from './features/auth/SignInPage.tsx';
 import { AddEquipmentPage } from './features/equipment/AddEquipmentPage.tsx';
 import { EditEquipmentPage } from './features/equipment/EditEquipmentPage.tsx';
@@ -52,6 +55,7 @@ export function App() {
     <>
       {/* 還在讀取登入狀態時只顯示底色，避免登入頁閃一下 */}
       {session === undefined ? null : session ? (
+        <GoogleGate userId={session.user.id}>
         <BrowserRouter>
           <PhotoSync />
           <Routes>
@@ -93,10 +97,20 @@ export function App() {
               <Route path="kitchen/equipment/:id" element={<EditEquipmentPage />} />
             </Route>
             </Route>
+            {/* 已經登入還點到邀請或重設連結：回首頁 */}
+            <Route path="invite/*" element={<Navigate to="/" replace />} />
+            <Route path="reset/*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
+        </GoogleGate>
       ) : (
-        <SignInPage />
+        <BrowserRouter>
+          <Routes>
+            <Route path="invite/:token" element={<InvitePage />} />
+            <Route path="reset/:token" element={<ResetPage />} />
+            <Route path="*" element={<SignInPage />} />
+          </Routes>
+        </BrowserRouter>
       )}
       <OfflineBanner />
       <UpdatePrompt />
