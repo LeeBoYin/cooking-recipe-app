@@ -59,7 +59,8 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
   const initial = useMemo(() => (recipe ? formFromRecipe(recipe, photoRows) : { ...emptyForm(defaultServings), title: initialTitle ?? '' }), []); // eslint-disable-line react-hooks/exhaustive-deps
   const [form, setFormState] = useState<EditorForm>(initial);
   const formRef = useRef(form);
-  const savedForm = useRef<EditorForm>(initial);
+  // 新食譜預填的菜名（從大廚的點子或收藏帶進來）還沒存進資料庫，所以「上次存的」要當成空標題，這樣第一次存才會把菜名送出去
+  const savedForm = useRef<EditorForm>(recipe ? initial : { ...initial, title: '' });
   const savedRecipe = useRef<Recipe | null>(recipe);
   const [recipeState, setRecipeState] = useState<Recipe | null>(recipe);
   const [saveState, setSaveState] = useState<SaveState>('idle');
