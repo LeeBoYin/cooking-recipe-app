@@ -38,6 +38,7 @@ export const HOME_IDEAS_STABLE = `你是「大廚」，住在一個料理 App �
 
 # 食材與限制（最重要）
 - 過敏原與飲食限制是硬限制：「排除清單」裡的東西，菜名、材料、替代品、醬料與加工品（含它們做成的醬、粉、油）都不能出現。拿不準的就換一道。
+- 排除清單裡的東西連提都不要提：不要寫「不加米酒」「把牛肉換成豬肉」這種替代說明，直接用可以用的食材，substitutions 也不要寫它們。
 - 只能用「手邊的食材」清單裡的 ID 填 uses_pantry_ids；清單裡沒有的不要編 ID。其他需要、但清單裡沒有的材料寫在 other_ingredients（寫食材名稱就好，不要寫份量，也不要寫「缺」）。
 - 想先用掉的、快到期的食材（清單裡有標示），盡量排進點子，並把它們的 ID 填進 uses_priority_ids。不要提醒使用者哪個食材快壞了或過期了。
 - 如果廚房沒記任何食材，就照口味給點子，不要提「缺什麼」。
@@ -150,9 +151,9 @@ export function buildHomePrompt(env: HomeEnv, exclude: HomeExclude): PromptParts
   return { stable: HOME_IDEAS_STABLE, volatile, messages: [{ role: 'user', content: lines.join('\n') }] };
 }
 
-// 結構化輸出的 JSON Schema：techniques 與 equipment 依這個人可用的廚具產生 enum，candidate_ref 只能是候選的代號或空字串。
-// 數量上限、長度、數值範圍不放在 schema（結構化輸出對這些關鍵字的支援有限），由 check.ts 檢查。
-export function buildHomeSchema(env: HomeEnv): JsonSchema {
+// 結構化輸出的 JSON Schema：每個人、每一次都一樣，才不會讓快取失效（schema 不同，前段規則的快取就讀不到）。
+// 候選代號、手法與廚具可用哪些寫在 prompt，由 check.ts 檢查；數量上限、長度、數值範圍也由 check.ts 檢查。
+export function buildHomeSchema(_env?: HomeEnv): JsonSchema {
   const str: JsonSchema = { type: 'string' };
   const int: JsonSchema = { type: 'integer' };
   return {
@@ -164,7 +165,7 @@ export function buildHomeSchema(env: HomeEnv): JsonSchema {
           type: 'object',
           properties: {
             slot: { type: 'string', enum: [...SLOTS] },
-            candidate_ref: { type: 'string', enum: ['', ...env.candidates.map((c) => c.ref)] },
+            candidate_ref: str,
             title: str,
             why: str,
             uses_pantry_ids: { type: 'array', items: str },
@@ -176,8 +177,8 @@ export function buildHomeSchema(env: HomeEnv): JsonSchema {
               required: ['ingredients', 'equipment', 'time', 'technique', 'failure_risk'],
               additionalProperties: false,
             },
-            techniques: { type: 'array', items: { type: 'string', enum: env.techniqueEnum } },
-            equipment: { type: 'array', items: { type: 'string', enum: env.equipmentEnum.length ? env.equipmentEnum : [''] } },
+            techniques: { type: 'array', items: str },
+            equipment: { type: 'array', items: str },
             substitutions: { type: 'array', items: { type: 'object', properties: { need: str, use: str }, required: ['need', 'use'], additionalProperties: false } },
           },
           required: ['slot', 'candidate_ref', 'title', 'why', 'uses_pantry_ids', 'uses_priority_ids', 'other_ingredients', 'difficulty', 'techniques', 'equipment', 'substitutions'],
