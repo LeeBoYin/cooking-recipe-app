@@ -1,6 +1,7 @@
 import { useState, type CSSProperties } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Chef } from '../../chef/Chef.tsx';
+import { useChef } from '../../chef/useChef.ts';
 import { installMode } from '../../pwa/install.ts';
 import { Icon, type IconName } from '../shell/Icon.tsx';
 import { InstallStep } from './InstallStep.tsx';
@@ -23,6 +24,7 @@ const TABS: { id: 'home' | 'recipes' | 'record' | 'kitchen' | 'me'; icon: IconNa
 
 // ⑧ 收尾（12 ⑧）：先謝謝使用者，再用一頁讓人知道底部五個分頁各做什麼；還沒安裝的再提醒一次。
 export function DoneStep({ onStart }: { onStart: () => void }) {
+  const chef = useChef();
   const [showInstall, setShowInstall] = useState(false);
   // 進到這一頁時決定一次，之後從安裝頁回來也不變
   const [canInstall] = useState(() => installMode() !== null);
@@ -41,9 +43,9 @@ export function DoneStep({ onStart }: { onStart: () => void }) {
           style={{ left: `${(s.left / 390) * 100}%`, top: s.top - 44, width: s.size, height: s.size } as CSSProperties}
         />
       ))}
-      <div className="flex justify-center pt-4"><Chef size={96} /></div>
+      <div className="flex justify-center pt-4"><Chef size={96} mood="happy" /></div>
       <h1 className="m-0 text-center font-round text-title"><FormattedMessage id="onboarding.done.title" /></h1>
-      <p className="m-0 text-center font-round text-[15px] leading-relaxed"><FormattedMessage id="onboarding.done.chef" /></p>
+      <p className="m-0 text-center font-round text-[15px] leading-relaxed">{chef.line('onboardDone')}</p>
       <ul className="m-0 mt-1 flex list-none flex-col rounded-chef bg-surface px-3.5 py-1">
         {TABS.map((t) => (
           <li key={t.id} className="flex items-center gap-3 py-2">

@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router';
 import type { Idea, TasteProfile } from '@zhusha/core';
 import { getIngredient } from '@zhusha/ingredients';
 import { Chef } from '../../chef/Chef.tsx';
+import { useChef } from '../../chef/useChef.ts';
 import type { Bookmark } from '../../data/bookmarks.ts';
 import { useBookmarkIdea, useUnbookmark } from '../../data/hooks.ts';
-import { reasonMessage } from './reason.ts';
+import { reasonText } from './reason.ts';
 
 // 點子抽屜：菜名、理由、主要食材（廚房有的標「廚房有」）。
 // 基礎菜色的主按鈕是「收藏」（已收藏顯示「已收藏」，再按取消）；自己的食譜不收藏，主按鈕是「打開食譜」
@@ -18,7 +19,10 @@ export function IdeaSheet({ idea, profile, bookmark, onClose }: {
 }) {
   const intl = useIntl();
   const navigate = useNavigate();
-  const reason = reasonMessage(idea.reason, profile);
+  const chef = useChef();
+  const reason = reasonText(idea.reason, profile, intl, chef.line, idea.key);
+  // 收藏後，大廚的話換成一句回應
+  const saved = bookmark && idea.source === 'dish' ? chef.line('bookmarked', { title: idea.title }, idea.key) : null;
   const have = new Set(idea.haveIngredientIds);
   const add = useBookmarkIdea();
   const remove = useUnbookmark();
@@ -27,7 +31,7 @@ export function IdeaSheet({ idea, profile, bookmark, onClose }: {
 
   function toggle() {
     if (bookmark) remove.mutate(bookmark.id);
-    else add.mutate({ title: idea.title, why: `${intl.formatMessage({ id: reason.id }, reason.values)}`, baseDishId: idea.id });
+    else add.mutate({ title: idea.title, why: reason, baseDishId: idea.id });
   }
 
   useEffect(() => {
@@ -62,9 +66,9 @@ export function IdeaSheet({ idea, profile, bookmark, onClose }: {
         </div>
         <b className="-mt-2 text-[24px]">{idea.title}</b>
         <div className="flex items-center gap-2.5 rounded-card bg-chef-soft px-3 py-2.5">
-          <Chef size={40} />
-          <span className="font-round text-[15px] leading-normal">
-            {intl.formatMessage({ id: reason.id }, reason.values)}。
+          <Chef size={40} mood={saved ? 'happy' : 'idea'} />
+          <span className="font-round text-[15px] leading-normal" aria-live="polite">
+            {saved ?? (/[。！？」」…]$/.test(reason) ? reason : `${reason}。`)}
           </span>
         </div>
         {idea.mainIngredientIds.length > 0 && (

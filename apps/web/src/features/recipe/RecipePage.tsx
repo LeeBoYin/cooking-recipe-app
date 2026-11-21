@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Link, useNavigate, useParams } from 'react-router';
+import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { DIFFICULTY_FACETS, difficultyOverall } from '@zhusha/core';
 import type { RecipeIngredient, RecipeStep, RecipeVisibility } from '@zhusha/shared-types';
-import { usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
+import { Chef } from '../../chef/Chef.tsx';
+import { useChef } from '../../chef/useChef.ts';
+import { usePhotoUrls, useMyRecipes, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
 import { Icon } from '../shell/Icon.tsx';
 import { DifficultyRadar } from './DifficultyRadar.tsx';
 import { knownHighlights } from './model.ts';
@@ -12,11 +14,28 @@ import { PhotoViewer, type ViewerPhoto } from './PhotoViewer.tsx';
 const TILT = ['-rotate-3', 'rotate-2'];
 const HEADING = 'm-0 font-round text-card-title';
 
+// 剛發佈完，大廚回應一句；第一篇食譜用另一組句子（只用來挑句子，不顯示數字）
+function PublishedNote({ recipeId }: { recipeId: string }) {
+  const chef = useChef();
+  const published = useMyRecipes('published');
+  if (!chef.ready || !published.data) return null;
+  const first = published.data.every((r) => r.id === recipeId);
+  const text = chef.line(first ? 'recordFirst' : 'recordDone', undefined, recipeId);
+  if (!text) return null;
+  return (
+    <div role="status" className="flex items-center gap-2.5 rounded-card bg-chef-soft px-3 py-2.5">
+      <Chef size={40} mood={first ? 'surprised' : 'happy'} />
+      <span className="font-round text-[15px] leading-normal">{text}</span>
+    </div>
+  );
+}
+
 // 食譜頁（自己的）：文字在前、照片在後——菜名與心得 → 難易度 → 一排照片 → 食材 → 做法 → 料理筆記
 export function RecipePage() {
   const intl = useIntl();
   const navigate = useNavigate();
   const { id } = useParams();
+  const justPublished = (useLocation().state as { published?: boolean } | null)?.published === true;
   const recipe = useRecipe(id);
   const photos = useRecipePhotos(id);
   const [viewer, setViewer] = useState<{ list: ViewerPhoto[]; index: number } | null>(null);
@@ -65,6 +84,8 @@ export function RecipePage() {
           <Icon name="back" />
         </button>
       </div>
+
+      {justPublished && id && <PublishedNote recipeId={id} />}
 
       <article className="flex flex-col gap-2 rounded-card bg-surface p-3">
         <div className="flex items-center gap-2 text-caption">

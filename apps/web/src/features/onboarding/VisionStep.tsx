@@ -1,12 +1,14 @@
 import { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Chef } from '../../chef/Chef.tsx';
+import { useChef } from '../../chef/useChef.ts';
 
 const CARDS = ['1', '2', '3'] as const;
 
 // ① 願景卡（12 ①）：三張左右滑的卡片，右上角「跳過」，最後一張按鈕「開始」
 export function VisionStep({ onDone, onSkip }: { onDone: () => void; onSkip: () => void }) {
   const intl = useIntl();
+  const chef = useChef();
   const scroller = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
   const last = index === CARDS.length - 1;
@@ -39,7 +41,7 @@ export function VisionStep({ onDone, onSkip }: { onDone: () => void; onSkip: () 
             aria-label={intl.formatMessage({ id: 'onboarding.vision.position' }, { index: Number(n), total: CARDS.length })}
             className="flex w-full shrink-0 snap-center flex-col gap-4 px-5"
           >
-            <div className="flex justify-center pt-6"><Chef size={96} /></div>
+            <div className="flex justify-center pt-6"><Chef size={96} mood={n === '1' ? 'happy' : 'normal'} /></div>
             <h1 className="m-0 whitespace-pre-line font-round text-display leading-[1.4]">
               <FormattedMessage id={`onboarding.vision.${n}.title`} />
             </h1>
@@ -58,7 +60,7 @@ export function VisionStep({ onDone, onSkip }: { onDone: () => void; onSkip: () 
               </ol>
             )}
             <p className="m-0 rounded-chef rounded-bl bg-surface px-3.5 py-3 font-round text-body leading-relaxed">
-              <FormattedMessage id={`onboarding.vision.${n}.chef`} />
+              {chef.line(`vision${n}`)}
             </p>
           </section>
         ))}

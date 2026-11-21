@@ -175,7 +175,7 @@ function Editor({ recipeId, recipe, photoRows }: { recipeId: string; recipe: Rec
     setPublishing(false);
     if (result) {
       if (fromState?.bookmarkId) linkBookmark.mutate({ bookmarkId: fromState.bookmarkId, recipeId });
-      void navigate(`/recipes/${recipeId}`, { replace: true });
+      void navigate(`/recipes/${recipeId}`, { replace: true, state: { published: true } });
     }
   }
 

@@ -1,6 +1,7 @@
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router';
 import { Chef } from '../../chef/Chef.tsx';
+import { useChef } from '../../chef/useChef.ts';
 import { useCurrentKitchen, useEquipmentPhotos, useKitchenEquipment, usePhotoUrls } from '../../data/hooks.ts';
 import type { KitchenEquipment } from '../../data/equipment.ts';
 import { ActionBar } from '../kitchen/ActionBar.tsx';
@@ -28,6 +29,7 @@ function Row({ item, thumbUrl }: { item: KitchenEquipment; thumbUrl?: string }) 
 
 // 廚房頁的「廚具」：依分類分組，一件一列。不放大廚的點子、不計次數（02 廚具）
 export function EquipmentTab() {
+  const chef = useChef();
   const { kitchen } = useCurrentKitchen();
   const equipment = useKitchenEquipment(kitchen?.id);
   const groups = groupEquipment(equipment.data ?? []);
@@ -51,8 +53,8 @@ export function EquipmentTab() {
         <>
           <StockCard kind="equipment" />
           <div className="flex flex-col items-center py-10 text-center">
-            <Chef size={96} />
-            <p className="mt-4 mb-0 text-body"><FormattedMessage id="equipment.empty" /></p>
+            <Chef size={96} mood="quiet" />
+            <p className="mt-4 mb-0 font-round text-body">{chef.line('emptyEquipment')}</p>
           </div>
         </>
       ) : (

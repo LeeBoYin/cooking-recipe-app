@@ -1,6 +1,7 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import type { Idea, TasteProfile } from '@zhusha/core';
-import { reasonMessage } from './reason.ts';
+import { useChef } from '../../chef/useChef.ts';
+import { reasonText } from './reason.ts';
 
 // 大廚的點子卡片（17〈大廚的點子卡片〉）：菜名、一句理由、一個標籤
 export function IdeaCard({ idea, profile, bookmarked, onOpen }: {
@@ -10,7 +11,8 @@ export function IdeaCard({ idea, profile, bookmarked, onOpen }: {
   onOpen: () => void;
 }) {
   const intl = useIntl();
-  const reason = reasonMessage(idea.reason, profile);
+  const chef = useChef();
+  const reason = reasonText(idea.reason, profile, intl, chef.line, idea.key);
   return (
     <li className="w-[148px] flex-none snap-start">
       <button
@@ -26,7 +28,7 @@ export function IdeaCard({ idea, profile, bookmarked, onOpen }: {
             </svg>
           )}
         </span>
-        <span className="text-small leading-[1.4] text-ink-muted">{intl.formatMessage({ id: reason.id }, reason.values)}</span>
+        <span className="text-small leading-[1.4] text-ink-muted">{reason}</span>
         {idea.allInKitchen ? (
           <span className="mt-0.5 whitespace-nowrap rounded-tag bg-green-soft px-2 py-0.5 text-small font-bold text-green">
             <FormattedMessage id="home.ideas.kitchenHas" />

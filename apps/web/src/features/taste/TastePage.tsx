@@ -18,6 +18,7 @@ import {
 import { getAllergen, regionChain } from '@zhusha/ingredients';
 import { preferenceDimensions, quizItems } from '@zhusha/taste';
 import { Chef } from '../../chef/Chef.tsx';
+import { useChef } from '../../chef/useChef.ts';
 import { useCurrentKitchen, useMyHardLimits, useMyTasteProfile, useSaveTasteProfile } from '../../data/hooks.ts';
 import { CardView } from './CardView.tsx';
 import { progressPercent, reactionFor, type ReactionKey } from './logic.ts';
@@ -51,6 +52,7 @@ type Result = { profile: TasteProfile; card: TasteCard };
 
 function Explore({ onFinish, doneId, initial: stored, allergenNames, previousContext, env }: { onFinish?: () => void; doneId?: string; initial: TasteProfile; allergenNames: string[]; previousContext: Parameters<ReturnType<typeof useSaveTasteProfile>['mutate']>[0]['previousContext']; env: QuizEnv }) {
   const intl = useIntl();
+  const chef = useChef();
   const navigate = useNavigate();
   const save = useSaveTasteProfile();
   // ?mode=deep：再多聊幾題（接續目前的口味地圖）；?mode=redo：重新探索（題目重問一次，自己設定的項目不會被蓋掉）
@@ -120,7 +122,7 @@ function Explore({ onFinish, doneId, initial: stored, allergenNames, previousCon
   if (step.kind === 'done') return null;
 
   const pct = progressPercent(session, step, contextAnswered);
-  const lineId = reaction ? `taste.react.${reaction}` : `taste.chef.${step.items[0]?.type ?? 'dish_card'}`;
+  const line = chef.line(reaction ? `tasteReact.${reaction}` : `tasteAsk.${step.items[0]?.type ?? 'dish_card'}`);
   return (
     <div className="flex flex-col gap-3.5">
       <div className="flex items-center gap-2.5">
@@ -139,9 +141,9 @@ function Explore({ onFinish, doneId, initial: stored, allergenNames, previousCon
         </button>
       </div>
       <div className="flex items-end gap-2" aria-live="polite">
-        <Chef size={40} />
+        <Chef size={40} mood={reaction ? 'happy' : 'normal'} />
         <p className="m-0 rounded-chef rounded-bl bg-bulb-soft px-3 py-2 font-round text-body">
-          <FormattedMessage id={lineId} />
+          {line}
         </p>
       </div>
       <QuestionView key={step.items.map((i) => i.id).join(',')} items={step.items.flatMap((i) => itemById.get(i.id) ?? [])} onAnswer={answer} />
