@@ -22,7 +22,7 @@ export function useIdeaBookmark(view: IdeaView) {
 
   function toggle() {
     if (bookmark) remove.mutate(bookmark.id);
-    else if (view.baseDishId) addDish.mutate({ title: view.title, why: view.why, baseDishId: view.baseDishId });
+    else if (view.baseDishId) addDish.mutate({ title: view.title, why: view.why, baseDishId: view.baseDishId, ...(view.suggestionId ? { suggestionId: view.suggestionId, ideaId: view.key } : {}) });
     else if (view.suggestionId) addAi.mutate({ suggestionId: view.suggestionId, title: view.title });
   }
   return {

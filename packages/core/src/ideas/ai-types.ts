@@ -1,5 +1,7 @@
 // 大廚的 AI 點子（M1a-06）：後端存進快取、回給手機的格式。後端（ai 函式）與手機共用同一份型別。
 // 卡片不含做法；做法與回饋之後用點子的 id 對應（05 AiSuggestionCache）。
+import type { Temperature, UnitCode } from '../units/units.ts';
+
 export type IdeaSlot = 'familiar' | 'twist' | 'adventure';
 
 export interface AiIdea {
@@ -30,6 +32,45 @@ export type HomeIdeasResponse =
   | { status: 'ok'; source: 'ai' | 'cache'; ideas: AiIdea[]; chefComment: string | null; createdAt: string; round: number; suggestionId: string | null } // suggestionId：這一組點子在快取裡的 id，收藏用
   | { status: 'not_enough' } // 新手門檻：口味不夠把握、又沒有自己的食譜
   | { status: 'rules' }; // 這一輪不用 AI（換太多次）：手機用規則評分
+
+// ---------------------------------------------------------------------------------------------
+// 展開做法（M1a-09）：`ai` 函式 expand_steps 任務的輸入與回傳。存進 ai_suggestion_cache.drafts 與 bookmarks.idea.recipeDraft 的格式
+// ---------------------------------------------------------------------------------------------
+// 份量與溫度只放結構化欄位（公制與攝氏），手機依偏好換算；食材一列一個，rawText 由手機依單位偏好組
+export interface DraftIngredient {
+  id: string; // UUID v7，後端產生
+  name: string; // 食材名稱（不含數量）
+  ingredientId: string | null; // 比對到字典的標準食材 ID
+  amount?: number;
+  amountMax?: number;
+  unit?: UnitCode; // 公制單位或個、瓣…；適量與少許不帶 amount
+  optional: boolean;
+  group?: string; // 「醃料」「醬汁」
+}
+
+export interface DraftStep {
+  id: string;
+  order: number;
+  text: string; // 不含帶單位的數字；溫度用 {{temp:180:C}} 標記
+  timerSeconds?: number;
+  techniques?: string[];
+  equipmentTypeIds?: string[];
+  targetTemp?: Temperature;
+}
+
+export interface RecipeDraft {
+  schemaVersion: 1;
+  servings: number; // 份量依這個人數寫
+  ingredients: DraftIngredient[];
+  steps: DraftStep[];
+  tips?: string;
+  model: string;
+}
+
+// expand_steps 的輸入：首頁或對話的點子（快取列的 id＋點子的 id），或收藏的點子
+export type ExpandInput = { suggestionId: string; ideaId: string } | { bookmarkId: string };
+
+export type ExpandResponse = { status: 'ok'; source: 'ai' | 'cache'; draft: RecipeDraft };
 
 // 自由文字裡的標記：{{temp:180:C}}（數字用攝氏或華氏，由手機依偏好轉換）
 const TEMP_MARK = /\{\{temp:(\d{2,3}):([CF])\}\}/g;

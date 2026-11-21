@@ -147,3 +147,30 @@ ANTHROPIC_API_KEY=... deno run --no-lock --no-config -A supabase/functions/ai/ch
 - 反問只在條件真的模糊時出現，而且不連續追問；「想做〇〇」不寫完整步驟。
 - 快取：`stable`＋`volatile` 第二輪起要讀得到（快取讀 token 不為 0）。
 - 偏好訊號：今天的要求是 `today`、長期的才是 `long_term`。
+
+## 08 點子抽屜的做法（M1a-09，本機）
+
+資料夾：`supabase/functions/ai/expand/`（提示詞 `prompt.ts`、檢查 `check.ts`、點子整理 `idea.ts`、流程 `handler.ts`、評估集 `eval/cases.ts`、實跑 `eval/run.ts`）
+
+| 項目 | 結果 |
+|------|------|
+| 評估集 5 組（家常菜骨架、AI 想的新點子、蝦與花生過敏、有舒肥棒的人遇到雞胸、只有電鍋）的自動測試（假的 AI 回應，測提示詞、檢查、存做法的規則；整份不用、重寫一次、兩次都不過什麼都不存、已展開的不重算） | ✅ 進 CI |
+| 資料庫：`ai_expand_get`／`ai_expand_save` 的權限、做法存進快取的 `drafts` 與收藏的 `recipeDraft`、收藏時帶著做法、收藏的點子快照不能被改 | ✅ pgTAP |
+| 手機整條路徑（用假的 `ai` 回應，沒有真的 Claude）：首頁抽屜思考中 → 顯示做法、再開同一個點子不再呼叫、失敗顯示「大廚需要再想想」→「再試一次」、「食譜 → 收藏」的「看做法」與「做了，記錄一篇」帶入菜名、食材與步驟（存檔後食材被解析成標準食材） | ✅ 本機 `pnpm dev` 走過一遍 |
+| 真的 Claude 評估（Sonnet 5.5） | ⏳ 還沒跑 |
+| 輸出 schema 在真的 API 上被接受、提示詞快取（`stable`）讀得到、檢查一次就過的比例、平均成本與延遲 | ⏳ 還沒跑 |
+
+**手動實跑**（只跑 Sonnet 5.5；會花錢，5 組合計不到 1 美元；金鑰只放在這個指令的環境變數，不寫進檔案、不貼進對話）：
+
+```bash
+ANTHROPIC_API_KEY=... deno run --no-lock --no-config -A supabase/functions/ai/expand/eval/run.ts
+```
+
+只跑一組加 `--case 03`。終端機只印數量與代號；輸出寫在 `supabase/functions/ai/expand/eval/out/<時間>/`（已加進 `.gitignore`）：每組一個 JSON，加上 `summary.md`（彙整：有效輸出、檢查一次就過的比例、自動斷言通過數、平均 token、快取讀寫、成本、延遲；每組的食材與步驟，留空格給人工打分合理度與口吻）。實跑只呼叫一次 Claude，不含自動重寫，所以「檢查一次就過」的比例就是自動重寫會多常發生。
+
+**要看的地方**
+- 檢查一次就過幾組；沒過的原因（`wording`＝步驟寫了數字最常見的話，要調提示詞）。
+- 過敏那組沒有蝦與花生；舒肥那組沒有寫舒肥、雞肉的中心溫度提醒由程式附上；電鍋那組只用電鍋。
+- 份量的單位都是公制或計數單位，`amount` 合理；步驟順、做得出來。
+- 快取：`stable` 第二組起要讀得到（快取讀 token 不為 0）。
+- 延遲：十幾秒內（不串流，整份寫完才顯示）；2,000 token 的輸出上限夠不夠（`truncated` 出現就要調）。

@@ -1,5 +1,7 @@
 // 中心溫度參考表（07 安全標準）。每個地區一份、附來源；沒有當地表的地區用各表最嚴格的值。
 // 溫度只引用來源上的官方數值，攝氏與華氏不互相換算。舒肥預設組合表目前是空的（待補），見 safety/*/sous-vide-presets.json。
+import jpSousVide from '../safety/JP/sous-vide-presets.json' with { type: 'json' };
+import usSousVide from '../safety/US/sous-vide-presets.json' with { type: 'json' };
 import jpDoneness from '../safety/JP/doneness-temps.json' with { type: 'json' };
 import usDoneness from '../safety/US/doneness-temps.json' with { type: 'json' };
 import { regionChain } from './region.ts';
@@ -66,4 +68,25 @@ export function strictestDoneness(): DonenessRow[] {
 export function donenessFor(region: string, rowId: string): DonenessRow | undefined {
   const own = donenessTableFor(region)?.rows.find((r) => r.id === rowId);
   return own ?? strictestDoneness().find((r) => r.id === rowId);
+}
+
+// 舒肥預設組合（SR-sous-vide）：AI 寫的舒肥步驟，水溫與時間只能落在表裡某一組的範圍內。目前每個地區的表都是空的，
+// 所以任何舒肥的步驟都會被擋下；表補上之後，這裡不用改。
+export interface SousVidePreset {
+  id: string;
+  name: { 'zh-TW': string };
+  tempC: number;
+  minMinutes: number;
+  maxMinutes: number;
+}
+
+const sousVideTables: Record<string, { presets: SousVidePreset[] }> = {
+  US: usSousVide as { presets: SousVidePreset[] },
+  JP: jpSousVide as { presets: SousVidePreset[] },
+};
+
+// 該地區的舒肥預設組合；該地區沒有表就用所有地區的表合併（沒有當地表時，寧可只留有來源的）
+export function sousVidePresetsFor(region: string): SousVidePreset[] {
+  for (const code of regionChain(region)) if (sousVideTables[code]) return sousVideTables[code].presets;
+  return Object.values(sousVideTables).flatMap((t) => t.presets);
 }

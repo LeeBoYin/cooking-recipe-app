@@ -864,6 +864,12 @@ isOneToOne: false
 "ai_chat_get":
 { Args: { "p_conversation": string,"p_user": string }; Returns: Json
                            },
+"ai_expand_get":
+{ Args: { "p_bookmark": string,"p_idea": string,"p_suggestion": string,"p_user": string }; Returns: Json
+                           },
+"ai_expand_save":
+{ Args: { "p_bookmark": string,"p_cache": string,"p_draft": Json,"p_idea_id": string,"p_user": string }; Returns: undefined
+                           },
 "ai_get_context":
 { Args: { "p_user": string }; Returns: Json
                            },
@@ -902,7 +908,7 @@ isOneToOne: false
         isSetofReturn: false
       } },
 "bookmark_recipe":
-{ Args: { "p_base_dish_id": string,"p_id": string,"p_title": string,"p_why": string }; Returns: {
+{ Args: { "p_base_dish_id": string,"p_id": string,"p_idea_id"?: string,"p_suggestion_id"?: string,"p_title": string,"p_why": string }; Returns: {
               "cooked_recipe_id": string | null,
 "created_at": string,
 "deleted_at": string | null,

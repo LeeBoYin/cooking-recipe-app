@@ -17,6 +17,7 @@ import {
   overBy,
   overLimit,
   textLimits,
+  type EditorDraft,
   type EditorPhoto,
   type EditorStep,
 } from './model.ts';
@@ -142,10 +143,10 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
   const intl = useIntl();
   const navigate = useNavigate();
   const location = useLocation();
-  const fromState = location.state as { title?: string; bookmarkId?: string } | null;
+  const fromState = location.state as { title?: string; bookmarkId?: string; draft?: EditorDraft } | null;
   const initialTitle = fromState?.title;
   const linkBookmark = useLinkBookmark();
-  const ed = useRecipeEditor(recipeId, recipe, photoRows, initialTitle, defaultServings);
+  const ed = useRecipeEditor(recipeId, recipe, photoRows, initialTitle, defaultServings, fromState?.draft);
   const remove = useDeleteRecipe();
   const { form, patchForm, setForm } = ed;
   const [methodOpen, setMethodOpen] = useState(
