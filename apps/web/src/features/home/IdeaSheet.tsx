@@ -2,24 +2,19 @@ import { useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import { Chef } from '../../chef/Chef.tsx';
-import { useChef } from '../../chef/useChef.ts';
 import type { IdeaView } from './ideaView.ts';
-import { useIdeaBookmark } from './useIdeaBookmark.ts';
 
-// 點子抽屜：菜名、理由、主要食材（廚房有的標「廚房有」）、其他材料與替代說明（AI 的點子）。
-// 能收藏的點子（家常菜、AI 想的）有「收藏」（已收藏顯示「已收藏」，再按取消）；自己的食譜不收藏，主按鈕是「打開食譜」。
-// 抽屜改版（做法、就聊這道，沒有收藏）是 M1a-08／09
-export function IdeaSheet({ view, onClose }: {
+// 點子抽屜（首頁與對話共用）：菜名、理由、食材（你說的、廚房有）、其他材料與替代說明，最下面「就聊這道」。
+// 抽屜裡沒有收藏（收藏在卡片右上角）；自己的食譜多一顆「打開食譜」。做法是 M1a-09。
+export function IdeaSheet({ view, onClose, onChat, chatDisabled }: {
   view: IdeaView;
   onClose: () => void;
+  onChat: (view: IdeaView) => void;
+  chatDisabled?: boolean;
 }) {
   const intl = useIntl();
   const navigate = useNavigate();
-  const chef = useChef();
   const reason = view.why;
-  // 收藏後，大廚的話換成一句回應
-  const { can, bookmark, toggle, busy, failed } = useIdeaBookmark(view);
-  const saved = bookmark ? chef.line('bookmarked', { title: view.title }, view.key) : null;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -53,9 +48,9 @@ export function IdeaSheet({ view, onClose }: {
         </div>
         <b className="-mt-2 text-[24px]">{view.title}</b>
         <div className="flex items-center gap-2.5 rounded-card bg-chef-soft px-3 py-2.5">
-          <Chef size={40} mood={saved ? 'happy' : 'idea'} />
-          <span className="font-round text-[15px] leading-normal" aria-live="polite">
-            {saved ?? (/[。！？」」…]$/.test(reason) ? reason : `${reason}。`)}
+          <Chef size={40} mood="idea" />
+          <span className="font-round text-[15px] leading-normal" >
+            {/[。！？」」…]$/.test(reason) ? reason : `${reason}。`}
           </span>
         </div>
         {view.ingredients.length > 0 && (
@@ -103,45 +98,19 @@ export function IdeaSheet({ view, onClose }: {
           <button
             type="button"
             onClick={() => void navigate(`/recipes/${view.recipeId}`)}
-            className="h-12 rounded-card border-2 border-ink bg-bulb font-[inherit] text-body font-bold text-ink"
+            className="h-11 rounded-card border-2 border-ink bg-surface font-[inherit] text-body font-bold text-ink"
           >
             <FormattedMessage id="idea.sheet.openRecipe" />
           </button>
         )}
-        {view.source === 'ai' && !can && (
-          <button
-            type="button"
-            onClick={() => void navigate('/recipes/new', { state: { title: view.title } })}
-            className="h-12 rounded-card border-2 border-ink bg-bulb font-[inherit] text-body font-bold text-ink"
-          >
-            <FormattedMessage id="idea.sheet.recordMain" />
-          </button>
-        )}
-        {can && (
-          <>
-            <button
-              type="button"
-              aria-pressed={!!bookmark}
-              disabled={busy}
-              onClick={toggle}
-              className={`h-12 rounded-card border-2 border-ink font-[inherit] text-body font-bold text-ink ${bookmark ? 'bg-surface' : 'bg-bulb'}`}
-            >
-              <FormattedMessage id={bookmark ? 'idea.sheet.bookmarked' : 'idea.sheet.bookmark'} />
-            </button>
-            {failed && (
-              <p role="alert" className="m-0 text-caption text-error">
-                <FormattedMessage id="idea.sheet.bookmarkError" />
-              </p>
-            )}
-            <button
-              type="button"
-              onClick={() => void navigate('/recipes/new', { state: { title: view.title, bookmarkId: bookmark?.id } })}
-              className="-mt-1.5 h-10 border-0 bg-transparent font-[inherit] text-caption text-ink-muted"
-            >
-              <FormattedMessage id="idea.sheet.record" />
-            </button>
-          </>
-        )}
+        <button
+          type="button"
+          disabled={chatDisabled}
+          onClick={() => onChat(view)}
+          className="h-12 rounded-card border-2 border-ink bg-bulb font-[inherit] text-body font-bold text-ink disabled:border-line disabled:bg-line disabled:text-ink-muted"
+        >
+          <FormattedMessage id="idea.sheet.chat" />
+        </button>
       </div>
     </div>
   );
