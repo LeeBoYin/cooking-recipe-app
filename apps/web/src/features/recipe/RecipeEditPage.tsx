@@ -3,12 +3,13 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { DIFFICULTY_FACETS, difficultyOverall, type DifficultyFacet } from '@zhusha/core';
 import type { RecipeVisibility } from '@zhusha/shared-types';
-import { useDeleteRecipe, useLinkBookmark, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
+import { useDeleteRecipe, useLinkBookmark, useMySettings, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
 import { recipeLimits, type Recipe } from '../../data/recipes.ts';
 import type { Photo } from '../../data/photos.ts';
 import { preloadWebpEncoder } from '../../photos/encode.ts';
 import { Icon } from '../shell/Icon.tsx';
 import {
+  DEFAULT_SERVINGS,
   HIGHLIGHTS,
   canAddStep,
   hasContent,
@@ -126,14 +127,14 @@ function StepRow({ step, index, thumb, onText, onPhoto, onRemovePhoto, over, aut
   );
 }
 
-function Editor({ recipeId, recipe, photoRows }: { recipeId: string; recipe: Recipe | null; photoRows: Photo[] }) {
+function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: string; recipe: Recipe | null; photoRows: Photo[]; defaultServings: number }) {
   const intl = useIntl();
   const navigate = useNavigate();
   const location = useLocation();
   const fromState = location.state as { title?: string; bookmarkId?: string } | null;
   const initialTitle = fromState?.title;
   const linkBookmark = useLinkBookmark();
-  const ed = useRecipeEditor(recipeId, recipe, photoRows, initialTitle);
+  const ed = useRecipeEditor(recipeId, recipe, photoRows, initialTitle, defaultServings);
   const remove = useDeleteRecipe();
   const { form, patchForm, setForm } = ed;
   const [methodOpen, setMethodOpen] = useState(
@@ -510,10 +511,11 @@ export function RecipeEditPage() {
   const { id } = useParams();
   const recipe = useRecipe(id);
   const photos = useRecipePhotos(id);
+  const settings = useMySettings();
   return (
     <section>
       <h1 className="sr-only">{intl.formatMessage({ id: 'recipe.edit.title' })}</h1>
-      {recipe.isPending || photos.isPending ? (
+      {recipe.isPending || photos.isPending || settings.isPending ? (
         <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="common.loading" /></p>
       ) : recipe.isError || photos.isError ? (
         <p role="alert" className="m-0 text-caption text-error"><FormattedMessage id="recipe.loadError" /></p>
@@ -521,7 +523,7 @@ export function RecipeEditPage() {
         <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="recipe.notFound" /></p>
       ) : (
         // key：換一篇時整個重新開始；null 就是還沒存過的新草稿
-        <Editor key={id} recipeId={id as string} recipe={recipe.data ?? null} photoRows={photos.data ?? []} />
+        <Editor key={id} recipeId={id as string} recipe={recipe.data ?? null} photoRows={photos.data ?? []} defaultServings={settings.data?.household_size ?? DEFAULT_SERVINGS} />
       )}
     </section>
   );

@@ -21,3 +21,10 @@ export {
   CHEF_PERSONAS, DEFAULT_CHEF_PERSONA, isChefPersona, timeBand, hourInTimeZone, buildChefCatalog, pickChefLine,
   type ChefPersona, type TimeBand, type ChefCatalog, type ChefLineInput,
 } from './chef/pick.ts';
+export {
+  parseMeasurePref, parseTemperaturePref, scaleToSystem, fractionText, roundedText, formatQuantity, convertTemperature, formatTemperature,
+  type UnitCode, type UnitSystem, type MeasurePref, type TemperaturePref, type Temperature, type UnitLabels, type Measured, type QuantityInput,
+} from './units/units.ts';
+export {
+  parseIngredient, renderIngredient, ingredientName, haveInKitchen, type QuantityToken, type IngredientSegment,
+} from './units/ingredient-text.ts';

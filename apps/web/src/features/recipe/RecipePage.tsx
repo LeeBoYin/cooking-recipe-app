@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
-import { DIFFICULTY_FACETS, difficultyOverall } from '@zhusha/core';
+import { DIFFICULTY_FACETS, difficultyOverall, formatTemperature, haveInKitchen, parseMeasurePref, parseTemperaturePref, renderIngredient, type UnitCode, type UnitLabels } from '@zhusha/core';
+import { getIngredient } from '@zhusha/ingredients';
 import type { RecipeIngredient, RecipeStep, RecipeVisibility } from '@zhusha/shared-types';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
-import { usePhotoUrls, useMyRecipes, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
+import { useCurrentKitchen, useMySettings, useMyRecipes, usePantryItems, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
 import { Icon } from '../shell/Icon.tsx';
 import { DifficultyRadar } from './DifficultyRadar.tsx';
 import { knownHighlights } from './model.ts';
 import { PhotoViewer, type ViewerPhoto } from './PhotoViewer.tsx';
+import { ShoppingSheet } from './ShoppingSheet.tsx';
+
+const UNIT_CODES: UnitCode[] = ['g', 'kg', 'oz', 'lb', 'tw_jin', 'tw_liang', 'cn_jin', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'cup_jp', 'rice_cup', 'fl_oz', 'qt', 'cm', 'inch'];
 
 const TILT = ['-rotate-3', 'rotate-2'];
 const HEADING = 'm-0 font-round text-card-title';
@@ -40,6 +44,32 @@ export function RecipePage() {
   const photos = useRecipePhotos(id);
   const [viewer, setViewer] = useState<{ list: ViewerPhoto[]; index: number } | null>(null);
   const [facetsOpen, setFacetsOpen] = useState(false);
+  // 這次瀏覽的人數與單位：只影響畫面，不存
+  const [servings, setServings] = useState<number | null>(null);
+  const [servingsOpen, setServingsOpen] = useState(false);
+  const [flipUnits, setFlipUnits] = useState(false);
+  const [buyOpen, setBuyOpen] = useState(false);
+  const settings = useMySettings();
+  const { kitchen } = useCurrentKitchen();
+  const pantry = usePantryItems(kitchen?.id);
+  const labels = useMemo(
+    () => Object.fromEntries(UNIT_CODES.map((u) => [u, intl.formatMessage({ id: `unit.${u}` })])) as UnitLabels,
+    [intl],
+  );
+  // 廚房有的食材：標準食材的 ID，加上名稱與別名（食譜裡的食材是自由文字，靠名字比對）
+  const kitchenHas = useMemo(() => {
+    const ids = new Set<string>();
+    const names: string[] = [];
+    for (const p of pantry.data ?? []) {
+      names.push(p.raw_name);
+      const d = getIngredient(p.ingredient_id);
+      if (d) {
+        ids.add(d.id);
+        names.push(d['name']['zh-TW'], ...(d.aliases['zh-TW'] ?? []));
+      }
+    }
+    return { ingredientIds: ids, names };
+  }, [pantry.data]);
 
   const rows = photos.data ?? [];
   const top = rows.filter((p) => p.owner_type === 'recipe');
@@ -67,6 +97,19 @@ export function RecipePage() {
     ? { ingredients: d.ingredients!, equipment: d.equipment!, time: d.time!, technique: d.technique!, failure_risk: d.failure_risk! }
     : null;
   const overall = values ? (d?.overall ?? difficultyOverall(values)) : null;
+  const baseServings = r.servings ?? null;
+  const shownServings = baseServings ? (servings ?? baseServings) : null;
+  const factor = baseServings && shownServings ? shownServings / baseServings : 1;
+  const measure = parseMeasurePref(settings.data?.measure_unit);
+  const temperature = parseTemperaturePref(settings.data?.temperature_unit);
+  // 一鍵切換：只看這一次，主要單位換成另一種、不再附括號
+  const measurePref = flipUnits ? { system: measure.system === 'us' ? ('metric' as const) : ('us' as const), both: false } : measure;
+  const tempPref = flipUnits ? { unit: temperature.unit === 'F' ? ('C' as const) : ('F' as const), both: false } : temperature;
+  const ingredientLines = ingredients.map((i) => ({
+    id: i.id,
+    text: renderIngredient(i.raw_text, { factor, pref: measurePref, labels }),
+    have: haveInKitchen({ text: i.raw_text, ingredientId: i.ingredient_id }, kitchenHas),
+  }));
   const originals = top.map((p): ViewerPhoto => ({ id: p.id, path: p.storage_path }));
   const cell = 'flex h-[110px] items-center justify-center overflow-hidden bg-photo-empty';
   const shown = top.length > 3 ? top.slice(0, 2) : top.slice(0, 3);
@@ -160,17 +203,47 @@ export function RecipePage() {
         <>
           <div className="flex items-center justify-between">
             <h2 className={HEADING}><FormattedMessage id="recipe.view.ingredients" /></h2>
-            {r.servings && (
-              <span className="rounded-full border border-line bg-surface px-3 py-1 text-caption">
-                <FormattedMessage id="recipe.view.servings" values={{ count: r.servings }} />
-              </span>
+            {shownServings && (
+              <button
+                type="button"
+                aria-expanded={servingsOpen}
+                aria-label={intl.formatMessage({ id: 'recipe.view.servingsMore' })}
+                onClick={() => setServingsOpen((o) => !o)}
+                className="min-h-9 rounded-full border border-line bg-surface px-3 py-1 text-caption text-ink"
+              >
+                <FormattedMessage id="recipe.view.servings" values={{ count: shownServings }} /> ▾
+              </button>
             )}
           </div>
+          {servingsOpen && shownServings && baseServings && (
+            <div className="-mt-1.5 flex flex-col gap-2 rounded-card bg-surface p-3">
+              <div className="flex items-center justify-center gap-3">
+                <button type="button" aria-label={intl.formatMessage({ id: 'recipe.servings.less' })} disabled={shownServings <= 1} onClick={() => setServings(shownServings - 1)} className="size-11 rounded-full border border-line bg-surface text-[20px] text-ink disabled:opacity-40">−</button>
+                <b className="min-w-16 text-center text-[18px]"><FormattedMessage id="recipe.view.servings" values={{ count: shownServings }} /></b>
+                <button type="button" aria-label={intl.formatMessage({ id: 'recipe.servings.more' })} disabled={shownServings >= 100} onClick={() => setServings(shownServings + 1)} className="size-11 rounded-full border border-line bg-surface text-[20px] text-ink disabled:opacity-40">＋</button>
+              </div>
+              <span className="text-center text-small text-ink-muted"><FormattedMessage id="recipe.view.servingsHint" /></span>
+              {shownServings !== baseServings && (
+                <button type="button" onClick={() => setServings(null)} className="self-center border-0 bg-transparent p-1 text-caption font-bold text-ink underline">
+                  <FormattedMessage id="recipe.view.servingsOriginal" values={{ count: baseServings }} />
+                </button>
+              )}
+            </div>
+          )}
           <ul className="-mt-1.5 m-0 list-none rounded-card bg-surface px-3 py-0.5">
-            {ingredients.map((i) => (
-              <li key={i.id} className="border-b border-line-soft py-2.5 text-[15px] last:border-b-0">{i.raw_text}</li>
+            {ingredientLines.map((l) => (
+              <li key={l.id} className="border-b border-line-soft py-2.5 text-[15px] last:border-b-0">{l.text}</li>
             ))}
           </ul>
+          <div className="-mt-1.5 flex flex-wrap items-center justify-between gap-2">
+            <button type="button" onClick={() => setBuyOpen(true)} className="min-h-11 border-0 bg-transparent p-0 text-caption font-bold text-ink underline">
+              <FormattedMessage id="recipe.view.buy" />
+            </button>
+            <button type="button" aria-pressed={flipUnits} onClick={() => setFlipUnits((f) => !f)} className="flex min-h-11 flex-col items-end border-0 bg-transparent p-0 text-caption font-bold text-ink underline">
+              <FormattedMessage id="recipe.view.unitsTo" values={{ system: measurePref.system === 'us' ? 'metric' : 'us' }} />
+            </button>
+          </div>
+          {flipUnits && <span className="-mt-2 text-right text-small text-ink-muted"><FormattedMessage id="recipe.view.unitsToHint" /></span>}
         </>
       )}
 
@@ -185,6 +258,11 @@ export function RecipePage() {
                   <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-ink text-small font-bold text-surface">{i + 1}</span>
                   <span className="flex min-w-0 flex-1 flex-col gap-2">
                     <span className="whitespace-pre-wrap text-[15px] leading-relaxed">{s.text}</span>
+                    {s.target_temp && (
+                      <span className="text-small text-ink-muted">
+                        <FormattedMessage id="recipe.view.stepTemp" values={{ value: formatTemperature(s.target_temp, tempPref) }} />
+                      </span>
+                    )}
                     {photo && (
                       <button
                         type="button"
@@ -215,6 +293,8 @@ export function RecipePage() {
           <FormattedMessage id="recipe.view.edit" />
         </Link>
       </div>
+
+      {buyOpen && <ShoppingSheet title={title} lines={ingredientLines} onClose={() => setBuyOpen(false)} />}
 
       {viewer && (
         <PhotoViewer

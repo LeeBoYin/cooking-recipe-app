@@ -55,12 +55,12 @@ export type EditorForm = {
 
 export const DEFAULT_SERVINGS = 2;
 
-export function emptyForm(): EditorForm {
+export function emptyForm(servings = DEFAULT_SERVINGS): EditorForm {
   return {
     title: '',
     story: '',
     photos: [],
-    servings: DEFAULT_SERVINGS,
+    servings,
     ingredients: [],
     steps: [],
     tips: '',
