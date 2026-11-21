@@ -190,6 +190,8 @@ export function buildHomeEnv(ctx: HomeContextRow, now: Date): HomeEnv {
     if (!ingredientById.has(p.ingredient_id) || seen.has(p.ingredient_id)) continue;
     const left = p.expires_at ? day(p.expires_at) - todayN : null;
     if (left !== null && left < 0) continue;
+    // 排除清單裡的食材（過敏、飲食限制、不吃、料理酒）不給 AI 看，免得被拿去用
+    if (violatesLimits([p.ingredient_id], {}, limits, ideaIngredients)) continue;
     seen.add(p.ingredient_id);
     const expiring = left !== null && left <= 3;
     if (p.want_to_use_soon || expiring) priorityIds.add(p.ingredient_id);

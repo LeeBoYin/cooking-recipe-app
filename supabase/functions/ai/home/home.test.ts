@@ -84,9 +84,11 @@ Deno.test('JSON Schema：手法與廚具是這個人能用的 enum，沒有舒�
     const env = buildHomeEnv(c.ctx, c.now ?? NOW);
     assertEquals(validate(buildHomeSchema(env), validRaw(env)), [], c.id);
   }
+  // schema 每次都一樣（快取才讀得到）；不能用的手法由檢查拿掉
+  assertEquals(JSON.stringify(buildHomeSchema(e1)), JSON.stringify(buildHomeSchema(e7)));
   const bad = validRaw(e1);
   (bad.suggestions[0] as RawIdea).techniques = ['sous-vide'];
-  assertNotEquals(validate(buildHomeSchema(e1), bad), []);
+  assertEquals(checkHomeOutput(bad, e1, { makeId: ids() }).dropped.technique, 1);
 });
 
 Deno.test('檢查：合格的點子留下，熟悉的菜名用候選的，ID 由程式產生', () => {
@@ -102,7 +104,7 @@ Deno.test('檢查：合格的點子留下，熟悉的菜名用候選的，ID 由
 Deno.test('檢查：過敏原（案例 2）——食材 ID、關鍵字、對不到字典的其他材料都會被拿掉', () => {
   const env = envOf('02');
   const r = check(env, [
-    idea(env, { title: '蝦仁炒飯', uses_pantry_ids: ['shrimp'] }),
+    idea(env, { title: '蝦仁炒飯', other_ingredients: [{ name: '蝦仁' }] }), // 蝦仁不在給 AI 的食材清單裡，從其他材料比對
     idea(env, { title: '蝦醬空心菜' }),
     idea(env, { title: '花生粉雞丁', other_ingredients: [{ name: '花生粉' }] }),
     idea(env, { title: '奇怪調味雞', other_ingredients: [{ name: '神祕香料包' }] }),
@@ -323,4 +325,11 @@ Deno.test('輸入雜湊：食材、飲食限制改了就不同，順序不影響
   assertNotEquals(a, more);
   const allergy = await hashHomeInputs(buildHomeEnv({ ...c.ctx, dietary: { allergen_ids: ['egg'], restriction_ids: [], dislike_ingredient_ids: [], no_cooking_alcohol: false } }, NOW));
   assertNotEquals(a, allergy);
+});
+
+Deno.test('排除清單裡的食材不給 AI 看', () => {
+  const env = envOf('08');
+  const ids = env.pantry.map((p) => p.id);
+  for (const id of ['beef-slices', 'rice-wine', 'mirin']) assertEquals(ids.includes(id), false, id);
+  assertEquals(ids.includes('pork-slices'), true);
 });
