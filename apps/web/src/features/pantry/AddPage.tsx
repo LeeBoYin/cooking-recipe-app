@@ -9,6 +9,7 @@ import { Icon } from '../shell/Icon.tsx';
 import { SubPage } from '../shell/SubPage.tsx';
 import { todayIn } from './dates.ts';
 import { ExpiryFields, type Expiry } from './ExpiryFields.tsx';
+import { toggleIngredientDraft } from './draftToggle.ts';
 import { ZoneSelect } from './ZoneSelect.tsx';
 import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
@@ -123,6 +124,21 @@ export function AddPage() {
     ]);
     setQuery('');
   }
+  function toggleFrequent(id: string) {
+    const ing = getIngredient(id);
+    if (!ing) return;
+    setDrafts((d) =>
+      toggleIngredientDraft(d, id, () => ({
+        id: newId(),
+        ingredient_id: id,
+        name: ing.name['zh-TW'],
+        zone: ing.defaultStorage,
+        want_to_use_soon: false,
+        expires_at: null,
+        date_type: null,
+      })),
+    );
+  }
   function addCustom(name: string) {
     setDrafts((d) => [
       ...d,
@@ -207,17 +223,16 @@ export function AddPage() {
 
         <section aria-labelledby="frequent">
           <h2 id="frequent" className="mx-0 mt-2 mb-2 text-card-title font-bold"><FormattedMessage id="pantry.frequent" /></h2>
-          <div className="flex flex-wrap gap-2">
+          <div className="-mx-4 grid auto-cols-max grid-flow-col grid-rows-2 gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {frequent.map((id) => {
               const used = carded.has(id);
               return (
                 <button
                   key={id}
                   type="button"
-                  disabled={used}
                   aria-pressed={used}
-                  onClick={() => addIngredient(id)}
-                  className={`min-h-11 rounded-full border px-3 text-caption ${used ? 'border-ink bg-bulb-soft font-bold' : 'border-line bg-surface'}`}
+                  onClick={() => toggleFrequent(id)}
+                  className={`min-h-11 whitespace-nowrap rounded-full border px-3 text-caption ${used ? 'border-ink bg-bulb-soft font-bold' : 'border-line bg-surface'}`}
                 >
                   <ItemIcon kind="ingredient" id={id} size={24} /> {getIngredient(id)?.name['zh-TW']}
                   {have.has(id) && !used && <span className="text-ink-muted"> ✓</span>}
