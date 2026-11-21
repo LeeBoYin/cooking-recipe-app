@@ -9,6 +9,7 @@ export interface AiIdea {
   why: string; // 可能含 {{temp:180:C}} 標記，手機依偏好轉成攝氏或華氏
   candidateRef: string | null; // 對應的候選：own:<食譜 id> 或 dish:<家常菜 id>
   usesPantryIds: string[];
+  usesMentionedIds?: string[]; // 對話中說的、廚房沒記的食材（只有對話的點子有；抽屜標「你說的」）
   usesPriorityIds: string[];
   otherIngredients: { name: string; ingredientId: string | null }[];
   difficulty: { ingredients: number; equipment: number; time: number; technique: number; failure_risk: number; overall: number };
@@ -35,3 +36,29 @@ const TEMP_MARK = /\{\{temp:(\d{2,3}):([CF])\}\}/g;
 export function replaceTempMarks(text: string, render: (value: number, unit: 'C' | 'F') => string): string {
   return text.replace(TEMP_MARK, (_m, v: string, u: string) => render(Number(v), u as 'C' | 'F'));
 }
+
+// ---------------------------------------------------------------------------------------------
+// 和大廚聊聊（M1a-07）：`ai` 函式 chat 任務的輸入與回傳
+// ---------------------------------------------------------------------------------------------
+export const CHAT_MAX_USER_CHARS = 500; // 使用者每則上限
+export const CHAT_MAX_TURNS = 20; // 一段對話最多幾輪（使用者一句加大廚一句算一輪）
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'chef';
+  text: string; // 大廚的話可能含 {{temp:180:C}} 標記
+  ask?: string; // 大廚的反問（有反問就沒有點子）
+  suggestionId?: string; // 大廚這一則附的點子（ai_suggestion_cache 的 id）
+  at: string;
+}
+
+// chat 的輸入：conversationId 空的就開新的一段；continueFrom 是滿 20 輪的那一段，新的一段從它的條件摘要開始
+export interface ChatInput {
+  message: string;
+  conversationId?: string;
+  continueFrom?: string;
+}
+
+export type ChatResponse =
+  | { status: 'ok'; conversationId: string; turnCount: number; userMessage: ChatMessage; chefMessage: ChatMessage; ideas: AiIdea[] }
+  | { status: 'full' }; // 這一段已經滿 20 輪

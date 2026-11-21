@@ -6,6 +6,7 @@ import { createClaude } from './claude.ts';
 import { type AiContext, type AiErrorCode, type Deps, ERROR_STATUS, runAi } from './pipeline.ts';
 import { TASKS } from './tasks.ts';
 import { runHomeIdeas } from './home/handler.ts';
+import { runChat } from './chat/handler.ts';
 import { createProtection, sessionIdOf } from './usage.ts';
 
 const CORS = {
@@ -68,6 +69,15 @@ Deno.serve(async (req) => {
         return error(home.error);
       }
       return json({ data: home.data });
+    }
+    // 和大廚聊聊：自己讀資料、組候選與提示詞、再檢查、存對話（見 chat/handler.ts）
+    if (body.task === 'chat') {
+      const chat = await runChat({ ai: deps, rpc: async (fn, args) => await client.rpc(fn, args) }, auth.user.id, body.input);
+      if (!chat.ok) {
+        console.error('ai: rejected', chat.error);
+        return error(chat.error);
+      }
+      return json({ data: chat.data });
     }
     const result = await runAi(deps, auth.user.id, body.task, body.input);
     if (!result.ok) {

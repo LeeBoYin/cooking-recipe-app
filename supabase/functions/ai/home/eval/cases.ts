@@ -9,13 +9,13 @@ export const NOW = new Date('2026-11-21T10:00:00Z'); // 台灣傍晚 6 點、加
 
 const AT = '2026-11-01T00:00:00Z';
 const dim = (affinity = 0.8, confidence = 0.8) => ({ affinity, confidence, source: 'explored' as const, updated_at: AT });
-const likes = (...keys: string[]) => Object.fromEntries(keys.map((k) => [k, dim()]));
-const pantry = (...ids: string[]) => ids.map((ingredient_id) => ({ ingredient_id, want_to_use_soon: false, expires_at: null as string | null }));
-const eq = (...ids: string[]) => ids.map((equipment_type_id) => ({ equipment_type_id, enabled_optional_techniques: [] as string[] }));
+export const likes = (...keys: string[]) => Object.fromEntries(keys.map((k) => [k, dim()]));
+export const pantry = (...ids: string[]) => ids.map((ingredient_id) => ({ ingredient_id, want_to_use_soon: false, expires_at: null as string | null }));
+export const eq = (...ids: string[]) => ids.map((equipment_type_id) => ({ equipment_type_id, enabled_optional_techniques: [] as string[] }));
 
-const FREQ = { adventure: 0.3, goals: [] as string[], festive_dishes: false };
+export const FREQ = { adventure: 0.3, goals: [] as string[], festive_dishes: false };
 
-function ctx(over: Partial<HomeContextRow> & { frequency?: string; adventure?: number; persona?: string }): HomeContextRow {
+export function ctx(over: Partial<HomeContextRow> & { frequency?: string; adventure?: number; persona?: string }): HomeContextRow {
   const { frequency, adventure, persona, ...rest } = over;
   const base: HomeContextRow = {
     kitchen: { id: '0192f000-0000-7000-8000-000000000001', region: 'TW', timezone: 'Asia/Taipei' },

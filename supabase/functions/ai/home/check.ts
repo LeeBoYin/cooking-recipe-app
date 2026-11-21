@@ -64,6 +64,11 @@ export interface CheckOptions {
   shownTitles?: ReadonlySet<string>;
   shownRefs?: ReadonlySet<string>;
   makeId?: () => string;
+  // 對話用：每個槽位與整體的數量上限（預設是首頁的 2／2／1、最多 5）
+  slotLimits?: Readonly<Record<Slot, number>>;
+  maxIdeas?: number;
+  // 對話用：使用者在對話中說的、廚房沒記的食材 ID。點子可以用，會放進 usesMentionedIds
+  extraIds?: ReadonlySet<string>;
 }
 
 export interface CheckResult {
@@ -84,6 +89,9 @@ export function checkHomeOutput(raw: RawOutput, env: HomeEnv, opts: CheckOptions
   const seenTitles = new Set<string>();
   const slotCount: Record<Slot, number> = { familiar: 0, twist: 0, adventure: 0 };
   const out: HomeIdea[] = [];
+  const slotLimits = opts.slotLimits ?? SLOT_LIMITS;
+  const maxIdeas = opts.maxIdeas ?? MAX_IDEAS;
+  const extra = opts.extraIds;
 
   for (const r of raw.suggestions) {
     if (!r || typeof r !== 'object' || !shapeOk(r)) { drop('format'); continue; }
@@ -96,7 +104,7 @@ export function checkHomeOutput(raw: RawOutput, env: HomeEnv, opts: CheckOptions
     const title = r.slot === 'familiar' && candidate ? candidate.title : r.title.trim();
 
     // 食材：只能用送出去的（沒過期的）；不在清單裡的整個點子拿掉
-    if (r.uses_pantry_ids.some((id) => !env.pantryIds.has(id))) { drop('pantry_not_sent'); continue; }
+    if (r.uses_pantry_ids.some((id) => !env.pantryIds.has(id) && !extra?.has(id))) { drop('pantry_not_sent'); continue; }
 
     // 其他材料：用字典比對出 ID；有設過敏原，而且有對不到字典的，整個拿掉
     const others = r.other_ingredients.map((o) => ({ name: o.name.trim(), ingredientId: matchIngredient(o.name, ingredientIndex) ?? null }));
@@ -127,7 +135,7 @@ export function checkHomeOutput(raw: RawOutput, env: HomeEnv, opts: CheckOptions
     if (opts.shownTitles?.has(key) || (candidate && opts.shownRefs?.has(candidate.key))) { drop('already_shown'); continue; }
 
     // 槽位數量與總數
-    if (slotCount[r.slot] >= SLOT_LIMITS[r.slot] || out.length >= MAX_IDEAS) { drop('slot_limit'); continue; }
+    if (slotCount[r.slot] >= slotLimits[r.slot] || out.length >= maxIdeas) { drop('slot_limit'); continue; }
 
     seenTitles.add(key);
     slotCount[r.slot] += 1;
@@ -138,7 +146,8 @@ export function checkHomeOutput(raw: RawOutput, env: HomeEnv, opts: CheckOptions
       title,
       why: r.why.trim(),
       candidateRef: candidate?.key ?? null,
-      usesPantryIds: [...new Set(r.uses_pantry_ids)],
+      usesPantryIds: [...new Set(r.uses_pantry_ids)].filter((id) => !extra || env.pantryIds.has(id)),
+      ...(extra ? { usesMentionedIds: [...new Set(r.uses_pantry_ids)].filter((id) => !env.pantryIds.has(id)) } : {}),
       usesPriorityIds: [...priority],
       otherIngredients: others,
       difficulty: { ...r.difficulty, overall },

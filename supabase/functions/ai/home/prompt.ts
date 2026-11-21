@@ -101,12 +101,13 @@ export interface HomeExclude {
   refs: string[];
 }
 
-export function buildHomePrompt(env: HomeEnv, exclude: HomeExclude): PromptParts {
+// 「這位使用者」：語氣、地區、口味、排除清單、廚具與手法。同一個人、同一段對話內不變（首頁與對話共用）
+export function buildUserBlock(env: HomeEnv): string {
   const region = getRegionProfile(env.ctx.kitchen.region)?.name['zh-TW'] ?? env.ctx.kitchen.region;
   const { names, dislikes } = exclusionList(env);
   const equipmentNames = env.equipmentEnum.map((id) => getEquipmentType(id)?.name['zh-TW'] ?? id);
 
-  const volatile = [
+  return [
     '# 這位使用者',
     `大廚的語氣：${PERSONA_TEXT[env.persona] ?? PERSONA_TEXT.warm}`,
     `所在地區：${region}（食材好不好買請依這裡判斷）`,
@@ -123,18 +124,25 @@ export function buildHomePrompt(env: HomeEnv, exclude: HomeExclude): PromptParts
     `手法代碼：${env.techniqueEnum.join('、')}`,
     `廚具代碼：${env.equipmentEnum.join('、')}`,
   ].filter((l, i, a) => l !== '' || a[i - 1] !== '').join('\n');
+}
 
+export const TIME_BAND_TEXT = { morning: '早上', noon: '中午', afternoon: '下午', evening: '傍晚', night: '晚上' } as const;
+
+// 手邊的食材（ID｜名稱）與調味料
+export function pantryLines(env: HomeEnv): string[] {
   const main = env.pantry.filter((p) => !p.seasoning);
   const seasonings = env.pantry.filter((p) => p.seasoning);
   const mark = (p: HomeEnv['pantry'][number]) => `${p.id}｜${p.name}${p.soon ? '｜想先用掉' : ''}${p.expiring ? '｜快到期' : ''}`;
-  const lines: string[] = [
-    '# 這一次',
-    `月份：${env.month} 月；時段：${({ morning: '早上', noon: '中午', afternoon: '下午', evening: '傍晚', night: '晚上' })[env.band]}`,
-    '',
+  return [
     '## 手邊的食材（ID｜名稱）',
     ...(main.length ? main.slice(0, 80).map(mark) : ['（廚房沒記任何食材）']),
     ...(seasonings.length ? ['', `## 手邊的調味料`, seasonings.slice(0, 40).map((p) => `${p.id}｜${p.name}`).join('；')] : []),
-    '',
+  ];
+}
+
+// 候選（代號｜來源｜菜名｜主要食材｜手邊覆蓋｜主要加分）
+export function candidateLines(env: HomeEnv): string[] {
+  return [
     '## 候選（代號｜來源｜菜名｜主要食材｜手邊覆蓋｜主要加分）',
     ...env.candidates.map(({ ref, idea }) => {
       const have = new Set(idea.haveIngredientIds);
@@ -144,6 +152,18 @@ export function buildHomePrompt(env: HomeEnv, exclude: HomeExclude): PromptParts
       return `${ref}｜${idea.source === 'own' ? '他自己的食譜' : '家常菜'}｜${idea.title}｜${idea.mainIngredientIds.map((id) => ingredientName(id) + (known && !have.has(id) ? '(缺)' : '')).join('、')}｜${cover}｜${reasonLabel(idea.reason)}`;
     }),
   ];
+}
+
+export function buildHomePrompt(env: HomeEnv, exclude: HomeExclude): PromptParts {
+  const volatile = buildUserBlock(env);
+  const lines: string[] = [
+    '# 這一次',
+    `月份：${env.month} 月；時段：${TIME_BAND_TEXT[env.band]}`,
+    '',
+    ...pantryLines(env),
+    '',
+    ...candidateLines(env),
+  ];
   if (exclude.titles.length) lines.push('', '## 已經出現過的點子（這次不要再給，也不要給很像的）', exclude.titles.join('、'));
   if (env.candidates.length === 0) lines.push('', '（這次沒有候選：不要給 familiar，只給 twist 與 adventure，從手邊的食材與口味出發。）');
   lines.push('', '請依規則給出點子。');
@@ -151,41 +171,43 @@ export function buildHomePrompt(env: HomeEnv, exclude: HomeExclude): PromptParts
   return { stable: HOME_IDEAS_STABLE, volatile, messages: [{ role: 'user', content: lines.join('\n') }] };
 }
 
-// 結構化輸出的 JSON Schema：每個人、每一次都一樣，才不會讓快取失效（schema 不同，前段規則的快取就讀不到）。
-// 候選代號、手法與廚具可用哪些寫在 prompt，由 check.ts 檢查；數量上限、長度、數值範圍也由 check.ts 檢查。
-export function buildHomeSchema(_env?: HomeEnv): JsonSchema {
+// 一個點子的格式（首頁與對話共用）
+export const IDEA_ITEM_SCHEMA: JsonSchema = (() => {
   const str: JsonSchema = { type: 'string' };
   const int: JsonSchema = { type: 'integer' };
   return {
     type: 'object',
     properties: {
-      suggestions: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            slot: { type: 'string', enum: [...SLOTS] },
-            candidate_ref: str,
-            title: str,
-            why: str,
-            uses_pantry_ids: { type: 'array', items: str },
-            uses_priority_ids: { type: 'array', items: str },
-            other_ingredients: { type: 'array', items: { type: 'object', properties: { name: str }, required: ['name'], additionalProperties: false } },
-            difficulty: {
-              type: 'object',
-              properties: { ingredients: int, equipment: int, time: int, technique: int, failure_risk: int },
-              required: ['ingredients', 'equipment', 'time', 'technique', 'failure_risk'],
-              additionalProperties: false,
-            },
-            techniques: { type: 'array', items: str },
-            equipment: { type: 'array', items: str },
-            substitutions: { type: 'array', items: { type: 'object', properties: { need: str, use: str }, required: ['need', 'use'], additionalProperties: false } },
-          },
-          required: ['slot', 'candidate_ref', 'title', 'why', 'uses_pantry_ids', 'uses_priority_ids', 'other_ingredients', 'difficulty', 'techniques', 'equipment', 'substitutions'],
-          additionalProperties: false,
-        },
+      slot: { type: 'string', enum: [...SLOTS] },
+      candidate_ref: str,
+      title: str,
+      why: str,
+      uses_pantry_ids: { type: 'array', items: str },
+      uses_priority_ids: { type: 'array', items: str },
+      other_ingredients: { type: 'array', items: { type: 'object', properties: { name: str }, required: ['name'], additionalProperties: false } },
+      difficulty: {
+        type: 'object',
+        properties: { ingredients: int, equipment: int, time: int, technique: int, failure_risk: int },
+        required: ['ingredients', 'equipment', 'time', 'technique', 'failure_risk'],
+        additionalProperties: false,
       },
-      chef_comment: str,
+      techniques: { type: 'array', items: str },
+      equipment: { type: 'array', items: str },
+      substitutions: { type: 'array', items: { type: 'object', properties: { need: str, use: str }, required: ['need', 'use'], additionalProperties: false } },
+    },
+    required: ['slot', 'candidate_ref', 'title', 'why', 'uses_pantry_ids', 'uses_priority_ids', 'other_ingredients', 'difficulty', 'techniques', 'equipment', 'substitutions'],
+    additionalProperties: false,
+  };
+})();
+
+// 結構化輸出的 JSON Schema：每個人、每一次都一樣，才不會讓快取失效（schema 不同，前段規則的快取就讀不到）。
+// 候選代號、手法與廚具可用哪些寫在 prompt，由 check.ts 檢查；數量上限、長度、數值範圍也由 check.ts 檢查。
+export function buildHomeSchema(_env?: HomeEnv): JsonSchema {
+  return {
+    type: 'object',
+    properties: {
+      suggestions: { type: 'array', items: IDEA_ITEM_SCHEMA },
+      chef_comment: { type: 'string' },
     },
     required: ['suggestions', 'chef_comment'],
     additionalProperties: false,
