@@ -27,7 +27,7 @@ export interface AiIdeasPayload {
 
 // `ai` 函式的 home_ideas 回傳
 export type HomeIdeasResponse =
-  | { status: 'ok'; source: 'ai' | 'cache'; ideas: AiIdea[]; chefComment: string | null; createdAt: string; round: number }
+  | { status: 'ok'; source: 'ai' | 'cache'; ideas: AiIdea[]; chefComment: string | null; createdAt: string; round: number; suggestionId: string | null } // suggestionId：這一組點子在快取裡的 id，收藏用
   | { status: 'not_enough' } // 新手門檻：口味不夠把握、又沒有自己的食譜
   | { status: 'rules' }; // 這一輪不用 AI（換太多次）：手機用規則評分
 

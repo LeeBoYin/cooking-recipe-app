@@ -31,4 +31,13 @@ describe('AI 點子的顯示內容', () => {
     expect(twist.source).toBe('ai');
     expect(twist.baseDishId).toBeUndefined();
   });
+
+  it('對話的點子：你說的食材標出來；AI 想的點子帶 suggestionId 才能收藏', () => {
+    const pref = { unit: 'C', both: false } as const;
+    const v = viewOfAiIdea(idea({ usesPantryIds: ['pork-ribs'], usesMentionedIds: ['bamboo-shoot'] }), pref, 's1');
+    expect(v.ingredients.map((i) => [i.have, i.said ?? false])).toEqual([[true, false], [false, true]]);
+    expect(v.kitchenHas).toBe(true);
+    expect(v.suggestionId).toBe('s1');
+    expect(viewOfAiIdea(idea(), pref).suggestionId).toBeUndefined();
+  });
 });

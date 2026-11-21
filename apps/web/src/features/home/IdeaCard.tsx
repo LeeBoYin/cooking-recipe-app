@@ -1,39 +1,35 @@
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import type { IdeaView } from './ideaView.ts';
+import { BookmarkButton } from './BookmarkButton.tsx';
 
-// 大廚的點子卡片（17〈大廚的點子卡片〉）：菜名、一句理由、一個標籤
-export function IdeaCard({ view, bookmarked, onOpen }: {
+// 大廚的點子卡片（17〈大廚的點子卡片〉）：菜名、一句理由、一個標籤，右上角收藏。
+// 首頁：148px 寬、chef-soft 底，一排左右滑；對話：全寬、直排、白底（放在 chef-soft 的對話旁邊）
+export function IdeaCard({ view, layout = 'home', onOpen }: {
   view: IdeaView;
-  bookmarked: boolean;
+  layout?: 'home' | 'chat';
   onOpen: () => void;
 }) {
-  const intl = useIntl();
+  const chat = layout === 'chat';
   return (
-    <li className="w-[148px] flex-none snap-start">
+    <li className={`relative ${chat ? 'w-full' : 'w-[148px] flex-none snap-start'}`}>
       <button
         type="button"
         onClick={onOpen}
-        className="flex h-full w-full flex-col items-start gap-1 rounded-card border-0 bg-chef-soft px-3 py-2.5 text-left font-[inherit] text-ink"
+        className={`flex h-full w-full flex-col items-start gap-1 rounded-card border-0 py-2.5 pr-11 pl-3 text-left font-[inherit] text-ink ${chat ? 'bg-surface' : 'bg-chef-soft'}`}
       >
-        <span className="flex w-full items-center gap-1">
-          <b className="min-w-0 flex-1 truncate text-body">{view.title}</b>
-          {bookmarked && (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" role="img" aria-label={intl.formatMessage({ id: 'home.ideas.bookmarked' })} className="flex-none">
-              <path d="M6 3h12v18l-6-4.5L6 21z" />
-            </svg>
-          )}
-        </span>
+        <b className={`w-full text-body ${chat ? '' : 'truncate'}`}>{view.title}</b>
         <span className="text-small leading-[1.4] text-ink-muted">{view.why}</span>
         {view.kitchenHas ? (
           <span className="mt-0.5 whitespace-nowrap rounded-tag bg-green-soft px-2 py-0.5 text-small font-bold text-green">
             <FormattedMessage id="home.ideas.kitchenHas" />
           </span>
         ) : view.difficulty ? (
-          <span className="mt-0.5 whitespace-nowrap rounded-tag bg-surface px-2 py-0.5 text-small text-ink-muted">
+          <span className={`mt-0.5 whitespace-nowrap rounded-tag px-2 py-0.5 text-small text-ink-muted ${chat ? 'bg-bg' : 'bg-surface'}`}>
             <FormattedMessage id="home.ideas.difficulty" values={{ value: view.difficulty }} />
           </span>
         ) : null}
       </button>
+      <BookmarkButton view={view} />
     </li>
   );
 }

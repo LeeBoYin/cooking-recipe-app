@@ -6,14 +6,14 @@ import { emptyProfile, parseTemperaturePref, todayInTimeZone } from '@zhusha/cor
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
 import {
-  useCurrentKitchen, useKitchenEquipment, useMyBookmarks, useMyDietary, useMyIdentity, useMyRecipes, useMySettings, useMyTasteProfile, usePantryItems,
+  useCurrentKitchen, useKitchenEquipment, useMyDietary, useMyIdentity, useMyRecipes, useMySettings, useMyTasteProfile, usePantryItems,
 } from '../../data/hooks.ts';
-import { ideaOf } from '../../data/bookmarks.ts';
 import { AiCallError, fetchHomeIdeas, getLastHomeIdeas } from '../../data/ai.ts';
 import { buildPool, hasNextIdeaSet, ideaSet } from './ideas.ts';
-import { viewOfAiIdea, viewOfRuleIdea, type IdeaView } from './ideaView.ts';
+import { renderMarks, viewOfAiIdea, viewOfRuleIdea, type IdeaView } from './ideaView.ts';
 import { IdeaCard } from './IdeaCard.tsx';
 import { IdeaSheet } from './IdeaSheet.tsx';
+import { useResumableChat } from '../chat/useChat.ts';
 
 // 「換一組」換到第幾組：只記在這次開啟的 App（模組變數），不存資料庫；日期換了就從第一組開始
 const rounds = new Map<string, number>();
@@ -32,7 +32,6 @@ export function HomePage() {
   const pantry = usePantryItems(kitchen?.id);
   const equipment = useKitchenEquipment(kitchen?.id);
   const recipes = useMyRecipes('published');
-  const bookmarks = useMyBookmarks();
   const [, rerender] = useState(0);
   const [open, setOpen] = useState<IdeaView | null>(null);
   const settings = useMySettings();
@@ -96,7 +95,7 @@ export function HomePage() {
   const aiShown = useRules ? null : (aiOk ?? last.data ?? null);
   const tempPref = parseTemperaturePref(settings.data?.temperature_unit);
   const views: IdeaView[] = useMemo(
-    () => (aiShown ? aiShown.ideas.map((i) => viewOfAiIdea(i, tempPref)) : ruleIdeas.map((i) => viewOfRuleIdea(i, profile, intl, chef.line))),
+    () => (aiShown ? aiShown.ideas.map((i) => viewOfAiIdea(i, tempPref, aiShown.suggestionId)) : ruleIdeas.map((i) => viewOfRuleIdea(i, profile, intl, chef.line))),
     // chef.line 與 intl 變了（語氣、語言）也要重算
     [aiShown, ruleIdeas, tempPref, profile, intl, chef.line],
   );
@@ -106,8 +105,10 @@ export function HomePage() {
   const limitLine = limitError instanceof AiCallError ? chef.line(limitError.fallback === 'slow_down' ? 'ideasSlowDown' : 'ideasDailyLimit') : null;
   const homeLine = aiOk?.chefComment ?? chef.line(`home.${chef.band}`);
 
-  // 收藏過的家常菜（同一道每人只有一筆）
-  const bookmarkOf = new Map((bookmarks.data ?? []).map((b) => [ideaOf(b).baseDishId, b]));
+  // 接著聊：6 小時內、同一個廚房的上一段對話，顯示大廚的上一句話
+  const resumable = useResumableChat(kitchen?.id);
+  const lastChef = resumable ? [...resumable.messages].reverse().find((m) => m.role === 'chef') : undefined;
+  const resumeLine = lastChef ? renderMarks(lastChef.ask ?? lastChef.text, tempPref) : null;
 
   function shuffle() {
     if (!computed) return;
@@ -128,7 +129,21 @@ export function HomePage() {
         </h1>
         {/* 招呼語固定；底下一句依時段與大廚的語氣，同一天固定一句 */}
         {homeLine && <p className="m-0 font-round text-[15px] leading-normal">{homeLine}</p>}
-        {/* 輸入框先放著不能打字（和大廚聊聊是 M1a-07） */}
+        {/* 接著聊：大廚的上一句話（一行，超過用刪節號）加「接著聊 ›」，不放頭像 */}
+        {resumable && resumeLine && (
+          <button
+            type="button"
+            onClick={() => void navigate('/chat', { state: { resume: true } })}
+            aria-label={intl.formatMessage({ id: 'home.chat.resumeLabel' }, { line: resumeLine })}
+            className="flex h-11 items-center gap-2 rounded-card border-0 bg-surface px-3 text-left font-[inherit] text-[14px] text-ink"
+          >
+            <span className="min-w-0 flex-1 truncate">{resumeLine}</span>
+            <span className="whitespace-nowrap text-small text-ink-muted">
+              <FormattedMessage id="home.chat.resume" /> ›
+            </span>
+          </button>
+        )}
+        {/* 輸入框：點了進到全螢幕的對話頁，一律開新的一段 */}
         <label className="flex h-11">
           <span className="sr-only">
             <FormattedMessage id="home.chatLabel" />
@@ -136,10 +151,12 @@ export function HomePage() {
           <input
             type="text"
             readOnly
-            aria-disabled="true"
-            tabIndex={-1}
-            placeholder={intl.formatMessage({ id: 'home.chatPlaceholder' })}
-            className="h-11 flex-1 cursor-default rounded-card border-0 bg-bg px-3 font-[inherit] text-body text-ink placeholder:text-ink-muted"
+            onFocus={(e) => {
+              e.currentTarget.blur();
+              void navigate('/chat');
+            }}
+            placeholder={intl.formatMessage({ id: resumable ? 'home.chatPlaceholderResume' : 'home.chatPlaceholder' })}
+            className="h-11 flex-1 cursor-pointer rounded-card border-0 bg-bg px-3 font-[inherit] text-body text-ink placeholder:text-ink-muted"
           />
         </label>
       </section>
@@ -181,7 +198,7 @@ export function HomePage() {
             {limitLine && <p className="m-0 mb-1.5 font-round text-caption text-ink-muted">{limitLine}</p>}
             <ul className="-mx-4 my-0 flex snap-x snap-mandatory scroll-px-4 list-none gap-2 overflow-x-auto px-4 pb-0 [scrollbar-width:none]">
               {views.map((view) => (
-                <IdeaCard key={view.key} view={view} bookmarked={!!view.baseDishId && bookmarkOf.has(view.baseDishId)} onOpen={() => setOpen(view)} />
+                <IdeaCard key={view.key} view={view} onOpen={() => setOpen(view)} />
               ))}
             </ul>
             {hasNext && (
@@ -203,7 +220,7 @@ export function HomePage() {
         )}
       </div>
 
-      {open && <IdeaSheet view={open} bookmark={open.baseDishId ? bookmarkOf.get(open.baseDishId) : undefined} onClose={() => setOpen(null)} />}
+      {open && <IdeaSheet view={open} onClose={() => setOpen(null)} />}
     </div>
   );
 }

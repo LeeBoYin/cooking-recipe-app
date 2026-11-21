@@ -6,7 +6,8 @@ import type { Row } from './types.ts';
 export type Bookmark = Row<'bookmarks'>;
 
 // 點子的快照（bookmarks.idea）
-export type BookmarkIdea = { schemaVersion: 1; title: string; why?: string; baseDishId: string };
+// 家常菜的點子有 baseDishId；AI 想的點子沒有，用 suggestionId（點子在快取裡的 id）＋菜名判斷重複
+export type BookmarkIdea = { schemaVersion: 1; title: string; why?: string; baseDishId?: string; suggestionId?: string };
 
 export function ideaOf(b: Bookmark): BookmarkIdea {
   return b.idea as unknown as BookmarkIdea;
@@ -30,6 +31,13 @@ export async function bookmarkIdea(v: { title: string; why?: string; baseDishId:
     p_why: v.why ?? '',
     p_base_dish_id: v.baseDishId,
   });
+  if (error) throw error;
+  return data;
+}
+
+// 收藏 AI 想的點子（首頁或對話）：理由與主要食材由後端從快取裡讀
+export async function bookmarkAiIdea(v: { suggestionId: string; title: string }): Promise<Bookmark> {
+  const { data, error } = await supabase().rpc('bookmark_ai_idea', { p_id: newId(), p_suggestion_id: v.suggestionId, p_title: v.title });
   if (error) throw error;
   return data;
 }

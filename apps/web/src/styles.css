@@ -83,3 +83,22 @@
     }
   }
 }
+
+/* 思考中的大廚：燈泡一明一滅；減少動態時不閃 */
+@keyframes chef-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.chef-bulb-blink {
+  animation: chef-blink 1.2s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .chef-bulb-blink {
+    animation: none !important;
+  }
+}

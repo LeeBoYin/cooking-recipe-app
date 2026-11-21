@@ -12,12 +12,13 @@ export interface IdeaView {
   why: string;
   kitchenHas: boolean; // 卡片標「食材廚房有」
   difficulty?: number | undefined; // 1–10，不是都有的時候卡片上放這個
-  ingredients: { name: string; have: boolean }[];
+  ingredients: { name: string; have: boolean; said?: boolean }[]; // said：使用者在對話中說的
   others: string[]; // 其他材料：只列名字，不寫「缺」
   substitutions: { need: string; use: string }[];
   source: 'own' | 'dish' | 'ai';
   recipeId?: string; // 自己的食譜：打開食譜
   baseDishId?: string; // 家常菜：可以收藏
+  suggestionId?: string; // AI 想的點子在快取裡的 id：沒有 baseDishId 的點子用它收藏
 }
 
 const nameOf = (id: string) => getIngredient(id)?.name['zh-TW'] ?? id;
@@ -43,20 +44,24 @@ export function renderMarks(text: string, pref: TemperaturePref): string {
   return replaceTempMarks(text, (value, unit) => formatTemperature({ value, unit }, pref));
 }
 
-export function viewOfAiIdea(idea: AiIdea, pref: TemperaturePref): IdeaView {
+export function viewOfAiIdea(idea: AiIdea, pref: TemperaturePref, suggestionId?: string | null): IdeaView {
   const ref = idea.candidateRef ?? '';
   const familiar = idea.slot === 'familiar';
   return {
     key: idea.id,
     title: idea.title,
     why: renderMarks(idea.why, pref),
-    kitchenHas: idea.usesPantryIds.length > 0 && idea.otherIngredients.length === 0,
+    kitchenHas: idea.usesPantryIds.length + (idea.usesMentionedIds?.length ?? 0) > 0 && idea.otherIngredients.length === 0,
     difficulty: idea.difficulty.overall,
-    ingredients: idea.usesPantryIds.map((id) => ({ name: nameOf(id), have: true })),
+    ingredients: [
+      ...idea.usesPantryIds.map((id) => ({ name: nameOf(id), have: true })),
+      ...(idea.usesMentionedIds ?? []).map((id) => ({ name: nameOf(id), have: false, said: true })),
+    ],
     others: idea.otherIngredients.map((o) => o.name),
     substitutions: idea.substitutions.map((s) => ({ need: renderMarks(s.need, pref), use: renderMarks(s.use, pref) })),
     source: familiar && ref.startsWith('own:') ? 'own' : familiar && ref.startsWith('dish:') ? 'dish' : 'ai',
     ...(familiar && ref.startsWith('own:') ? { recipeId: ref.slice(4) } : {}),
     ...(familiar && ref.startsWith('dish:') ? { baseDishId: ref.slice(5) } : {}),
+    ...(suggestionId ? { suggestionId } : {}),
   };
 }

@@ -3,16 +3,14 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
-import type { Bookmark } from '../../data/bookmarks.ts';
-import { useBookmarkIdea, useUnbookmark } from '../../data/hooks.ts';
 import type { IdeaView } from './ideaView.ts';
+import { useIdeaBookmark } from './useIdeaBookmark.ts';
 
 // 點子抽屜：菜名、理由、主要食材（廚房有的標「廚房有」）、其他材料與替代說明（AI 的點子）。
-// 基礎菜色的主按鈕是「收藏」（已收藏顯示「已收藏」，再按取消）；自己的食譜不收藏，主按鈕是「打開食譜」；
-// AI 想出來的變化版與新挑戰還不能收藏（收藏點子的擴充是 M1a-10），只有「記錄一篇」
-export function IdeaSheet({ view, bookmark, onClose }: {
+// 能收藏的點子（家常菜、AI 想的）有「收藏」（已收藏顯示「已收藏」，再按取消）；自己的食譜不收藏，主按鈕是「打開食譜」。
+// 抽屜改版（做法、就聊這道，沒有收藏）是 M1a-08／09
+export function IdeaSheet({ view, onClose }: {
   view: IdeaView;
-  bookmark?: Bookmark | undefined;
   onClose: () => void;
 }) {
   const intl = useIntl();
@@ -20,16 +18,8 @@ export function IdeaSheet({ view, bookmark, onClose }: {
   const chef = useChef();
   const reason = view.why;
   // 收藏後，大廚的話換成一句回應
-  const saved = bookmark && view.baseDishId ? chef.line('bookmarked', { title: view.title }, view.key) : null;
-  const add = useBookmarkIdea();
-  const remove = useUnbookmark();
-  const busy = add.isPending || remove.isPending;
-  const failed = add.isError || remove.isError;
-
-  function toggle() {
-    if (bookmark) remove.mutate(bookmark.id);
-    else if (view.baseDishId) add.mutate({ title: view.title, why: reason, baseDishId: view.baseDishId });
-  }
+  const { can, bookmark, toggle, busy, failed } = useIdeaBookmark(view);
+  const saved = bookmark ? chef.line('bookmarked', { title: view.title }, view.key) : null;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -77,6 +67,11 @@ export function IdeaSheet({ view, bookmark, onClose }: {
               {view.ingredients.map((ing) => (
                 <li key={ing.name} className="flex min-h-10 items-center justify-between border-b border-line-soft text-body">
                   {ing.name}
+                  {ing.said && (
+                    <span className="whitespace-nowrap rounded-tag bg-bulb-soft px-2 py-0.5 text-small font-bold">
+                      <FormattedMessage id="idea.sheet.said" />
+                    </span>
+                  )}
                   {ing.have && (
                     <span className="whitespace-nowrap rounded-tag bg-green-soft px-2 py-0.5 text-small font-bold text-green">
                       <FormattedMessage id="idea.sheet.kitchenHas" />
@@ -113,7 +108,7 @@ export function IdeaSheet({ view, bookmark, onClose }: {
             <FormattedMessage id="idea.sheet.openRecipe" />
           </button>
         )}
-        {view.source === 'ai' && (
+        {view.source === 'ai' && !can && (
           <button
             type="button"
             onClick={() => void navigate('/recipes/new', { state: { title: view.title } })}
@@ -122,7 +117,7 @@ export function IdeaSheet({ view, bookmark, onClose }: {
             <FormattedMessage id="idea.sheet.recordMain" />
           </button>
         )}
-        {view.baseDishId && (
+        {can && (
           <>
             <button
               type="button"
