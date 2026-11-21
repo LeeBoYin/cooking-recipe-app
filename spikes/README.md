@@ -121,3 +121,28 @@ ANTHROPIC_API_KEY=... deno run --no-lock --no-config -A supabase/functions/ai/ho
 ```
 
 終端機只印數量與代號；輸出寫在 `supabase/functions/ai/home/eval/out/<時間>/`（已加進 `.gitignore`）：每組每個模型一個 JSON，加上 `summary.md`（彙整表：有效輸出、檢查後留下的比例、自動斷言通過數、平均 token、快取 token、平均成本與延遲；各組 Sonnet 與 Haiku 並排，附口吻與合理度的打分欄）。`--model sonnet|haiku` 只跑一個、`--case 05` 只跑一組。口吻與合理度由人工打分，Haiku 能不能取代 Sonnet（預算用到提醒門檻時 `BUDGET_DEGRADE` 會自動降成 Haiku、關思考）要看打分與留下比例。
+
+## 07 和大廚聊聊（M1a-07，2026-11-21，本機）
+
+資料夾：`supabase/functions/ai/chat/`（提示詞 `prompt.ts`、檢查 `check.ts`、環境 `env.ts`、流程 `handler.ts`、評估集 `eval/cases.ts`、實跑 `eval/run.ts`）
+
+| 項目 | 結果 |
+|------|------|
+| 評估集 6 段劇本（反問、過敏原、「不要太辣」接著聊、說了沒記在廚房的食材、20 輪附近、「想做〇〇」加長期偏好）的自動測試（假的 AI 回應，測提示詞、檢查、存對話的規則） | ✅ 進 CI |
+| 後端用串流呼叫 Claude、回給 App 一整段（官方 SDK 的 `messages.stream().finalMessage()`） | ✅ 本機 `supabase functions serve`＋假的 Claude 伺服器（`ANTHROPIC_BASE_URL`，SSE 事件）；真的 API 還沒驗證 |
+| 整條路徑（假的 Claude）：送出、思考中、反問、點子卡片、收藏、接著聊、6 小時後首頁不再出現「接著聊」、20 輪上限與開新的一段、偏好訊號與說過的食材存下、Claude 連不上（500）時使用者的話留在畫面上、什麼都不存 | ✅ 手機寬度（375px）走過一遍 |
+| 真的 Claude 評估（Sonnet 5.5） | ⏳ 還沒跑，要用另開的金鑰 |
+
+**手動實跑**（只跑 Sonnet 5.5；會花錢，6 段約 12 輪，合計不到 1 美元；金鑰只放在這個指令的環境變數，不寫進檔案、不貼進對話）：
+
+```bash
+ANTHROPIC_API_KEY=... deno run --no-lock --no-config -A supabase/functions/ai/chat/eval/run.ts
+```
+
+只跑一段加 `--case 03`。終端機只印數量與代號；輸出寫在 `supabase/functions/ai/chat/eval/out/<時間>/`（已加進 `.gitignore`）：每段一個 JSON，加上 `summary.md`（彙整：有效輸出、平均 token、快取讀寫、成本、延遲；每輪的使用者的話與大廚的回應，留空格給人工打分口吻與合理度）。
+
+**要看的地方**
+- 自動斷言全過幾段；`reply` 被「帶單位的數字」或排除清單擋下的比例（擋下就是整則不用，使用者會看到「大廚想不出來」；比例高就要調提示詞）。
+- 反問只在條件真的模糊時出現，而且不連續追問；「想做〇〇」不寫完整步驟。
+- 快取：`stable`＋`volatile` 第二輪起要讀得到（快取讀 token 不為 0）。
+- 偏好訊號：今天的要求是 `today`、長期的才是 `long_term`。

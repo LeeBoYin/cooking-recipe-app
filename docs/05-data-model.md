@@ -569,6 +569,7 @@ interface ChefConversation extends UserEntity {   // 只有本人能讀；管理
   turnCount: number;          // 最多 20 輪（用量保護）
   messages: ChefMessage[];    // 內嵌陣列（jsonb）；只由後端的 ai 函式在同一個動作中附加「使用者的話＋大廚的回應」，手機不直接改這個欄位，兩台裝置同時送也不會互相蓋掉
   mentionedIngredients: { text: string; ingredientId?: string }[];   // 對話中說的、不在食材裡的；只用在這段對話，不寫進食材
+  preferenceSignals: { dimensionKey: string; affinity: number; scope: 'long_term' | 'today' }[];   // 從對話學口味（P1）：M1a-07 先存下，M1a-10 才算進口味
   lastMessageAt: Instant;
 }
 
@@ -576,6 +577,7 @@ interface ChefMessage {
   id: string;
   role: 'user' | 'chef';
   text: string;               // 使用者每則上限 500 字
+  ask?: string;               // 大廚的反問（有反問就沒有點子卡片）
   suggestionId?: string;      // 大廚這一則附的點子（AiSuggestionCache）
   at: Instant;
 }

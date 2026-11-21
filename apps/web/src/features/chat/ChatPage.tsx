@@ -53,9 +53,10 @@ export function ChatPage() {
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: 'end' });
   }, [messages.length, pending, failed, full]);
+  // 進來、新對話、開新的一段之後，游標回到輸入框
   useEffect(() => {
-    input.current?.focus();
-  }, []);
+    if (!full) input.current?.focus();
+  }, [full, convId]);
 
   function back() {
     if ((window.history.state as { idx?: number } | null)?.idx) void navigate(-1);
@@ -130,7 +131,7 @@ export function ChatPage() {
           </p>
         ) : loading ? null : messages.length === 0 && !pending && !failed ? (
           <div className="flex items-start gap-2">
-            <Chef size={24} />
+            <Chef size={24} className="flex-none" />
             <p className="m-0 rounded-[4px_14px_14px_14px] bg-chef-soft px-3 py-2.5 font-round text-[16px] leading-normal">
               <FormattedMessage id="chat.empty" />
             </p>
@@ -145,7 +146,7 @@ export function ChatPage() {
           <>
             <UserBubble text={pending} />
             <div role="status" className="flex items-center gap-2">
-              <Chef size={24} mood="thinking" blink />
+              <Chef size={24} mood="thinking" blink className="flex-none" />
               <span className="font-round text-[15px] text-ink-muted">
                 <FormattedMessage id="chat.thinking" />
               </span>
@@ -156,7 +157,7 @@ export function ChatPage() {
           <>
             <UserBubble text={failed.text} />
             <div className="flex items-start gap-2">
-              <Chef size={24} mood="quiet" />
+              <Chef size={24} mood="quiet" className="flex-none" />
               <p role="alert" className="m-0 max-w-[92%] rounded-[4px_14px_14px_14px] bg-chef-soft px-3 py-2.5 font-round text-[16px] leading-normal">
                 {unavailableLine}
               </p>
@@ -165,7 +166,7 @@ export function ChatPage() {
         )}
         {full && (
           <div className="flex items-start gap-2">
-            <Chef size={24} />
+            <Chef size={24} className="flex-none" />
             <div className="flex max-w-[92%] flex-col items-start gap-2.5 rounded-[4px_14px_14px_14px] bg-chef-soft px-3 py-2.5 font-round text-[16px] leading-normal">
               <p className="m-0">
                 <FormattedMessage id="chat.limit" />
@@ -242,7 +243,7 @@ function Message({ message, conv, tempPref, onOpen }: {
   return (
     <>
       <div className="flex max-w-[92%] items-start gap-2">
-        <Chef size={24} mood={ideas.length > 0 ? 'idea' : 'normal'} />
+        <Chef size={24} mood={ideas.length > 0 ? 'idea' : 'normal'} className="flex-none" />
         <div className="rounded-[4px_14px_14px_14px] bg-chef-soft px-3 py-2.5 font-round text-[16px] leading-normal">
           <p className="m-0">{renderMarks(message.text, tempPref)}</p>
           {message.ask && <p className="m-0 mt-1.5">{renderMarks(message.ask, tempPref)}</p>}
