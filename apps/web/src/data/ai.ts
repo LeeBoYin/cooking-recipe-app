@@ -1,6 +1,6 @@
 // `ai` Edge Function 的呼叫（16 第六節）。前端不直接呼叫 Claude，也不自己判斷額度；
 // 失敗時只拿到錯誤代號，由各畫面依代號走退路（03〈AI 不能用時〉），不顯示次數。
-import type { AiIdea, AiIdeasPayload, ChatInput, ChatMessage, ChatResponse, HomeIdeasResponse } from '@zhusha/core';
+import type { AiIdea, AiIdeasPayload, ChatInput, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse } from '@zhusha/core';
 import { supabase } from './supabase.ts';
 
 // 和 supabase/functions/ai/pipeline.ts 的 AiErrorCode 一致，加上手機端的 network
@@ -144,4 +144,12 @@ export async function getLatestChatConversation(): Promise<ChatConversation | nu
 export const CHAT_RESUME_HOURS = 6;
 export function isResumable(conv: ChatConversation | null | undefined, kitchenId: string | undefined, now: number = Date.now()): conv is ChatConversation {
   return !!conv && !!kitchenId && conv.kitchenId === kitchenId && now - Date.parse(conv.lastMessageAt) < CHAT_RESUME_HOURS * 3_600_000;
+}
+
+// ---------------------------------------------------------------------------------------------
+// 點子抽屜的做法（expand_steps，M1a-09）
+// ---------------------------------------------------------------------------------------------
+// 第一次打開才叫 Claude（十幾秒），寫好的做法後端存起來，之後直接回；失敗時丟 AiCallError，什麼都沒存
+export async function expandSteps(input: ExpandInput): Promise<ExpandResponse> {
+  return await callAi<ExpandResponse>('expand_steps', input);
 }

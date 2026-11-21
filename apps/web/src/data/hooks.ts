@@ -16,7 +16,8 @@ import { currentUserId, getMyIdentity, getMySettings, updateDisplayName, updateM
 import { bookmarkAiIdea, bookmarkIdea, linkBookmarkToRecipe, listMyBookmarks, unbookmark } from './bookmarks.ts';
 import { getMyDietary, saveMyDietary, type Dietary } from './dietary.ts';
 import { getMyHardLimits, getMyTasteProfile, saveTasteProfile } from './taste.ts';
-import type { TasteProfile } from '@zhusha/core';
+import type { ExpandInput, TasteProfile } from '@zhusha/core';
+import { expandSteps } from './ai.ts';
 import { listMyKitchens, setCurrentKitchen, updateKitchen, type KitchenPatch } from './kitchens.ts';
 import {
   addPantryItems,
@@ -60,6 +61,7 @@ export const queryKeys = {
   tasteProfile: ['me', 'taste', 'profile'] as const,
   hardLimits: ['me', 'taste', 'hard-limits'] as const,
   dietary: ['me', 'dietary'] as const,
+  expand: (input: object) => ['ai', 'expand', input] as const,
   photoUrls: (paths: string[]) => ['photo-urls', ...paths] as const,
 };
 
@@ -430,5 +432,18 @@ export function useLinkBookmark() {
   return useMutation({
     mutationFn: (v: { bookmarkId: string; recipeId: string }) => linkBookmarkToRecipe(v.bookmarkId, v.recipeId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks }),
+  });
+}
+
+// 點子抽屜的做法：打開才問後端（已經展開過的後端直接回存下來的）；不自動重試，失敗由畫面的「再試一次」重問
+export function useExpandSteps(input: ExpandInput | null) {
+  return useQuery({
+    queryKey: queryKeys.expand(input ?? {}),
+    queryFn: () => expandSteps(input as ExpandInput),
+    enabled: input !== null,
+    retry: false,
+    staleTime: Infinity,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 }

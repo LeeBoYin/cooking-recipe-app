@@ -548,7 +548,7 @@ interface Bookmark extends UserEntity {
   idea?: {                    // chef_idea：點子當下的快照
     title: string;
     why?: string;
-    recipeDraft?: { ingredients: RecipeIngredient[]; steps: RecipeStep[] };   // 收藏前已經展開過就一起存；沒有的話，第一次打開收藏時才產生並存進來
+    recipeDraft?: RecipeDraft;   // 展開好的做法（見 AiSuggestionCache）；收藏前已經展開過就一起存，沒有的話第一次打開收藏時才產生並存進來
     suggestionId?: string;
     baseDishId?: string;      // 點子來自內建家常菜時記下：展開做法時當依據，也用來判斷同一道是否已收藏（每人每道最多一筆）；AI 想的點子沒有 baseDishId，用 suggestionId＋菜名判斷
   };
@@ -724,6 +724,16 @@ interface TasteProfileSnapshot {      // 由後端用 core 套件計算（不信
   data: TasteProfile;                 // 見 03 AI 設計
 }
 
+// 展開好的做法（快取的 drafts 與收藏的 recipeDraft 同一種格式）：份量與溫度用結構化欄位（公制與攝氏），手機依偏好顯示
+interface RecipeDraft {
+  schemaVersion: 1;
+  servings: number;                   // 份量依這個人數寫（平常煮幾人份）
+  ingredients: { id: string; name: string; ingredientId: string | null; amount?: number; amountMax?: number; unit?: UnitCode; optional: boolean; group?: string }[];   // ingredientId：比對到字典的標準食材；適量、少許沒有 amount
+  steps: { id: string; order: number; text: string; timerSeconds?: number; techniques?: TechniqueId[]; equipmentTypeIds?: string[]; targetTemp?: Temperature }[];   // text 不含帶單位的數字，溫度用 {{temp:180:C}}
+  tips?: string;                      // 小提醒；用到肉類、蛋、海鮮時，程式依當地的安全表附上中心溫度
+  model: string;
+}
+
 interface AiSuggestionCache {       // 存在後端，換手機也看得到上次的點子；只有本人能讀，只由 ai 函式寫
   id: string;
   userId: string;
@@ -735,7 +745,7 @@ interface AiSuggestionCache {       // 存在後端，換手機也看得到上�
   createdAt: string;
   expiresAt: string;                  // 產生後一天；每人的首頁點子只留最近 6 筆
   payload: unknown;                   // 結構化輸出（點子卡片，不含做法）：{ schemaVersion: 1, ideas: AiIdea[], chefComment: string | null, model: string }，見 03〈輸出格式〉
-  drafts?: Record<string, { ingredients: RecipeIngredient[]; steps: RecipeStep[]; tips?: string }>;   // 依點子 ID 存「展開做法」的結果；同一個點子不重算（M1a-09 才寫）
+  drafts?: Record<string, RecipeDraft>;   // 依點子 ID 存「展開做法」的結果；同一個點子不重算，失敗的不存
   feedback: { ideaId: string; action: 'bookmarked' | 'recorded' | 'dismissed'; reason?: string; at: Instant }[];   // 每個點子各自的回饋（首頁一組最多 5 個點子），用來學口味（M1a-10 才寫）
 }
 // 飲食限制（過敏原、飲食原則、不吃的食物、不用料理酒）一改，由觸發器清掉這個人所有的點子快取：

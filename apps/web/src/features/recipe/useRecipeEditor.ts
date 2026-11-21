@@ -25,7 +25,8 @@ import {
   buildPatch,
   canAddPhoto,
   canAddStep,
-  emptyForm,
+  startingForm,
+  type EditorDraft,
   formFromRecipe,
   isBlank,
   newIngredient,
@@ -54,13 +55,13 @@ function failureKind(error: unknown): { kind: string; onServer: boolean } {
   return { kind: 'network', onServer: false };
 }
 
-export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRows: Photo[], initialTitle?: string, defaultServings?: number) {
+export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRows: Photo[], initialTitle?: string, defaultServings?: number, initialDraft?: EditorDraft) {
   const queryClient = useQueryClient();
-  const initial = useMemo(() => (recipe ? formFromRecipe(recipe, photoRows) : { ...emptyForm(defaultServings), title: initialTitle ?? '' }), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const initial = useMemo(() => (recipe ? formFromRecipe(recipe, photoRows) : startingForm(defaultServings, initialTitle, initialDraft)), []); // eslint-disable-line react-hooks/exhaustive-deps
   const [form, setFormState] = useState<EditorForm>(initial);
   const formRef = useRef(form);
-  // 新食譜預填的菜名（從大廚的點子或收藏帶進來）還沒存進資料庫，所以「上次存的」要當成空標題，這樣第一次存才會把菜名送出去
-  const savedForm = useRef<EditorForm>(recipe ? initial : { ...initial, title: '' });
+  // 新食譜預填的菜名與做法（從大廚的點子或收藏帶進來）還沒存進資料庫，所以「上次存的」要當成空白，這樣第一次存才會把它們送出去
+  const savedForm = useRef<EditorForm>(recipe ? initial : startingForm(defaultServings, undefined, undefined));
   const savedRecipe = useRef<Recipe | null>(recipe);
   const [recipeState, setRecipeState] = useState<Recipe | null>(recipe);
   const [saveState, setSaveState] = useState<SaveState>('idle');

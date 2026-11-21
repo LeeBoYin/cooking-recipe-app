@@ -4,6 +4,8 @@ import { formatTemperature, replaceTempMarks, type AiIdea, type Idea, type Taste
 import type { IntlShape } from 'react-intl';
 import type { ChefLineFn } from '../../chef/useChef.ts';
 import { getIngredient } from '@zhusha/ingredients';
+import { techniques as techniqueDict } from '@zhusha/equipment';
+import { baseDishes } from '@zhusha/taste';
 import { reasonText } from './reason.ts';
 
 export interface IdeaView {
@@ -15,6 +17,7 @@ export interface IdeaView {
   ingredients: { name: string; have: boolean; said?: boolean }[]; // said：使用者在對話中說的
   others: string[]; // 其他材料：只列名字，不寫「缺」
   substitutions: { need: string; use: string }[];
+  techniques: string[]; // 手法的名稱：做法還沒寫好（或寫不出來）時，家常菜的骨架就是食材加手法
   source: 'own' | 'dish' | 'ai';
   recipeId?: string; // 自己的食譜：打開食譜
   baseDishId?: string; // 家常菜：可以收藏
@@ -22,6 +25,10 @@ export interface IdeaView {
 }
 
 const nameOf = (id: string) => getIngredient(id)?.name['zh-TW'] ?? id;
+const techniqueById = new Map(techniqueDict.map((t) => [t.id, t.name['zh-TW']]));
+const dishById = new Map(baseDishes.map((d) => [d.id, d]));
+export const techniqueNames = (ids: readonly string[]): string[] => [...new Set(ids)].map((id) => techniqueById.get(id) ?? id);
+export const dishTechniques = (dishId: string | undefined): string[] => techniqueNames(dishId ? (dishById.get(dishId)?.techniques ?? []) : []);
 
 export function viewOfRuleIdea(idea: Idea, profile: TasteProfile, intl: IntlShape, chefLine: ChefLineFn): IdeaView {
   const have = new Set(idea.haveIngredientIds);
@@ -34,6 +41,7 @@ export function viewOfRuleIdea(idea: Idea, profile: TasteProfile, intl: IntlShap
     ingredients: idea.mainIngredientIds.map((id) => ({ name: nameOf(id), have: have.has(id) })),
     others: [],
     substitutions: [],
+    techniques: idea.source === 'dish' ? dishTechniques(idea.id) : [],
     source: idea.source,
     ...(idea.source === 'own' ? { recipeId: idea.id } : { baseDishId: idea.id }),
   };
@@ -56,9 +64,12 @@ export function viewOfAiIdea(idea: AiIdea, pref: TemperaturePref, suggestionId?:
     ingredients: [
       ...idea.usesPantryIds.map((id) => ({ name: nameOf(id), have: true })),
       ...(idea.usesMentionedIds ?? []).map((id) => ({ name: nameOf(id), have: false, said: true })),
+      // 家常菜的骨架：主要食材裡手邊沒有的也列出來（骨架就是食材加手法）
+      ...(familiar && ref.startsWith('dish:') ? (dishById.get(ref.slice(5))?.ingredientIds ?? []).filter((id) => !idea.usesPantryIds.includes(id)).map((id) => ({ name: nameOf(id), have: false })) : []),
     ],
     others: idea.otherIngredients.map((o) => o.name),
     substitutions: idea.substitutions.map((s) => ({ need: renderMarks(s.need, pref), use: renderMarks(s.use, pref) })),
+    techniques: techniqueNames([...idea.techniques, ...(familiar && ref.startsWith('dish:') ? (dishById.get(ref.slice(5))?.techniques ?? []) : [])]),
     source: familiar && ref.startsWith('own:') ? 'own' : familiar && ref.startsWith('dish:') ? 'dish' : 'ai',
     ...(familiar && ref.startsWith('own:') ? { recipeId: ref.slice(4) } : {}),
     ...(familiar && ref.startsWith('dish:') ? { baseDishId: ref.slice(5) } : {}),

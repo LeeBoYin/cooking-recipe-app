@@ -1,20 +1,31 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
+import type { ExpandInput, RecipeDraft } from '@zhusha/core';
 import { Chef } from '../../chef/Chef.tsx';
+import { useExpandSteps, useMySettings } from '../../data/hooks.ts';
+import { ingredientLines, stepLines, tipsText, unitPrefs } from './draft.ts';
 import type { IdeaView } from './ideaView.ts';
 
-// 點子抽屜（首頁與對話共用）：菜名、理由、食材（你說的、廚房有）、其他材料與替代說明，最下面「就聊這道」。
-// 抽屜裡沒有收藏（收藏在卡片右上角）；自己的食譜多一顆「打開食譜」。做法是 M1a-09。
-export function IdeaSheet({ view, onClose, onChat, chatDisabled }: {
+// 點子抽屜（首頁、對話、收藏共用）：菜名、理由、食材標籤，接著直接是做法（沒有另外的「看做法」按鈕）。
+// 第一次打開要等大廚寫：標籤先顯示，做法區塊放思考中的大廚；寫好、檢查過才一次顯示。寫不出來顯示「大廚需要再想想」。
+// 家常菜先顯示骨架（主要食材與手法）。自己的食譜不呼叫 AI，只有「打開食譜」。
+// 抽屜裡沒有收藏（收藏在卡片右上角）。從「食譜 → 收藏」打開時（有 bookmarkId），做法讀收藏的，底下是「做了，記錄一篇」。
+export function IdeaSheet({ view, onClose, onChat, chatDisabled, bookmarkId, onRecord }: {
   view: IdeaView;
   onClose: () => void;
-  onChat: (view: IdeaView) => void;
+  onChat?: (view: IdeaView) => void;
   chatDisabled?: boolean;
+  bookmarkId?: string;
+  onRecord?: (draft: RecipeDraft | null) => void;
 }) {
   const intl = useIntl();
   const navigate = useNavigate();
   const reason = view.why;
+  const input: ExpandInput | null =
+    view.source === 'own' ? null : bookmarkId ? { bookmarkId } : view.suggestionId ? { suggestionId: view.suggestionId, ideaId: view.key } : null;
+  const expand = useExpandSteps(input);
+  const draft = expand.data?.draft ?? null;
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -53,7 +64,7 @@ export function IdeaSheet({ view, onClose, onChat, chatDisabled }: {
             {/[。！？」」…]$/.test(reason) ? reason : `${reason}。`}
           </span>
         </div>
-        {view.ingredients.length > 0 && (
+        {!draft && view.ingredients.length > 0 && (
           <section className="flex flex-col gap-1">
             <h2 className="m-0 text-caption font-normal text-ink-muted">
               <FormattedMessage id="idea.sheet.ingredients" />
@@ -77,7 +88,7 @@ export function IdeaSheet({ view, onClose, onChat, chatDisabled }: {
             </ul>
           </section>
         )}
-        {view.others.length > 0 && (
+        {!draft && view.others.length > 0 && (
           <section className="flex flex-col gap-1">
             <h2 className="m-0 text-caption font-normal text-ink-muted">
               <FormattedMessage id="idea.sheet.others" />
@@ -94,6 +105,17 @@ export function IdeaSheet({ view, onClose, onChat, chatDisabled }: {
             ))}
           </ul>
         )}
+        {view.source !== 'own' && (
+          <MethodSection
+            view={view}
+            hasInput={input !== null}
+            pending={expand.isPending && input !== null}
+            failed={expand.isError}
+            retrying={expand.isFetching}
+            draft={draft}
+            onRetry={() => void expand.refetch()}
+          />
+        )}
         {view.source === 'own' && view.recipeId && (
           <button
             type="button"
@@ -103,6 +125,16 @@ export function IdeaSheet({ view, onClose, onChat, chatDisabled }: {
             <FormattedMessage id="idea.sheet.openRecipe" />
           </button>
         )}
+        {onRecord && (
+          <button
+            type="button"
+            onClick={() => onRecord(draft)}
+            className="h-12 rounded-card border-2 border-ink bg-bulb font-[inherit] text-body font-bold text-ink"
+          >
+            <FormattedMessage id="idea.sheet.record" />
+          </button>
+        )}
+        {onChat && (
         <button
           type="button"
           disabled={chatDisabled}
@@ -111,7 +143,119 @@ export function IdeaSheet({ view, onClose, onChat, chatDisabled }: {
         >
           <FormattedMessage id="idea.sheet.chat" />
         </button>
+        )}
       </div>
     </div>
+  );
+}
+
+// 做法區塊：食材與步驟。三種狀態：思考中（大廚）、寫好了、需要再想想；沒有 AI 可問的家常菜只有骨架
+function MethodSection({ view, hasInput, pending, failed, retrying, draft, onRetry }: {
+  view: IdeaView;
+  hasInput: boolean;
+  pending: boolean;
+  failed: boolean;
+  retrying: boolean;
+  draft: RecipeDraft | null;
+  onRetry: () => void;
+}) {
+  const intl = useIntl();
+  const settings = useMySettings();
+  const prefs = useMemo(() => unitPrefs(settings.data, intl), [settings.data, intl]);
+
+  if (draft) {
+    const lines = ingredientLines(draft, prefs);
+    const steps = stepLines(draft, prefs);
+    const tips = tipsText(draft, prefs);
+    const groups = [...new Set(lines.map((l) => l.group ?? ''))];
+    return (
+      <section aria-label={intl.formatMessage({ id: 'idea.sheet.method' })} className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <h2 className="m-0 text-caption font-normal text-ink-muted">
+            <FormattedMessage id="idea.sheet.method.ingredients" values={{ servings: draft.servings }} />
+          </h2>
+          {groups.map((g) => (
+            <div key={g}>
+              {g && <div className="pt-1.5 text-small font-bold text-ink-muted">{g}</div>}
+              <ul className="m-0 list-none p-0">
+                {lines.filter((l) => (l.group ?? '') === g).map((l) => (
+                  <li key={l.id} className="flex min-h-10 items-center justify-between border-b border-line-soft text-body">
+                    {l.text}
+                    {l.optional && <span className="text-small text-ink-muted"><FormattedMessage id="idea.sheet.method.optional" /></span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-col gap-1">
+          <h2 className="m-0 text-caption font-normal text-ink-muted"><FormattedMessage id="idea.sheet.method.steps" /></h2>
+          <ol className="m-0 flex list-none flex-col gap-2.5 p-0">
+            {steps.map((s, i) => (
+              <li key={s.id} className="flex gap-2.5 text-body leading-normal">
+                <span aria-hidden="true" className="grid size-6 flex-none place-items-center rounded-full bg-bulb-soft text-small font-bold">{i + 1}</span>
+                <span className="min-w-0 flex-1">
+                  {s.text}
+                  {(s.timerMinutes || s.temp) && (
+                    <span className="block text-small text-ink-muted">
+                      {[s.temp, s.timerMinutes ? intl.formatMessage({ id: 'idea.sheet.method.timer' }, { minutes: s.timerMinutes }) : null].filter(Boolean).join('　')}
+                    </span>
+                  )}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+        {tips && (
+          <div className="rounded-card bg-chef-soft px-3 py-2.5 text-caption leading-normal">
+            <b className="mr-1"><FormattedMessage id="idea.sheet.method.tips" /></b>
+            {tips.split('\n').map((t) => <span key={t} className="block">{t}</span>)}
+          </div>
+        )}
+      </section>
+    );
+  }
+
+  // 家常菜的骨架：主要食材（上面的標籤）加手法；步驟等大廚寫完再補上
+  const skeleton = view.techniques.length > 0 && (
+    <p className="m-0 text-caption text-ink-muted">
+      <FormattedMessage id="idea.sheet.techniques" values={{ list: view.techniques.join('、') }} />
+    </p>
+  );
+
+  if (!hasInput) {
+    return (
+      <section className="flex flex-col gap-1.5">
+        {skeleton}
+        <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="idea.sheet.method.later" /></p>
+      </section>
+    );
+  }
+  if (failed && !retrying) {
+    return (
+      <section className="flex flex-col gap-2.5">
+        {skeleton}
+        <div role="alert" className="flex items-center gap-2.5 rounded-card bg-chef-soft px-3 py-2.5">
+          <Chef size={40} mood="quiet" />
+          <span className="font-round text-[15px] leading-normal"><FormattedMessage id="idea.sheet.method.failed" /></span>
+          <button
+            type="button"
+            onClick={onRetry}
+            className="ml-auto h-10 flex-none rounded-full border-2 border-ink bg-surface px-3.5 font-[inherit] text-caption font-bold text-ink"
+          >
+            <FormattedMessage id="idea.sheet.method.retry" />
+          </button>
+        </div>
+      </section>
+    );
+  }
+  return (
+    <section aria-busy={pending || retrying} className="flex flex-col gap-2.5">
+      {skeleton}
+      <div role="status" className="flex items-center gap-2.5 rounded-card border border-dashed border-line-strong px-3 py-3">
+        <Chef size={40} mood="thinking" blink />
+        <span className="font-round text-[15px] leading-normal text-ink-muted"><FormattedMessage id="idea.sheet.method.thinking" /></span>
+      </div>
+    </section>
   );
 }

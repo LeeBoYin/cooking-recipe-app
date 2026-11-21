@@ -7,6 +7,7 @@ import { type AiContext, type AiErrorCode, type Deps, ERROR_STATUS, runAi } from
 import { TASKS } from './tasks.ts';
 import { runHomeIdeas } from './home/handler.ts';
 import { runChat } from './chat/handler.ts';
+import { runExpandSteps } from './expand/handler.ts';
 import { createProtection, sessionIdOf } from './usage.ts';
 
 const CORS = {
@@ -78,6 +79,15 @@ Deno.serve(async (req) => {
         return error(chat.error);
       }
       return json({ data: chat.data });
+    }
+    // 點子抽屜的做法：自己讀點子、已經展開過就用存下來的、再檢查、存進快取與收藏（見 expand/handler.ts）
+    if (body.task === 'expand_steps') {
+      const expand = await runExpandSteps({ ai: deps, rpc: async (fn, args) => await client.rpc(fn, args) }, auth.user.id, body.input);
+      if (!expand.ok) {
+        console.error('ai: rejected', expand.error);
+        return error(expand.error);
+      }
+      return json({ data: expand.data });
     }
     const result = await runAi(deps, auth.user.id, body.task, body.input);
     if (!result.ok) {

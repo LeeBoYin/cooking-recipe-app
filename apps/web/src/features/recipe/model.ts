@@ -56,6 +56,18 @@ export type EditorForm = {
 
 export const DEFAULT_SERVINGS = 2;
 
+// 新食譜預先帶入的內容（從收藏的點子「做了，記錄一篇」進來）：大廚展開好的食材與步驟，已經依偏好轉成編輯頁的文字
+export type EditorDraft = { servings: number; ingredients: EditorIngredient[]; steps: { id: string; text: string }[]; tips: string };
+
+// 新食譜的起點：空白表單加上菜名與帶入的內容
+export function startingForm(servings: number | undefined, title: string | undefined, draft: EditorDraft | undefined): EditorForm {
+  return {
+    ...emptyForm(servings),
+    title: title ?? '',
+    ...(draft ? { servings: draft.servings, ingredients: draft.ingredients, steps: draft.steps, tips: draft.tips } : {}),
+  };
+}
+
 export function emptyForm(servings = DEFAULT_SERVINGS): EditorForm {
   return {
     title: '',

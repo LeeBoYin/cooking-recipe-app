@@ -29,7 +29,7 @@ export function normalizeTitle(t: string): string {
   return t.normalize('NFKC').replace(/\s+/g, '').toLowerCase();
 }
 
-function includesAny(text: string, terms: readonly string[]): boolean {
+export function includesAny(text: string, terms: readonly string[]): boolean {
   const t = text.normalize('NFKC').toLowerCase();
   return terms.some((term) => term.length > 0 && t.includes(term.normalize('NFKC').toLowerCase()));
 }
