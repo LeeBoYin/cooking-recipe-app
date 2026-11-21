@@ -2,6 +2,7 @@
 // 不產生連結（分享連結是 M2）。標題文字由呼叫端傳入（語系檔），這裡只管排版。
 export type RecipeTextInput = {
   title: string;
+  story?: string | null | undefined; // 心得，接在菜名下面
   servings?: string | undefined; // 已經套好人數的文字，例：「2 人份」
   ingredients: readonly string[]; // 已依人數與單位換算好的一列一樣
   steps: readonly string[]; // 每步一段，目標溫度之類已併進文字
@@ -20,6 +21,8 @@ const clean = (s: string) => s.replace(/\r\n?/g, '\n').trim();
 // 每個區塊之間空一行；沒內容的區塊整段省略
 export function formatRecipeText(input: RecipeTextInput, labels: RecipeTextLabels): string {
   const blocks: string[] = [`【${clean(input.title)}】`];
+  const story = input.story ? clean(input.story) : '';
+  if (story) blocks.push(story);
   const servings = input.servings ? clean(input.servings) : '';
   if (servings) blocks.push(`${labels.servings}：${servings}`);
   const ingredients = input.ingredients.map(clean).filter(Boolean);

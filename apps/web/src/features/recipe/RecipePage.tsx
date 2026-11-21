@@ -125,6 +125,7 @@ export function RecipePage() {
     const text = formatRecipeText(
       {
         title,
+        story: r?.story,
         servings: shownServings ? intl.formatMessage({ id: 'recipe.view.servings' }, { count: shownServings }) : undefined,
         ingredients: ingredientLines.map((l) => l.text),
         steps: steps.map((s) => (s.target_temp ? `${s.text}\n${intl.formatMessage({ id: 'recipe.view.stepTemp' }, { value: formatTemperature(s.target_temp, tempPref) })}` : s.text)),
