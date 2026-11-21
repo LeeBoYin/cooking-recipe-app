@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { getIngredient, seasoningIngredientIds, stapleIngredientIdsFor } from '@zhusha/ingredients';
+import { getIngredient, pantrySeasoningIdsFor, stapleIngredientIdsFor } from '@zhusha/ingredients';
 import {
   useAddKitchenEquipment, useAddPantryItems, useCurrentKitchen, useKitchenEquipment, usePantryItems,
 } from '../../data/hooks.ts';
@@ -40,7 +40,7 @@ export function StockStep({ onDone, onLater }: { onDone: () => void; onLater: ()
   const [failed, setFailed] = useState(false);
 
   const staples = useMemo(() => stapleIngredientIdsFor(region).filter((id) => getIngredient(id)), [region]);
-  const sauces = useMemo(() => seasoningIngredientIds(), []);
+  const sauces = useMemo(() => pantrySeasoningIdsFor(region).filter((id) => getIngredient(id)), [region]);
   const groups = useMemo(() => groupTypes(inventoryWall(region)), [region]);
 
   const ownedIngredients = useMemo(() => new Set((pantry.data ?? []).flatMap((i) => (i.ingredient_id ? [i.ingredient_id] : []))), [pantry.data]);

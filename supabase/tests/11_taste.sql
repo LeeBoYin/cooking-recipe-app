@@ -1,6 +1,6 @@
 -- 口味資料：字典匯入的檢查、口味地圖與飲食限制的權限（13 第八節、16 第三、四、八節）
 begin;
-select plan(74);
+select plan(75);
 
 create function tests.updated_rows(p_sql text)
 returns integer
@@ -31,7 +31,7 @@ as $json$
     "equipmentTypes": [],
     "regions": [{ "code": "TW", "name": { "zh-TW": "台灣" }, "hemisphere": "north", "defaultTimezone": "Asia/Taipei",
       "defaultLocale": "zh-TW", "defaultUnits": { "temperature": "C", "measure": "metric" },
-      "seasons": [{ "key": "spring", "months": [3, 4, 5] }], "commonPantryIngredientIds": ["salt"], "stapleIngredientIds": ["salt"], "dataStatus": "partial" },
+      "seasons": [{ "key": "spring", "months": [3, 4, 5] }], "commonPantryIngredientIds": ["salt"], "stapleIngredientIds": ["salt"], "pantrySeasoningIds": ["salt"], "dataStatus": "partial" },
       { "code": "US-CA", "name": { "zh-TW": "美國加州" }, "hemisphere": "north", "defaultTimezone": "America/Los_Angeles",
       "defaultLocale": "zh-TW", "defaultUnits": { "temperature": "F", "measure": "us" },
       "seasons": [], "dataStatus": "partial" }],
@@ -84,6 +84,7 @@ select is((select parent_key from public.dict_preference_dimensions where key = 
 select is((select common_pantry_ingredient_ids from public.dict_regions where code = 'US-CA'), '{}'::text[], '地區沒有常見食材時是空的');
 select is((select staple_ingredient_ids from public.dict_regions where code = 'TW'), '{salt}'::text[], '匯入地區的常備食材');
 select is((select staple_ingredient_ids from public.dict_regions where code = 'US-CA'), '{}'::text[], '地區沒有常備食材時是空的');
+select is((select pantry_seasoning_ids from public.dict_regions where code = 'TW'), '{salt}'::text[], '匯入地區的醬料櫃');
 select private.import_dictionaries(tests.base_dict() || '{"version": "t2"}');
 select is((select version from public.dict_version), 't2', '重新匯入會成功（整批取代）');
 

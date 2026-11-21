@@ -57,6 +57,11 @@ export const regionProfiles: RegionProfile[] = [
       'frozen-dumplings', 'frozen-edamame', 'frozen-mixed-veg',
       'egg', 'onion', 'potato', 'sweet-potato', 'carrot', 'garlic', 'ginger',
     ],
+    pantrySeasoningIds: [
+      'soy-sauce', 'dark-soy-sauce', 'rice-wine', 'mirin', 'fish-sauce', 'sesame-oil', 'salt', 'sugar', 'rock-sugar', 'black-pepper',
+      'white-pepper', 'honey', 'white-vinegar', 'black-vinegar', 'oyster-sauce', 'doubanjiang', 'ketchup', 'mayonnaise', 'chili-sauce', 'sha-cha-sauce',
+      'sesame-paste', 'chicken-powder', 'tapioca-starch', 'five-spice', 'cumin', 'sichuan-pepper', 'star-anise', 'curry-powder', 'miso', 'olive-oil',
+    ],
     dataStatus: 'partial',
   },
   {
@@ -82,6 +87,11 @@ export const regionProfiles: RegionProfile[] = [
       'black-beans-can', 'chickpea-can', 'tuna-can', 'corn-can', 'canned-tomato', 'chicken-broth', 'pasta-sauce',
       'frozen-peas', 'frozen-berries', 'frozen-mixed-veg', 'frozen-edamame', 'frozen-dumplings',
       'egg', 'onion', 'potato', 'sweet-potato', 'carrot', 'garlic', 'ginger',
+    ],
+    pantrySeasoningIds: [
+      'salt', 'black-pepper', 'sugar', 'honey', 'olive-oil', 'ketchup', 'mayonnaise', 'mustard', 'bbq-sauce', 'hot-sauce',
+      'soy-sauce', 'white-vinegar', 'curry-powder', 'cumin', 'chili-sauce', 'oyster-sauce', 'sesame-oil', 'fish-sauce', 'miso', 'white-pepper',
+      'tapioca-starch', 'mirin', 'rice-wine', 'sesame-paste', 'five-spice', 'star-anise', 'chicken-powder', 'wasabi',
     ],
     dataStatus: 'partial',
   },
@@ -110,6 +120,11 @@ export const regionProfiles: RegionProfile[] = [
       'tuna-can', 'corn-can', 'canned-tomato',
       'frozen-dumplings', 'frozen-edamame', 'frozen-mixed-veg',
       'egg', 'onion', 'potato', 'sweet-potato', 'carrot', 'garlic', 'ginger',
+    ],
+    pantrySeasoningIds: [
+      'soy-sauce', 'mirin', 'sake', 'miso', 'salt', 'sugar', 'white-vinegar', 'sesame-oil', 'dashi-powder', 'mayonnaise',
+      'ketchup', 'tonkatsu-sauce', 'ponzu', 'wasabi', 'black-pepper', 'white-pepper', 'honey', 'curry-powder', 'chili-sauce', 'sesame-paste',
+      'oyster-sauce', 'doubanjiang', 'tapioca-starch', 'mustard', 'rice-wine', 'olive-oil', 'five-spice', 'sichuan-pepper', 'chicken-powder', 'fish-sauce',
     ],
     dataStatus: 'partial',
   },
@@ -143,4 +158,10 @@ export function commonIngredientIdsFor(region: string): string[] {
 export function stapleIngredientIdsFor(region: string): string[] {
   const own = getRegionProfile(region)?.stapleIngredientIds ?? [];
   return own.length > 0 ? own : (getRegionProfile('TW')?.stapleIngredientIds ?? []);
+}
+
+// 新手引導 ⑦ 的醬料櫃：沒有該地區的設定、或該地區還沒有清單時，用台灣的
+export function pantrySeasoningIdsFor(region: string): string[] {
+  const own = getRegionProfile(region)?.pantrySeasoningIds ?? [];
+  return own.length > 0 ? own : (getRegionProfile('TW')?.pantrySeasoningIds ?? []);
 }

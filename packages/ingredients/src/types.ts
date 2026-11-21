@@ -94,5 +94,6 @@ export interface RegionProfile {
   holidays: Holiday[];
   commonPantryIngredientIds: string[];
   stapleIngredientIds: string[];
+  pantrySeasoningIds: string[];
   dataStatus: 'full' | 'partial';
 }

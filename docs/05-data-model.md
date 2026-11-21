@@ -227,7 +227,7 @@ interface Allergen {
   name: LocalizedText;                // { 'zh-TW': '花生' }
   aliases: LocalizedTerms;
   parentId?: string;                  // 上層：'shrimp'、'crab' → 'crustacean'；'walnut'、'almond' → 'tree-nut'。選上層就包含底下所有的；食材標最細的那層
-  regions?: RegionCode[];             // 哪些地區的標示規範列為主要過敏原；新手設定時依廚房地區排在前面
+  regions?: RegionCode[];             // 只有某些地區的標示規定才列的過敏原（例：日本的蕎麥）；沒填代表各地都列。過敏原清單與順序全球共用，地區只補這些項目
   displayLevelByRegion?: Partial<Record<RegionCode, 'self' | 'parent'>>;   // 這個地區的新手設定顯示這一層還是上層（例：台灣顯示「蝦蟹」、日本分開顯示「蝦」「蟹」）
 }
 
@@ -279,6 +279,7 @@ interface RegionProfile {
   holidays: Holiday[];
   commonPantryIngredientIds: string[];   // 快速盤點的常見食材（約 40 樣，含葉菜、肉這類常變動的）
   stapleIngredientIds: string[];         // 新手引導 ⑦ 的常備食材（約 30–40 樣，放得久的：乾貨、罐頭、冷凍、蛋、根莖類）
+  pantrySeasoningIds: string[];          // 新手引導 ⑦ 的醬料櫃（約 30 種當地常見的醬料與調味料）；地區沒有清單時用台灣的
   dataStatus: 'full' | 'partial';     // 資料完整度，partial 時只用有的部分
 }
 
