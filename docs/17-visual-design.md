@@ -264,6 +264,17 @@ App 的色彩、字型、版面、元件與動態。畫面上的樣子以這份�
 
 ---
 
+## 九之一、啟動畫面
+
+- 內嵌在 `apps/web/index.html`（HTML＋CSS＋SVG），不靠 JS bundle、沒有額外網路請求，也不加人為延遲。
+- 畫面：`bg` 底色、置中的大廚（平常的表情，96px）、下方「今仔日煮啥」。
+- React 掛載、`#root` 出現第一個畫面時淡出（250ms）並移除；手機開了「減少動態」就直接移除。
+- manifest 的 `background_color`、`theme_color` 與 `bg` 一致，Android 的系統啟動畫面接得上。
+- 深色模式：目前只有淺色；之後加深色色彩代碼時，啟動畫面的底色和字色一起加深色的值。
+- iPhone 的 `apple-touch-startup-image` 不做（見 [08](08-open-items.md)）。
+
+---
+
 ## 九、動態
 
 - **克制**：日常的轉場 150–250ms、輕微淡入。

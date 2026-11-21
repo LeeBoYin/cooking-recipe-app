@@ -273,7 +273,6 @@
     "category": "vegetable",
     "defaultStorage": "pantry",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "aromatic",
       "spicy"
@@ -306,7 +305,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "flavorTags": [
       "aromatic"
     ]
@@ -333,7 +331,6 @@
     "category": "vegetable",
     "defaultStorage": "pantry",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "sweet",
       "aromatic"
@@ -370,7 +367,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "spicy",
       "aromatic"
@@ -396,7 +392,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 7,
     "flavorTags": [
       "spicy"
     ]
@@ -416,7 +411,6 @@
     "category": "herb",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 4,
     "flavorTags": [
       "aromatic"
     ]
@@ -443,7 +437,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 10,
     "flavorTags": [
       "sweet"
     ],
@@ -495,7 +488,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 7,
     "flavorTags": [
       "sour",
       "sweet",
@@ -543,7 +535,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "seasonMonths": {
       "TW": [
         5,
@@ -585,7 +576,6 @@
     "category": "mushroom",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "flavorTags": [
       "umami"
     ],
@@ -623,7 +613,6 @@
     "category": "tofu-bean",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 4,
     "allergenIds": [
       "soy"
     ]
@@ -654,7 +643,6 @@
     "category": "egg",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 14,
     "allergenIds": [
       "egg"
     ]
@@ -685,7 +673,6 @@
     "category": "dairy",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 7,
     "allergenIds": [
       "milk"
     ]
@@ -713,8 +700,7 @@
     ],
     "category": "meat",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 3
+    "isPerishable": true
   },
   {
     "id": "ground-pork",
@@ -740,8 +726,7 @@
     ],
     "category": "meat",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 2
+    "isPerishable": true
   },
   {
     "id": "chicken-thigh",
@@ -769,8 +754,7 @@
     ],
     "category": "poultry",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 2
+    "isPerishable": true
   },
   {
     "id": "beef-slices",
@@ -794,8 +778,7 @@
     ],
     "category": "meat",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 2
+    "isPerishable": true
   },
   {
     "id": "shrimp",
@@ -825,7 +808,6 @@
     "category": "seafood",
     "defaultStorage": "freezer",
     "isPerishable": true,
-    "recentDays": 2,
     "flavorTags": [
       "sweet",
       "umami"
@@ -860,7 +842,6 @@
     "category": "seafood",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 2,
     "allergenIds": [
       "fish"
     ],
@@ -1453,8 +1434,7 @@
     "traits": [],
     "category": "vegetable",
     "defaultStorage": "pantry",
-    "isPerishable": true,
-    "recentDays": 14
+    "isPerishable": true
   },
   {
     "id": "carrot",
@@ -1478,7 +1458,6 @@
     "category": "vegetable",
     "defaultStorage": "pantry",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "sweet"
     ],
@@ -1521,7 +1500,6 @@
     "category": "vegetable",
     "defaultStorage": "pantry",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "sweet"
     ],
@@ -2029,8 +2007,7 @@
     ],
     "category": "poultry",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 2
+    "isPerishable": true
   },
   {
     "id": "spinach",
@@ -2054,7 +2031,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 4,
     "flavorTags": [
       "bitter"
     ],
@@ -2097,8 +2073,7 @@
     "traits": [],
     "category": "vegetable",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 5
+    "isPerishable": true
   },
   {
     "id": "cucumber",
@@ -2122,7 +2097,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "seasonMonths": {
       "JP": [
         6,
@@ -2162,7 +2136,6 @@
     "category": "vegetable",
     "defaultStorage": "pantry",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "sweet"
     ],
@@ -2203,7 +2176,6 @@
     "category": "herb",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "flavorTags": [
       "aromatic"
     ]
@@ -2310,7 +2282,6 @@
     "category": "dairy",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 30,
     "flavorTags": [
       "aromatic"
     ],
@@ -2344,7 +2315,6 @@
     "category": "dairy",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "salty",
       "umami"
@@ -2377,7 +2347,6 @@
     "category": "dairy",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 10,
     "flavorTags": [
       "sour"
     ],
@@ -2411,7 +2380,6 @@
     "category": "grain",
     "defaultStorage": "pantry",
     "isPerishable": true,
-    "recentDays": 5,
     "allergenIds": [
       "wheat"
     ]
@@ -2436,7 +2404,6 @@
     "category": "grain",
     "defaultStorage": "pantry",
     "isPerishable": true,
-    "recentDays": 14,
     "allergenIds": [
       "wheat"
     ]
@@ -2489,7 +2456,6 @@
     "category": "meat",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 2,
     "flavorTags": [
       "umami"
     ]
@@ -2522,7 +2488,6 @@
     "category": "meat",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 3,
     "flavorTags": [
       "umami"
     ]
@@ -2549,7 +2514,6 @@
     "category": "meat",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 7,
     "flavorTags": [
       "salty",
       "umami"
@@ -2582,8 +2546,7 @@
     ],
     "category": "meat",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 3
+    "isPerishable": true
   },
   {
     "id": "pork-ribs",
@@ -2612,8 +2575,7 @@
     ],
     "category": "meat",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 3
+    "isPerishable": true
   },
   {
     "id": "turkey-breast",
@@ -2637,8 +2599,7 @@
     ],
     "category": "poultry",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 2
+    "isPerishable": true
   },
   {
     "id": "broccoli",
@@ -2662,8 +2623,7 @@
     "traits": [],
     "category": "vegetable",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 5
+    "isPerishable": true
   },
   {
     "id": "bell-pepper",
@@ -2689,7 +2649,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 7,
     "flavorTags": [
       "sweet"
     ],
@@ -2723,7 +2682,6 @@
     "category": "fruit",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "seasonMonths": {
       "US-CA": [
         3,
@@ -2757,7 +2715,6 @@
     "category": "fruit",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "sour",
       "aromatic"
@@ -2792,7 +2749,6 @@
     "category": "fruit",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "sour",
       "aromatic"
@@ -2821,7 +2777,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "flavorTags": [
       "sweet"
     ],
@@ -2863,7 +2818,6 @@
     "category": "mushroom",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "flavorTags": [
       "umami"
     ]
@@ -2890,7 +2844,6 @@
     "category": "fruit",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "sweet"
     ],
@@ -2927,7 +2880,6 @@
     "category": "fruit",
     "defaultStorage": "pantry",
     "isPerishable": true,
-    "recentDays": 5,
     "flavorTags": [
       "sweet"
     ]
@@ -3346,7 +3298,6 @@
     "category": "tofu-bean",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "umami"
     ],
@@ -3375,7 +3326,6 @@
     "category": "tofu-bean",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "allergenIds": [
       "soy"
     ]
@@ -3400,8 +3350,7 @@
     "traits": [],
     "category": "processed",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 30
+    "isPerishable": true
   },
   {
     "id": "daikon",
@@ -3423,7 +3372,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 7,
     "flavorTags": [
       "sweet"
     ],
@@ -3457,7 +3405,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 10,
     "flavorTags": [
       "sweet"
     ],
@@ -3497,7 +3444,6 @@
     "category": "mushroom",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "flavorTags": [
       "umami"
     ]
@@ -3522,7 +3468,6 @@
     "category": "mushroom",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "flavorTags": [
       "umami"
     ],
@@ -3551,7 +3496,6 @@
     "category": "vegetable",
     "defaultStorage": "pantry",
     "isPerishable": true,
-    "recentDays": 10,
     "seasonMonths": {
       "JP": [
         11,
@@ -3582,7 +3526,6 @@
     "category": "herb",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "flavorTags": [
       "aromatic"
     ]
@@ -3606,7 +3549,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 5,
     "flavorTags": [
       "aromatic"
     ],
@@ -3662,7 +3604,6 @@
     "category": "fruit",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 14,
     "flavorTags": [
       "sour",
       "aromatic"
@@ -3694,7 +3635,6 @@
     "category": "vegetable",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 7,
     "flavorTags": [
       "bitter"
     ],
@@ -3725,8 +3665,7 @@
     "traits": [],
     "category": "vegetable",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 3
+    "isPerishable": true
   },
   {
     "id": "pork-slices",
@@ -3753,8 +3692,7 @@
     ],
     "category": "meat",
     "defaultStorage": "fridge",
-    "isPerishable": true,
-    "recentDays": 3
+    "isPerishable": true
   },
   {
     "id": "mackerel",
@@ -3779,7 +3717,6 @@
     "category": "seafood",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 2,
     "flavorTags": [
       "umami"
     ],
@@ -3818,7 +3755,6 @@
     "category": "seafood",
     "defaultStorage": "fridge",
     "isPerishable": true,
-    "recentDays": 3,
     "flavorTags": [
       "sweet",
       "umami"

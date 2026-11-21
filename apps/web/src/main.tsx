@@ -30,3 +30,23 @@ createRoot(root).render(
     </IntlProvider>
   </StrictMode>,
 );
+
+// 啟動畫面（index.html 內嵌）：#root 有內容、第一個畫面可以顯示時淡出移除。
+const splash = document.getElementById('splash');
+if (splash) {
+  const removeSplash = () => {
+    observer.disconnect();
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      splash.remove();
+      return;
+    }
+    splash.classList.add('splash-out');
+    splash.addEventListener('transitionend', () => splash.remove(), { once: true });
+    window.setTimeout(() => splash.remove(), 600);
+  };
+  const observer = new MutationObserver(() => {
+    if (root.childElementCount > 0) removeSplash();
+  });
+  observer.observe(root, { childList: true });
+}

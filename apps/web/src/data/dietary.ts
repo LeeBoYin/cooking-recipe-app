@@ -1,5 +1,4 @@
 // 飲食限制（dietary_profiles）：過敏、飲食原則、不用料理酒、不吃的食物。權限由 RLS 判斷，只有本人能寫。
-// 週期性規則（recurring_rules）產品不做，欄位留著不用。
 import { supabase } from './supabase.ts';
 import { currentUserId } from './account.ts';
 import { newId } from '@zhusha/core';

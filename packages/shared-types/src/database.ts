@@ -145,14 +145,14 @@ isOneToOne: false
                   ]
                 },"dict_ingredients": {
                   Row: {
-                    "aliases": NonNullable<Json>,"allergen_ids": (string)[],"category": string,"default_storage": string,"density_g_per_ml": number | null,"deprecated": boolean,"family": string,"flavor_tags": (string)[],"id": string,"is_perishable": boolean,"name": NonNullable<Json>,"recent_days": number | null,"replaced_by": string | null,"season_months": NonNullable<Json>,"traits": (string)[]
+                    "aliases": NonNullable<Json>,"allergen_ids": (string)[],"category": string,"default_storage": string,"density_g_per_ml": number | null,"deprecated": boolean,"family": string,"flavor_tags": (string)[],"id": string,"is_perishable": boolean,"name": NonNullable<Json>,"replaced_by": string | null,"season_months": NonNullable<Json>,"traits": (string)[]
                   }
                   ComputedFields: never
                   Insert: {
-                    "aliases"?: NonNullable<Json>,"allergen_ids"?: (string)[],"category": string,"default_storage": string,"density_g_per_ml"?: number | null,"deprecated"?: boolean,"family": string,"flavor_tags"?: (string)[],"id": string,"is_perishable": boolean,"name": NonNullable<Json>,"recent_days"?: number | null,"replaced_by"?: string | null,"season_months"?: NonNullable<Json>,"traits"?: (string)[]
+                    "aliases"?: NonNullable<Json>,"allergen_ids"?: (string)[],"category": string,"default_storage": string,"density_g_per_ml"?: number | null,"deprecated"?: boolean,"family": string,"flavor_tags"?: (string)[],"id": string,"is_perishable": boolean,"name": NonNullable<Json>,"replaced_by"?: string | null,"season_months"?: NonNullable<Json>,"traits"?: (string)[]
                   }
                   Update: {
-                    "aliases"?: NonNullable<Json>,"allergen_ids"?: (string)[],"category"?: string,"default_storage"?: string,"density_g_per_ml"?: number | null,"deprecated"?: boolean,"family"?: string,"flavor_tags"?: (string)[],"id"?: string,"is_perishable"?: boolean,"name"?: NonNullable<Json>,"recent_days"?: number | null,"replaced_by"?: string | null,"season_months"?: NonNullable<Json>,"traits"?: (string)[]
+                    "aliases"?: NonNullable<Json>,"allergen_ids"?: (string)[],"category"?: string,"default_storage"?: string,"density_g_per_ml"?: number | null,"deprecated"?: boolean,"family"?: string,"flavor_tags"?: (string)[],"id"?: string,"is_perishable"?: boolean,"name"?: NonNullable<Json>,"replaced_by"?: string | null,"season_months"?: NonNullable<Json>,"traits"?: (string)[]
                   }
                   Relationships: [
                     {
@@ -265,14 +265,14 @@ isOneToOne: false
                   ]
                 },"dietary_profiles": {
                   Row: {
-                    "allergen_ids": (string)[],"created_at": string,"dietary_restriction_ids": (string)[],"dislike_ingredient_ids": (string)[],"id": string,"no_cooking_alcohol": boolean,"recurring_rules": NonNullable<Json>,"schema_version": number,"updated_at": string,"user_id": string
+                    "allergen_ids": (string)[],"created_at": string,"dietary_restriction_ids": (string)[],"dislike_ingredient_ids": (string)[],"id": string,"no_cooking_alcohol": boolean,"schema_version": number,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "allergen_ids"?: (string)[],"created_at"?: string,"dietary_restriction_ids"?: (string)[],"dislike_ingredient_ids"?: (string)[],"id": string,"no_cooking_alcohol"?: boolean,"recurring_rules"?: NonNullable<Json>,"schema_version"?: number,"updated_at"?: string,"user_id": string
+                    "allergen_ids"?: (string)[],"created_at"?: string,"dietary_restriction_ids"?: (string)[],"dislike_ingredient_ids"?: (string)[],"id": string,"no_cooking_alcohol"?: boolean,"schema_version"?: number,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "allergen_ids"?: (string)[],"created_at"?: string,"dietary_restriction_ids"?: (string)[],"dislike_ingredient_ids"?: (string)[],"id"?: string,"no_cooking_alcohol"?: boolean,"recurring_rules"?: NonNullable<Json>,"schema_version"?: number,"updated_at"?: string,"user_id"?: string
+                    "allergen_ids"?: (string)[],"created_at"?: string,"dietary_restriction_ids"?: (string)[],"dislike_ingredient_ids"?: (string)[],"id"?: string,"no_cooking_alcohol"?: boolean,"schema_version"?: number,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     

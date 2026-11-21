@@ -1,6 +1,6 @@
 -- 口味資料：字典匯入的檢查、口味地圖與飲食限制的權限（13 第八節、16 第三、四、八節）
 begin;
-select plan(75);
+select plan(73);
 
 create function tests.updated_rows(p_sql text)
 returns integer
@@ -232,13 +232,10 @@ select tests.logout();
 ---------------------------------------------------------------------------
 select tests.login_as(:'owner');
 select is(tests.updated_rows($$update public.dietary_profiles set allergen_ids = '{crustacean}', dislike_ingredient_ids = '{salt}',
-  dietary_restriction_ids = '{vegan}', no_cooking_alcohol = true,
-  recurring_rules = '[{"restriction_id": "vegan", "schedule": "lunar_1_15"}]'$$), 1, '本人可以改自己的飲食限制');
+  dietary_restriction_ids = '{vegan}', no_cooking_alcohol = true$$), 1, '本人可以改自己的飲食限制');
 select throws_ok($$update public.dietary_profiles set allergen_ids = '{mystery}'$$, '23514', null, '過敏原要在字典裡');
 select throws_ok($$update public.dietary_profiles set dislike_ingredient_ids = '{mystery}'$$, '23514', null, '不吃的食材要在字典裡');
 select throws_ok($$update public.dietary_profiles set dietary_restriction_ids = '{mystery}'$$, '23514', null, '飲食限制要在字典裡');
-select throws_ok($$update public.dietary_profiles set recurring_rules = '[{"restriction_id": "mystery", "schedule": "weekly"}]'$$, '23514', null, '週期性規則的限制要在字典裡');
-select throws_ok($$update public.dietary_profiles set recurring_rules = '[{"restriction_id": "vegan", "schedule": "daily"}]'$$, '23514', null, '週期性規則的週期只有三種');
 select throws_ok(format($$insert into public.dietary_profiles (id, user_id) values ('%s', '%s')$$, private.uuid_v7(), :'owner'), '23505', null, '一個人只有一份');
 select throws_ok(format($$insert into public.dietary_profiles (id, user_id) values ('%s', '%s')$$, private.uuid_v7(), :'mate'), '42501', null, '不能幫別人建');
 select tests.logout();
