@@ -6,6 +6,7 @@ export type Temperature = { value: number; unit: 'C' | 'F' };
 export type RecipeIngredient = {
   id: string; // 穩定 ID，調整順序也不會對錯
   raw_text: string; // 「醬油 2 大匙」原文
+  name?: string; // 手機從原文拆出的食材名字（最長 60 字）；食材正規化的對應與回填靠它，不給使用者看
   ingredient_id?: string; // 解析後的標準食材；字典裡找不到的視為對應不到
   amount?: number;
   amount_max?: number; // 範圍的上限，例「蒜 2–3 瓣」

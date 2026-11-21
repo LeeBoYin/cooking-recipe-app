@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildIngredientIndex, parseIngredientLine, type DictIngredient } from './ingredient-line.ts';
+import { buildIngredientIndex, parseIngredientLine, parseIngredientLineNamed, type DictIngredient } from './ingredient-line.ts';
 import { renderIngredient } from './ingredient-text.ts';
 import { parseMeasurePref, type UnitLabels } from './units.ts';
 
@@ -105,5 +105,13 @@ describe('用存檔時解析好的數量顯示', () => {
   });
   it('原文裡找不到數量時，照原文', () => {
     expect(renderIngredient('鹽 適量', { factor: 2, pref: metric, labels }, { amount: 3, unit: 'g' })).toBe('鹽 適量');
+  });
+});
+
+describe('parseIngredientLineNamed', () => {
+  it('回傳拆出來的食材名字，其餘欄位和 parseIngredientLine 一樣', () => {
+    expect(parseIngredientLineNamed('阿嬤的辣醬 1 大匙', index)).toEqual({ amount: 1, unit: 'tbsp', name: '阿嬤的辣醬' });
+    expect(parseIngredientLineNamed('蒜 2–3 瓣', index)).toEqual({ ingredientId: 'garlic', amount: 2, amountMax: 3, unit: 'clove', name: '蒜' });
+    expect(parseIngredientLineNamed('', index).name).toBe('');
   });
 });
