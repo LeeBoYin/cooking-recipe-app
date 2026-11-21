@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link } from 'react-router';
 import { Chef } from '../../chef/Chef.tsx';
+import { useChef } from '../../chef/useChef.ts';
 import { useCurrentKitchen, useMyRecipePhotos, useMyRecipes, usePhotoUrls, useSearchMyRecipes } from '../../data/hooks.ts';
 import { todayIn } from '../pantry/dates.ts';
 import { Icon } from '../shell/Icon.tsx';
@@ -19,6 +20,7 @@ function useDebounced<T>(value: T, ms: number): T {
 
 // 我的食譜：草稿列、搜尋框、依月分組的時間軸（沒有篩選與其他排序，02 時間軸）
 export function MyRecipesTab() {
+  const chef = useChef();
   const intl = useIntl();
   const { kitchen } = useCurrentKitchen();
   const timeZone = kitchen?.timezone ?? 'Asia/Taipei';
@@ -85,8 +87,8 @@ export function MyRecipesTab() {
         <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="recipes.search.none" /></p>
       ) : !searching && entries.length === 0 ? (
         <div className="flex flex-col items-center gap-3.5 px-8 pt-20 text-center">
-          <Chef size={96} />
-          <p className="m-0 font-round text-card-title"><FormattedMessage id="recipes.empty.title" /></p>
+          <Chef size={96} mood="quiet" />
+          <p className="m-0 font-round text-card-title">{chef.line('emptyRecipes')}</p>
           <p className="m-0 text-[15px] leading-[1.7] text-ink-muted"><FormattedMessage id="recipes.empty.body" /></p>
           <Link to="/recipes/new" className="flex h-12 items-center rounded-card bg-bulb px-5 text-body font-bold text-ink no-underline">
             <FormattedMessage id="recipes.empty.action" />

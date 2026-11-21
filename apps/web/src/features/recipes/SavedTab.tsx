@@ -4,6 +4,7 @@ import { Link } from 'react-router';
 import { difficultyOverall } from '@zhusha/core';
 import { baseDishes } from '@zhusha/taste';
 import { Chef } from '../../chef/Chef.tsx';
+import { useChef } from '../../chef/useChef.ts';
 import { ideaOf, type Bookmark } from '../../data/bookmarks.ts';
 import { useCurrentKitchen, useMyBookmarks } from '../../data/hooks.ts';
 import { localDate, groupByMonth } from './timeline.ts';
@@ -22,6 +23,7 @@ function difficultyOf(baseDishId: string): number | null {
 // 收藏：依收藏的月分組的時間軸。M0 只有大廚的點子（朋友的食譜 M2 才有）；
 // 收藏的點子沒有做法，M1a 起第一次打開時由大廚展開（所以這裡先不能點進去看做法）
 export function SavedTab() {
+  const chef = useChef();
   const { kitchen } = useCurrentKitchen();
   const timeZone = kitchen?.timezone ?? 'Asia/Taipei';
   const bookmarks = useMyBookmarks();
@@ -44,8 +46,8 @@ export function SavedTab() {
   if (entries.length === 0) {
     return (
       <div className="flex flex-col items-center gap-3.5 px-8 pt-20 text-center">
-        <Chef size={96} />
-        <p className="m-0 font-round text-card-title"><FormattedMessage id="recipes.saved.empty.title" /></p>
+        <Chef size={96} mood="quiet" />
+        <p className="m-0 font-round text-card-title">{chef.line('emptySaved')}</p>
         <p className="m-0 text-[15px] leading-[1.7] text-ink-muted"><FormattedMessage id="recipes.saved.empty.body" /></p>
       </div>
     );

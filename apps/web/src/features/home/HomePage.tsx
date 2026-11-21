@@ -4,6 +4,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import { emptyProfile, todayInTimeZone, type Idea } from '@zhusha/core';
 import { Chef } from '../../chef/Chef.tsx';
+import { useChef } from '../../chef/useChef.ts';
 import { signOut } from '../../data/auth.ts';
 import {
   useCurrentKitchen, useKitchenEquipment, useMyBookmarks, useMyDietary, useMyIdentity, useMyRecipes, useMyTasteProfile, usePantryItems,
@@ -31,6 +32,7 @@ export function HomePage() {
   const bookmarks = useMyBookmarks();
   const [, rerender] = useState(0);
   const [open, setOpen] = useState<Idea | null>(null);
+  const chef = useChef();
 
   const ready = !!(kitchen && identity.data && taste.data !== undefined && dietary.data && pantry.data && equipment.data && recipes.data);
   const failed = kitchenError || identity.error || taste.error || dietary.error || pantry.error || equipment.error || recipes.error;
@@ -78,6 +80,8 @@ export function HomePage() {
         <h1 className="absolute top-2 left-[76px] m-0 font-round text-body font-bold">
           <FormattedMessage id="chef.greeting" />
         </h1>
+        {/* 招呼語固定；底下一句依時段與大廚的語氣，同一天固定一句 */}
+        {chef.line(`home.${chef.band}`) && <p className="m-0 font-round text-[15px] leading-normal">{chef.line(`home.${chef.band}`)}</p>}
         {/* M0 沒有 AI，輸入框先放著不能打字（M1a 才接上和大廚聊聊） */}
         <label className="flex h-11">
           <span className="sr-only">
@@ -108,8 +112,9 @@ export function HomePage() {
           </p>
         ) : ideas.length === 0 ? (
           <div className="flex flex-col gap-2.5 rounded-card bg-chef-soft p-3.5">
+            <Chef size={40} mood="quiet" />
             <p className="m-0 font-round text-[15px] leading-relaxed">
-              <FormattedMessage id={computed.pool.tasteEnough ? 'home.ideas.none' : 'home.ideas.notEnough'} />
+              {chef.line(computed.pool.tasteEnough ? 'ideasNone' : 'ideasNotEnough')}
             </p>
             {!computed.pool.tasteEnough && (
               <button

@@ -3,6 +3,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { Link } from 'react-router';
 import { isRecentlyBought } from '@zhusha/ingredients';
 import { Chef } from '../../chef/Chef.tsx';
+import { useChef } from '../../chef/useChef.ts';
 import { useCurrentKitchen, usePantryItems, useRemovePantryItem, useRestorePantryItem } from '../../data/hooks.ts';
 import type { PantryItem } from '../../data/pantry.ts';
 import { ActionBar } from '../kitchen/ActionBar.tsx';
@@ -48,6 +49,7 @@ function Row({ item, today, onRemove }: { item: PantryItem; today: string; onRem
 
 // 廚房頁的「食材」：依放哪裡分組，一項一列。移除一鍵完成、可以復原（02 食材）
 export function PantryTab() {
+  const chef = useChef();
   const intl = useIntl();
   const { kitchen } = useCurrentKitchen();
   const pantry = usePantryItems(kitchen?.id);
@@ -83,8 +85,8 @@ export function PantryTab() {
         <>
           <StockCard kind="pantry" />
           <div className="flex flex-col items-center py-10 text-center">
-            <Chef size={96} />
-            <p className="mt-4 mb-0 text-body"><FormattedMessage id="pantry.empty" /></p>
+            <Chef size={96} mood="quiet" />
+            <p className="mt-4 mb-0 font-round text-body">{chef.line('emptyPantry')}</p>
             <Link to="/kitchen/pantry/inventory" className="mt-3 flex h-11 items-center rounded-card border-2 border-ink bg-bulb px-4 text-body font-bold text-ink no-underline">
               <FormattedMessage id="pantry.inventory" />
             </Link>
