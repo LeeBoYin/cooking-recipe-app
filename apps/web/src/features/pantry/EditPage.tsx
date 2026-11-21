@@ -6,8 +6,9 @@ import type { PantryItem } from '../../data/pantry.ts';
 import { SubPage } from '../shell/SubPage.tsx';
 import { todayIn } from './dates.ts';
 import { ExpiryFields, type Expiry } from './ExpiryFields.tsx';
-import { displayName, emojiFor } from './labels.ts';
+import { displayName } from './labels.ts';
 import { ZoneSelect } from './ZoneSelect.tsx';
+import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
 function Form({ item, today, kitchenId }: { item: PantryItem; today: string; kitchenId: string }) {
   const intl = useIntl();
@@ -35,7 +36,7 @@ function Form({ item, today, kitchenId }: { item: PantryItem; today: string; kit
   return (
     <div className="flex flex-col gap-4 pb-24">
       <h2 className="m-0 font-round text-heading font-bold">
-        <span aria-hidden="true">{emojiFor(item.ingredient_id)}</span> {name}
+        <ItemIcon kind="ingredient" id={item.ingredient_id} size={32} /> {name}
       </h2>
       <ZoneSelect value={zone} onChange={setZone} />
       <label className="flex min-h-11 items-center gap-2 text-body">

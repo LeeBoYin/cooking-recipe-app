@@ -8,7 +8,8 @@ import { ActionBar } from '../kitchen/ActionBar.tsx';
 import { StockCard } from '../kitchen/StockCard.tsx';
 import { Icon } from '../shell/Icon.tsx';
 import { useToast } from '../shell/Toast.tsx';
-import { ZONES, ZONE_EMOJI, displayName, emojiFor } from './labels.ts';
+import { ZONES, ZONE_EMOJI, displayName } from './labels.ts';
+import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
 const TAG = 'rounded-tag bg-line-soft px-1.5 text-small font-bold text-ink-muted';
 
@@ -18,7 +19,7 @@ function Row({ item, onRemove }: { item: PantryItem; onRemove: (i: PantryItem) =
   return (
     <li className="flex items-center border-b border-line-soft last:border-b-0">
       <Link to={`/kitchen/pantry/${item.id}`} className="flex min-h-14 flex-1 items-center gap-3 py-2 text-ink no-underline">
-        <span aria-hidden="true" className="w-7 text-center text-card-title">{emojiFor(item.ingredient_id)}</span>
+        <ItemIcon kind="ingredient" id={item.ingredient_id} size={32} />
         <span className="flex flex-1 flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-body">{name}</span>
           {item.want_to_use_soon && (

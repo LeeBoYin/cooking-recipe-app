@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router';
 import { useMySettings } from './data/hooks.ts';
 import { Onboarding } from './features/onboarding/Onboarding.tsx';
@@ -33,6 +34,9 @@ import { PhotoSync } from './photos/PhotoSync.tsx';
 import { OfflineBanner } from './pwa/OfflineBanner.tsx';
 import { UpdatePrompt } from './pwa/UpdatePrompt.tsx';
 
+// 開發用的 icon 總覽，正式建置會整段拿掉
+const IconsPage = import.meta.env.DEV ? lazy(() => import('./features/dev/IconsPage.tsx').then((m) => ({ default: m.IconsPage }))) : null;
+
 // 登入後 onboarding_completed_at 還是空的，就先走新手引導（12 第三節）
 function OnboardingGate() {
   const settings = useMySettings();
@@ -51,6 +55,7 @@ export function App() {
         <BrowserRouter>
           <PhotoSync />
           <Routes>
+            {IconsPage && <Route path="dev/icons" element={<Suspense><IconsPage /></Suspense>} />}
             <Route element={<OnboardingGate />}>
             <Route path="onboarding" element={<Onboarding redo />} />
             <Route element={<AppShell />}>

@@ -31,9 +31,31 @@
   --text-small: 13px;
   --text-tab: 12px;
 
+  /* 食材與廚具 icon 的淡色圓底，7 個顏色群組（17 第七節） */
+  --color-icon-veg: #dcefdc;
+  --color-icon-fruit: #fbe3cb;
+  --color-icon-meat: #f0e0d4;
+  --color-icon-dairy: #fbecc4;
+  --color-icon-staple: #ece3cf;
+  --color-icon-seasoning: #e6e0ea;
+  --color-icon-equipment: #dfe7ef;
+
   --radius-card: 10px;
   --radius-chef: 14px;
   --radius-tag: 6px;
+}
+
+/* 深色模式的 icon 色票：App 還沒有深色模式，先備好；之後在 <html> 加 data-theme="dark" 即生效 */
+:root[data-theme='dark'],
+[data-icon-theme='dark'] {
+  --color-icon-veg: #2e4a33;
+  --color-icon-fruit: #5b3d26;
+  --color-icon-meat: #543a2f;
+  --color-icon-dairy: #5a4a22;
+  --color-icon-staple: #4a4333;
+  --color-icon-seasoning: #433a50;
+  --color-icon-equipment: #334150;
+  --icon-ink: #f1e9dc;
 }
 
 @layer base {
