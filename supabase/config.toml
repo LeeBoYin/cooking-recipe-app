@@ -447,3 +447,7 @@ verify_jwt = false
 # ai 自己用 Auth 驗證 token，再依序檢查帳號、任務、輸入（見 functions/ai/pipeline.ts）
 [functions.ai]
 verify_jwt = false
+
+# background-jobs 只給資料庫排程（pg_net）呼叫，自己用 BACKGROUND_JOBS_TOKEN 驗證，不走使用者的 JWT
+[functions.background-jobs]
+verify_jwt = false

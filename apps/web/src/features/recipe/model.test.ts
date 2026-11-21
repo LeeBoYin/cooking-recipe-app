@@ -60,7 +60,7 @@ describe('buildPatch', () => {
       { id: 's1', order: 0, text: '燙過' },
       { id: 's2', order: 1, text: '' },
     ]);
-    expect(patch.ingredients).toEqual([{ id: 'i1', raw_text: '五花肉 600 克', ingredient_id: 'pork-belly', amount: 600, unit: 'g', optional: false }]);
+    expect(patch.ingredients).toEqual([{ id: 'i1', raw_text: '五花肉 600 克', name: '五花肉', ingredient_id: 'pork-belly', amount: 600, unit: 'g', optional: false }]);
   });
   it('難易度由作者設定', () => {
     const d = { ingredients: 2, equipment: 1, time: 4, technique: 2, failure_risk: 3 };
@@ -121,12 +121,12 @@ describe('發佈與空白判斷', () => {
 
 describe('toIngredient：存檔時解析食材', () => {
   it('標準食材、數量、單位', () => {
-    expect(toIngredient('a', '蒜 2–3 瓣')).toEqual({ id: 'a', raw_text: '蒜 2–3 瓣', ingredient_id: 'garlic', amount: 2, amount_max: 3, unit: 'clove', optional: false });
+    expect(toIngredient('a', '蒜 2–3 瓣')).toEqual({ id: 'a', raw_text: '蒜 2–3 瓣', name: '蒜', ingredient_id: 'garlic', amount: 2, amount_max: 3, unit: 'clove', optional: false });
     expect(toIngredient('b', '醬油 2 大匙')).toMatchObject({ ingredient_id: 'soy-sauce', amount: 2, unit: 'tbsp' });
-    expect(toIngredient('c', '鹽 適量')).toEqual({ id: 'c', raw_text: '鹽 適量', ingredient_id: 'salt', unit: 'to_taste', optional: false });
+    expect(toIngredient('c', '鹽 適量')).toEqual({ id: 'c', raw_text: '鹽 適量', name: '鹽', ingredient_id: 'salt', unit: 'to_taste', optional: false });
     expect(toIngredient('d', '豬絞肉 300 克')).toMatchObject({ ingredient_id: 'ground-pork', amount: 300, unit: 'g' });
   });
   it('對不到字典的食材沒有 ingredient_id，數量照解析', () => {
-    expect(toIngredient('e', '阿嬤的辣醬 1 匙')).toEqual({ id: 'e', raw_text: '阿嬤的辣醬 1 匙', amount: 1, optional: false });
+    expect(toIngredient('e', '阿嬤的辣醬 1 大匙')).toEqual({ id: 'e', raw_text: '阿嬤的辣醬 1 大匙', name: '阿嬤的辣醬', amount: 1, unit: 'tbsp', optional: false });
   });
 });

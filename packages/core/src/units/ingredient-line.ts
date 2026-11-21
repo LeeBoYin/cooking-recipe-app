@@ -81,6 +81,16 @@ const PINCH = /少許|少量|一點點|些許/;
 
 // 一列食材文字：拿掉數量（與緊接的計數單位）、括號與「適量」之後剩下的，就是食材名字
 export function parseIngredientLine(text: string, index: IngredientIndex): ParsedIngredient {
+  return parseLine(text, index).parsed;
+}
+
+// 同上，另外回傳拆出來的食材名字（食材正規化用：存在食譜每列的 name，對應與回填靠它）
+export function parseIngredientLineNamed(text: string, index: IngredientIndex): ParsedIngredient & { name: string } {
+  const { parsed, name } = parseLine(text, index);
+  return { ...parsed, name };
+}
+
+function parseLine(text: string, index: IngredientIndex): { parsed: ParsedIngredient; name: string } {
   const out: ParsedIngredient = {};
   const segments = parseIngredient(text);
   const nameParts: string[] = [];
@@ -123,5 +133,5 @@ export function parseIngredientLine(text: string, index: IngredientIndex): Parse
     .trim();
   const id = matchIngredient(name, index);
   if (id) out.ingredientId = id;
-  return out;
+  return { parsed: out, name };
 }

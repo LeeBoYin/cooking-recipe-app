@@ -489,6 +489,7 @@ type RecipeSnapshot = Pick<Recipe, 'title' | 'story' | 'highlights' | 'cookedOn'
 interface RecipeIngredient {
   id: string;                 // 穩定 ID，調整順序也不會對錯
   rawText: string;            // 「醬油 2 大匙」原文，使用者只編輯這一欄
+  name?: string;              // 由手機從原文拆出的食材名字（最長 60 字）；食材正規化的對應與回填靠它，不給使用者看
   ingredientId?: string;      // 以下由存檔時的解析填入（見 16 `save_recipe`）：解析後的標準食材
   amount?: number;
   amountMax?: number;         // 範圍的上限，例「蒜 2–3 瓣」
@@ -845,27 +846,34 @@ interface AiRateCounter {             // 速率限制的計數，只存在後端
 
 interface BackgroundJob {             // 背景任務佇列（發佈後整理、食材正規化、照片清理…），只存在後端
   id: string;
-  kind: 'post_publish' | 'normalize' | 'import_retry' | 'storage_cleanup' | 'push';   // post_publish：發佈當下的整理失敗時，在背景重試標籤與難易度
-  payload: unknown;                   // 例：{ recipeId }、{ rawText }
-  status: 'pending' | 'running' | 'done' | 'failed';
-  attempts: number;                   // 失敗時退避重試，最多 5 次
+  kind: 'normalize_ingredients' | 'post_publish' | 'import_retry' | 'storage_cleanup' | 'push';   // 現在只有 normalize_ingredients（M1a-05）；post_publish：發佈當下的整理失敗時，在背景重試標籤與難易度
+  dedupeKey: string;                  // 同一種任務、同一個鍵，排隊或執行中只會有一筆（食材正規化：詞的標準寫法）
+  payload: unknown;                   // 例：{ text }（使用者輸入的原樣，最長 60 字）、{ recipeId }
+  requestedBy?: string;               // 第一個排隊的人，AI 用量算在他身上；帳號刪除後為空
+  status: 'pending' | 'running' | 'done' | 'dead';   // dead：次數用完，放棄
+  attempts: number;                   // 失敗時退避重試（2、4、8、16 分鐘），最多 maxAttempts（5）次
+  maxAttempts: number;
   runAfter: Instant;
-  lastError?: string;
+  lockedAt?: Instant;                 // 執行中；超過 10 分鐘沒回報視為中斷
+  lastError?: string;                 // 只存錯誤代號
   createdAt: Instant;
+  updatedAt: Instant;
 }
 
 interface IngredientMapping {         // 全站共用的食材對應快取（03 食材正規化），只存在後端；來源只有 AI 與你的審查
   rawTextNormalized: string;          // 去空白、全半形統一後的原文；唯一
   ingredientId?: string;              // 對不到時為空（之後不再問 AI，等你審查）
   source: 'ai' | 'admin';
-  occurrences: number;                // 被輸入過幾次，M3 字典審查依它排序
-  updatedAt: Instant;
+  model?: string;                     // AI 對應時用的模型
+  createdAt: Instant;
+  updatedAt: Instant;                 // 「被輸入過幾次」之類給 M3 字典審查排序用的欄位，M3 再加
 }
 
 interface UserIngredientMapping {     // 使用者自己的修正，只影響自己的資料；優先於全站對應
   userId: string;
   rawTextNormalized: string;
   ingredientId: string;
+  createdAt: Instant;
   updatedAt: Instant;
 }
 

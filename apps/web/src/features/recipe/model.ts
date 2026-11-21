@@ -1,5 +1,5 @@
 // 編輯頁的資料模型（純函式，方便測試）：資料庫的一篇食譜 ⇄ 編輯中的表單 ⇄ 要送出的變更。
-import { buildIngredientIndex, difficultyOverall, newId, parseIngredientLine, type DifficultyValues } from '@zhusha/core';
+import { buildIngredientIndex, difficultyOverall, newId, parseIngredientLineNamed, type DifficultyValues } from '@zhusha/core';
 import { ingredients as dictionaryIngredients } from '@zhusha/ingredients';
 import type { Highlight, RecipeDifficulty, RecipeIngredient, RecipeStep, RecipeVisibility } from '@zhusha/shared-types';
 import type { Photo } from '../../data/photos.ts';
@@ -124,14 +124,15 @@ export function newIngredient(): EditorIngredient {
 // 食材字典的比對索引（第一次存檔時才建）
 let ingredientIndex: ReturnType<typeof buildIngredientIndex> | null = null;
 
-// 一列食材原文 → 要送出的食材：原文照存，另外附上手機解析好的 ingredient_id、amount、amount_max、unit
-// （資料庫會再檢查，不合格的欄位清空）；解析不出來的欄位不放
+// 一列食材原文 → 要送出的食材：原文照存，另外附上手機解析好的 name（拆出來的食材名字，食材正規化的對應與回填用）、
+// ingredient_id、amount、amount_max、unit（資料庫會再檢查，不合格的欄位清空）；解析不出來的欄位不放
 export function toIngredient(id: string, text: string): RecipeIngredient {
   ingredientIndex ??= buildIngredientIndex(dictionaryIngredients);
-  const parsed = parseIngredientLine(text, ingredientIndex);
+  const parsed = parseIngredientLineNamed(text, ingredientIndex);
   return {
     id,
     raw_text: text,
+    ...(parsed.name !== '' && [...parsed.name].length <= 60 ? { name: parsed.name } : {}),
     ...(parsed.ingredientId ? { ingredient_id: parsed.ingredientId } : {}),
     ...(parsed.amount !== undefined ? { amount: parsed.amount } : {}),
     ...(parsed.amountMax !== undefined ? { amount_max: parsed.amountMax } : {}),

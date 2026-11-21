@@ -28,7 +28,7 @@ export const AI_TASKS = {
   import_url: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 2000 },
   edit_by_voice: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 1000 },
   post_publish: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 600, background: true },
-  normalize_ingredient: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 300, background: true },
+  normalize_ingredients: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 300, background: true },
   inspiration_egg: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 300 },
   // 驗證整條路徑用，不做任何真正的事
   _selftest: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 200, internal: true },

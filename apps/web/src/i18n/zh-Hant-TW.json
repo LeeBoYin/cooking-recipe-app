@@ -781,7 +781,7 @@
   "admin.settings.ai.task.import_url": "匯入：網址",
   "admin.settings.ai.task.edit_by_voice": "用說的改食譜",
   "admin.settings.ai.task.post_publish": "發佈後整理",
-  "admin.settings.ai.task.normalize_ingredient": "食材正規化",
+  "admin.settings.ai.task.normalize_ingredients": "食材正規化",
   "admin.settings.ai.task.inspiration_egg": "靈感彩蛋",
   "admin.logs.title": "操作紀錄",
   "admin.logs.hint": "管理員的每個操作都會留下紀錄，不能修改或刪除。紀錄裡不會有 email 或連結。",

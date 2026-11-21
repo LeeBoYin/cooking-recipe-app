@@ -152,3 +152,20 @@ Deno.test('JSON Schema 驗證', () => {
   // 錯誤只有位置，不含值
   assertEquals(validate(schema, { n: 'secret' }).join('').includes('secret'), false);
 });
+
+Deno.test('normalize_ingredients：輸入檢查與提示', async () => {
+  const def = TASKS.normalize_ingredients!;
+  const bad = [null, {}, { terms: [] }, { terms: [{ text: 'x', candidates: [] }] }, { terms: [{ text: '', candidates: [{ id: 'a', name: 'b' }] }] }];
+  for (const b of bad) assertEquals(def.parseInput(b as never).ok, false);
+  const good = { terms: [{ text: '小朝天椒', candidates: [{ id: 'chili', name: '辣椒' }, { id: 'pepper', name: '胡椒' }] }] };
+  assertEquals(def.parseInput(good as never).ok, true);
+  const d = deps({ reply: response({ text: JSON.stringify({ choices: [1] }) }) });
+  const r = await runAi(d, 'u1', 'normalize_ingredients', good);
+  assertEquals(r.ok, true);
+  // 候選用編號，輸出只有整數：使用者輸入不會出現在輸出裡
+  assertEquals(d.calls[0].messages[0].content.includes('1) 辣椒'), true);
+  assertEquals(d.calls[0].model, 'claude-haiku-5-5');
+  assertEquals(d.calls[0].maxTokens, 300);
+  assertEquals(validate(def.outputSchema, { choices: [9] }).length > 0, true);
+  assertEquals(validate(def.outputSchema, { choices: [0, 3] }).length, 0);
+});

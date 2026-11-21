@@ -50,6 +50,7 @@
 | Google 登入的用戶端 ID 與密鑰 | Supabase Auth 設定 | 只做 Google 與密碼登入 |
 | `SUPABASE_ACCESS_TOKEN`、專案 ID | GitHub 的秘密設定 | GitHub Actions 部署 migration 與 Edge Functions |
 | `MAINTENANCE_TOKEN` | 各專案的 Edge Function Secrets；GitHub 的秘密設定 `MAINTENANCE_TOKEN_STAGING`、`MAINTENANCE_TOKEN_PRODUCTION` | 呼叫 `maintenance` 的通行證，測試與正式各一組 |
+| `BACKGROUND_JOBS_TOKEN` | 各專案的 Edge Function Secrets；另存一份在各專案資料庫的 Vault（名稱 `background_jobs_token`），Vault 另存函式網址（`background_jobs_url`，例 `https://<專案 ID>.supabase.co/functions/v1/background-jobs`） | 資料庫排程呼叫 `background-jobs` 的通行證與網址，測試與正式各一組；Vault 沒設就不派發（任務留在佇列）。設定步驟見 M1a-05 的 PR 說明 |
 | `SUPABASE_URL`、`SUPABASE_ANON_KEY` | Netlify 的環境變數 | 公開的，前端用 |
 
 ## 三、資料表
@@ -96,7 +97,7 @@
 | `taste_profile_snapshots` | `user_id` | `auth.users`（連動） | M1a |
 | `ai_suggestion_cache` | `id` | `user_id`（連動）；`conversation_id`（空值） | M1a |
 | `share_links` | `id` | `recipe_id`（連動） | M2 |
-| `user_ingredient_mappings` | `(user_id, raw_text_normalized)` | `user_id`（連動） | M0 |
+| `user_ingredient_mappings` | `(user_id, raw_text_normalized)` | `user_id`（連動） | M1a-05 |
 
 ### 社群（M2）
 
@@ -117,8 +118,8 @@
 |-------|------|------|
 | `app_config` | M0 | 單列設定：文字長度上限、照片張數上限、軟刪除保留天數；M1a-03 起加 AI 總開關 `ai_enabled`、每月預算 `ai_monthly_budget_usd`（預設 18）、降級提醒門檻 `ai_budget_alert_ratio`（預設 0.8）、`ai_protection`（用量保護的數值，M1a-04 定格式） |
 | `error_logs` | M0 | ADR-21 |
-| `ingredient_mappings` | M0 | 全站共用的食材對應快取（只來自 AI 與你的審查） |
-| `background_jobs` | M1a | 背景任務佇列 |
+| `ingredient_mappings` | M1a-05 | 全站共用的食材對應快取（只來自 AI 與你的審查）。主鍵 `raw_text_normalized`（`private.normalize_term`：全形轉半形、小寫、去空白，最長 60 字）；`ingredient_id` 為空表示 AI 看過、候選裡沒有合適的（不再重問）；`source` 是 `ai` 或 `admin`。使用者讀不到，只有資料庫函式能寫 |
+| `background_jobs` | M1a-05 | 背景任務佇列。使用者不能讀寫。欄位：`kind`（目前只有 `normalize_ingredients`）、`dedupe_key`（詞的標準寫法；同一個詞排隊或執行中只會有一筆）、`payload`、`requested_by`（第一個排隊的人，AI 用量算在他身上）、`status`（`pending`／`running`／`done`／`dead`）、`attempts`／`max_attempts`（5）、`run_after`、`locked_at`、`last_error`（只存代號）。完成的 7 天後、放棄的 30 天後由 `purge_background_jobs` 刪除 |
 | `ai_usage_records`、`ai_spend_monthly`、`ai_rate_counters`、`ai_usage_alerts` | M1a-04 | AI 用量與保護。四張表都沒有任何角色能直接存取，只經 `ai_guard_check`（呼叫前：全站預算 → 個人與方案的每日／每月上限 → 速率，同一個交易、列鎖原子計數）、`ai_record_usage`（呼叫後：寫紀錄、累加每月累計、80%／100% 提醒、異常偵測）與 `admin_*`；格式與預設值見 05 `aiProtection` 與 03〈用量保護〉。每日維護清過期的速率計數與 13 個月前的明細 |
 | `admin_audit_logs` | M1a | 管理員每個寫入操作的紀錄（誰、何時、做了什麼；`detail` 只放代號、數字與設定的前後值，不放 email 與 token）。只能新增：沒有任何角色能直接讀寫，修改、刪除、清空由觸發器擋下（連資料庫擁有者也一樣）；`admin_user_id` 不設外鍵，免得刪帳號時被「不能修改」擋住 |
 | `product_events`、`analytics_identities`、`product_metrics_monthly` | M1a | 產品數據 |
@@ -180,7 +181,9 @@
 | `delete_recipe`、`restore_recipe` | 作者 | 軟刪除與復原；`app_config.soft_delete_retention_days` 內可以復原，到期後由每日維護真正刪除 |
 | `search_my_recipes` | 已登入、啟用中的使用者 | 以關鍵字找自己已發佈、未刪除的食譜：比對名稱與食材原文（不分大小寫，`%`、`_` 當一般字元），回傳食譜 ID、符合的是名稱還是食材、符合的文字，最多 200 筆。M0 用 `ilike`，之後換 PGroonga 時介面不變 |
 | `record_cook_again` | 作者 | 新增一筆「又做了一次」，更新 `cooked_dates` |
-| `add_pantry_items` | 廚房成員 | 一次加入多樣食材（最多 100 樣）：已經有的只更新加入日期（保留較早的期限），沒有的新增；放哪裡沒指定時用字典的預設，對應不到字典就放 `pantry`；同一個 ID 重送不會重複新增。食材對應到字典（使用者自己的對應優先、全站對應其次）在 M1a 的食材正規化一起做 |
+| `add_pantry_items` | 廚房成員 | 一次加入多樣食材（最多 100 樣）：已經有的只更新加入日期（保留較早的期限），沒有的新增；放哪裡沒指定時用字典的預設，對應不到字典就放 `pantry`；同一個 ID 重送不會重複新增。沒給 `ingredient_id` 時，食材對應到字典的順序：使用者自己的對應（`user_ingredient_mappings`，蓋過手機送來的 ID）→ 手機送來的 `ingredient_id`（手機比對字典的結果）→ 全站對應（`ingredient_mappings`）→ 都對不到就保留原文並排進 `background_jobs`（M1a-05）。食譜食材同一套順序，用每列的 `name`（解析器拆出的食材名字）：`clean_recipe_ingredients` 在 `save_recipe` 裡補 `ingredient_id` 與排隊，不動原文 |
+| `set_my_ingredient_mapping`、`clear_my_ingredient_mapping` | 已登入、啟用中的使用者 | 使用者手動修正（M1a-05）：把一個詞對應到字典食材（不能是不存在或已淘汰的）。寫進自己的 `user_ingredient_mappings`，同時把自己已存的食材（`created_by`）與食譜食材（`user_id`）裡同一個詞的 `ingredient_id` 改掉（原文不動；同一廚房已有同樣食材的略過）；不影響別人與全站對應。`clear_` 只拿掉對應，已存的維持現狀 |
+| `claim_background_jobs`、`complete_normalization_jobs`、`fail_background_job`、`release_background_jobs` | 只有 `service_role`（`background-jobs` 函式） | 領一批到期的任務（執行中超過 10 分鐘視為中斷）；回報結果（寫全站對應、回填、標完成；已有的全站對應不蓋掉）；失敗（2、4、8、16 分鐘退避，次數用完標 `dead`）；暫時不能處理時放回佇列（不算一次嘗試）。回填只改 `ingredient_id`（食材 `ingredient_id` 空的、食譜每列 `name` 相符且沒有 `ingredient_id` 的），重算食譜的 `ingredient_ids`，不改原文、不動 `updated_at`，略過自己有同一個詞對應的人 |
 | `remove_pantry_item`、`restore_pantry_item` | 廚房成員 | 移除與復原；復原時同一種食材已經又被加回來，就併進現有那一筆（保留較早的加入日期與期限），被復原的那一筆維持移除 |
 | `merge_kitchen_into` | 來源廚房的管理者，且是目標廚房的成員 | 把一個廚房的食材與廚具搬到另一個，同一種食材合併 |
 | `create_kitchen` | 已登入的人 | 建立廚房，呼叫的人成為管理者；時區與地區用手機送來的值（檢查是有效的時區與地區代碼）；同一個 ID 重送不會重複建立；回傳廚房，由手機接著切換過去 |
@@ -231,6 +234,7 @@
 | `track` | 已登入的人 | 收產品事件與手機的錯誤紀錄，由後端填分析 ID 後寫入 |
 | `admin` | 系統管理員（兩步驟驗證） | 後台的所有資料與操作（含 `set_user_plan` 調整方案、`get_ai_models` 唯讀看各任務的模型，`update_config` 可改 AI 總開關與每月預算），每次寫操作紀錄。不開閘道的 JWT 驗證，自己依序檢查：token 交給 Auth 驗證（401 `unauthorized`）→ 是啟用中的系統管理員（403 `forbidden`，不是管理員的人只看到這個）→ JWT 的 `aal` 是 `aal2`（403 `mfa_required`，前端據此引導綁定或輸入驗證碼）。`body.action`：`get_config`、`list_users`、`list_invites`、`list_audit_logs`、`create_invite`、`regenerate_invite`、`revoke_invite`、`extend_invite`、`update_invite_email`、`set_user_status`、`create_reset_link`、`update_config`；AI 用量保護（M1a-04）：`get_ai_protection`、`update_ai_protection`、`set_user_fair_use`（個人每日／每月上限覆寫，`clear` 回到方案的值）、`set_user_ai_paused`、`list_ai_alerts`（`open`／`resolved`／`all`）、`resolve_ai_alert`、`get_ai_usage`（本月用量與預算進度、Console 硬上限對照、依任務與模型拆分、使用者排行），寫入都留操作紀錄；邀請與重設連結只回傳原始 token（只此一次），由前端組成網址。資料庫錯誤對應成代號（`invite_not_usable`、`invite_pending_exists`、`already_registered`、`invite_capacity`、`cannot_target_self`…），沒見過的一律 `server_error`，回應與紀錄不含 email 與 token。`is_system_admin()`（RLS 與 `create_invite` 等用的判斷）同樣要求 `aal2`。兩步驟驗證用 Supabase Auth 的 TOTP（本機 `config.toml` 已開；測試與正式專案在 Dashboard → Authentication → MFA 開啟） |
 | `maintenance` | 只有排程 | 需要 Storage API 的清理（孤兒照片、刪除帳號後的照片） |
+| `background-jobs` | 只有資料庫排程（`pg_cron` → `pg_net`） | 執行背景任務佇列（M1a-05：食材正規化）。要帶 `BACKGROUND_JOBS_TOKEN`。流程（`functions/background-jobs/runner.ts`，資料庫與 AI 由外面傳入，單元測試用假的）：全站預算用完就不領 → 領 20 個詞 → 程式從字典挑候選（`_shared/ingredient-candidates.ts`：名字或別名包含、二連詞重疊，最多 8 個，已淘汰的不列；沒有候選的詞不問 AI，直接記成沒有合適的）→ 一次呼叫 `normalize_ingredients`（Haiku 5.5，AI 只回「選第幾個候選，0 是沒有合適的」；選的一定在候選裡，超出範圍就丟掉並讓任務重試）→ 回報結果。用量用 `runAi`（同 `ai` 的流程）算在排隊的人身上；那個人超過上限或被暫停就換下一位，都不行就放回佇列 5 分鐘；預算用完或 AI 關閉就放回佇列 10 分鐘；Claude 出錯等失敗退避重試。紀錄只有數量與錯誤代號，不含食材原文 |
 | `mcp` | 經 OAuth 授權的外部 AI | M4 |
 
 **Auth「建立使用者前」hook**（`hook_before_user_created`，Postgres 函式 hook，只有 `supabase_auth_admin` 能執行）：
@@ -272,7 +276,7 @@
 | 排程 | 頻率 | 做什麼 |
 |------|------|-------|
 | 到期提醒、週末靈感 | 每 15 分鐘（`pg_cron`） | 找出現在是當地提醒時間的廚房、週六早上的使用者，排入推播 |
-| 背景任務 | 每分鐘 | 執行 `background_jobs` 裡到期的任務，失敗就退避重試 |
+| 背景任務 | 每分鐘（`pg_cron`） | `private.dispatch_background_jobs`：有到期的任務、而且累積到 20 個或最早的已經等超過 2 分鐘，才用 `pg_net` 叫 `background-jobs`（累積幾個詞一起送，少呼叫幾次 AI）；失敗就退避重試。另每天 19:40（UTC）清掉完成與放棄很久的任務 |
 | 每日維護 | 每天凌晨 | 刪除超過 30 天的對話、移除超過 30 天的食材（`private.purge_removed_pantry_items`）、90 天的通知與錯誤紀錄、過期的速率計數；軟刪除到期的資料（食譜、廚房）；13 個月以上的產品事件與 AI 用量明細；AI 費用對帳 |
 | 每月匯總 | 每月 1 日 | 產生上個月的 `product_metrics_monthly` |
 | 喚醒與孤兒照片檔 | 每週（GitHub Actions，`weekly.yml`） | 喚醒測試與正式專案；呼叫 `maintenance` 清掉資料庫沒有記錄、且超過 24 小時的照片檔（孤兒超過檔案總數一半時不刪，記一筆 critical） |

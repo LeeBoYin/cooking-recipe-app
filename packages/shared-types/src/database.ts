@@ -107,6 +107,20 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"background_jobs": {
+                  Row: {
+                    "attempts": number,"created_at": string,"dedupe_key": string,"id": string,"kind": string,"last_error": string | null,"locked_at": string | null,"max_attempts": number,"payload": NonNullable<Json>,"requested_by": string | null,"run_after": string,"status": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempts"?: number,"created_at"?: string,"dedupe_key": string,"id"?: string,"kind": string,"last_error"?: string | null,"locked_at"?: string | null,"max_attempts"?: number,"payload"?: NonNullable<Json>,"requested_by"?: string | null,"run_after"?: string,"status"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "attempts"?: number,"created_at"?: string,"dedupe_key"?: string,"id"?: string,"kind"?: string,"last_error"?: string | null,"locked_at"?: string | null,"max_attempts"?: number,"payload"?: NonNullable<Json>,"requested_by"?: string | null,"run_after"?: string,"status"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"bookmarks": {
                   Row: {
                     "cooked_recipe_id": string | null,"created_at": string,"deleted_at": string | null,"id": string,"idea": NonNullable<Json>,"idea_ingredient_ids": (string)[],"kind": string,"note": string | null,"updated_at": string,"user_id": string
@@ -375,6 +389,26 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"ingredient_mappings": {
+                  Row: {
+                    "created_at": string,"ingredient_id": string | null,"model": string | null,"raw_text_normalized": string,"source": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"ingredient_id"?: string | null,"model"?: string | null,"raw_text_normalized": string,"source": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"ingredient_id"?: string | null,"model"?: string | null,"raw_text_normalized"?: string,"source"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ingredient_mappings_ingredient_id_fkey"
+      columns: ["ingredient_id"]
+isOneToOne: false
+      referencedRelation: "dict_ingredients"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"invite_code_attempts": {
                   Row: {
                     "created_at": string,"failed_count": number,"last_failed_at": string | null,"locked_until": string | null,"source_hash": string,"updated_at": string
@@ -609,6 +643,26 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"user_ingredient_mappings": {
+                  Row: {
+                    "created_at": string,"ingredient_id": string,"raw_text_normalized": string,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"ingredient_id": string,"raw_text_normalized": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"ingredient_id"?: string,"raw_text_normalized"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "user_ingredient_mappings_ingredient_id_fkey"
+      columns: ["ingredient_id"]
+isOneToOne: false
+      referencedRelation: "dict_ingredients"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"user_profiles": {
                   Row: {
                     "ai_paused": boolean,"created_at": string,"invite_id": string | null,"last_active_at": string | null,"role": string,"status": string,"updated_at": string,"user_id": string
@@ -789,14 +843,23 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"claim_background_jobs":
+{ Args: { "p_kind": string,"p_limit"?: number }; Returns: Json
+                           },
 "claim_password_reset_link":
 { Args: { "p_token_hash": string }; Returns: string
+                           },
+"clear_my_ingredient_mapping":
+{ Args: { "p_raw_text": string }; Returns: undefined
                            },
 "complete_google_signup":
 { Args: { "p_display_name"?: string,"p_region"?: string,"p_timezone"?: string }; Returns: string
                            },
 "complete_invite_signup":
 { Args: { "p_display_name"?: string,"p_invite_id": string,"p_region"?: string,"p_timezone"?: string,"p_user_id": string }; Returns: string
+                           },
+"complete_normalization_jobs":
+{ Args: { "p_results": Json }; Returns: number
                            },
 "create_invite":
 { Args: { "p_befriend_inviter"?: boolean,"p_email": string,"p_id": string,"p_invited_by"?: string,"p_kitchen_id"?: string,"p_note"?: string,"p_plan"?: string,"p_type"?: string }; Returns: {
@@ -850,6 +913,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"fail_background_job":
+{ Args: { "p_code": string,"p_id": string,"p_retry"?: boolean }; Returns: undefined
+                           },
 "hook_before_user_created":
 { Args: { "event": Json }; Returns: Json
                            },
@@ -905,6 +971,9 @@ isOneToOne: false
 { Args: { "p_code_hash": string,"p_source_hash": string }; Returns: {
               "email": string,"invite_id": string,"locked_until": string,"result": string
             }[]
+                           },
+"release_background_jobs":
+{ Args: { "p_delay_seconds"?: number,"p_ids": (string)[] }; Returns: undefined
                            },
 "release_password_reset_link":
 { Args: { "p_token_hash": string }; Returns: undefined
@@ -1068,6 +1137,9 @@ isOneToOne: false
                            },
 "set_invite_code":
 { Args: { "p_code_hash": string,"p_invite_id": string }; Returns: string
+                           },
+"set_my_ingredient_mapping":
+{ Args: { "p_ingredient_id": string,"p_raw_text": string }; Returns: undefined
                            },
 "setup_new_user":
 { Args: { "p_create_kitchen"?: boolean,"p_display_name"?: string,"p_kitchen_name"?: string,"p_region"?: string,"p_timezone"?: string,"p_user_id": string }; Returns: string
