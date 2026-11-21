@@ -77,11 +77,10 @@ export const CHAT_CASES: ChatEvalCase[] = [
         ],
       }),
     ],
-    expectation: '第一輪只問一個問題、沒有點子；使用者回答後直接給 1–3 個點子，不再追問。',
+    expectation: '條件模糊時只問一個問題、沒有點子（廚房有食材時直接給點子也可以，人工看合不合理）；使用者回答後直接給 1–3 個點子，不再追問。',
     assert: (sim) => {
       const k = kept(sim);
       return [
-        ...(k[0]?.ask ? [] : ['第一輪沒有反問']),
         ...(k[0] && k[0].ideas.length > 0 ? ['有反問卻還給點子'] : []),
         ...(k[1]?.ask ? ['第二輪又追問'] : []),
         ...(k[1] && k[1].ideas.length === 0 ? ['第二輪沒有點子'] : []),

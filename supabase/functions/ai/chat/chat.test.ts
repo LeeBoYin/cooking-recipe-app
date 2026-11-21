@@ -194,3 +194,18 @@ Deno.test('handler：開新的一段帶舊的摘要', async () => {
   assertEquals(calls.find((c) => c.fn === 'ai_chat_append')?.args.p_carry_summary, '想吃熱的；不要太辣');
   assert((claudeCalls.claude[0]?.messages.at(-1)?.content ?? '').includes('想吃熱的；不要太辣'));
 });
+
+Deno.test('檢查：AI 不知道 ID 的說過的食材，由程式用字典查，點子的「其他材料」裡的改成「你說的」', () => {
+  const c = CHAT_CASES[3];
+  assert(c);
+  const ce = buildChatEnv(c.ctx, NOW, null, '鄰居送了一些筍子，想煮湯');
+  const r = checkChatOutput({
+    reply: '筍子煮湯最甜。', ask: null, summary: '想煮湯；有筍子', preference_signals: [],
+    mentioned_ingredients: [{ text: '筍子', ingredient_id: null }],
+    suggestions: [idea(ce, { title: '筍子排骨湯', uses_pantry_ids: ['pork-ribs'], other_ingredients: [{ name: '筍子' }] })],
+  }, ce);
+  assert(r.ok);
+  assertEquals(r.mentioned, [{ text: '筍子', ingredientId: 'bamboo-shoot' }]);
+  assertEquals(r.ideas[0]?.usesMentionedIds, ['bamboo-shoot']);
+  assertEquals(r.ideas[0]?.otherIngredients, []);
+});

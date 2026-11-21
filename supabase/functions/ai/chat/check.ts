@@ -1,10 +1,10 @@
 // 對話輸出的程式再檢查（03〈安全與信任〉）：點子走首頁同一套檢查（過敏原、排除清單、關鍵字、手法廚具、禁用字眼…），
 // 大廚的話、反問、說過的食材、偏好訊號、摘要另外檢查。不合格的拿掉，不補。純函式，評估集與單元測試餵假的 AI 回應。
 // 紀錄只留原因與數量，不含內容。
-import { violatesLimits, type AiIdea } from '../../../../packages/core/src/index.ts';
+import { matchIngredient, violatesLimits, type AiIdea } from '../../../../packages/core/src/index.ts';
 import { checkHomeOutput } from '../home/check.ts';
 import { wordingProblems } from '../home/check.ts';
-import { dimensionKeys, ideaIngredients } from '../home/env.ts';
+import { dimensionKeys, ideaIngredients, ingredientIndex } from '../home/env.ts';
 import type { DropReason } from '../home/types.ts';
 import { norm, type ChatEnv } from './env.ts';
 import type { ChatDropReason, ChatMention, ChatSignal, RawChatOutput } from './types.ts';
@@ -74,11 +74,13 @@ export function checkChatOutput(raw: RawChatOutput, ce: ChatEnv, opts: { makeId?
     if (!text || [...text].length > 40 || !ce.userText.includes(n) || seenText.has(n)) { drop('mention'); continue; }
     if (includesAny(text, env.hardTerms) || includesAny(text, env.dislikeTerms)) { drop('mention'); continue; }
     let id: string | null = null;
-    if (typeof m.ingredient_id === 'string' && m.ingredient_id) {
+    // AI 不知道字典的 ID（不在手邊食材清單裡的）：對不到就由程式用字典查
+    const wanted = typeof m.ingredient_id === 'string' && m.ingredient_id ? m.ingredient_id : (matchIngredient(text, ingredientIndex) ?? null);
+    if (wanted) {
       // ID 要是字典裡的、不能是排除清單的。字和 ID 對不對得上不硬檢查（字典沒收「筍子」這種說法，但 AI 知道是竹筍）；
       // 對錯了只是點子用錯食材，不影響安全（過敏原與排除清單照樣擋）
-      if (!ideaIngredients.has(m.ingredient_id) || violatesLimits([m.ingredient_id], {}, env.limits, ideaIngredients)) { drop('mention'); continue; }
-      id = m.ingredient_id;
+      if (!ideaIngredients.has(wanted) || violatesLimits([wanted], {}, env.limits, ideaIngredients)) { drop('mention'); continue; }
+      id = wanted;
     }
     seenText.add(n);
     mentioned.push({ text, ingredientId: id });
@@ -90,8 +92,19 @@ export function checkChatOutput(raw: RawChatOutput, ce: ChatEnv, opts: { makeId?
   const gave = Array.isArray(raw.suggestions) ? raw.suggestions.length : 0;
   let ideas: AiIdea[] = [];
   if (!ask && gave > 0) {
+    // 點子的「其他材料」裡其實是使用者說過的食材（AI 不知道它的 ID）：改成「你說的」
+    const suggestions = raw.suggestions.map((r) => {
+      if (!r || !Array.isArray(r.other_ingredients) || !Array.isArray(r.uses_pantry_ids)) return r;
+      const moved: string[] = [];
+      const rest = r.other_ingredients.filter((o) => {
+        const id = typeof o?.name === 'string' ? matchIngredient(o.name, ingredientIndex) : undefined;
+        if (id && extra.has(id)) { moved.push(id); return false; }
+        return true;
+      });
+      return moved.length ? { ...r, other_ingredients: rest, uses_pantry_ids: [...r.uses_pantry_ids, ...moved] } : r;
+    });
     const checked = checkHomeOutput(
-      { suggestions: raw.suggestions, chef_comment: '' },
+      { suggestions, chef_comment: '' },
       env,
       { slotLimits: { familiar: MAX_IDEAS, twist: MAX_IDEAS, adventure: MAX_IDEAS }, maxIdeas: MAX_IDEAS, extraIds: extra, ...(opts.makeId ? { makeId: opts.makeId } : {}) },
     );
