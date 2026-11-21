@@ -37,6 +37,26 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"bookmarks": {
+                  Row: {
+                    "cooked_recipe_id": string | null,"created_at": string,"deleted_at": string | null,"id": string,"idea": NonNullable<Json>,"idea_ingredient_ids": (string)[],"kind": string,"note": string | null,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cooked_recipe_id"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"id": string,"idea": NonNullable<Json>,"idea_ingredient_ids"?: (string)[],"kind": string,"note"?: string | null,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "cooked_recipe_id"?: string | null,"created_at"?: string,"deleted_at"?: string | null,"id"?: string,"idea"?: NonNullable<Json>,"idea_ingredient_ids"?: (string)[],"kind"?: string,"note"?: string | null,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "bookmarks_cooked_recipe_id_fkey"
+      columns: ["cooked_recipe_id"]
+isOneToOne: false
+      referencedRelation: "recipes"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"dict_allergens": {
                   Row: {
                     "aliases": NonNullable<Json>,"deprecated": boolean,"display_level_by_region": NonNullable<Json>,"id": string,"name": NonNullable<Json>,"parent_id": string | null,"regions": (string)[],"replaced_by": string | null
@@ -528,6 +548,25 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"bookmark_recipe":
+{ Args: { "p_base_dish_id": string,"p_id": string,"p_title": string,"p_why": string }; Returns: {
+              "cooked_recipe_id": string | null,
+"created_at": string,
+"deleted_at": string | null,
+"id": string,
+"idea": NonNullable<Json>,
+"idea_ingredient_ids": (string)[],
+"kind": string,
+"note": string | null,
+"updated_at": string,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "bookmarks"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "delete_recipe":
 { Args: { "p_id": string }; Returns: {
               "ai_tags": Json | null,
@@ -774,6 +813,9 @@ isOneToOne: false
                            },
 "setup_new_user":
 { Args: { "p_create_kitchen"?: boolean,"p_display_name"?: string,"p_kitchen_name"?: string,"p_region"?: string,"p_timezone"?: string,"p_user_id": string }; Returns: string
+                           },
+"unbookmark_recipe":
+{ Args: { "p_id": string }; Returns: undefined
                            }
           }
           Enums: {

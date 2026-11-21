@@ -4,15 +4,31 @@ import { useNavigate } from 'react-router';
 import type { Idea, TasteProfile } from '@zhusha/core';
 import { getIngredient } from '@zhusha/ingredients';
 import { Chef } from '../../chef/Chef.tsx';
+import type { Bookmark } from '../../data/bookmarks.ts';
+import { useBookmarkIdea, useUnbookmark } from '../../data/hooks.ts';
 import { reasonMessage } from './reason.ts';
 
 // 點子抽屜：菜名、理由、主要食材（廚房有的標「廚房有」）。
-// 基礎菜色的主按鈕「收藏」在 M0-19b 才接；這裡先不放。自己的食譜的主按鈕是「打開食譜」
-export function IdeaSheet({ idea, profile, onClose }: { idea: Idea; profile: TasteProfile; onClose: () => void }) {
+// 基礎菜色的主按鈕是「收藏」（已收藏顯示「已收藏」，再按取消）；自己的食譜不收藏，主按鈕是「打開食譜」
+export function IdeaSheet({ idea, profile, bookmark, onClose }: {
+  idea: Idea;
+  profile: TasteProfile;
+  bookmark?: Bookmark | undefined;
+  onClose: () => void;
+}) {
   const intl = useIntl();
   const navigate = useNavigate();
   const reason = reasonMessage(idea.reason, profile);
   const have = new Set(idea.haveIngredientIds);
+  const add = useBookmarkIdea();
+  const remove = useUnbookmark();
+  const busy = add.isPending || remove.isPending;
+  const failed = add.isError || remove.isError;
+
+  function toggle() {
+    if (bookmark) remove.mutate(bookmark.id);
+    else add.mutate({ title: idea.title, why: `${intl.formatMessage({ id: reason.id }, reason.values)}`, baseDishId: idea.id });
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -80,13 +96,29 @@ export function IdeaSheet({ idea, profile, onClose }: { idea: Idea; profile: Tas
           </button>
         )}
         {idea.source === 'dish' && (
-          <button
-            type="button"
-            onClick={() => void navigate('/recipes/new', { state: { title: idea.title } })}
-            className="-mt-1.5 h-10 border-0 bg-transparent font-[inherit] text-caption text-ink-muted"
-          >
-            <FormattedMessage id="idea.sheet.record" />
-          </button>
+          <>
+            <button
+              type="button"
+              aria-pressed={!!bookmark}
+              disabled={busy}
+              onClick={toggle}
+              className={`h-12 rounded-card border-2 border-ink font-[inherit] text-body font-bold text-ink ${bookmark ? 'bg-surface' : 'bg-bulb'}`}
+            >
+              <FormattedMessage id={bookmark ? 'idea.sheet.bookmarked' : 'idea.sheet.bookmark'} />
+            </button>
+            {failed && (
+              <p role="alert" className="m-0 text-caption text-error">
+                <FormattedMessage id="idea.sheet.bookmarkError" />
+              </p>
+            )}
+            <button
+              type="button"
+              onClick={() => void navigate('/recipes/new', { state: { title: idea.title, bookmarkId: bookmark?.id } })}
+              className="-mt-1.5 h-10 border-0 bg-transparent font-[inherit] text-caption text-ink-muted"
+            >
+              <FormattedMessage id="idea.sheet.record" />
+            </button>
+          </>
         )}
       </div>
     </div>

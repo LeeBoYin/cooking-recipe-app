@@ -6,8 +6,9 @@ import { emptyProfile, todayInTimeZone, type Idea } from '@zhusha/core';
 import { Chef } from '../../chef/Chef.tsx';
 import { signOut } from '../../data/auth.ts';
 import {
-  useCurrentKitchen, useKitchenEquipment, useMyDietary, useMyIdentity, useMyRecipes, useMyTasteProfile, usePantryItems,
+  useCurrentKitchen, useKitchenEquipment, useMyBookmarks, useMyDietary, useMyIdentity, useMyRecipes, useMyTasteProfile, usePantryItems,
 } from '../../data/hooks.ts';
+import { ideaOf } from '../../data/bookmarks.ts';
 import { buildPool, hasNextIdeaSet, ideaSet } from './ideas.ts';
 import { IdeaCard } from './IdeaCard.tsx';
 import { IdeaSheet } from './IdeaSheet.tsx';
@@ -27,6 +28,7 @@ export function HomePage() {
   const pantry = usePantryItems(kitchen?.id);
   const equipment = useKitchenEquipment(kitchen?.id);
   const recipes = useMyRecipes('published');
+  const bookmarks = useMyBookmarks();
   const [, rerender] = useState(0);
   const [open, setOpen] = useState<Idea | null>(null);
 
@@ -54,6 +56,9 @@ export function HomePage() {
   const round = computed ? (rounds.get(computed.seedKey) ?? 0) : 0;
   const ideas = computed ? ideaSet(computed.pool, computed.seedKey, round) : [];
   const hasNext = computed ? hasNextIdeaSet(computed.pool, computed.seedKey, round) : false;
+
+  // 收藏過的家常菜（同一道每人只有一筆）
+  const bookmarkOf = new Map((bookmarks.data ?? []).map((b) => [ideaOf(b).baseDishId, b]));
 
   async function onSignOut() {
     await signOut();
@@ -120,7 +125,7 @@ export function HomePage() {
           <>
             <ul className="-mx-4 my-0 flex snap-x snap-mandatory scroll-px-4 list-none gap-2 overflow-x-auto px-4 pb-0 [scrollbar-width:none]">
               {ideas.map((idea) => (
-                <IdeaCard key={idea.key} idea={idea} profile={profile} onOpen={() => setOpen(idea)} />
+                <IdeaCard key={idea.key} idea={idea} profile={profile} bookmarked={idea.source === 'dish' && bookmarkOf.has(idea.id)} onOpen={() => setOpen(idea)} />
               ))}
             </ul>
             {hasNext && (
@@ -141,7 +146,7 @@ export function HomePage() {
         )}
       </div>
 
-      {open && <IdeaSheet idea={open} profile={profile} onClose={() => setOpen(null)} />}
+      {open && <IdeaSheet idea={open} profile={profile} bookmark={open.source === 'dish' ? bookmarkOf.get(open.id) : undefined} onClose={() => setOpen(null)} />}
 
       <button
         type="button"

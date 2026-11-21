@@ -16,7 +16,9 @@ export type TimelineEntry = {
   thumbPath?: string; // 縮圖：食譜是封面，又做了一次是那次的第一張
 };
 
-export type MonthGroup = { key: string; year: number; month: number; showYear: boolean; entries: TimelineEntry[] };
+export type MonthGroup<T extends { date: string } = TimelineEntry> = {
+  key: string; year: number; month: number; showYear: boolean; entries: T[];
+};
 
 // 某個時間點在指定時區的日期（YYYY-MM-DD）
 export function localDate(iso: string, timeZone: string): string {
@@ -59,9 +61,9 @@ export function buildTimeline(recipes: Recipe[], photos: RecipePhotoLite[], time
 }
 
 // 依月分組（輸入要已經排好）。today 是今天的日期（YYYY-MM-DD），不是今年的月標題才要寫年
-export function groupByMonth(entries: TimelineEntry[], today: string): MonthGroup[] {
+export function groupByMonth<T extends { date: string }>(entries: T[], today: string): MonthGroup<T>[] {
   const thisYear = Number(today.slice(0, 4));
-  const groups: MonthGroup[] = [];
+  const groups: MonthGroup<T>[] = [];
   for (const e of entries) {
     const key = e.date.slice(0, 7);
     let g = groups[groups.length - 1];
