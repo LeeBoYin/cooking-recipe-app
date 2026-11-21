@@ -1,19 +1,19 @@
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import { useCurrentKitchen, useRecentlyRemovedPantry, useRestorePantryItem } from '../../data/hooks.ts';
-import { SubPage } from '../shell/SubPage.tsx';
-import { displayName, emojiFor } from './labels.ts';
+import { displayName, emojiFor } from '../pantry/labels.ts';
 
-// 最近移除：30 天內拿掉的食材，一鍵復原（02 移除）
-export function RemovedPage() {
-  const intl = useIntl();
+// 「我的 → 最近刪除」的食材區：只列目前所在廚房、30 天內拿掉的食材，一鍵復原（02 移除）
+export function TrashPantry() {
   const { kitchen } = useCurrentKitchen();
   const removed = useRecentlyRemovedPantry(kitchen?.id);
   const restore = useRestorePantryItem(kitchen?.id);
   const items = removed.data ?? [];
   return (
-    <SubPage srTitle={intl.formatMessage({ id: 'pantry.removed' })}>
+    <section aria-labelledby="trash-pantry">
       <div className="flex flex-col gap-3">
-        <h2 className="m-0 font-round text-heading font-bold"><FormattedMessage id="pantry.removed" /></h2>
+        <h2 id="trash-pantry" className="m-0 font-round text-heading font-bold">
+          {kitchen ? <FormattedMessage id="trash.pantry" values={{ kitchen: kitchen.name }} /> : <FormattedMessage id="trash.pantry.loading" />}
+        </h2>
         {removed.isPending ? (
           <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="common.loading" /></p>
         ) : removed.error ? (
@@ -42,6 +42,6 @@ export function RemovedPage() {
           <p role="alert" className="m-0 text-caption text-error"><FormattedMessage id="pantry.error.write" /></p>
         )}
       </div>
-    </SubPage>
+    </section>
   );
 }

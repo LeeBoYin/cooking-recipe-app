@@ -392,7 +392,7 @@ interface PantryItem extends KitchenEntity {   // 屬於廚房，同廚房的成
   dateType?: 'use-by' | 'best-before';   // 有效日期／賞味期限；不做系統估算
   expirySetOn?: LocalDate;    // 設定期限的那天，計算提醒比例用；由資料庫在期限變動時填
   status: 'active' | 'removed';   // removed 不區分用掉或丟掉、不問原因
-  removedAt?: Instant;        // 「最近移除」清單用，可復原（復原就改回 active）
+  removedAt?: Instant;        // 「我的 → 最近刪除」清單用，可復原（復原就改回 active）
   removedBy?: string;         // 哪位成員移除的
   alertNotified?: { tier: 'soon' | 'expiring' | 'expired' | 'past_best'; on: LocalDate };   // 到期提醒已經通知到哪一級（🟡🟠🔴⚪）；存在廚房層級，一人處理（移除或改日期）後所有成員的提醒一起消失；改日期時清空
   stillThereAskedOn?: LocalDate;  // 上次問「還在嗎？」的日期，避免重複問；使用者回答「還在」也記在這裡
@@ -1183,7 +1183,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 食材有哪些 | `pantry_items (kitchen_id, status)` 取目前廚房、狀態為 active 的食材（通常只有幾十到幾百筆） |
 | 最近買的 | 同上，依 `added_on` 與字典的 `recentDays` 判斷 |
 | 設了期限、快到期的 | 同上，篩有 `expires_at` 的，依比例計算提醒狀態；計算函式放在 `packages/core`，排程推播也用同一個 |
-| 最近移除（可復原） | `pantry_items (kitchen_id, removed_at)` |
+| 最近刪除的食材（可復原） | `pantry_items (kitchen_id, removed_at)` |
 | 常買清單 | `pantry_items (kitchen_id, ingredient_id, added_on)`：過去 30 天加入過的食材依筆數排序（已移除的也算；再加入已有的食材只更新日期，所以一筆代表一段「有」的期間）；次數不顯示。新廚房用 `RegionProfile.commonPantryIngredientIds` |
 | 食譜時間軸 | `recipes.cooked_dates`（GIN 索引）展開成「食譜＋日期」、依月分組，只取 published、未刪除；又做了一次的那天顯示那次的照片與一句話 |
 | 草稿匣 | `recipes (user_id, status)` 取 draft |

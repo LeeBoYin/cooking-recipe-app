@@ -1,11 +1,10 @@
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useMyDeletedRecipes, useMyRecipePhotos, usePhotoUrls, useRestoreRecipe } from '../../data/hooks.ts';
 import { recipeLimits } from '../../data/recipes.ts';
-import { InnerHeader } from './InnerHeader.tsx';
-import { daysLeft } from './timeline.ts';
+import { daysLeft } from '../recipes/timeline.ts';
 
-// 最近刪除：保留期限內可以復原，之後真的刪掉（沒有紅色警告）
-export function DeletedPage() {
+// 「我的 → 最近刪除」的食譜區（含草稿）：保留期限內可以復原，之後真的刪掉（沒有紅色警告）
+export function TrashRecipes() {
   const intl = useIntl();
   const deleted = useMyDeletedRecipes();
   const photos = useMyRecipePhotos();
@@ -13,8 +12,8 @@ export function DeletedPage() {
   const cover = (id: string) => photos.data?.find((p) => p.owner_id === id && !p.cook_note_id)?.thumb_path;
   const urls = usePhotoUrls((deleted.data ?? []).flatMap((d) => cover(d.id) ?? [])).data;
   return (
-    <section>
-      <InnerHeader title={intl.formatMessage({ id: 'recipes.deleted.title' })} />
+    <section aria-labelledby="trash-recipes">
+      <h2 id="trash-recipes" className="m-0 mb-1 font-round text-heading font-bold"><FormattedMessage id="trash.recipes" /></h2>
       <p className="m-0 mb-2 text-small text-ink-muted">
         <FormattedMessage id="recipes.deleted.help" values={{ days: recipeLimits.softDeleteDays }} />
       </p>

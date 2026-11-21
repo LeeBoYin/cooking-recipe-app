@@ -1,4 +1,4 @@
-import { BrowserRouter, Outlet, Route, Routes } from 'react-router';
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router';
 import { useMySettings } from './data/hooks.ts';
 import { Onboarding } from './features/onboarding/Onboarding.tsx';
 import { useSession } from './data/auth.ts';
@@ -12,7 +12,6 @@ import { KitchenPage } from './features/kitchen/KitchenPage.tsx';
 import { AddPage } from './features/pantry/AddPage.tsx';
 import { EditPage } from './features/pantry/EditPage.tsx';
 import { InventoryPage } from './features/pantry/InventoryPage.tsx';
-import { DeletedPage } from './features/recipes/DeletedPage.tsx';
 import { DraftsPage } from './features/recipes/DraftsPage.tsx';
 import { MyRecipesTab } from './features/recipes/MyRecipesTab.tsx';
 import { RecipesPage } from './features/recipes/RecipesPage.tsx';
@@ -21,7 +20,7 @@ import { NewRecipe } from './features/recipe/NewRecipe.tsx';
 import { RecipeEditPage } from './features/recipe/RecipeEditPage.tsx';
 import { RecipePage } from './features/recipe/RecipePage.tsx';
 import { PantryTab } from './features/pantry/PantryTab.tsx';
-import { RemovedPage } from './features/pantry/RemovedPage.tsx';
+import { TrashPage } from './features/me/TrashPage.tsx';
 import { AppShell } from './features/shell/AppShell.tsx';
 import { InnerLayout } from './features/shell/InnerLayout.tsx';
 import { TastePage } from './features/taste/TastePage.tsx';
@@ -72,7 +71,8 @@ export function App() {
             <Route element={<InnerLayout />}>
               <Route path="recipes/new" element={<NewRecipe />} />
               <Route path="recipes/drafts" element={<DraftsPage />} />
-              <Route path="recipes/deleted" element={<DeletedPage />} />
+              <Route path="me/trash" element={<TrashPage />} />
+              <Route path="recipes/deleted" element={<Navigate to="/me/trash" replace />} />
               <Route path="recipes/:id" element={<RecipePage />} />
               <Route path="recipes/:id/edit" element={<RecipeEditPage />} />
               <Route path="taste" element={<TastePage />} />
@@ -81,7 +81,7 @@ export function App() {
               <Route path="me/settings" element={<SettingsPage />} />
               <Route path="kitchen/pantry/add" element={<AddPage />} />
               <Route path="kitchen/pantry/inventory" element={<InventoryPage />} />
-              <Route path="kitchen/pantry/removed" element={<RemovedPage />} />
+              <Route path="kitchen/pantry/removed" element={<Navigate to="/me/trash" replace />} />
               <Route path="kitchen/pantry/:id" element={<EditPage />} />
               <Route path="kitchen/equipment/add" element={<AddEquipmentPage />} />
               <Route path="kitchen/equipment/inventory" element={<EquipmentInventoryPage />} />

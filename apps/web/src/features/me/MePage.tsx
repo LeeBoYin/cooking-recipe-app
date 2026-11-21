@@ -215,6 +215,7 @@ export function MePage() {
 
       <div className="overflow-hidden rounded-card bg-surface">
         {canInstall && <Row label={intl.formatMessage({ id: 'me.install' })} onClick={() => setInstallOpen(true)} />}
+        <Row to="/me/trash" label={intl.formatMessage({ id: 'trash.title' })} />
         <Row to="/onboarding" label={intl.formatMessage({ id: 'me.onboarding.redo' })} />
         <Row label={intl.formatMessage({ id: 'me.account' })} value={session?.user.email ? maskEmail(session.user.email) : undefined} />
         <Row danger label={intl.formatMessage({ id: 'signOut' })} onClick={() => void signOut()} />

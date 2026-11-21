@@ -60,7 +60,7 @@ function Row({ draft, thumb, open, onOpen, onDelete }: {
   );
 }
 
-// 草稿匣：只有自己看得到，沒有催促的文案。左滑露出「刪除」（刪掉的進「最近刪除」，可以復原）
+// 草稿匣：只有自己看得到，沒有催促的文案。左滑露出「刪除」（刪掉的進「我的 → 最近刪除」，可以復原）
 export function DraftsPage() {
   const intl = useIntl();
   const drafts = useMyRecipes('draft');
