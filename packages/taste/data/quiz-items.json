@@ -846,34 +846,6 @@
     ]
   },
   {
-    "id": "card_tiramisu",
-    "type": "dish_card",
-    "title": {
-      "zh-TW": "提拉米蘇"
-    },
-    "description": {
-      "zh-TW": "手指餅乾沾咖啡，疊上馬斯卡彭起司，冰過後綿密微苦"
-    },
-    "regions": [
-      "TW",
-      "US-CA",
-      "JP"
-    ],
-    "mapping": {
-      "form.dessert_baking": 0.8,
-      "cuisine.mediterranean.italian": 0.4,
-      "taste.sweet": 0.6,
-      "taste.bitter": 0.3,
-      "texture.smooth": 0.6
-    },
-    "excludedAllergenIds": [
-      "milk",
-      "egg",
-      "wheat",
-      "gluten-grain"
-    ]
-  },
-  {
     "id": "tot_rainy_day",
     "type": "this_or_that",
     "title": {
@@ -1741,10 +1713,9 @@
       },
       {
         "label": {
-          "zh-TW": "烤點甜點"
+          "zh-TW": "做一桌請朋友"
         },
-        "value": 0.4,
-        "addGoal": "form.dessert_baking"
+        "value": 0.6
       }
     ]
   },
@@ -1941,32 +1912,6 @@
       "vegan",
       "buddhist-vegetarian",
       "pescatarian"
-    ]
-  },
-  {
-    "id": "card_pineapple_cake",
-    "type": "dish_card",
-    "title": {
-      "zh-TW": "鳳梨酥"
-    },
-    "description": {
-      "zh-TW": "奶油酥皮包著微酸的鳳梨餡，一口酥香，帶點甜"
-    },
-    "regions": [
-      "TW"
-    ],
-    "mapping": {
-      "cuisine.taiwan": 0.7,
-      "form.dessert_baking": 0.8,
-      "taste.sweet": 0.6,
-      "taste.sour": 0.2,
-      "texture.crispy": 0.3
-    },
-    "excludedAllergenIds": [
-      "milk",
-      "egg",
-      "wheat",
-      "gluten-grain"
     ]
   },
   {
@@ -2381,8 +2326,7 @@
       "cuisine.american": 0.6,
       "taste.sour": 0.2,
       "texture.smooth": 0.4,
-      "protein.egg": 0.2,
-      "form.dessert_baking": 0.1
+      "protein.egg": 0.2
     },
     "excludedAllergenIds": [
       "wheat"
