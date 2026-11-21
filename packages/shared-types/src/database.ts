@@ -39,14 +39,14 @@ export type Database = {
                   ]
                 },"app_config": {
                   Row: {
-                    "id": boolean,"max_steps": number,"max_users": number,"photo_limits": NonNullable<Json>,"registration_mode": string,"soft_delete_retention_days": number,"text_limits": NonNullable<Json>,"updated_at": string
+                    "ai_budget_alert_ratio": number,"ai_enabled": boolean,"ai_monthly_budget_usd": number,"ai_protection": NonNullable<Json>,"id": boolean,"max_steps": number,"max_users": number,"photo_limits": NonNullable<Json>,"registration_mode": string,"soft_delete_retention_days": number,"text_limits": NonNullable<Json>,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "id"?: boolean,"max_steps"?: number,"max_users"?: number,"photo_limits"?: NonNullable<Json>,"registration_mode"?: string,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
+                    "ai_budget_alert_ratio"?: number,"ai_enabled"?: boolean,"ai_monthly_budget_usd"?: number,"ai_protection"?: NonNullable<Json>,"id"?: boolean,"max_steps"?: number,"max_users"?: number,"photo_limits"?: NonNullable<Json>,"registration_mode"?: string,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Update: {
-                    "id"?: boolean,"max_steps"?: number,"max_users"?: number,"photo_limits"?: NonNullable<Json>,"registration_mode"?: string,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
+                    "ai_budget_alert_ratio"?: number,"ai_enabled"?: boolean,"ai_monthly_budget_usd"?: number,"ai_protection"?: NonNullable<Json>,"id"?: boolean,"max_steps"?: number,"max_users"?: number,"photo_limits"?: NonNullable<Json>,"registration_mode"?: string,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -287,6 +287,20 @@ isOneToOne: false
                   }
                   Update: {
                     "allergen_ids"?: (string)[],"created_at"?: string,"dietary_restriction_ids"?: (string)[],"dislike_ingredient_ids"?: (string)[],"id"?: string,"no_cooking_alcohol"?: boolean,"schema_version"?: number,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"entitlements": {
+                  Row: {
+                    "created_at": string,"fair_use_override": Json | null,"plan": string,"updated_at": string,"user_id": string,"valid_until": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"fair_use_override"?: Json | null,"plan"?: string,"updated_at"?: string,"user_id": string,"valid_until"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"fair_use_override"?: Json | null,"plan"?: string,"updated_at"?: string,"user_id"?: string,"valid_until"?: string | null
                   }
                   Relationships: [
                     
@@ -652,14 +666,20 @@ isOneToOne: false
 "admin_revoke_invite":
 { Args: { "p_admin": string,"p_invite_id": string }; Returns: undefined
                            },
+"admin_set_user_plan":
+{ Args: { "p_admin": string,"p_plan": string,"p_user_id": string }; Returns: undefined
+                           },
 "admin_set_user_status":
 { Args: { "p_admin": string,"p_status": string,"p_user_id": string }; Returns: undefined
                            },
 "admin_update_config":
-{ Args: { "p_admin": string,"p_max_users"?: number,"p_soft_delete_retention_days"?: number }; Returns: Json
+{ Args: { "p_admin": string,"p_ai_enabled"?: boolean,"p_ai_monthly_budget_usd"?: number,"p_max_users"?: number,"p_soft_delete_retention_days"?: number }; Returns: Json
                            },
 "admin_update_invite_email":
 { Args: { "p_admin": string,"p_email": string,"p_invite_id": string }; Returns: undefined
+                           },
+"ai_get_context":
+{ Args: { "p_user": string }; Returns: Json
                            },
 "backfill_recipe_ingredients":
 { Args: { "p_ingredients": Json,"p_recipe_id": string }; Returns: boolean

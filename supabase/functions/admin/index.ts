@@ -4,6 +4,7 @@
 // 寫入動作都是資料庫函式，在同一個交易裡檢查、操作並寫入 admin_audit_logs。
 // 回應與紀錄不含 email、token。
 import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
+import { publicTaskList } from '../_shared/ai-models.ts';
 import { type AdminRequest, jwtClaims, mapDbError, parseRequest, uuidV7 } from './guard.ts';
 
 const CORS = {
@@ -35,8 +36,12 @@ async function run(client: SupabaseClient, admin: string, req: AdminRequest): Pr
   switch (req.action) {
     case 'get_config':
       return await rpc('admin_get_config', {});
+    case 'get_ai_models':
+      return { data: publicTaskList() }; // 設定檔唯讀顯示，不經資料庫
     case 'list_users':
       return await rpc('admin_list_users', {});
+    case 'set_user_plan':
+      return await rpc('admin_set_user_plan', { p_user_id: req.userId, p_plan: req.plan });
     case 'list_invites':
       return await rpc('admin_list_invites', {});
     case 'list_audit_logs':
@@ -65,6 +70,8 @@ async function run(client: SupabaseClient, admin: string, req: AdminRequest): Pr
       return await rpc('admin_update_config', {
         p_max_users: req.maxUsers,
         p_soft_delete_retention_days: req.softDeleteRetentionDays,
+        p_ai_enabled: req.aiEnabled,
+        p_ai_monthly_budget_usd: req.aiMonthlyBudgetUsd,
       });
     case 'set_user_status': {
       // 先改 Auth 的封鎖，再改資料庫（含紀錄）；資料庫那步失敗就把封鎖還原

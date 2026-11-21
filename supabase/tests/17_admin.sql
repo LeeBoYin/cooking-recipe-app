@@ -130,7 +130,7 @@ select is((select array_agg(action order by action)::text from public.admin_audi
 
 -- 系統設定
 set local role service_role;
-select is((select public.admin_update_config((select admin from u), 50, null)), '{"max_users":50,"soft_delete_retention_days":30}'::jsonb, '改人數上限');
+select is((select public.admin_update_config((select admin from u), 50, null)), '{"max_users":50,"soft_delete_retention_days":30,"ai_enabled":true,"ai_monthly_budget_usd":18.00}'::jsonb, '改人數上限');
 select throws_ok($$select public.admin_update_config((select admin from u), 0)$$, '22023', null, '人數上限至少 1');
 reset role;
 select is((select detail -> 'before' ->> 'max_users' from public.admin_audit_logs where action = 'config.update'),

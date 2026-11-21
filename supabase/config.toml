@@ -443,3 +443,7 @@ verify_jwt = false
 # admin 自己用 Auth 驗證 token，再檢查系統管理員與 aal2（兩步驟驗證）
 [functions.admin]
 verify_jwt = false
+
+# ai 自己用 Auth 驗證 token，再依序檢查帳號、任務、輸入（見 functions/ai/pipeline.ts）
+[functions.ai]
+verify_jwt = false

@@ -55,3 +55,19 @@ Deno.test('mapDbError', () => {
   assertEquals(mapDbError('boom with private data'), { error: 'server_error', status: 500 });
   assertEquals(mapDbError(undefined), { error: 'server_error', status: 500 });
 });
+
+Deno.test('parseRequest：方案與 AI 設定', () => {
+  const uid = '019a9f00-0000-7000-8000-0000000000aa';
+  assertEquals(parseRequest({ action: 'get_ai_models' }).ok, true);
+  assertEquals(parseRequest({ action: 'set_user_plan', userId: uid, plan: 'plus' }).ok, true);
+  assertEquals(parseRequest({ action: 'set_user_plan', userId: uid, plan: 'vip' }).ok, false);
+  assertEquals(parseRequest({ action: 'set_user_plan', userId: 'x', plan: 'free' }).ok, false);
+  assertEquals(parseRequest({ action: 'update_config', aiEnabled: false }).ok, true);
+  assertEquals(parseRequest({ action: 'update_config', aiEnabled: 'no' }).ok, false);
+  assertEquals(parseRequest({ action: 'update_config', aiMonthlyBudgetUsd: 12.345 }), {
+    ok: true,
+    value: { action: 'update_config', maxUsers: null, softDeleteRetentionDays: null, aiEnabled: null, aiMonthlyBudgetUsd: 12.35 },
+  });
+  assertEquals(parseRequest({ action: 'update_config', aiMonthlyBudgetUsd: -1 }).ok, false);
+  assertEquals(parseRequest({ action: 'update_config', aiMonthlyBudgetUsd: '18' }).ok, false);
+});
