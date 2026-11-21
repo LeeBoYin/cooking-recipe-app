@@ -141,7 +141,7 @@ const TRAIT_WORDS: Record<string, string[]> = {
   allium: ['蔥', '蒜', '韭', '洋蔥', '紅蔥'],
 };
 
-function termsOf(id: string, minAlias = 2): string[] {
+export function termsOf(id: string, minAlias = 2): string[] {
   const i = ingredientById.get(id);
   if (!i) return [];
   const names = Object.values(i.name);

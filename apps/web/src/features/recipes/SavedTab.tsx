@@ -69,7 +69,7 @@ export function SavedTab() {
 function SavedCard({ bookmark }: { bookmark: Bookmark }) {
   const idea = ideaOf(bookmark);
   const cooked = bookmark.cooked_recipe_id;
-  const difficulty = difficultyOf(idea.baseDishId);
+  const difficulty = idea.baseDishId ? difficultyOf(idea.baseDishId) : null;
   const unbookmark = useUnbookmark();
   const tag = 'rounded-tag px-2 py-0.5 text-small font-bold';
   return (

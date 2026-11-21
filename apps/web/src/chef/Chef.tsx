@@ -1,8 +1,9 @@
 // 靈感大廚：手繪線條加平塗（17 第八節）。目前是佔位的靜態圖：用燈泡顏色、眼睛和嘴形分幾種表情；
 // 正式插圖與動畫（Rive）完成後，只換這個元件，其他畫面不用動。
-export type ChefMood = 'normal' | 'happy' | 'idea' | 'quiet' | 'surprised';
+export type ChefMood = 'normal' | 'happy' | 'idea' | 'quiet' | 'surprised' | 'thinking';
 export type ChefSize = 24 | 40 | 56 | 96;
-type Props = { size?: ChefSize; mood?: ChefMood; className?: string };
+// blink：燈泡一明一滅（思考中用；手機開了「減少動態」就不閃，見 styles.css）
+type Props = { size?: ChefSize; mood?: ChefMood; blink?: boolean; className?: string };
 
 // 燈泡顏色（17 第八節）：平常、想到點子最亮、安慰柔和暖光
 const BULB: Record<ChefMood, string> = {
@@ -11,6 +12,7 @@ const BULB: Record<ChefMood, string> = {
   idea: '#FFD84D',
   quiet: '#F3C58C',
   surprised: '#FFD84D',
+  thinking: '#F7DFA0',
 };
 
 const INK = 'var(--color-ink)';
@@ -32,6 +34,14 @@ function Face({ mood }: { mood: ChefMood }) {
           <circle cx="37.5" cy="42.5" r="2.4" fill={INK} />
           <path d="M26.5 48.5q5.5 6.5 11 0z" fill={INK} stroke={INK} strokeWidth="2" strokeLinejoin="round" />
           <path d="M8 36l-4-2M9 28l-4-4M56 36l4-2M55 28l4-4" {...stroke} strokeWidth={2} />
+        </>
+      );
+    case 'thinking':
+      return (
+        <>
+          <circle cx="26.5" cy="42.5" r="2.4" fill={INK} />
+          <circle cx="37.5" cy="42.5" r="2.4" fill={INK} />
+          <path d="M28 50h8" {...stroke} />
         </>
       );
     case 'quiet':
@@ -62,7 +72,7 @@ function Face({ mood }: { mood: ChefMood }) {
   }
 }
 
-export function Chef({ size = 56, mood = 'normal', className }: Props) {
+export function Chef({ size = 56, mood = 'normal', blink = false, className }: Props) {
   const height = Math.round((size * 76) / 64);
   return (
     <svg width={size} height={height} viewBox="0 0 64 76" aria-hidden="true" className={className} data-mood={mood}>
@@ -77,6 +87,7 @@ export function Chef({ size = 56, mood = 'normal', className }: Props) {
       <path
         d="M32 26.5c-12 .2-19.5 8.4-19 18.2.3 6.6 4.2 10.6 8.2 14.4l.2 6h21.4l.1-6c4.2-3.9 8.1-8 8.2-14.6.2-9.8-7.1-18.2-19.1-18z"
         fill={BULB[mood]}
+        className={blink ? 'chef-bulb-blink' : undefined}
         stroke={INK}
         strokeWidth="2.6"
         strokeLinejoin="round"

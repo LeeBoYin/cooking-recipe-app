@@ -13,7 +13,7 @@ import {
 import { deletePhoto, getAvatar, listEquipmentPhotos, listMyRecipePhotos, listRecipePhotos, replaceAvatar, signPhotoUrls, type Photo } from './photos.ts';
 import { deleteRecipe, getRecipe, listMyDeletedRecipes, listMyRecipes, restoreRecipe, searchMyRecipes } from './recipes.ts';
 import { currentUserId, getMyIdentity, getMySettings, updateDisplayName, updateMySettings, type UserSettings, type UserSettingsPatch } from './account.ts';
-import { bookmarkIdea, linkBookmarkToRecipe, listMyBookmarks, unbookmark } from './bookmarks.ts';
+import { bookmarkAiIdea, bookmarkIdea, linkBookmarkToRecipe, listMyBookmarks, unbookmark } from './bookmarks.ts';
 import { getMyDietary, saveMyDietary, type Dietary } from './dietary.ts';
 import { getMyHardLimits, getMyTasteProfile, saveTasteProfile } from './taste.ts';
 import type { TasteProfile } from '@zhusha/core';
@@ -405,6 +405,14 @@ export function useBookmarkIdea() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: bookmarkIdea,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks }),
+  });
+}
+
+export function useBookmarkAiIdea() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: bookmarkAiIdea,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks }),
   });
 }

@@ -17,3 +17,4 @@ supabase/.branches/
 # 本機由 pnpm db:dict 產生
 supabase/seeds/dictionaries.sql
 supabase/functions/ai/home/eval/out/
+supabase/functions/ai/chat/eval/out/

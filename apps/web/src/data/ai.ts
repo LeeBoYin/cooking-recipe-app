@@ -1,6 +1,6 @@
 // `ai` Edge Function 的呼叫（16 第六節）。前端不直接呼叫 Claude，也不自己判斷額度；
 // 失敗時只拿到錯誤代號，由各畫面依代號走退路（03〈AI 不能用時〉），不顯示次數。
-import type { AiIdeasPayload, HomeIdeasResponse } from '@zhusha/core';
+import type { AiIdea, AiIdeasPayload, ChatInput, ChatMessage, ChatResponse, HomeIdeasResponse } from '@zhusha/core';
 import { supabase } from './supabase.ts';
 
 // 和 supabase/functions/ai/pipeline.ts 的 AiErrorCode 一致，加上手機端的 network
@@ -82,7 +82,7 @@ export async function fetchHomeIdeas(shuffle = false): Promise<HomeIdeasResponse
 export async function getLastHomeIdeas(): Promise<Extract<HomeIdeasResponse, { status: 'ok' }> | null> {
   const { data, error } = await supabase()
     .from('ai_suggestion_cache')
-    .select('payload, created_at, round')
+    .select('id, payload, created_at, round')
     .eq('kind', 'home')
     .order('created_at', { ascending: false })
     .limit(1)
@@ -90,5 +90,58 @@ export async function getLastHomeIdeas(): Promise<Extract<HomeIdeasResponse, { s
   if (error) throw error;
   const payload = data?.payload as unknown as AiIdeasPayload | undefined;
   if (!data || !payload || payload.schemaVersion !== 1 || !Array.isArray(payload.ideas) || payload.ideas.length === 0) return null;
-  return { status: 'ok', source: 'cache', ideas: payload.ideas, chefComment: payload.chefComment, createdAt: data.created_at, round: data.round };
+  return { status: 'ok', source: 'cache', ideas: payload.ideas, chefComment: payload.chefComment, createdAt: data.created_at, round: data.round, suggestionId: data.id };
+}
+
+// ---------------------------------------------------------------------------------------------
+// 和大廚聊聊（chat，M1a-07）
+// ---------------------------------------------------------------------------------------------
+// 送出一則話：後端用串流呼叫 Claude、整段收完才回；失敗時丟 AiCallError，這一則什麼都不會存
+export async function sendChat(input: ChatInput): Promise<ChatResponse> {
+  return await callAi<ChatResponse>('chat', input);
+}
+
+export interface ChatConversation {
+  id: string;
+  kitchenId: string | null;
+  turnCount: number;
+  messages: ChatMessage[];
+  lastMessageAt: string;
+  // 大廚每一則回應附的點子：key 是 ChatMessage.suggestionId
+  suggestions: Map<string, AiIdea[]>;
+}
+
+const asMessages = (v: unknown): ChatMessage[] => (Array.isArray(v) ? (v as ChatMessage[]) : []);
+
+async function withSuggestions(row: { id: string; kitchen_id: string | null; turn_count: number; messages: unknown; last_message_at: string }): Promise<ChatConversation> {
+  const { data, error } = await supabase().from('ai_suggestion_cache').select('id, payload').eq('conversation_id', row.id);
+  if (error) throw error;
+  const suggestions = new Map<string, AiIdea[]>();
+  for (const s of data) {
+    const p = s.payload as unknown as AiIdeasPayload;
+    if (p?.schemaVersion === 1 && Array.isArray(p.ideas)) suggestions.set(s.id, p.ideas);
+  }
+  return { id: row.id, kitchenId: row.kitchen_id, turnCount: row.turn_count, messages: asMessages(row.messages), lastMessageAt: row.last_message_at, suggestions };
+}
+
+const CONVERSATION_COLUMNS = 'id, kitchen_id, turn_count, messages, last_message_at';
+
+// 一段對話（只有本人讀得到，RLS）
+export async function getChatConversation(id: string): Promise<ChatConversation | null> {
+  const { data, error } = await supabase().from('chef_conversations').select(CONVERSATION_COLUMNS).eq('id', id).maybeSingle();
+  if (error) throw error;
+  return data ? await withSuggestions(data) : null;
+}
+
+// 最近的一段：同一時間只有一段進行中的對話（開了新的一段，舊的就不是最近的）
+export async function getLatestChatConversation(): Promise<ChatConversation | null> {
+  const { data, error } = await supabase().from('chef_conversations').select(CONVERSATION_COLUMNS).order('last_message_at', { ascending: false }).limit(1).maybeSingle();
+  if (error) throw error;
+  return data ? await withSuggestions(data) : null;
+}
+
+// 首頁的「接著聊」：6 小時內、同一個廚房才出現（03〈對話的一段〉）
+export const CHAT_RESUME_HOURS = 6;
+export function isResumable(conv: ChatConversation | null | undefined, kitchenId: string | undefined, now: number = Date.now()): conv is ChatConversation {
+  return !!conv && !!kitchenId && conv.kitchenId === kitchenId && now - Date.parse(conv.lastMessageAt) < CHAT_RESUME_HOURS * 3_600_000;
 }

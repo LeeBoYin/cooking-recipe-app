@@ -21,7 +21,9 @@ export function createClaude(apiKey: string): (req: ClaudeRequest) => Promise<Cl
         output_config: { effort: req.effort, format: { type: 'json_schema', schema: req.outputSchema } },
         ...(req.thinking === 'off' ? { thinking: { type: 'disabled' } } : {}),
       };
-      const message = (await client.messages.create(params as never)) as unknown as {
+      // 串流：邊收邊組，收完整段才回傳（App 看到的還是一整段）；不串流的任務照舊一次回應
+      const raw = req.stream ? await client.messages.stream(params as never).finalMessage() : await client.messages.create(params as never);
+      const message = raw as unknown as {
         model: string;
         stop_reason: string | null;
         content: { type: string; text?: string }[];

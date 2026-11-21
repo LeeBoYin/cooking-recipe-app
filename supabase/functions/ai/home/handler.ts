@@ -96,7 +96,7 @@ export async function runHomeIdeas(deps: HomeDeps, userId: string, rawInput: unk
   if (!parsed.shuffle && latest && latestPayload) {
     const ideas = recheckCachedIdeas(latestPayload.ideas, env);
     if (ideas.length > 0) {
-      return { ok: true, data: { status: 'ok', source: 'cache', ideas, chefComment: latestPayload.chefComment, createdAt: latest.created_at, round: latest.round } };
+      return { ok: true, data: { status: 'ok', source: 'cache', ideas, chefComment: latestPayload.chefComment, createdAt: latest.created_at, round: latest.round, suggestionId: latest.id } };
     }
     // 重新檢查後一個都不剩（例如剛改了過敏原）：重新產生
   }
@@ -138,7 +138,7 @@ export async function runHomeIdeas(deps: HomeDeps, userId: string, rawInput: unk
     p_user: userId, p_kitchen: env.ctx.kitchen.id, p_input_hash: hash, p_round: round, p_payload: payload, p_ttl_hours: CACHE_TTL_HOURS,
   });
   if (saved.error) console.error('ai: cache save failed', saved.error.code); // 存不到不影響這一次的回應
-  return { ok: true, data: { status: 'ok', source: 'ai', ideas: checked.ideas, chefComment: checked.chefComment, createdAt: now.toISOString(), round } };
+  return { ok: true, data: { status: 'ok', source: 'ai', ideas: checked.ideas, chefComment: checked.chefComment, createdAt: now.toISOString(), round, suggestionId: typeof saved.data === 'string' ? saved.data : null } };
 }
 
 export type { ClaudeResponse };

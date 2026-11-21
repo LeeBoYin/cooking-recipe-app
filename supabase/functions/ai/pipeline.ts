@@ -56,12 +56,16 @@ export interface PromptParts {
   stable: string;
   volatile?: string;
   messages: { role: 'user' | 'assistant'; content: string }[];
+  // volatile 在同一段對話內不變時（對話的口味、限制、廚具）也一起快取
+  cacheVolatile?: boolean;
 }
 
 export interface TaskDefinition<I = unknown> {
   parseInput(raw: unknown): { ok: true; value: I } | { ok: false };
   buildPrompt(input: I, ctx: AiContext): PromptParts;
   outputSchema: JsonSchema;
+  // 用串流呼叫 Claude（對話用）
+  stream?: boolean;
   // 自由文字的長度與上限（字數），給異常偵測看「輸入長度是不是一直貼著上限」；沒有自由文字的任務不用填
   inputSize?(input: I): { length: number; limit: number };
 }
@@ -74,6 +78,8 @@ export interface ClaudeRequest {
   system: { text: string; cache: boolean }[];
   messages: PromptParts['messages'];
   outputSchema: JsonSchema;
+  // 用串流呼叫 Claude、收完整段才回傳（等得久的任務用，避免連線逾時）
+  stream?: boolean;
 }
 
 export interface Usage {
@@ -155,7 +161,7 @@ export async function runAi(deps: Deps, userId: string, rawTask: unknown, rawInp
 
   // 5. 組 prompt、呼叫 Claude
   const prompt = def.buildPrompt(parsed.value, ctx);
-  const system = [{ text: prompt.stable, cache: true }, ...(prompt.volatile ? [{ text: prompt.volatile, cache: false }] : [])];
+  const system = [{ text: prompt.stable, cache: true }, ...(prompt.volatile ? [{ text: prompt.volatile, cache: prompt.cacheVolatile === true }] : [])];
   const inputHash = await hashInput(rawInput);
   const size = def.inputSize?.(parsed.value as never);
   const inputRatio = size && size.limit > 0 ? Math.min(100, Math.round((size.length / size.limit) * 100)) : null;
@@ -170,6 +176,7 @@ export async function runAi(deps: Deps, userId: string, rawTask: unknown, rawInp
       system,
       messages: prompt.messages,
       outputSchema: def.outputSchema,
+      ...(def.stream ? { stream: true } : {}),
     });
   } catch (e) {
     if (e instanceof UpstreamError) return fail('upstream_error');

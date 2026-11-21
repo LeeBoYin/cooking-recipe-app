@@ -67,17 +67,23 @@ export type Database = {
                   ]
                 },"ai_suggestion_cache": {
                   Row: {
-                    "created_at": string,"drafts": NonNullable<Json>,"expires_at": string,"feedback": NonNullable<Json>,"id": string,"input_hash": string,"kind": string,"kitchen_id": string | null,"payload": NonNullable<Json>,"round": number,"user_id": string
+                    "conversation_id": string | null,"created_at": string,"drafts": NonNullable<Json>,"expires_at": string,"feedback": NonNullable<Json>,"id": string,"input_hash": string,"kind": string,"kitchen_id": string | null,"payload": NonNullable<Json>,"round": number,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"drafts"?: NonNullable<Json>,"expires_at": string,"feedback"?: NonNullable<Json>,"id": string,"input_hash": string,"kind": string,"kitchen_id"?: string | null,"payload": NonNullable<Json>,"round"?: number,"user_id": string
+                    "conversation_id"?: string | null,"created_at"?: string,"drafts"?: NonNullable<Json>,"expires_at": string,"feedback"?: NonNullable<Json>,"id": string,"input_hash": string,"kind": string,"kitchen_id"?: string | null,"payload": NonNullable<Json>,"round"?: number,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"drafts"?: NonNullable<Json>,"expires_at"?: string,"feedback"?: NonNullable<Json>,"id"?: string,"input_hash"?: string,"kind"?: string,"kitchen_id"?: string | null,"payload"?: NonNullable<Json>,"round"?: number,"user_id"?: string
+                    "conversation_id"?: string | null,"created_at"?: string,"drafts"?: NonNullable<Json>,"expires_at"?: string,"feedback"?: NonNullable<Json>,"id"?: string,"input_hash"?: string,"kind"?: string,"kitchen_id"?: string | null,"payload"?: NonNullable<Json>,"round"?: number,"user_id"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "ai_suggestion_cache_conversation_id_fkey"
+      columns: ["conversation_id"]
+isOneToOne: false
+      referencedRelation: "chef_conversations"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "ai_suggestion_cache_kitchen_id_fkey"
       columns: ["kitchen_id"]
 isOneToOne: false
@@ -158,6 +164,26 @@ isOneToOne: false
       columns: ["cooked_recipe_id"]
 isOneToOne: false
       referencedRelation: "recipes"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"chef_conversations": {
+                  Row: {
+                    "created_at": string,"id": string,"kitchen_id": string | null,"lang": string,"last_message_at": string,"mentioned_ingredients": NonNullable<Json>,"messages": NonNullable<Json>,"preference_signals": NonNullable<Json>,"summary": string | null,"turn_count": number,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id": string,"kitchen_id"?: string | null,"lang"?: string,"last_message_at"?: string,"mentioned_ingredients"?: NonNullable<Json>,"messages"?: NonNullable<Json>,"preference_signals"?: NonNullable<Json>,"summary"?: string | null,"turn_count"?: number,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"kitchen_id"?: string | null,"lang"?: string,"last_message_at"?: string,"mentioned_ingredients"?: NonNullable<Json>,"messages"?: NonNullable<Json>,"preference_signals"?: NonNullable<Json>,"summary"?: string | null,"turn_count"?: number,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chef_conversations_kitchen_id_fkey"
+      columns: ["kitchen_id"]
+isOneToOne: false
+      referencedRelation: "kitchens"
       referencedColumns: ["id"]
     }
                   ]
@@ -832,6 +858,12 @@ isOneToOne: false
 "ai_budget_state":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
+"ai_chat_append":
+{ Args: { "p_ask": string,"p_carry_summary": string,"p_chef_text": string,"p_conversation": string,"p_ideas": Json,"p_kitchen": string,"p_lang": string,"p_mentioned": Json,"p_model": string,"p_signals": Json,"p_summary": string,"p_user": string,"p_user_text": string }; Returns: Json
+                           },
+"ai_chat_get":
+{ Args: { "p_conversation": string,"p_user": string }; Returns: Json
+                           },
 "ai_get_context":
 { Args: { "p_user": string }; Returns: Json
                            },
@@ -850,6 +882,25 @@ isOneToOne: false
 "backfill_recipe_ingredients":
 { Args: { "p_ingredients": Json,"p_recipe_id": string }; Returns: boolean
                            },
+"bookmark_ai_idea":
+{ Args: { "p_id": string,"p_suggestion_id": string,"p_title": string }; Returns: {
+              "cooked_recipe_id": string | null,
+"created_at": string,
+"deleted_at": string | null,
+"id": string,
+"idea": NonNullable<Json>,
+"idea_ingredient_ids": (string)[],
+"kind": string,
+"note": string | null,
+"updated_at": string,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "bookmarks"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "bookmark_recipe":
 { Args: { "p_base_dish_id": string,"p_id": string,"p_title": string,"p_why": string }; Returns: {
               "cooked_recipe_id": string | null,

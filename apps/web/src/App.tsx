@@ -11,6 +11,7 @@ import { AddEquipmentPage } from './features/equipment/AddEquipmentPage.tsx';
 import { EditEquipmentPage } from './features/equipment/EditEquipmentPage.tsx';
 import { EquipmentInventoryPage } from './features/equipment/EquipmentInventoryPage.tsx';
 import { EquipmentTab } from './features/equipment/EquipmentTab.tsx';
+import { ChatPage } from './features/chat/ChatPage.tsx';
 import { HomePage } from './features/home/HomePage.tsx';
 import { KitchenPage } from './features/kitchen/KitchenPage.tsx';
 import { KitchenSettingsPage } from './features/kitchen/KitchenSettingsPage.tsx';
@@ -67,6 +68,8 @@ export function App() {
             <Route path="admin/*" element={<Suspense fallback={null}><AdminApp /></Suspense>} />
             <Route element={<OnboardingGate />}>
             <Route path="onboarding" element={<Onboarding redo />} />
+            {/* 和大廚聊聊：全螢幕，沒有分頁列 */}
+            <Route path="chat" element={<ChatPage />} />
             <Route element={<AppShell />}>
               <Route index element={<HomePage />} />
               <Route path="recipes" element={<RecipesPage />}>
