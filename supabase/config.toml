@@ -431,3 +431,7 @@ enabled = true
 # maintenance 自己用 MAINTENANCE_TOKEN 驗證呼叫端（只有排程會呼叫），不走使用者的 JWT
 [functions.maintenance]
 verify_jwt = false
+
+# accept-invite 的呼叫者還沒有帳號，憑邀請連結的 token 驗證，不走使用者的 JWT
+[functions.accept-invite]
+verify_jwt = false
