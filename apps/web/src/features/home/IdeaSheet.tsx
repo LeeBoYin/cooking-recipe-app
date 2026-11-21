@@ -5,7 +5,7 @@ import type { ExpandInput, RecipeDraft } from '@zhusha/core';
 import { Chef } from '../../chef/Chef.tsx';
 import { useExpandSteps, useMySettings } from '../../data/hooks.ts';
 import { ingredientLines, stepLines, tipsText, unitPrefs } from './draft.ts';
-import type { IdeaView } from './ideaView.ts';
+import { ingredientBadges, type IdeaView } from './ideaView.ts';
 
 // 點子抽屜（首頁、對話、收藏共用）：菜名、理由、食材標籤，接著直接是做法（沒有另外的「看做法」按鈕）。
 // 第一次打開要等大廚寫：標籤先顯示，做法區塊放思考中的大廚；寫好、檢查過才一次顯示。寫不出來顯示「大廚需要再想想」。
@@ -181,7 +181,22 @@ function MethodSection({ view, hasInput, pending, failed, retrying, draft, onRet
                 {lines.filter((l) => (l.group ?? '') === g).map((l) => (
                   <li key={l.id} className="flex min-h-10 items-center justify-between border-b border-line-soft text-body">
                     {l.text}
-                    {l.optional && <span className="text-small text-ink-muted"><FormattedMessage id="idea.sheet.method.optional" /></span>}
+                    <span className="flex items-center gap-1.5">
+                      {l.optional && <span className="text-small text-ink-muted"><FormattedMessage id="idea.sheet.method.optional" /></span>}
+                      {(() => {
+                        const badge = ingredientBadges(view, l.ingredientId);
+                        return (
+                          <>
+                            {badge.said && (
+                              <span className="whitespace-nowrap rounded-tag bg-bulb-soft px-2 py-0.5 text-small font-bold"><FormattedMessage id="idea.sheet.said" /></span>
+                            )}
+                            {badge.have && (
+                              <span className="whitespace-nowrap rounded-tag bg-green-soft px-2 py-0.5 text-small font-bold text-green"><FormattedMessage id="idea.sheet.kitchenHas" /></span>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </span>
                   </li>
                 ))}
               </ul>

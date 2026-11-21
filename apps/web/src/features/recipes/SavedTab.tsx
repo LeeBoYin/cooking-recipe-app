@@ -80,7 +80,7 @@ function viewOfBookmark(b: Bookmark, tempUnit: string | null | undefined): IdeaV
     title: idea.title,
     why: renderMarks(idea.why ?? '', parseTemperaturePref(tempUnit)),
     kitchenHas: false,
-    ingredients: b.idea_ingredient_ids.map((id) => ({ name: nameOf(id), have: false })),
+    ingredients: b.idea_ingredient_ids.map((id) => ({ id, name: nameOf(id), have: false })),
     others: [],
     substitutions: [],
     techniques: idea.baseDishId ? dishTechniques(idea.baseDishId) : techniqueNames([]),

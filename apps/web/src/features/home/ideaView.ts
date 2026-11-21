@@ -14,7 +14,7 @@ export interface IdeaView {
   why: string;
   kitchenHas: boolean; // 卡片標「食材廚房有」
   difficulty?: number | undefined; // 1–10，不是都有的時候卡片上放這個
-  ingredients: { name: string; have: boolean; said?: boolean }[]; // said：使用者在對話中說的
+  ingredients: { id?: string; name: string; have: boolean; said?: boolean }[]; // said：使用者在對話中說的
   others: string[]; // 其他材料：只列名字，不寫「缺」
   substitutions: { need: string; use: string }[];
   techniques: string[]; // 手法的名稱：做法還沒寫好（或寫不出來）時，家常菜的骨架就是食材加手法
@@ -38,7 +38,7 @@ export function viewOfRuleIdea(idea: Idea, profile: TasteProfile, intl: IntlShap
     why: reasonText(idea.reason, profile, intl, chefLine, idea.key),
     kitchenHas: idea.allInKitchen,
     difficulty: idea.difficulty,
-    ingredients: idea.mainIngredientIds.map((id) => ({ name: nameOf(id), have: have.has(id) })),
+    ingredients: idea.mainIngredientIds.map((id) => ({ id, name: nameOf(id), have: have.has(id) })),
     others: [],
     substitutions: [],
     techniques: idea.source === 'dish' ? dishTechniques(idea.id) : [],
@@ -62,10 +62,10 @@ export function viewOfAiIdea(idea: AiIdea, pref: TemperaturePref, suggestionId?:
     kitchenHas: idea.usesPantryIds.length + (idea.usesMentionedIds?.length ?? 0) > 0 && idea.otherIngredients.length === 0,
     difficulty: idea.difficulty.overall,
     ingredients: [
-      ...idea.usesPantryIds.map((id) => ({ name: nameOf(id), have: true })),
-      ...(idea.usesMentionedIds ?? []).map((id) => ({ name: nameOf(id), have: false, said: true })),
+      ...idea.usesPantryIds.map((id) => ({ id, name: nameOf(id), have: true })),
+      ...(idea.usesMentionedIds ?? []).map((id) => ({ id, name: nameOf(id), have: false, said: true })),
       // 家常菜的骨架：主要食材裡手邊沒有的也列出來（骨架就是食材加手法）
-      ...(familiar && ref.startsWith('dish:') ? (dishById.get(ref.slice(5))?.ingredientIds ?? []).filter((id) => !idea.usesPantryIds.includes(id)).map((id) => ({ name: nameOf(id), have: false })) : []),
+      ...(familiar && ref.startsWith('dish:') ? (dishById.get(ref.slice(5))?.ingredientIds ?? []).filter((id) => !idea.usesPantryIds.includes(id)).map((id) => ({ id, name: nameOf(id), have: false })) : []),
     ],
     others: idea.otherIngredients.map((o) => o.name),
     substitutions: idea.substitutions.map((s) => ({ need: renderMarks(s.need, pref), use: renderMarks(s.use, pref) })),
@@ -75,4 +75,11 @@ export function viewOfAiIdea(idea: AiIdea, pref: TemperaturePref, suggestionId?:
     ...(familiar && ref.startsWith('dish:') ? { baseDishId: ref.slice(5) } : {}),
     ...(suggestionId ? { suggestionId } : {}),
   };
+}
+
+// 做法的食材清單每一列要加的標籤：用標準食材 ID 對 view 的食材（「你說的」「廚房有」）；沒有 ID 的列不加
+export function ingredientBadges(view: Pick<IdeaView, 'ingredients'>, ingredientId: string | null | undefined): { said: boolean; have: boolean } {
+  if (!ingredientId) return { said: false, have: false };
+  const hit = view.ingredients.find((i) => i.id === ingredientId);
+  return { said: !!hit?.said, have: !!hit?.have };
 }

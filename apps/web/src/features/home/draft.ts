@@ -21,9 +21,10 @@ export function unitPrefs(settings: { measure_unit?: string | null; temperature_
 }
 
 // 抽屜裡顯示的食材一列：「醬油 1 大匙」
-export function ingredientLines(draft: RecipeDraft, prefs: UnitPrefs): { id: string; text: string; group?: string; optional: boolean }[] {
+export function ingredientLines(draft: RecipeDraft, prefs: UnitPrefs): { id: string; ingredientId: string | null; text: string; group?: string; optional: boolean }[] {
   return draft.ingredients.map((i) => ({
     id: i.id,
+    ingredientId: i.ingredientId,
     text: draftIngredientText(i, prefs.measure, prefs.labels),
     optional: i.optional,
     ...(i.group ? { group: i.group } : {}),

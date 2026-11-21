@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { replaceTempMarks, type AiIdea } from '@zhusha/core';
-import { renderMarks, viewOfAiIdea } from './ideaView.ts';
+import { ingredientBadges, renderMarks, viewOfAiIdea } from './ideaView.ts';
 
 const idea = (over: Partial<AiIdea> = {}): AiIdea => ({
   id: 'i1', slot: 'twist', title: '豆瓣醬燒茄子', why: '用{{temp:180:C}}煎到金黃。', candidateRef: null, usesPantryIds: ['eggplant', 'doubanjiang'], usesPriorityIds: ['eggplant'],
@@ -39,5 +39,18 @@ describe('AI 點子的顯示內容', () => {
     expect(v.kitchenHas).toBe(true);
     expect(v.suggestionId).toBe('s1');
     expect(viewOfAiIdea(idea(), pref).suggestionId).toBeUndefined();
+  });
+});
+
+describe('ingredientBadges', () => {
+  const view = { ingredients: [{ id: 'cabbage', name: '高麗菜', have: true }, { id: 'bamboo-shoot', name: '竹筍', have: false, said: true }, { name: '無 ID', have: true }] };
+  it('用標準食材 ID 對：廚房有、你說的', () => {
+    expect(ingredientBadges(view, 'cabbage')).toEqual({ said: false, have: true });
+    expect(ingredientBadges(view, 'bamboo-shoot')).toEqual({ said: true, have: false });
+  });
+  it('對不到或沒有 ID 的列不加標籤', () => {
+    expect(ingredientBadges(view, 'salt')).toEqual({ said: false, have: false });
+    expect(ingredientBadges(view, null)).toEqual({ said: false, have: false });
+    expect(ingredientBadges(view, undefined)).toEqual({ said: false, have: false });
   });
 });
