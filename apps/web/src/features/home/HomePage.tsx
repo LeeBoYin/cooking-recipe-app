@@ -220,7 +220,11 @@ export function HomePage() {
         )}
       </div>
 
-      {open && <IdeaSheet view={open} onClose={() => setOpen(null)} />}
+      {open && <IdeaSheet
+          view={open}
+          onClose={() => setOpen(null)}
+          onChat={(v) => void navigate('/chat', { state: { about: v.title } })}
+        />}
     </div>
   );
 }
