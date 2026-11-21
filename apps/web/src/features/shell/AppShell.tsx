@@ -35,18 +35,18 @@ export function AppShell() {
               to={tab.to}
               end={tab.end}
               className={({ isActive }) =>
-                `flex min-h-14 flex-col items-center justify-center gap-0.5 no-underline ${
+                `flex min-h-14 items-center justify-center no-underline ${
                   isActive ? 'font-bold text-ink' : 'text-ink-muted'
                 }`
               }
             >
               {({ isActive }) => (
                 <>
-                  <span className={`flex h-7 w-10 items-center justify-center rounded-full ${isActive ? 'bg-bulb-soft' : ''}`}>
+                  <span className={`flex flex-col items-center gap-0.5 rounded-2xl px-3 py-1.5 ${isActive ? 'bg-bulb-soft' : ''}`}>
                     <Icon name={tab.icon} />
-                  </span>
-                  <span className="text-tab">
-                    <FormattedMessage id={tab.label} />
+                    <span className="text-tab">
+                      <FormattedMessage id={tab.label} />
+                    </span>
                   </span>
                 </>
               )}

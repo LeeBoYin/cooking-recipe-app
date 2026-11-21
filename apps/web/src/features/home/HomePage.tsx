@@ -1,11 +1,9 @@
-import { useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import { emptyProfile, todayInTimeZone, type Idea } from '@zhusha/core';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
-import { signOut } from '../../data/auth.ts';
 import {
   useCurrentKitchen, useKitchenEquipment, useMyBookmarks, useMyDietary, useMyIdentity, useMyRecipes, useMyTasteProfile, usePantryItems,
 } from '../../data/hooks.ts';
@@ -19,7 +17,6 @@ const rounds = new Map<string, number>();
 
 // 登入後的首頁：大廚區塊＋大廚的點子（M0 由程式依規則挑，見 03）。朋友的動態之後再做
 export function HomePage() {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const intl = useIntl();
   const { kitchen, isPending: kitchenPending, error: kitchenError } = useCurrentKitchen();
@@ -61,11 +58,6 @@ export function HomePage() {
 
   // 收藏過的家常菜（同一道每人只有一筆）
   const bookmarkOf = new Map((bookmarks.data ?? []).map((b) => [ideaOf(b).baseDishId, b]));
-
-  async function onSignOut() {
-    await signOut();
-    queryClient.clear();
-  }
 
   function shuffle() {
     if (!computed) return;
@@ -152,14 +144,6 @@ export function HomePage() {
       </div>
 
       {open && <IdeaSheet idea={open} profile={profile} bookmark={open.source === 'dish' ? bookmarkOf.get(open.id) : undefined} onClose={() => setOpen(null)} />}
-
-      <button
-        type="button"
-        onClick={() => void onSignOut()}
-        className="mt-6 min-h-11 border-0 bg-transparent px-0 text-caption font-bold text-ink underline underline-offset-4"
-      >
-        <FormattedMessage id="signOut" />
-      </button>
     </div>
   );
 }
