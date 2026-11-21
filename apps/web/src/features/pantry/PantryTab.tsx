@@ -8,7 +8,7 @@ import { ActionBar } from '../kitchen/ActionBar.tsx';
 import { StockCard } from '../kitchen/StockCard.tsx';
 import { Icon } from '../shell/Icon.tsx';
 import { useToast } from '../shell/Toast.tsx';
-import { ZONES, ZONE_EMOJI, displayName } from './labels.ts';
+import { ZONES, ZONE_ICON, displayName } from './labels.ts';
 import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
 const TAG = 'rounded-tag bg-line-soft px-1.5 text-small font-bold text-ink-muted';
@@ -91,8 +91,9 @@ export function PantryTab() {
           if (inZone.length === 0) return null;
           return (
             <section key={zone} aria-labelledby={`zone-${zone}`}>
-              <h2 id={`zone-${zone}`} className="mx-0 mt-2 mb-2 text-card-title font-bold">
-                {ZONE_EMOJI[zone]} <FormattedMessage id={`pantry.zone.${zone}`} />
+              <h2 id={`zone-${zone}`} className="mx-0 mt-2 mb-2 flex items-center gap-1.5 text-card-title font-bold">
+                <Icon name={ZONE_ICON[zone]} size={20} />
+                <FormattedMessage id={`pantry.zone.${zone}`} />
               </h2>
               <ul className="m-0 list-none rounded-card bg-surface px-3 py-0">
                 {inZone.map((item) => (

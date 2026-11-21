@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router';
 import { commonIngredientIdsFor, getIngredient, rankFrequent } from '@zhusha/ingredients';
 import { useAddPantryItems, useCurrentKitchen, usePantryAdditions, usePantryItems, useRemovePantryItem } from '../../data/hooks.ts';
 import { SubPage } from '../shell/SubPage.tsx';
-import { ZONES, ZONE_EMOJI } from './labels.ts';
+import { ZONES, ZONE_ICON } from './labels.ts';
+import { Icon } from '../shell/Icon.tsx';
 import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
 // 快速盤點：常見食材的圖示牆，點一下「有」、再點一下「沒有」，按完成才一次送出（02 快速盤點）
@@ -78,8 +79,9 @@ export function InventoryPage() {
             if (ids.length === 0) return null;
             return (
               <section key={zone} aria-labelledby={`inv-${zone}`}>
-                <h2 id={`inv-${zone}`} className="mx-0 mt-2 mb-2 text-card-title font-bold">
-                  {ZONE_EMOJI[zone]} <FormattedMessage id={`pantry.zone.${zone}`} />
+                <h2 id={`inv-${zone}`} className="mx-0 mt-2 mb-2 flex items-center gap-1.5 text-card-title font-bold">
+                  <Icon name={ZONE_ICON[zone]} size={20} />
+                <FormattedMessage id={`pantry.zone.${zone}`} />
                 </h2>
                 <div className="grid grid-cols-4 gap-2">
                   {ids.map((id) => {
