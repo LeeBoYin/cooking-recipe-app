@@ -31,6 +31,7 @@ import { SettingsPage } from './features/me/SettingsPage.tsx';
 import { TasteMapPage } from './features/me/TasteMapPage.tsx';
 import { Placeholder } from './features/shell/Placeholder.tsx';
 import { PhotoSync } from './photos/PhotoSync.tsx';
+import { OfflineBanner } from './pwa/OfflineBanner.tsx';
 import { UpdatePrompt } from './pwa/UpdatePrompt.tsx';
 
 // 登入後 onboarding_completed_at 還是空的，就先走新手引導（12 第三節）
@@ -92,6 +93,7 @@ export function App() {
       ) : (
         <SignInPage />
       )}
+      <OfflineBanner />
       <UpdatePrompt />
     </>
   );

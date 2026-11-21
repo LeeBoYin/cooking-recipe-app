@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
-import { DIFFICULTY_FACETS, difficultyOverall, formatTemperature, haveInKitchen, parseMeasurePref, parseTemperaturePref, renderIngredient, UNIT_CODES, type UnitLabels } from '@zhusha/core';
+import { DIFFICULTY_FACETS, difficultyOverall, formatRecipeText, formatTemperature, haveInKitchen, parseMeasurePref, parseTemperaturePref, renderIngredient, UNIT_CODES, type UnitLabels } from '@zhusha/core';
 import { getIngredient } from '@zhusha/ingredients';
 import type { RecipeIngredient, RecipeStep, RecipeVisibility } from '@zhusha/shared-types';
 import { Chef } from '../../chef/Chef.tsx';
@@ -47,6 +47,12 @@ export function RecipePage() {
   const [servingsOpen, setServingsOpen] = useState(false);
   const [flipUnits, setFlipUnits] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
+  const [shareNote, setShareNote] = useState<'copied' | 'failed' | null>(null);
+  useEffect(() => {
+    if (!shareNote) return;
+    const t = setTimeout(() => setShareNote(null), 4000);
+    return () => clearTimeout(t);
+  }, [shareNote]);
   const settings = useMySettings();
   const { kitchen } = useCurrentKitchen();
   const pantry = usePantryItems(kitchen?.id);
@@ -113,6 +119,41 @@ export function RecipePage() {
     }),
     have: haveInKitchen({ text: i.raw_text, ingredientId: i.ingredient_id }, kitchenHas),
   }));
+  // 純文字分享：依目前選的人數與單位排好，用系統分享選單送出；不支援就複製（02 G）
+  async function shareText() {
+    setShareNote(null);
+    const text = formatRecipeText(
+      {
+        title,
+        story: r?.story,
+        servings: shownServings ? intl.formatMessage({ id: 'recipe.view.servings' }, { count: shownServings }) : undefined,
+        ingredients: ingredientLines.map((l) => l.text),
+        steps: steps.map((s) => (s.target_temp ? `${s.text}\n${intl.formatMessage({ id: 'recipe.view.stepTemp' }, { value: formatTemperature(s.target_temp, tempPref) })}` : s.text)),
+        tips: r?.tips,
+      },
+      {
+        servings: intl.formatMessage({ id: 'recipe.share.label.servings' }),
+        ingredients: intl.formatMessage({ id: 'recipe.share.label.ingredients' }),
+        steps: intl.formatMessage({ id: 'recipe.share.label.steps' }),
+        tips: intl.formatMessage({ id: 'recipe.share.label.tips' }),
+      },
+    );
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title, text });
+        return;
+      } catch (e) {
+        if ((e as DOMException).name === 'AbortError') return; // 使用者自己關掉分享選單
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      setShareNote('copied');
+    } catch {
+      setShareNote('failed');
+    }
+  }
+
   const originals = top.map((p): ViewerPhoto => ({ id: p.id, path: p.storage_path }));
   const cell = 'flex h-[110px] items-center justify-center overflow-hidden bg-photo-empty';
   const shown = top.length > 3 ? top.slice(0, 2) : top.slice(0, 3);
@@ -291,7 +332,16 @@ export function RecipePage() {
         </section>
       )}
 
+      {shareNote && (
+        <p role="status" className="fixed inset-x-4 bottom-[calc(88px+env(safe-area-inset-bottom))] z-10 mx-auto m-0 max-w-[528px] rounded-card bg-ink px-3 py-2.5 text-center text-caption text-surface">
+          <FormattedMessage id={shareNote === 'copied' ? 'recipe.share.copied' : 'recipe.share.copyFailed'} />
+        </p>
+      )}
+
       <div className="fixed inset-x-0 bottom-0 z-10 mx-auto flex max-w-[560px] gap-2.5 border-t border-line bg-bg px-4 pt-3 pb-[calc(16px+env(safe-area-inset-bottom))]">
+        <button type="button" onClick={() => void shareText()} className="flex h-12 flex-1 items-center justify-center rounded-card border border-line bg-surface font-[inherit] text-body font-bold text-ink">
+          <FormattedMessage id="recipe.view.share" />
+        </button>
         <Link to={`/recipes/${r.id}/edit`} className="flex h-12 flex-1 items-center justify-center rounded-card bg-bulb text-body font-bold text-ink no-underline">
           <FormattedMessage id="recipe.view.edit" />
         </Link>
