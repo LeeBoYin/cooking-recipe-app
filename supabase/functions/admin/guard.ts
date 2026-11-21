@@ -39,7 +39,12 @@ export function uuidV7(now = Date.now(), random: (n: number) => Uint8Array = (n)
 }
 
 export type AdminRequest =
-  | { action: 'get_config' | 'list_users' | 'list_invites' | 'get_ai_models' }
+  | { action: 'get_config' | 'list_users' | 'list_invites' | 'get_ai_models' | 'get_ai_protection' | 'get_ai_usage' }
+  | { action: 'update_ai_protection'; protection: Record<string, unknown> }
+  | { action: 'set_user_fair_use'; userId: string; dailyUsd: number | null; monthlyUsd: number | null; clear: boolean }
+  | { action: 'set_user_ai_paused'; userId: string; paused: boolean }
+  | { action: 'list_ai_alerts'; status: 'open' | 'resolved' | 'all'; limit: number; before: string | null }
+  | { action: 'resolve_ai_alert'; alertId: string; resolution: 'ok' | 'override_raised' | 'ai_paused' }
   | { action: 'list_audit_logs'; limit: number; before: string | null }
   | { action: 'create_invite'; email: string; note: string | null; plan: 'free' | 'plus'; befriendInviter: boolean }
   | { action: 'regenerate_invite' | 'revoke_invite'; inviteId: string }
@@ -74,7 +79,38 @@ export function parseRequest(body: unknown): ParseResult {
     case 'list_users':
     case 'list_invites':
     case 'get_ai_models':
+    case 'get_ai_protection':
+    case 'get_ai_usage':
       return { ok: true, value: { action: b.action } };
+    case 'update_ai_protection':
+      // 格式與範圍由資料庫的 ai_protection_valid 檢查，這裡只確認是物件
+      return typeof b.protection === 'object' && b.protection !== null && !Array.isArray(b.protection)
+        ? { ok: true, value: { action: 'update_ai_protection', protection: b.protection as Record<string, unknown> } }
+        : bad;
+    case 'set_user_fair_use': {
+      const usd = (v: unknown) => (v === undefined || v === null ? null : typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 100000 ? Math.round(v * 100) / 100 : undefined);
+      const daily = usd(b.dailyUsd);
+      const monthly = usd(b.monthlyUsd);
+      const clear = b.clear === undefined ? false : b.clear;
+      if (!id(b.userId) || daily === undefined || monthly === undefined || typeof clear !== 'boolean') return bad;
+      if (!clear && daily === null && monthly === null) return bad;
+      return { ok: true, value: { action: 'set_user_fair_use', userId: b.userId, dailyUsd: daily, monthlyUsd: monthly, clear } };
+    }
+    case 'set_user_ai_paused':
+      return id(b.userId) && typeof b.paused === 'boolean'
+        ? { ok: true, value: { action: 'set_user_ai_paused', userId: b.userId, paused: b.paused } }
+        : bad;
+    case 'list_ai_alerts': {
+      const status = b.status === undefined ? 'open' : b.status;
+      const limit = b.limit === undefined ? 50 : int(b.limit, 1, 200);
+      const before = b.before === undefined || b.before === null ? null : typeof b.before === 'string' && !Number.isNaN(Date.parse(b.before)) ? b.before : false;
+      if ((status !== 'open' && status !== 'resolved' && status !== 'all') || limit === null || before === false) return bad;
+      return { ok: true, value: { action: 'list_ai_alerts', status, limit, before } };
+    }
+    case 'resolve_ai_alert':
+      return id(b.alertId) && (b.resolution === 'ok' || b.resolution === 'override_raised' || b.resolution === 'ai_paused')
+        ? { ok: true, value: { action: 'resolve_ai_alert', alertId: b.alertId, resolution: b.resolution } }
+        : bad;
     case 'list_audit_logs': {
       const limit = b.limit === undefined ? 50 : int(b.limit, 1, 200);
       const before = b.before === undefined || b.before === null ? null : typeof b.before === 'string' && !Number.isNaN(Date.parse(b.before)) ? b.before : false;
@@ -151,6 +187,7 @@ const DB_ERRORS: ReadonlyArray<readonly [string, number]> = [
   ['cannot_target_self', 400],
   ['cannot_target_admin', 400],
   ['user_not_found', 404],
+  ['alert_not_found', 404],
 ];
 
 export function mapDbError(message: string | undefined): { error: string; status: number } {

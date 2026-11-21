@@ -12,6 +12,7 @@ const selftest: TaskDefinition<{ text: string }> = {
     if (typeof text !== 'string' || text.length === 0 || [...text].length > SELFTEST_MAX_CHARS) return { ok: false };
     return { ok: true, value: { text } };
   },
+  inputSize: (input) => ({ length: [...input.text].length, limit: SELFTEST_MAX_CHARS }),
   buildPrompt(input) {
     return {
       stable: '你是連線測試用的小幫手。使用者給一段短文字，你只回傳 JSON：reply 是把原文原樣回傳，length 是原文的字數。',

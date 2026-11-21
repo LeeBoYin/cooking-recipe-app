@@ -37,6 +37,62 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"ai_rate_counters": {
+                  Row: {
+                    "blocked": number,"bucket": string,"count": number,"user_id": string,"window_start": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "blocked"?: number,"bucket": string,"count"?: number,"user_id": string,"window_start": string
+                  }
+                  Update: {
+                    "blocked"?: number,"bucket"?: string,"count"?: number,"user_id"?: string,"window_start"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"ai_spend_monthly": {
+                  Row: {
+                    "call_count": number,"id": string,"month": string,"scope": string,"total_usd": number,"updated_at": string,"user_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "call_count"?: number,"id"?: string,"month": string,"scope": string,"total_usd"?: number,"updated_at"?: string,"user_id"?: string | null
+                  }
+                  Update: {
+                    "call_count"?: number,"id"?: string,"month"?: string,"scope"?: string,"total_usd"?: number,"updated_at"?: string,"user_id"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"ai_usage_alerts": {
+                  Row: {
+                    "created_at": string,"dedupe_key": string,"detail": NonNullable<Json>,"id": string,"kind": string,"resolution": string | null,"resolved_at": string | null,"resolved_by": string | null,"user_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"dedupe_key": string,"detail"?: NonNullable<Json>,"id"?: string,"kind": string,"resolution"?: string | null,"resolved_at"?: string | null,"resolved_by"?: string | null,"user_id"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"dedupe_key"?: string,"detail"?: NonNullable<Json>,"id"?: string,"kind"?: string,"resolution"?: string | null,"resolved_at"?: string | null,"resolved_by"?: string | null,"user_id"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"ai_usage_records": {
+                  Row: {
+                    "cache_read_tokens": number,"cache_write_tokens": number,"cost_usd": number,"created_at": string,"id": string,"input_hash": string | null,"input_ratio": number | null,"input_tokens": number,"latency_ms": number | null,"model": string,"ok": boolean,"output_tokens": number,"session_id": string | null,"task": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cache_read_tokens"?: number,"cache_write_tokens"?: number,"cost_usd": number,"created_at"?: string,"id"?: string,"input_hash"?: string | null,"input_ratio"?: number | null,"input_tokens"?: number,"latency_ms"?: number | null,"model": string,"ok": boolean,"output_tokens"?: number,"session_id"?: string | null,"task": string,"user_id": string
+                  }
+                  Update: {
+                    "cache_read_tokens"?: number,"cache_write_tokens"?: number,"cost_usd"?: number,"created_at"?: string,"id"?: string,"input_hash"?: string | null,"input_ratio"?: number | null,"input_tokens"?: number,"latency_ms"?: number | null,"model"?: string,"ok"?: boolean,"output_tokens"?: number,"session_id"?: string | null,"task"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"app_config": {
                   Row: {
                     "ai_budget_alert_ratio": number,"ai_enabled": boolean,"ai_monthly_budget_usd": number,"ai_protection": NonNullable<Json>,"id": boolean,"max_steps": number,"max_users": number,"photo_limits": NonNullable<Json>,"registration_mode": string,"soft_delete_retention_days": number,"text_limits": NonNullable<Json>,"updated_at": string
@@ -643,11 +699,20 @@ isOneToOne: false
 "admin_extend_invite":
 { Args: { "p_admin": string,"p_days": number,"p_invite_id": string }; Returns: string
                            },
+"admin_get_ai_protection":
+{ Args: { "p_admin": string }; Returns: Json
+                           },
+"admin_get_ai_usage":
+{ Args: { "p_admin": string,"p_now"?: string }; Returns: Json
+                           },
 "admin_get_config":
 { Args: { "p_admin": string }; Returns: Json
                            },
 "admin_is_admin":
 { Args: { "p_user": string }; Returns: boolean
+                           },
+"admin_list_ai_alerts":
+{ Args: { "p_admin": string,"p_before"?: string,"p_limit"?: number,"p_status"?: string }; Returns: Json
                            },
 "admin_list_audit_logs":
 { Args: { "p_admin": string,"p_before"?: string,"p_limit"?: number }; Returns: Json
@@ -663,8 +728,17 @@ isOneToOne: false
               "expires_at": string,"invite_id": string,"token": string
             }[]
                            },
+"admin_resolve_ai_alert":
+{ Args: { "p_admin": string,"p_alert_id": string,"p_resolution": string }; Returns: undefined
+                           },
 "admin_revoke_invite":
 { Args: { "p_admin": string,"p_invite_id": string }; Returns: undefined
+                           },
+"admin_set_user_ai_paused":
+{ Args: { "p_admin": string,"p_paused": boolean,"p_user_id": string }; Returns: undefined
+                           },
+"admin_set_user_fair_use":
+{ Args: { "p_admin": string,"p_clear"?: boolean,"p_daily_usd"?: number,"p_monthly_usd"?: number,"p_user_id": string }; Returns: Json
                            },
 "admin_set_user_plan":
 { Args: { "p_admin": string,"p_plan": string,"p_user_id": string }; Returns: undefined
@@ -672,14 +746,26 @@ isOneToOne: false
 "admin_set_user_status":
 { Args: { "p_admin": string,"p_status": string,"p_user_id": string }; Returns: undefined
                            },
+"admin_update_ai_protection":
+{ Args: { "p_admin": string,"p_protection": Json }; Returns: Json
+                           },
 "admin_update_config":
 { Args: { "p_admin": string,"p_ai_enabled"?: boolean,"p_ai_monthly_budget_usd"?: number,"p_max_users"?: number,"p_soft_delete_retention_days"?: number }; Returns: Json
                            },
 "admin_update_invite_email":
 { Args: { "p_admin": string,"p_email": string,"p_invite_id": string }; Returns: undefined
                            },
+"ai_budget_state":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
 "ai_get_context":
 { Args: { "p_user": string }; Returns: Json
+                           },
+"ai_guard_check":
+{ Args: { "p_background"?: boolean,"p_now"?: string,"p_user": string }; Returns: Json
+                           },
+"ai_record_usage":
+{ Args: { "p_cache_read_tokens": number,"p_cache_write_tokens": number,"p_cost_usd": number,"p_input_hash"?: string,"p_input_ratio"?: number,"p_input_tokens": number,"p_latency_ms"?: number,"p_model": string,"p_now"?: string,"p_ok": boolean,"p_output_tokens": number,"p_session_id"?: string,"p_task": string,"p_user": string }; Returns: undefined
                            },
 "backfill_recipe_ingredients":
 { Args: { "p_ingredients": Json,"p_recipe_id": string }; Returns: boolean

@@ -5,6 +5,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { createClaude } from './claude.ts';
 import { type AiContext, type AiErrorCode, type Deps, ERROR_STATUS, runAi } from './pipeline.ts';
 import { TASKS } from './tasks.ts';
+import { createProtection, sessionIdOf } from './usage.ts';
 
 const CORS = {
   'access-control-allow-origin': '*',
@@ -54,6 +55,7 @@ Deno.serve(async (req) => {
     tasks: TASKS,
     // 只有本機與測試專案設 AI_ALLOW_INTERNAL_TASKS=true；正式專案不設
     allowInternalTasks: Deno.env.get('AI_ALLOW_INTERNAL_TASKS') === 'true',
+    ...createProtection(async (fn, args) => await client.rpc(fn, args), sessionIdOf(token)),
   };
 
   try {
