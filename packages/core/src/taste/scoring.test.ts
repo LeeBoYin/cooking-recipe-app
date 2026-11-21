@@ -128,16 +128,16 @@ describe('applyAnswer：其他題型', () => {
     expect(applyAnswer(emptyProfile(), who, { type: 'context', choices: [0, 2] }, dims, NOW).context.cooksFor).toEqual(['self', 'family']);
   });
 
-  it('週末題：挑戰意願以選項為基準，加上「想試試」累積的部分；烤甜點加進想學', () => {
+  it('週末題：挑戰意願以選項為基準，加上「想試試」累積的部分', () => {
     const weekend: TasteQuizItem = {
       id: 'ctx_weekend', type: 'context', regions: ['TW'], mapping: {}, contextField: 'adventure',
-      options: [{ value: 0.8 }, { value: 0.4, addGoal: 'form.dessert_baking' }],
+      options: [{ value: 0.8 }, { value: 0.6 }],
     };
     const p0 = emptyProfile();
     p0.context.adventure = 0.3; // 答過 2 次「想試試」
     const p = applyAnswer(p0, weekend, { type: 'context', choices: [1] }, dims, NOW);
-    expect(p.context.adventure).toBeCloseTo(0.5);
-    expect(p.context.goals).toContain('form.dessert_baking');
+    expect(p.context.adventure).toBeCloseTo(0.7);
+    expect(p.context.goals).toEqual([]);
     expect(applyAnswer(emptyProfile(), weekend, { type: 'context', choices: [0] }, dims, NOW).context.adventure).toBeCloseTo(0.8);
   });
 });
