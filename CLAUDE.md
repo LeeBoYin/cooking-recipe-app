@@ -79,7 +79,8 @@ Vite＋React＋TypeScript 的 PWA（放在 Netlify）；Supabase（Postgres＋RL
 ## 環境與安全
 
 - Supabase 正式專案 `dvlfioarakgddstcwfiu`、測試專案 `usnsgpcutztcmnjbqopg`（東京、免費方案）。
-- 正式網站 https://tsu-siann.netlify.app（Netlify，從 `main` 自動部署；預覽網址連測試專案）。
+- 正式網站 https://tsu-siann.today（Netlify，從 `main` 自動部署；舊網址 tsu-siann.netlify.app 會導向它；預覽網址連測試專案）。
+- 測試站 https://staging.tsu-siann.today：Netlify 部署 `staging` 分支，連測試專案、資料和正式台分開，用來建假資料；`staging` 由 `.github/workflows/sync-staging.yml` 隨 `main` 對齊，不要直接推東西進去。
 - 實驗和測試的 SQL 只在**測試專案**或本機跑；正式專案只透過 CI 部署。
 - 金鑰不進儲存庫：資料庫密碼、Anthropic 金鑰、VAPID 私密金鑰、推播訂閱資料都不 commit，也不貼進對話。
 - 本機開發用 Supabase CLI＋OrbStack（Docker）。若找不到 `docker` 指令，先把 `~/.orbstack/bin` 加進 `PATH`。

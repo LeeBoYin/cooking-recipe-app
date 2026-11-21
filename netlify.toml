@@ -1,6 +1,7 @@
 # 前端由 Netlify 從 git 自動部署（04 ADR-11）。
 # 環境變數 VITE_SUPABASE_URL、VITE_SUPABASE_PUBLISHABLE_KEY 在 Netlify 後台依部署情境設定：
-# 正式網站連正式專案，預覽網址與分支部署連測試專案。
+# 正式網站（tsu-siann.today）連正式專案，預覽網址與分支部署連測試專案。
+# 測試站（staging.tsu-siann.today）是 `staging` 分支的部署，由 .github/workflows/sync-staging.yml 隨 main 同步。
 [build]
   command = "pnpm build"
   publish = "apps/web/dist"
