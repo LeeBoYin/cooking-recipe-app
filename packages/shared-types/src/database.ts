@@ -23,7 +23,21 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "app_config": {
+            "admin_audit_logs": {
+                  Row: {
+                    "action": string,"admin_user_id": string,"created_at": string,"detail": NonNullable<Json>,"id": string,"target_id": string | null,"target_type": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "action": string,"admin_user_id": string,"created_at"?: string,"detail"?: NonNullable<Json>,"id"?: string,"target_id"?: string | null,"target_type"?: string | null
+                  }
+                  Update: {
+                    "action"?: string,"admin_user_id"?: string,"created_at"?: string,"detail"?: NonNullable<Json>,"id"?: string,"target_id"?: string | null,"target_type"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"app_config": {
                   Row: {
                     "id": boolean,"max_steps": number,"max_users": number,"photo_limits": NonNullable<Json>,"registration_mode": string,"soft_delete_retention_days": number,"text_limits": NonNullable<Json>,"updated_at": string
                   }
@@ -602,6 +616,51 @@ isOneToOne: false
         isOneToOne: false
         isSetofReturn: true
       } },
+"admin_create_invite":
+{ Args: { "p_admin": string,"p_befriend_inviter"?: boolean,"p_email": string,"p_id": string,"p_note"?: string,"p_plan"?: string }; Returns: {
+              "expires_at": string,"invite_id": string,"token": string
+            }[]
+                           },
+"admin_create_reset_link":
+{ Args: { "p_admin": string,"p_id": string,"p_user_id": string }; Returns: {
+              "expires_at": string,"link_id": string,"token": string
+            }[]
+                           },
+"admin_extend_invite":
+{ Args: { "p_admin": string,"p_days": number,"p_invite_id": string }; Returns: string
+                           },
+"admin_get_config":
+{ Args: { "p_admin": string }; Returns: Json
+                           },
+"admin_is_admin":
+{ Args: { "p_user": string }; Returns: boolean
+                           },
+"admin_list_audit_logs":
+{ Args: { "p_admin": string,"p_before"?: string,"p_limit"?: number }; Returns: Json
+                           },
+"admin_list_invites":
+{ Args: { "p_admin": string }; Returns: Json
+                           },
+"admin_list_users":
+{ Args: { "p_admin": string }; Returns: Json
+                           },
+"admin_regenerate_invite":
+{ Args: { "p_admin": string,"p_invite_id": string }; Returns: {
+              "expires_at": string,"invite_id": string,"token": string
+            }[]
+                           },
+"admin_revoke_invite":
+{ Args: { "p_admin": string,"p_invite_id": string }; Returns: undefined
+                           },
+"admin_set_user_status":
+{ Args: { "p_admin": string,"p_status": string,"p_user_id": string }; Returns: undefined
+                           },
+"admin_update_config":
+{ Args: { "p_admin": string,"p_max_users"?: number,"p_soft_delete_retention_days"?: number }; Returns: Json
+                           },
+"admin_update_invite_email":
+{ Args: { "p_admin": string,"p_email": string,"p_invite_id": string }; Returns: undefined
+                           },
 "backfill_recipe_ingredients":
 { Args: { "p_ingredients": Json,"p_recipe_id": string }; Returns: boolean
                            },

@@ -145,7 +145,7 @@ select is((select count(*)::int from public.kitchens k join public.kitchen_membe
 -- 重設密碼連結
 ---------------------------------------------------------------------------
 -- 系統管理員可以產生；只存雜湊、24 小時；啟用中的使用者才行
-select tests.login_as((select admin from u));
+select tests.login_as((select admin from u), 'aal2');
 create temp table r1 as select * from public.create_password_reset_link(private.uuid_v7(), (select someone from u));
 grant select on r1 to public;
 select tests.logout();

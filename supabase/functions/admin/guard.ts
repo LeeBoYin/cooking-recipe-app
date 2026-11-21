@@ -1,0 +1,136 @@
+// admin 的純邏輯（不碰網路與資料庫，方便測試）：JWT 內容、請求格式、資料庫錯誤對應。
+// 只用標準 Web API，Deno 2.1 相容。
+
+export interface Claims {
+  sub: string | null;
+  aal: string | null;
+}
+
+// 只解碼內容，不驗簽：呼叫前已經用 Auth 的 getUser 驗證過這個 token
+export function jwtClaims(authorization: string | null): Claims & { token: string } | null {
+  const token = (authorization ?? '').replace(/^Bearer /i, '').trim();
+  const part = token.split('.')[1];
+  if (!part) return null;
+  try {
+    const b64 = part.replace(/-/g, '+').replace(/_/g, '/');
+    const bytes = Uint8Array.from(atob(b64.padEnd(Math.ceil(b64.length / 4) * 4, '=')), (c) => c.charCodeAt(0));
+    const payload = JSON.parse(new TextDecoder().decode(bytes)) as Record<string, unknown>;
+    return {
+      token,
+      sub: typeof payload.sub === 'string' ? payload.sub : null,
+      aal: typeof payload.aal === 'string' ? payload.aal : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function uuidV7(now = Date.now(), random: (n: number) => Uint8Array = (n) => crypto.getRandomValues(new Uint8Array(n))): string {
+  const b = new Uint8Array(16);
+  const ts = BigInt(now);
+  for (let i = 0; i < 6; i++) b[i] = Number((ts >> BigInt(8 * (5 - i))) & 0xffn);
+  b.set(random(10), 6);
+  b[6] = (b[6] & 0x0f) | 0x70;
+  b[8] = (b[8] & 0x3f) | 0x80;
+  const hex = [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
+export type AdminRequest =
+  | { action: 'get_config' | 'list_users' | 'list_invites' }
+  | { action: 'list_audit_logs'; limit: number; before: string | null }
+  | { action: 'create_invite'; email: string; note: string | null; plan: 'free' | 'plus'; befriendInviter: boolean }
+  | { action: 'regenerate_invite' | 'revoke_invite'; inviteId: string }
+  | { action: 'extend_invite'; inviteId: string; days: number }
+  | { action: 'update_invite_email'; inviteId: string; email: string }
+  | { action: 'set_user_status'; userId: string; status: 'active' | 'suspended' }
+  | { action: 'create_reset_link'; userId: string }
+  | { action: 'update_config'; maxUsers: number | null; softDeleteRetentionDays: number | null };
+
+export type ParseResult = { ok: true; value: AdminRequest } | { ok: false; error: string };
+
+const bad: ParseResult = { ok: false, error: 'invalid_request' };
+
+function int(v: unknown, min: number, max: number): number | null {
+  return typeof v === 'number' && Number.isInteger(v) && v >= min && v <= max ? v : null;
+}
+
+export function parseRequest(body: unknown): ParseResult {
+  if (typeof body !== 'object' || body === null) return bad;
+  const b = body as Record<string, unknown>;
+  const id = (v: unknown): v is string => typeof v === 'string' && UUID.test(v);
+
+  switch (b.action) {
+    case 'get_config':
+    case 'list_users':
+    case 'list_invites':
+      return { ok: true, value: { action: b.action } };
+    case 'list_audit_logs': {
+      const limit = b.limit === undefined ? 50 : int(b.limit, 1, 200);
+      const before = b.before === undefined || b.before === null ? null : typeof b.before === 'string' && !Number.isNaN(Date.parse(b.before)) ? b.before : false;
+      if (limit === null || before === false) return bad;
+      return { ok: true, value: { action: 'list_audit_logs', limit, before } };
+    }
+    case 'create_invite': {
+      const email = typeof b.email === 'string' ? b.email.trim() : '';
+      if (!/^[^@\s]+@[^@\s]+$/.test(email) || email.length > 254) return { ok: false, error: 'invalid_invite_input' };
+      const note = b.note === undefined || b.note === null ? null : typeof b.note === 'string' ? b.note.trim() || null : false;
+      if (note === false || (note !== null && [...note].length > 100)) return { ok: false, error: 'invalid_invite_input' };
+      const plan = b.plan === undefined ? 'free' : b.plan;
+      if (plan !== 'free' && plan !== 'plus') return { ok: false, error: 'invalid_invite_input' };
+      const befriend = b.befriendInviter === undefined ? true : b.befriendInviter;
+      if (typeof befriend !== 'boolean') return bad;
+      return { ok: true, value: { action: 'create_invite', email, note, plan, befriendInviter: befriend } };
+    }
+    case 'regenerate_invite':
+    case 'revoke_invite':
+      return id(b.inviteId) ? { ok: true, value: { action: b.action, inviteId: b.inviteId } } : bad;
+    case 'extend_invite': {
+      const days = int(b.days, 1, 60);
+      return id(b.inviteId) && days !== null ? { ok: true, value: { action: 'extend_invite', inviteId: b.inviteId, days } } : bad;
+    }
+    case 'update_invite_email': {
+      const email = typeof b.email === 'string' ? b.email.trim() : '';
+      if (!id(b.inviteId)) return bad;
+      if (!/^[^@\s]+@[^@\s]+$/.test(email) || email.length > 254) return { ok: false, error: 'invalid_invite_input' };
+      return { ok: true, value: { action: 'update_invite_email', inviteId: b.inviteId, email } };
+    }
+    case 'set_user_status':
+      return id(b.userId) && (b.status === 'active' || b.status === 'suspended')
+        ? { ok: true, value: { action: 'set_user_status', userId: b.userId, status: b.status } }
+        : bad;
+    case 'create_reset_link':
+      return id(b.userId) ? { ok: true, value: { action: 'create_reset_link', userId: b.userId } } : bad;
+    case 'update_config': {
+      const maxUsers = b.maxUsers === undefined || b.maxUsers === null ? null : int(b.maxUsers, 1, 1000);
+      const days =
+        b.softDeleteRetentionDays === undefined || b.softDeleteRetentionDays === null ? null : int(b.softDeleteRetentionDays, 1, 365);
+      if ((b.maxUsers != null && maxUsers === null) || (b.softDeleteRetentionDays != null && days === null)) return bad;
+      if (maxUsers === null && days === null) return bad;
+      return { ok: true, value: { action: 'update_config', maxUsers, softDeleteRetentionDays: days } };
+    }
+    default:
+      return bad;
+  }
+}
+
+// 資料庫函式丟出的錯誤（訊息是我們自己寫的代號）轉成 HTTP 狀態與代號；沒見過的一律 500，不外洩內容
+const DB_ERRORS: ReadonlyArray<readonly [string, number]> = [
+  ['forbidden', 403],
+  ['invite_not_usable', 409],
+  ['invite_pending_exists', 409],
+  ['already_registered', 409],
+  ['invite_capacity', 409],
+  ['invalid_invite_input', 400],
+  ['invalid_input', 400],
+  ['cannot_target_self', 400],
+  ['cannot_target_admin', 400],
+  ['user_not_found', 404],
+];
+
+export function mapDbError(message: string | undefined): { error: string; status: number } {
+  const hit = DB_ERRORS.find(([code]) => message?.includes(code));
+  return hit ? { error: hit[0], status: hit[1] } : { error: 'server_error', status: 500 };
+}
