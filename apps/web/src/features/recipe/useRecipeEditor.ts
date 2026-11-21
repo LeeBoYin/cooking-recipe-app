@@ -8,6 +8,7 @@ import { newId } from '@zhusha/core';
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { queryKeys } from '../../data/hooks.ts';
 import { currentUserId } from '../../data/account.ts';
+import { reportError } from '../../data/errors.ts';
 import type { Photo } from '../../data/photos.ts';
 import { createRecipe, publishRecipe, updateRecipe, type Recipe } from '../../data/recipes.ts';
 import { processPhoto } from '../../photos/process.ts';
@@ -42,6 +43,17 @@ export type Removed = { photo: EditorPhoto; stepId?: string; index: number; key:
 
 const AUTOSAVE_MS = 1000;
 
+// 存檔或發佈失敗：只回報原因代碼（資料庫的錯誤碼，或我們自己的 `recipe_xxx`），不送任何內容。
+// 沒有錯誤碼＝請求沒送到，當成網路問題
+function failureKind(error: unknown): { kind: string; onServer: boolean } {
+  const e = (error ?? {}) as { code?: unknown; message?: unknown };
+  const message = typeof e.message === 'string' ? (e.message.split(':')[0] ?? '') : '';
+  const code = typeof e.code === 'string' ? e.code : '';
+  if (/^[a-z_]+$/.test(message) && message.length <= 40) return { kind: message, onServer: true };
+  if (/^[0-9A-Z]{5}$/.test(code)) return { kind: `pg_${code}`, onServer: true };
+  return { kind: 'network', onServer: false };
+}
+
 export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRows: Photo[], initialTitle?: string, defaultServings?: number) {
   const queryClient = useQueryClient();
   const initial = useMemo(() => (recipe ? formFromRecipe(recipe, photoRows) : { ...emptyForm(defaultServings), title: initialTitle ?? '' }), []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -51,6 +63,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
   const savedRecipe = useRef<Recipe | null>(recipe);
   const [recipeState, setRecipeState] = useState<Recipe | null>(recipe);
   const [saveState, setSaveState] = useState<SaveState>('idle');
+  const [saveFailedOnServer, setSaveFailedOnServer] = useState(false); // 資料庫拒絕（不是網路問題）
   const [removed, setRemoved] = useState<Removed | null>(null);
   const [previews, setPreviews] = useState<ReadonlyMap<string, string>>(new Map());
   const previewUrls = useRef(new Map<string, string>());
@@ -108,7 +121,10 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
         void queryClient.invalidateQueries({ queryKey: ['recipes'] });
         setSaveState('saved');
         return result;
-      } catch {
+      } catch (error) {
+        const { kind, onServer } = failureKind(error);
+        setSaveFailedOnServer(onServer);
+        void reportError(`recipe_save_${kind}`, 'recipe-edit', 'warning');
         setSaveState('error');
         return savedRecipe.current;
       }
@@ -294,7 +310,10 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
       queryClient.setQueryData(queryKeys.recipe(recipeId), result);
       void queryClient.invalidateQueries({ queryKey: ['recipes'] });
       return result;
-    } catch {
+    } catch (error) {
+      const { kind, onServer } = failureKind(error);
+      setSaveFailedOnServer(onServer);
+      void reportError(`recipe_publish_${kind}`, 'recipe-edit', 'warning');
       setSaveState('error');
       return null;
     }
@@ -310,6 +329,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
     isDraft,
     dirty,
     saveState,
+    saveFailedOnServer,
     save,
     publish,
     previews,

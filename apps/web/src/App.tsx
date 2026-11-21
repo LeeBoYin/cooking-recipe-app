@@ -10,6 +10,7 @@ import { EquipmentInventoryPage } from './features/equipment/EquipmentInventoryP
 import { EquipmentTab } from './features/equipment/EquipmentTab.tsx';
 import { HomePage } from './features/home/HomePage.tsx';
 import { KitchenPage } from './features/kitchen/KitchenPage.tsx';
+import { KitchenSettingsPage } from './features/kitchen/KitchenSettingsPage.tsx';
 import { AddPage } from './features/pantry/AddPage.tsx';
 import { EditPage } from './features/pantry/EditPage.tsx';
 import { InventoryPage } from './features/pantry/InventoryPage.tsx';
@@ -84,6 +85,7 @@ export function App() {
               <Route path="me/taste" element={<TasteMapPage />} />
               <Route path="me/diet" element={<DietPage />} />
               <Route path="me/settings" element={<SettingsPage />} />
+              <Route path="kitchen/settings" element={<KitchenSettingsPage />} />
               <Route path="kitchen/pantry/add" element={<AddPage />} />
               <Route path="kitchen/pantry/inventory" element={<InventoryPage />} />
               <Route path="kitchen/pantry/removed" element={<Navigate to="/me/trash" replace />} />

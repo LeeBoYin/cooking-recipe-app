@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Outlet } from 'react-router';
+import { Link, Outlet } from 'react-router';
 import { useCurrentKitchen } from '../../data/hooks.ts';
 import { Icon } from '../shell/Icon.tsx';
 import { SegmentNav } from '../shell/SegmentNav.tsx';
@@ -39,6 +39,15 @@ export function KitchenPage() {
             { to: '/kitchen/equipment', label: <FormattedMessage id="kitchen.tab.equipment" /> },
           ]}
         />
+        {kitchen && (
+          <Link
+            to="/kitchen/settings"
+            aria-label={intl.formatMessage({ id: 'kitchen.settings.title' })}
+            className="flex size-11 shrink-0 items-center justify-center rounded-card bg-surface text-ink"
+          >
+            <Icon name="more" />
+          </Link>
+        )}
       </div>
       <Outlet />
       {switching && <KitchenSwitcher currentId={kitchen?.id} onClose={() => setSwitching(false)} />}
