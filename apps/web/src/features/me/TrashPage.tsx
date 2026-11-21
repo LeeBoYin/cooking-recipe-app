@@ -12,9 +12,8 @@ export function TrashPage() {
   const pantry = useRecentlyRemovedPantry(kitchen?.id);
   const bothEmpty = recipes.isSuccess && pantry.isSuccess && recipes.data.length === 0 && (pantry.data ?? []).length === 0;
   return (
-    <SubPage srTitle={intl.formatMessage({ id: 'trash.title' })}>
+    <SubPage title={intl.formatMessage({ id: 'trash.title' })}>
       <div className="flex flex-col gap-6">
-        <h1 className="m-0 font-round text-heading font-bold" aria-hidden="true"><FormattedMessage id="trash.title" /></h1>
         {bothEmpty ? (
           <p className="m-0 text-body text-ink-muted"><FormattedMessage id="trash.empty" /></p>
         ) : (

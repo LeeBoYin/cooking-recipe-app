@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Link, useLocation, useNavigate, useParams } from 'react-router';
+import { Link, useLocation, useParams } from 'react-router';
 import { DIFFICULTY_FACETS, difficultyOverall, formatRecipeText, formatTemperature, haveInKitchen, parseMeasurePref, parseTemperaturePref, renderIngredient, UNIT_CODES, type UnitLabels } from '@zhusha/core';
 import { getIngredient } from '@zhusha/ingredients';
 import type { RecipeIngredient, RecipeStep, RecipeVisibility } from '@zhusha/shared-types';
@@ -8,6 +8,7 @@ import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
 import { useCurrentKitchen, useMySettings, useMyRecipes, usePantryItems, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
 import { Icon } from '../shell/Icon.tsx';
+import { TopBar } from '../shell/SubPage.tsx';
 import { useToast } from '../shell/Toast.tsx';
 import { DifficultyRadar } from './DifficultyRadar.tsx';
 import { knownHighlights } from './model.ts';
@@ -36,7 +37,6 @@ function PublishedNote({ recipeId }: { recipeId: string }) {
 // 食譜頁（自己的）：文字在前、照片在後——菜名與心得 → 難易度 → 一排照片 → 食材 → 做法 → 料理筆記
 export function RecipePage() {
   const intl = useIntl();
-  const navigate = useNavigate();
   const { id } = useParams();
   const justPublished = (useLocation().state as { published?: boolean } | null)?.published === true;
   const recipe = useRecipe(id);
@@ -156,24 +156,28 @@ export function RecipePage() {
 
   return (
     <div className="flex flex-col gap-3.5 pb-6">
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          aria-label={intl.formatMessage({ id: 'common.back' })}
-          onClick={() => void navigate(-1)}
-          className="flex size-11 items-center justify-center rounded-card border-0 bg-surface text-ink"
-        >
-          <Icon name="back" />
-        </button>
-        <div className="flex items-center gap-2">
-          <button type="button" onClick={() => void shareText()} className="flex h-11 items-center justify-center rounded-card border border-line bg-surface px-4 font-[inherit] text-body font-bold text-ink">
-            <FormattedMessage id="recipe.view.share" />
-          </button>
-          <Link to={`/recipes/${r.id}/edit`} className="flex h-11 items-center justify-center rounded-card bg-bulb px-5 text-body font-bold text-ink no-underline">
-            <FormattedMessage id="recipe.view.edit" />
-          </Link>
-        </div>
-      </div>
+      <TopBar
+        className=""
+        right={
+          <>
+            <button
+              type="button"
+              aria-label={intl.formatMessage({ id: 'recipe.view.share' })}
+              onClick={() => void shareText()}
+              className="flex size-11 items-center justify-center rounded-card border-0 bg-transparent text-ink"
+            >
+              <Icon name="share" />
+            </button>
+            <Link
+              to={`/recipes/${r.id}/edit`}
+              aria-label={intl.formatMessage({ id: 'recipe.view.edit' })}
+              className="flex size-11 items-center justify-center rounded-card bg-transparent text-ink no-underline"
+            >
+              <Icon name="edit" />
+            </Link>
+          </>
+        }
+      />
 
       {justPublished && id && <PublishedNote recipeId={id} />}
 

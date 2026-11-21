@@ -152,19 +152,24 @@ export function AddPage() {
   }
 
   return (
-    <SubPage srTitle={intl.formatMessage({ id: 'pantry.add' })}>
+    <SubPage
+      srTitle={intl.formatMessage({ id: 'pantry.add' })}
+      rightFill
+      right={
+      <label className="relative block min-w-0 flex-1">
+                <span className="sr-only"><FormattedMessage id="pantry.search" /></span>
+                <Icon name="search" size={20} className="pointer-events-none absolute top-3 left-3 text-ink-muted" />
+                <input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder={intl.formatMessage({ id: 'pantry.search.placeholder' })}
+                  className="h-11 w-full rounded-card border-0 bg-surface pr-3 pl-10 text-body text-ink"
+                />
+              </label>
+      }
+    >
       <div className="flex flex-col gap-3 pb-24">
-        <label className="relative block">
-          <span className="sr-only"><FormattedMessage id="pantry.search" /></span>
-          <Icon name="search" size={20} className="pointer-events-none absolute top-3.5 left-3 text-ink-muted" />
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={intl.formatMessage({ id: 'pantry.search.placeholder' })}
-            className="h-12 w-full rounded-card border-0 bg-surface pr-3 pl-10 text-body text-ink"
-          />
-        </label>
 
         {trimmed && (
           <ul className="m-0 list-none rounded-card bg-surface px-3 py-0">

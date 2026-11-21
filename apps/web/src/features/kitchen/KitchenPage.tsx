@@ -43,9 +43,9 @@ export function KitchenPage() {
           <Link
             to="/kitchen/settings"
             aria-label={intl.formatMessage({ id: 'kitchen.settings.title' })}
-            className="flex size-11 shrink-0 items-center justify-center rounded-card bg-surface text-ink"
+            className="flex size-11 shrink-0 items-center justify-center rounded-card bg-transparent text-ink"
           >
-            <Icon name="more" />
+            <Icon name="gear" />
           </Link>
         )}
       </div>

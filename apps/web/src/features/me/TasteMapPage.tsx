@@ -119,9 +119,8 @@ export function TasteMapPage() {
   })();
 
   return (
-    <SubPage srTitle={srTitle}>
+    <SubPage title={srTitle}>
       <div className="flex flex-col gap-3.5">
-        <b className="text-card-title"><FormattedMessage id="tastemap.title" /></b>
         <div className="flex flex-col gap-0.5 rounded-chef border-2 border-bulb bg-surface px-3.5 py-3">
           <b className="font-round text-card-title">{title ?? intl.formatMessage({ id: 'tastemap.noName' })}</b>
           {challenge && <span className="text-caption text-ink-muted">{challenge}</span>}

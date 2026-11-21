@@ -48,9 +48,8 @@ export function EquipmentInventoryPage() {
   }
 
   return (
-    <SubPage srTitle={intl.formatMessage({ id: 'equipment.inventory.title' })}>
+    <SubPage title={intl.formatMessage({ id: 'equipment.inventory.title' })}>
       <div className="flex flex-col gap-3 pb-24">
-        <h2 className="m-0 font-round text-heading font-bold"><FormattedMessage id="equipment.inventory.title" /></h2>
         <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="equipment.inventory.help" /></p>
         {!current ? (
           <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="common.loading" /></p>

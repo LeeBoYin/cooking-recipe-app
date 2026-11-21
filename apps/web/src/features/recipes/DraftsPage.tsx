@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import { useDeleteRecipe, useMyRecipePhotos, useMyRecipes, usePhotoUrls } from '../../data/hooks.ts';
 import type { Recipe } from '../../data/recipes.ts';
 import { Icon } from '../shell/Icon.tsx';
-import { InnerHeader } from './InnerHeader.tsx';
+import { TopBar } from '../shell/SubPage.tsx';
 
 const REVEAL = 88; // 左滑露出「刪除」的寬度
 
@@ -71,7 +71,7 @@ export function DraftsPage() {
   const urls = usePhotoUrls((drafts.data ?? []).flatMap((d) => cover(d.id) ?? [])).data;
   return (
     <section>
-      <InnerHeader title={intl.formatMessage({ id: 'recipes.drafts.title' })} />
+      <TopBar title={intl.formatMessage({ id: 'recipes.drafts.title' })} />
       <p className="m-0 mb-2 text-small text-ink-muted"><FormattedMessage id="recipes.drafts.help" /></p>
       {drafts.isPending ? (
         <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="common.loading" /></p>
