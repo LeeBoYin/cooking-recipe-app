@@ -111,10 +111,6 @@ export function PantryTab() {
         })
       )}
 
-      <Link to="/kitchen/pantry/removed" className="mt-2 min-h-11 text-caption font-bold text-ink underline underline-offset-4">
-        <FormattedMessage id="pantry.removed" />
-      </Link>
-
       {remove.isError && (
         <p role="alert" className="m-0 text-caption text-error"><FormattedMessage id="pantry.error.write" /></p>
       )}
