@@ -20,6 +20,7 @@ import {
   type EditorStep,
 } from './model.ts';
 import { PhotoStrip } from './PhotoStrip.tsx';
+import { SortableItem, SortableList } from './SortableList.tsx';
 import { useRecipeEditor } from './useRecipeEditor.ts';
 
 const VISIBILITIES: RecipeVisibility[] = ['friends', 'household', 'private'];
@@ -63,21 +64,22 @@ function Section({ title, hint, open, onToggle, children }: {
   );
 }
 
-function StepRow({ step, index, thumb, onText, onPhoto, onRemovePhoto, over, autoFocus }: {
+function StepRow({ step, index, thumb, onText, onPhoto, onRemovePhoto, onRemove, over, autoFocus }: {
   step: EditorStep;
   index: number;
   thumb: string | undefined;
   onText: (text: string) => void;
   onPhoto: (file: File) => void;
   onRemovePhoto: () => void;
+  onRemove: () => void;
   over: number;
   autoFocus: boolean;
 }) {
   const intl = useIntl();
   const input = useRef<HTMLInputElement>(null);
   return (
-    <div className="flex items-start gap-2.5">
-      <span className="mt-1 flex size-6 shrink-0 items-center justify-center rounded-full bg-ink text-small font-bold text-surface">{index + 1}</span>
+    <SortableItem id={step.id} handleLabel={intl.formatMessage({ id: 'recipe.step.drag' }, { n: index + 1 })} className="flex items-start gap-1">
+      <span className="mt-2.5 mr-1 flex size-6 shrink-0 items-center justify-center rounded-full bg-ink text-small font-bold text-surface">{index + 1}</span>
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <textarea
           rows={2}
@@ -123,7 +125,15 @@ function StepRow({ step, index, thumb, onText, onPhoto, onRemovePhoto, over, aut
           </button>
         )}
       </div>
-    </div>
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={intl.formatMessage({ id: 'recipe.step.remove' }, { n: index + 1 })}
+        className="flex size-11 shrink-0 items-center justify-center border-0 bg-transparent p-0 text-ink-muted"
+      >
+        <Icon name="trash" size={20} />
+      </button>
+    </SortableItem>
   );
 }
 
@@ -312,21 +322,37 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
 
         <div className="flex flex-col gap-1.5">
           <span className={LABEL}><FormattedMessage id="recipe.ingredients.help" /></span>
-          <div className="flex flex-col rounded-card border border-line px-3">
-            {form.ingredients.map((ing, i) => (
-              <input
-                key={ing.id}
-                type="text"
-                autoFocus={focusId === ing.id}
-                value={ing.text}
-                aria-label={intl.formatMessage({ id: 'recipe.ingredient.aria' }, { n: i + 1 })}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, ingredients: f.ingredients.map((x) => (x.id === ing.id ? { ...x, text: e.target.value } : x)) }))
-                }
-                className="border-0 border-b border-line-soft bg-transparent py-2.5 text-body text-ink outline-none"
-              />
-            ))}
-            <button type="button" onClick={() => setFocusId(ed.addIngredient())} className="h-11 border-0 bg-transparent p-0 text-left text-body font-[inherit] text-ink-muted">
+          <div className="flex flex-col rounded-card border border-line px-1">
+            <SortableList ids={form.ingredients.map((i) => i.id)} onReorder={ed.reorderIngredients}>
+              {form.ingredients.map((ing, i) => (
+                <SortableItem
+                  key={ing.id}
+                  id={ing.id}
+                  handleLabel={intl.formatMessage({ id: 'recipe.ingredient.drag' }, { n: i + 1 })}
+                  className="flex items-center border-b border-line-soft"
+                >
+                  <input
+                    type="text"
+                    autoFocus={focusId === ing.id}
+                    value={ing.text}
+                    aria-label={intl.formatMessage({ id: 'recipe.ingredient.aria' }, { n: i + 1 })}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, ingredients: f.ingredients.map((x) => (x.id === ing.id ? { ...x, text: e.target.value } : x)) }))
+                    }
+                    className="min-w-0 flex-1 border-0 bg-transparent py-2.5 text-body text-ink outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => ed.removeIngredient(ing.id)}
+                    aria-label={intl.formatMessage({ id: 'recipe.ingredient.remove' }, { n: i + 1 })}
+                    className="flex size-11 shrink-0 items-center justify-center border-0 bg-transparent p-0 text-ink-muted"
+                  >
+                    <Icon name="trash" size={20} />
+                  </button>
+                </SortableItem>
+              ))}
+            </SortableList>
+            <button type="button" onClick={() => setFocusId(ed.addIngredient())} className="h-11 border-0 bg-transparent px-2 text-left text-body font-[inherit] text-ink-muted">
               <FormattedMessage id="recipe.ingredients.add" />
             </button>
           </div>
@@ -336,6 +362,7 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
           <span className={LABEL}>
             <FormattedMessage id="recipe.steps.help" values={{ max: recipeLimits.steps }} />
           </span>
+          <SortableList ids={form.steps.map((s) => s.id)} onReorder={ed.reorderSteps}>
           {form.steps.map((s, i) => (
             <StepRow
               key={s.id}
@@ -347,8 +374,10 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
               onText={(text) => setForm((f) => ({ ...f, steps: f.steps.map((x) => (x.id === s.id ? { ...x, text } : x)) }))}
               onPhoto={(file) => void ed.addPhotos([file], s.id)}
               onRemovePhoto={() => s.photo && ed.removePhoto(s.photo.id)}
+              onRemove={() => ed.removeStep(s.id)}
             />
           ))}
+          </SortableList>
           <button
             type="button"
             disabled={!canAddStep(form)}

@@ -10,6 +10,8 @@ const PATHS = {
   more: 'M5 12h.01M12 12h.01M19 12h.01',
   search: 'M11 18a7 7 0 100-14 7 7 0 000 14zM20 20l-4-4',
   close: 'M6 6l12 12M18 6L6 18',
+  grip: 'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01',
+  trash: 'M5 7h14M10 4h4M7 7l1 13h8l1-13M10 11v6M14 11v6',
   check: 'M5 12.5l4.5 4.5L19 7',
   down: 'M6 9l6 6 6-6',
   right: 'M9 6l6 6-6 6',

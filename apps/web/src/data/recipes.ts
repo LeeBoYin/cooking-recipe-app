@@ -79,7 +79,7 @@ export const recipeErrors = {
   conflict: 'recipe_conflict', // 這篇在別的地方改過了：請看過最新版再改
   notFound: 'recipe_not_found',
   deleted: 'recipe_deleted',
-  empty: 'recipe_empty', // 發佈要有標題或至少一張照片
+  empty: 'recipe_empty', // 發佈要有菜名和至少一張照片
   textTooLong: 'text_too_long', // text_too_long:欄位:上限:超過幾字
   photoLimit: 'photo_limit_reached',
   tooManySteps: 'too_many_steps',

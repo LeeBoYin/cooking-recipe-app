@@ -175,7 +175,7 @@
 |------|---------|-------|
 | `save_recipe` | 作者 | 新增或更新食譜（含草稿），只送有改的欄位；ID 還不存在時新增一篇草稿；比對讀取時的 `updated_at`，不一致就拒絕；用字典表算出 `ingredient_ids`、`equipment_type_ids`、`techniques`、`difficulty.overall`、`cooked_on`（料理時間改變時才重算，用食譜所在廚房的時區；沒指定廚房時用目前的廚房）、`cooked_dates`；做法改變時 `version` 加一（M1b 起同時寫一版 `recipe_revisions`）；依 `app_config.text_limits` 檢查長度；刪掉已經不在步驟裡的步驟照片資料列（檔案由孤兒檔清理處理）；步驟最多 `app_config.max_steps` 步；`p_photos`（選填）是這篇食譜上方照片與步驟照片的完整清單：不在清單裡的刪除、新的建立、順序依清單，上方照片的第一張設為封面，張數依 `photo_limits` 檢查；食材每一列的 `ingredient_id`、`amount`、`amount_max`、`unit` 由手機用 `core` 的解析器從原文算出後送來（中文原文不適合在資料庫裡解析），資料庫只檢查：食材 ID 在字典裡、單位在 `UnitCode` 清單裡、數量是正數且上限不小於下限，不合格的欄位清空、保留原文；這些欄位只影響自己食譜的顯示與換算，M1a 起對不到字典的再交給背景的食材正規化補上；可以一起存 `recipe_private`，兩張表同一個交易 |
 | `set_avatar` | 本人 | 換大頭貼：`p_photo_id` 是新照片的 ID，400px 的檔案要已經在 `users/{userId}/avatar/` 底下才能建立資料列；同一個交易裡刪掉本人舊的頭像資料列（檔案由孤兒檔清理處理）。傳 `null` 代表拿掉大頭貼 |
-| `publish_recipe` | 作者 | 檢查有標題或照片、改成已發佈、第一次發佈時填 `published_at`；M2 起對好友與家人送「有新動態」訊號（Realtime Broadcast，和 `feed_page` 一起做） |
+| `publish_recipe` | 作者 | 檢查有標題且至少一張照片（否則 `recipe_empty`）、改成已發佈、第一次發佈時填 `published_at`；M2 起對好友與家人送「有新動態」訊號（Realtime Broadcast，和 `feed_page` 一起做） |
 | `delete_recipe`、`restore_recipe` | 作者 | 軟刪除與復原；`app_config.soft_delete_retention_days` 內可以復原，到期後由每日維護真正刪除 |
 | `search_my_recipes` | 已登入、啟用中的使用者 | 以關鍵字找自己已發佈、未刪除的食譜：比對名稱與食材原文（不分大小寫，`%`、`_` 當一般字元），回傳食譜 ID、符合的是名稱還是食材、符合的文字，最多 200 筆。M0 用 `ilike`，之後換 PGroonga 時介面不變 |
 | `record_cook_again` | 作者 | 新增一筆「又做了一次」，更新 `cooked_dates` |

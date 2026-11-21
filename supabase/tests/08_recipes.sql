@@ -1,7 +1,7 @@
 -- 食譜：save_recipe／publish_recipe／delete_recipe／restore_recipe、可見範圍、私人資料、
 -- 食譜與步驟照片的權限與張數上限（16 第三～五節）
 begin;
-select plan(116);
+select plan(120);
 
 create function tests.updated_rows(p_sql text)
 returns integer
@@ -192,7 +192,9 @@ select tests.logout();
 select tests.login_as(:'owner');
 select lives_ok(format($$select tests.save('{"id":"%s"}')$$, :'r2'), '只有一個 ID 就能建立空白草稿');
 select throws_ok(format($$select public.publish_recipe('%s')$$, :'r2'), '22023', null, '沒有標題也沒有照片不能發佈');
-select lives_ok(format($$select public.publish_recipe('%s')$$, :'r1'), '有標題就能發佈');
+select throws_ok(format($$select public.publish_recipe('%s')$$, :'r1'), '22023', null, '只有標題不能發佈');
+select lives_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r1', jsonb_build_array(tests.photo(:'ph1', 'recipe'))), '補一張照片');
+select lives_ok(format($$select public.publish_recipe('%s')$$, :'r1'), '有照片和標題就能發佈');
 select is((select status from public.recipes where id = :'r1'), 'published', '狀態改成已發佈');
 select ok((select published_at is not null from public.recipes where id = :'r1'), '填入發佈時間');
 select tests.logout();
@@ -348,10 +350,12 @@ select tests.login_as(:'owner');
 select lives_ok(format($$select tests.save('{"id":"%s","steps":[]}')$$, :'r1'), '清空步驟');
 select is((select count(*)::int from public.photos where owner_type = 'recipe_step'), 0, '步驟照片資料列跟著刪掉');
 
--- 只有照片也能發佈
+-- 發佈要有照片和菜名
 select lives_ok(format($$select tests.save('{"id":"%s"}')$$, :'r3'), '另一篇草稿');
 select lives_ok(format($$select tests.save('{"id":"%s"}', null, '%s')$$, :'r3', jsonb_build_array(tests.photo(:'ph8', 'recipe'))), '只放一張照片');
-select lives_ok(format($$select public.publish_recipe('%s')$$, :'r3'), '只有照片也能發佈');
+select throws_ok(format($$select public.publish_recipe('%s')$$, :'r3'), '22023', null, '只有照片不能發佈');
+select lives_ok(format($$select tests.save('{"id":"%s","title":"有菜名了"}')$$, :'r3'), '補上菜名');
+select lives_ok(format($$select public.publish_recipe('%s')$$, :'r3'), '有照片和菜名就能發佈');
 
 ---------------------------------------------------------------------------
 -- 刪除與復原

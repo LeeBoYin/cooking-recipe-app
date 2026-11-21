@@ -247,6 +247,41 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
     return ingredient.id;
   }, [setForm]);
 
+  const reorderIngredients = useCallback(
+    (activeId: string, overId: string) =>
+      setForm((f) => {
+        const from = f.ingredients.findIndex((i) => i.id === activeId);
+        const to = f.ingredients.findIndex((i) => i.id === overId);
+        return from < 0 || to < 0 ? f : { ...f, ingredients: arrayMove(f.ingredients, from, to) };
+      }),
+    [setForm],
+  );
+  const reorderSteps = useCallback(
+    (activeId: string, overId: string) =>
+      setForm((f) => {
+        const from = f.steps.findIndex((s) => s.id === activeId);
+        const to = f.steps.findIndex((s) => s.id === overId);
+        return from < 0 || to < 0 ? f : { ...f, steps: arrayMove(f.steps, from, to) };
+      }),
+    [setForm],
+  );
+  const removeIngredient = useCallback(
+    (id: string) => setForm((f) => ({ ...f, ingredients: f.ingredients.filter((i) => i.id !== id) })),
+    [setForm],
+  );
+  // 刪步驟：有照片的話照片照原本的移除流程處理；步驟已經沒了，不出現「復原」提示
+  const removeStep = useCallback(
+    (id: string) => {
+      const photo = formRef.current.steps.find((s) => s.id === id)?.photo;
+      if (photo) {
+        removePhoto(photo.id);
+        setRemoved(null);
+      }
+      setForm((f) => ({ ...f, steps: f.steps.filter((s) => s.id !== id) }));
+    },
+    [removePhoto, setForm],
+  );
+
   // 發佈：先把最新的存好，再發佈
   const publish = useCallback(async (): Promise<Recipe | null> => {
     const saved = await save();
@@ -287,6 +322,10 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
     undoRemove,
     addStep,
     addIngredient,
+    reorderIngredients,
+    reorderSteps,
+    removeIngredient,
+    removeStep,
     retryUploads,
   };
 }

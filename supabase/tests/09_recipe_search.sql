@@ -23,16 +23,38 @@ select private.uuid_v7() as r3 \gset
 select private.uuid_v7() as r4 \gset
 select private.uuid_v7() as r5 \gset
 
+-- 發佈要有照片：測試用的輔助函式先補一張照片資料列再發佈（建立時是超級使用者）
+create function tests.publish(p_id uuid)
+returns void
+language plpgsql
+security definer
+as $$
+declare
+  v_user uuid := (select user_id from public.recipes where id = p_id);
+  v_photo uuid := private.uuid_v7();
+begin
+  insert into storage.objects (bucket_id, name) values
+    ('photos', format('users/%s/%s.webp', v_user, v_photo)),
+    ('photos', format('users/%s/%s_feed.webp', v_user, v_photo)),
+    ('photos', format('users/%s/%s_thumb.webp', v_user, v_photo));
+  insert into public.photos (id, user_id, owner_type, owner_id, storage_path, feed_path, thumb_path, width, height)
+  values (v_photo, v_user, 'recipe', p_id, format('users/%s/%s.webp', v_user, v_photo),
+          format('users/%s/%s_feed.webp', v_user, v_photo), format('users/%s/%s_thumb.webp', v_user, v_photo), 1200, 900);
+  perform public.publish_recipe(p_id);
+end;
+$$;
+grant execute on function tests.publish(uuid) to authenticated;
+
 select tests.login_as(:'owner');
 select tests.save(format('{"id":"%s","title":"麻婆豆腐","ingredients":[{"id":"i1","raw_text":"板豆腐 1 盒","optional":false}]}', :'r1')::jsonb);
 select tests.save(format('{"id":"%s","title":"三杯雞","ingredients":[{"id":"i1","raw_text":"雞腿肉 500 克","optional":false},{"id":"i2","raw_text":"嫩豆腐 半盒","optional":false}]}', :'r2')::jsonb);
 select tests.save(format('{"id":"%s","title":"草稿豆腐"}', :'r3')::jsonb);
 select tests.save(jsonb_build_object('id', :'r4'::text, 'title', '100% 純果汁'));
 select tests.save(format('{"id":"%s","title":"已刪除的豆腐"}', :'r5')::jsonb);
-select public.publish_recipe(:'r1'::uuid);
-select public.publish_recipe(:'r2'::uuid);
-select public.publish_recipe(:'r4'::uuid);
-select public.publish_recipe(:'r5'::uuid);
+select tests.publish(:'r1'::uuid);
+select tests.publish(:'r2'::uuid);
+select tests.publish(:'r4'::uuid);
+select tests.publish(:'r5'::uuid);
 select public.delete_recipe(:'r5'::uuid);
 
 select is((select count(*)::int from public.search_my_recipes('豆腐')), 2, '名稱或食材符合的兩篇；草稿與已刪除的不算');
