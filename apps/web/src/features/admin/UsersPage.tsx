@@ -1,5 +1,5 @@
 // 使用者與邀請 ②：使用者清單。只有帳號資料，沒有任何使用者的食譜、食材、照片。
-// 調整方案、個人的合理使用上限、暫停 AI 等 M1a-03、04 再加。
+// 方案可以調整（M1a-03）；個人的合理使用上限、暫停 AI 等 M1a-04 再加。
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
@@ -18,18 +18,25 @@ function UserRow({ user, onLink }: { user: AdminUser; onLink: (shown: Shown) => 
   const refresh = () => void qc.invalidateQueries({ queryKey: ['admin'] });
   const suspended = user.status === 'suspended';
   const status = useMutation({ mutationFn: () => adminApi.setUserStatus(user.user_id, suspended ? 'active' : 'suspended'), onSuccess: refresh });
+  const plan = useMutation({
+    mutationFn: () => adminApi.setUserPlan(user.user_id, user.plan === 'plus' ? 'free' : 'plus'),
+    onSuccess: refresh,
+  });
   const reset = useMutation({
     mutationFn: () => adminApi.createResetLink(user.user_id),
     onSuccess: (r) => onLink({ url: resetUrl(window.location.origin, r.token), expiresAt: r.expires_at, name: user.display_name ?? '' }),
   });
   const isAdmin = user.role === 'system_admin';
-  const failure = [status, reset].find((m) => m.isError)?.error;
+  const failure = [status, reset, plan].find((m) => m.isError)?.error;
 
   return (
     <li className="flex flex-col gap-2 border-t border-line-soft py-3 first:border-t-0">
       <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
         <span className="font-bold">{user.display_name ?? '—'}</span>
         <span className="min-w-0 text-caption break-all text-ink-muted">{user.email}</span>
+        <span className="rounded-full bg-line-soft px-2 py-0.5 text-small font-bold">
+          <FormattedMessage id={`admin.user.plan.${user.plan}`} />
+        </span>
         {isAdmin && <span className="rounded-full bg-bulb-soft px-2 py-0.5 text-small font-bold"><FormattedMessage id="admin.user.admin" /></span>}
         <span className={`rounded-full px-2 py-0.5 text-small font-bold ${suspended ? 'bg-line-soft text-error' : 'bg-green-soft text-green'}`}>
           <FormattedMessage id={`admin.user.status.${user.status}`} />
@@ -48,6 +55,9 @@ function UserRow({ user, onLink }: { user: AdminUser; onLink: (shown: Shown) => 
       </div>
       {!isAdmin && (
         <div className="flex flex-wrap gap-2">
+          <button type="button" className={btn} disabled={plan.isPending} onClick={() => plan.mutate()}>
+            <FormattedMessage id={user.plan === 'plus' ? 'admin.user.plan.toFree' : 'admin.user.plan.toPlus'} />
+          </button>
           {!suspended && (
             <button type="button" className={btn} disabled={reset.isPending} onClick={() => reset.mutate()}>
               <FormattedMessage id="admin.user.resetLink" />

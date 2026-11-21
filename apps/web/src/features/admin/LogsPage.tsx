@@ -12,8 +12,8 @@ function shortId(id: string | null): string {
 function Detail({ log }: { log: AuditLog }) {
   const d = log.detail;
   if (log.action === 'config.update') {
-    const before = (d.before ?? {}) as Record<string, number>;
-    const after = (d.after ?? {}) as Record<string, number>;
+    const before = (d.before ?? {}) as Record<string, number | boolean>;
+    const after = (d.after ?? {}) as Record<string, number | boolean>;
     const keys = Object.keys(after).filter((k) => before[k] !== after[k]);
     return (
       <>
@@ -22,6 +22,14 @@ function Detail({ log }: { log: AuditLog }) {
             <FormattedMessage id={`admin.logs.config.${k}`} defaultMessage={k} />：{String(before[k])} → {String(after[k])}
           </span>
         ))}
+      </>
+    );
+  }
+  if (log.action === 'user.plan') {
+    return (
+      <>
+        <FormattedMessage id={`admin.user.plan.${String(d.before)}`} defaultMessage={String(d.before)} /> →{' '}
+        <FormattedMessage id={`admin.user.plan.${String(d.after)}`} defaultMessage={String(d.after)} />
       </>
     );
   }

@@ -68,7 +68,7 @@
 | `household_profiles` | `id` | `kitchen_id`（連動） | M2 |
 | `kitchen_join_codes` | `id` | `kitchen_id`（連動）；`created_by`、`used_by` → 使用者（空值） | M2 |
 | `dietary_profiles` | `id` | `user_id`（連動，唯一）；`household_profile_id`（連動，M2 建 `household_profiles` 時加上欄位，並讓兩者恰好一個有值） | M0（只有使用者的） |
-| `entitlements` | `user_id` | `auth.users`（連動） | M1a |
+| `entitlements` | `user_id` | `auth.users`（連動） | M1a：`plan`（`free`／`plus`）、`valid_until`、`fair_use_override`（管理員個別調整的合理使用上限，M1a-04 讀）；本人只能讀，寫入只經註冊（依邀請的方案，密碼與 Google 兩條路徑同一個交易）與 `admin_set_user_plan` |
 | `invites` | `id` | `invited_by`（佔位）；`kitchen_id`（連動）；`accepted_user_id`（空值） | M1a |
 | `password_reset_links` | `id` | `user_id`（連動） | M1a |
 | `invite_code_attempts` | `source_hash` | — | M1a |
@@ -115,7 +115,7 @@
 
 | 資料表 | 階段 | 說明 |
 |-------|------|------|
-| `app_config` | M0 | 單列設定：文字長度上限、照片張數上限、軟刪除保留天數 |
+| `app_config` | M0 | 單列設定：文字長度上限、照片張數上限、軟刪除保留天數；M1a-03 起加 AI 總開關 `ai_enabled`、每月預算 `ai_monthly_budget_usd`（預設 18）、降級提醒門檻 `ai_budget_alert_ratio`（預設 0.8）、`ai_protection`（用量保護的數值，M1a-04 定格式） |
 | `error_logs` | M0 | ADR-21 |
 | `ingredient_mappings` | M0 | 全站共用的食材對應快取（只來自 AI 與你的審查） |
 | `background_jobs` | M1a | 背景任務佇列 |
@@ -212,7 +212,11 @@
 
 | 函式 | 誰能呼叫 | 做什麼 |
 |------|---------|-------|
-| `ai` | 已登入、啟用中的使用者 | 任務：首頁點子、對話、展開做法、口述整理、用說的改食譜、從網址匯入、發佈後整理（標籤、難易度、一句話）、正規化、靈感彩蛋。每個任務的模型與 effort 讀設定檔（見 [03 模型選擇](03-ai-design.md#模型選擇)）。依序檢查帳號狀態、速率、合理使用上限、預算；口味檔案過期時先用 `core` 重算；組 prompt、呼叫 Claude、驗證輸出、過敏原與安全二次檢查、寫用量紀錄 |
+| `ai` | 已登入、啟用中的使用者 | 任務：首頁點子、對話、展開做法、口述整理、用說的改食譜、從網址匯入、發佈後整理（標籤、難易度、一句話）、正規化、靈感彩蛋。每個任務的模型與 effort 讀設定檔（見 [03 模型選擇](03-ai-design.md#模型選擇)）。依序檢查帳號狀態、速率、合理使用上限、預算；口味檔案過期時先用 `core` 重算；組 prompt、呼叫 Claude、驗證輸出、過敏原與安全二次檢查、寫用量紀錄。
+
+骨架（M1a-03）：請求 `{ task, input }`，回應 `{ data }` 或 `{ error: <代號> }`；不開閘道的 JWT 驗證，自己用 Auth 驗證 token。主流程在 `functions/ai/pipeline.ts`（Claude、資料庫與任務都由外面傳入，單元測試用假的回應）：已登入（401 `unauthorized`）→ 帳號啟用中、沒被暫停 AI、AI 總開關開著（`ai_get_context`：`account_inactive`／`ai_paused`／`ai_disabled`）→ 任務在白名單（`unknown_task`；已列出但還沒實作的任務與正式環境的內部任務是 `task_not_available`）→ 輸入格式與長度（`invalid_input`）→ 【用量保護的掛載點 `guard`：M1a-04 在這裡檢查速率 `rate_limited`、合理使用上限 `over_limit`、預算 `budget_exhausted`，也可以改寫這次的模型設定做降級】→ 組 prompt（`stable` 在最前面、加 `cache_control`；`volatile` 接在後面）→ 呼叫 Claude（官方 SDK，`output_config.format` 結構化輸出、`output_config.effort`，Haiku 5.5 的抽取類任務 `thinking: disabled`）→ `stop_reason`：`refusal` 是 `refused`、`max_tokens` 是 `truncated`、其他非正常結束與不是合法 JSON 或不符 schema 是 `invalid_output`、Claude 服務出錯是 `upstream_error`（前端一律走不用 AI 的退路）→ 回傳輸出與 token 用量（輸入、輸出、快取讀、快取寫），用量交給 `onUsage` 掛載點，M1a-04 寫進用量紀錄。沒有設 `ANTHROPIC_API_KEY` 是 500 `not_configured`。紀錄只有任務與錯誤代號，不含使用者輸入與 AI 的回應。
+
+模型設定檔在 `functions/_shared/ai-models.ts`：每個任務的模型、effort、思考開關（`adaptive`／`off`）、輸出上限；改這個檔就換模型。`admin` 函式的 `get_ai_models` 唯讀顯示它（不含內部任務）。任務的輸入檢查、prompt、輸出 schema 登記在 `functions/ai/tasks.ts`；目前只有內部測試用的 `_selftest`，只有環境變數 `AI_ALLOW_INTERNAL_TASKS=true`（本機與測試專案）才能呼叫，正式專案不設。輸出用 `_shared/json-schema.ts` 的小型驗證器檢查（不用 ajv：它靠 `new Function`，Edge Runtime 不保證能跑）。|
 | `accept-invite` | 持有邀請連結或邀請碼的人 | 新註冊（密碼）或已有帳號的人接受家人邀請；建立帳號與初始資料（見第八節）。密碼註冊：驗證 token（存在、沒撤銷、沒用過、沒過期、email 相符，不分大小寫）→ 用 admin API 建立已確認 email 的使用者（不寄信）→ `complete_invite_signup`；失敗時刪掉剛建的使用者，回應與紀錄不含 email 與 token。用 `body.action` 分四個動作（沒填當作 `signup`）：
 - `signup`：同上，驗證邀請的憑證可以是連結的 `token`，也可以是 6 碼 `code`（走 `redeem_invite_code`，一樣計錯誤次數）。
 - `open`：打開邀請連結時，驗證 token 後產生 6 碼邀請碼（字母表去掉 0/O、1/I/L，1 小時內有效，只存雜湊，重新產生時舊的作廢），回傳邀請碼、邀請的 email 與邀請者的暱稱（`inviterName`，沒有邀請者時是空值；用 `invite_inviter_name` 取，只回暱稱），邀請頁顯示「〇〇邀請你一起用…」。
@@ -223,7 +227,7 @@
 | `share` | 任何人（公開頁）；作者（建立） | 輸出公開分享頁；建立分享連結時存公開照片副本與手機產生的預覽圖 |
 | `push` | 只有資料庫（`pg_net`）與排程 | 送 Web Push，清掉失效的訂閱 |
 | `track` | 已登入的人 | 收產品事件與手機的錯誤紀錄，由後端填分析 ID 後寫入 |
-| `admin` | 系統管理員（兩步驟驗證） | 後台的所有資料與操作，每次寫操作紀錄。不開閘道的 JWT 驗證，自己依序檢查：token 交給 Auth 驗證（401 `unauthorized`）→ 是啟用中的系統管理員（403 `forbidden`，不是管理員的人只看到這個）→ JWT 的 `aal` 是 `aal2`（403 `mfa_required`，前端據此引導綁定或輸入驗證碼）。`body.action`：`get_config`、`list_users`、`list_invites`、`list_audit_logs`、`create_invite`、`regenerate_invite`、`revoke_invite`、`extend_invite`、`update_invite_email`、`set_user_status`、`create_reset_link`、`update_config`；邀請與重設連結只回傳原始 token（只此一次），由前端組成網址。資料庫錯誤對應成代號（`invite_not_usable`、`invite_pending_exists`、`already_registered`、`invite_capacity`、`cannot_target_self`…），沒見過的一律 `server_error`，回應與紀錄不含 email 與 token。`is_system_admin()`（RLS 與 `create_invite` 等用的判斷）同樣要求 `aal2`。兩步驟驗證用 Supabase Auth 的 TOTP（本機 `config.toml` 已開；測試與正式專案在 Dashboard → Authentication → MFA 開啟） |
+| `admin` | 系統管理員（兩步驟驗證） | 後台的所有資料與操作（含 `set_user_plan` 調整方案、`get_ai_models` 唯讀看各任務的模型，`update_config` 可改 AI 總開關與每月預算），每次寫操作紀錄。不開閘道的 JWT 驗證，自己依序檢查：token 交給 Auth 驗證（401 `unauthorized`）→ 是啟用中的系統管理員（403 `forbidden`，不是管理員的人只看到這個）→ JWT 的 `aal` 是 `aal2`（403 `mfa_required`，前端據此引導綁定或輸入驗證碼）。`body.action`：`get_config`、`list_users`、`list_invites`、`list_audit_logs`、`create_invite`、`regenerate_invite`、`revoke_invite`、`extend_invite`、`update_invite_email`、`set_user_status`、`create_reset_link`、`update_config`；邀請與重設連結只回傳原始 token（只此一次），由前端組成網址。資料庫錯誤對應成代號（`invite_not_usable`、`invite_pending_exists`、`already_registered`、`invite_capacity`、`cannot_target_self`…），沒見過的一律 `server_error`，回應與紀錄不含 email 與 token。`is_system_admin()`（RLS 與 `create_invite` 等用的判斷）同樣要求 `aal2`。兩步驟驗證用 Supabase Auth 的 TOTP（本機 `config.toml` 已開；測試與正式專案在 Dashboard → Authentication → MFA 開啟） |
 | `maintenance` | 只有排程 | 需要 Storage API 的清理（孤兒照片、刪除帳號後的照片） |
 | `mcp` | 經 OAuth 授權的外部 AI | M4 |
 

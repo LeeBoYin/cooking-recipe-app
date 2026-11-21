@@ -69,9 +69,13 @@ export function adminErrorOf(e: unknown): AdminError {
 export interface AdminConfig {
   max_users: number;
   soft_delete_retention_days: number;
+  ai_enabled: boolean;
+  ai_monthly_budget_usd: number;
   registered_count: number;
   pending_invite_count: number;
 }
+
+export type Plan = 'free' | 'plus';
 
 export interface AdminUser {
   user_id: string;
@@ -79,6 +83,7 @@ export interface AdminUser {
   display_name: string | null;
   role: 'user' | 'system_admin';
   status: 'active' | 'suspended';
+  plan: Plan;
   created_at: string;
   last_active_at: string | null;
   accepted_via: 'password' | 'google' | null;
@@ -97,6 +102,15 @@ export interface AdminInvite {
   expires_at: string;
   created_at: string;
   accepted_at: string | null;
+}
+
+// 設定檔唯讀：每個 AI 任務用的模型（後端 _shared/ai-models.ts）
+export interface AiModelRow {
+  task: string;
+  model: string;
+  effort: string;
+  thinking: 'adaptive' | 'off';
+  max_output_tokens: number;
 }
 
 export interface AuditLog {
@@ -129,8 +143,13 @@ export const adminApi = {
   updateInviteEmail: (inviteId: string, email: string) => adminCall<null>({ action: 'update_invite_email', inviteId, email }),
   setUserStatus: (userId: string, status: 'active' | 'suspended') => adminCall<null>({ action: 'set_user_status', userId, status }),
   createResetLink: (userId: string) => adminCall<{ link_id: string; token: string; expires_at: string }>({ action: 'create_reset_link', userId }),
-  updateConfig: (input: { maxUsers?: number; softDeleteRetentionDays?: number }) =>
-    adminCall<{ max_users: number; soft_delete_retention_days: number }>({ action: 'update_config', ...input }),
+  aiModels: () => adminCall<AiModelRow[]>({ action: 'get_ai_models' }),
+  setUserPlan: (userId: string, plan: Plan) => adminCall<null>({ action: 'set_user_plan', userId, plan }),
+  updateConfig: (input: { maxUsers?: number; softDeleteRetentionDays?: number; aiEnabled?: boolean; aiMonthlyBudgetUsd?: number }) =>
+    adminCall<{ max_users: number; soft_delete_retention_days: number; ai_enabled: boolean; ai_monthly_budget_usd: number }>({
+      action: 'update_config',
+      ...input,
+    }),
 };
 
 // 連結格式（02 K）：邀請 /invite/<token>、重設密碼 /reset/<token>。token 是 base64url，不需要再編碼。

@@ -814,6 +814,7 @@ interface AppConfig {                 // 後端設定，在管理後台的「系
     status: number;                   // 近況 60
     bio: number;                      // 自我介紹 100
   };
+  aiEnabled: boolean;                 // AI 總開關，預設 true；關閉後所有 AI 功能改用不用 AI 的推薦
   aiMonthlyBudgetUsd: number;         // AI 每月預算，預設 18（每月營運總額 US$20）；100% 改用不用 AI 的推薦
   aiBudgetAlertRatio: number;         // 提醒門檻，預設 0.8：提醒管理員，並把首頁點子降級成 Haiku 5.5、靈感彩蛋改用模板
   aiProtection: {                     // 用量保護；使用者看不到這些數值

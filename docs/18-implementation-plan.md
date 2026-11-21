@@ -76,7 +76,7 @@
 | [x] M1a-01b | **邀請（後端 ②）**：6 碼邀請碼、Auth「建立使用者前」hook（Google 登入檢查邀請；先驗證免費方案可用）、`password_reset_links` | Sonnet | 16 第六節；02 K |
 | [x] M1a-02 | **邀請與註冊（畫面）**：邀請連結入口、建立帳號、6 碼邀請碼、Google 登入、忘記密碼的說明 | Sonnet | 12 第二、三節；02 K |
 | [x] M1a-12 | **管理後台基本版 ①**：`/admin` 外框、`system_admin` 的兩步驟驗證（TOTP）、使用者與邀請（不顯示「加入我的廚房」）、系統設定、操作紀錄 | Sonnet | 02 L；04 ADR-15；16 `admin` |
-| [ ] M1a-03 | **方案與 `entitlements`**、`app_config` 的 AI 設定、`ai` 函式骨架與模型設定檔 | Sonnet | 03；16 第六節 |
+| [x] M1a-03 | **方案與 `entitlements`**、`app_config` 的 AI 設定、`ai` 函式骨架與模型設定檔 | Sonnet | 03；16 第六節 |
 | [ ] M1a-04 | **用量保護與異常清單**：速率限制、每人每日與每月上限、每月預算與 80%／100% 降級、Claude Console 花費上限的對照 | Sonnet | 03 成本與保護；02 L |
 | [ ] M1a-05 | **食材正規化**：使用者自己的對應、全站對應、`add_pantry_items` 接上、背景任務 | Sonnet | 16 第五節；03〈食材正規化〉 |
 | [ ] M1a-06 | **大廚的點子（AI）**：`ai_suggestion_cache`、提示詞、過敏原與安全規則的程式檢查、輸出格式驗證。先在 Opus 定提示詞與輸出格式、寫 10 組評估集草稿、用真的 prompt 量每次的 token 與成本 | Opus 先討論，再 Sonnet | 03；01；07 |

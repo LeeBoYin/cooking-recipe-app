@@ -39,7 +39,7 @@ export function uuidV7(now = Date.now(), random: (n: number) => Uint8Array = (n)
 }
 
 export type AdminRequest =
-  | { action: 'get_config' | 'list_users' | 'list_invites' }
+  | { action: 'get_config' | 'list_users' | 'list_invites' | 'get_ai_models' }
   | { action: 'list_audit_logs'; limit: number; before: string | null }
   | { action: 'create_invite'; email: string; note: string | null; plan: 'free' | 'plus'; befriendInviter: boolean }
   | { action: 'regenerate_invite' | 'revoke_invite'; inviteId: string }
@@ -47,7 +47,14 @@ export type AdminRequest =
   | { action: 'update_invite_email'; inviteId: string; email: string }
   | { action: 'set_user_status'; userId: string; status: 'active' | 'suspended' }
   | { action: 'create_reset_link'; userId: string }
-  | { action: 'update_config'; maxUsers: number | null; softDeleteRetentionDays: number | null };
+  | { action: 'set_user_plan'; userId: string; plan: 'free' | 'plus' }
+  | {
+      action: 'update_config';
+      maxUsers: number | null;
+      softDeleteRetentionDays: number | null;
+      aiEnabled: boolean | null;
+      aiMonthlyBudgetUsd: number | null;
+    };
 
 export type ParseResult = { ok: true; value: AdminRequest } | { ok: false; error: string };
 
@@ -66,6 +73,7 @@ export function parseRequest(body: unknown): ParseResult {
     case 'get_config':
     case 'list_users':
     case 'list_invites':
+    case 'get_ai_models':
       return { ok: true, value: { action: b.action } };
     case 'list_audit_logs': {
       const limit = b.limit === undefined ? 50 : int(b.limit, 1, 200);
@@ -103,13 +111,28 @@ export function parseRequest(body: unknown): ParseResult {
         : bad;
     case 'create_reset_link':
       return id(b.userId) ? { ok: true, value: { action: 'create_reset_link', userId: b.userId } } : bad;
+    case 'set_user_plan':
+      return id(b.userId) && (b.plan === 'free' || b.plan === 'plus')
+        ? { ok: true, value: { action: 'set_user_plan', userId: b.userId, plan: b.plan } }
+        : bad;
     case 'update_config': {
       const maxUsers = b.maxUsers === undefined || b.maxUsers === null ? null : int(b.maxUsers, 1, 1000);
       const days =
         b.softDeleteRetentionDays === undefined || b.softDeleteRetentionDays === null ? null : int(b.softDeleteRetentionDays, 1, 365);
+      const aiEnabled = b.aiEnabled === undefined || b.aiEnabled === null ? null : typeof b.aiEnabled === 'boolean' ? b.aiEnabled : undefined;
+      const budget =
+        b.aiMonthlyBudgetUsd === undefined || b.aiMonthlyBudgetUsd === null
+          ? null
+          : typeof b.aiMonthlyBudgetUsd === 'number' && Number.isFinite(b.aiMonthlyBudgetUsd) && b.aiMonthlyBudgetUsd >= 0 && b.aiMonthlyBudgetUsd <= 10000
+            ? Math.round(b.aiMonthlyBudgetUsd * 100) / 100
+            : undefined;
       if ((b.maxUsers != null && maxUsers === null) || (b.softDeleteRetentionDays != null && days === null)) return bad;
-      if (maxUsers === null && days === null) return bad;
-      return { ok: true, value: { action: 'update_config', maxUsers, softDeleteRetentionDays: days } };
+      if (aiEnabled === undefined || budget === undefined) return bad;
+      if (maxUsers === null && days === null && aiEnabled === null && budget === null) return bad;
+      return {
+        ok: true,
+        value: { action: 'update_config', maxUsers, softDeleteRetentionDays: days, aiEnabled, aiMonthlyBudgetUsd: budget },
+      };
     }
     default:
       return bad;
