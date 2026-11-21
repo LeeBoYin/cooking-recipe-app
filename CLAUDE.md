@@ -49,7 +49,7 @@ Vite＋React＋TypeScript 的 PWA（放在 Netlify）；Supabase（Postgres＋RL
 - 衍生欄位由資料庫函式計算，不信任手機送來的值。
 - ID 由手機產生（UUID v7）；`created_at`、`updated_at` 由資料庫設定。
 - 列舉用 `text`＋`CHECK`，不用 Postgres 的 `ENUM`；`jsonb` 欄位用 `pg_jsonschema` 檢查格式，並帶 `schemaVersion`。
-- 結構改動要和前一版 App 相容：先加欄位，下一版才拿掉舊的。
+- 目前還沒有真實使用者，結構改動不用和前一版 App 相容，不用的欄位直接拿掉。M1a 開放邀請、有真實使用者之後，改成先加欄位、下一版才拿掉舊的。
 
 **共用套件**（前端和 Edge Functions 都會用）
 - 相對匯入一律寫 `.ts` 副檔名；前端 `tsconfig` 開 `allowImportingTsExtensions`。

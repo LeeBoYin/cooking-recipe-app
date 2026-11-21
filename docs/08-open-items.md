@@ -84,7 +84,7 @@
 
 | 項目 | 說明 | 何時需要 |
 |------|------|---------|
-| 食材字典的 `recentDays` | 「最近買的」已拿掉，欄位與資料先留著（相容規則：先停止讀取，下一版才移除）；之後從 `packages/ingredients` 的型別與 `ingredients.json` 清掉 | 下一次改字典結構時 |
+| 食材字典的 `recentDays` | 「最近買的」已拿掉，已不讀取；從 `packages/ingredients` 的型別與 `ingredients.json` 直接清掉 | 下一次改字典結構時 |
 
 ### 專案建置
 
@@ -97,7 +97,7 @@
 | 後端與 AI 帳號 | Supabase 正式與測試兩個專案（免費方案，M0）、Anthropic API 金鑰與 US$20 花費上限（M1a） |
 | 免費方案的維運 | GitHub Actions：每週喚醒 Supabase 專案、每週清孤兒照片檔（資料庫備份暫不做，見 04）；後台總覽顯示資料庫與照片用量（M0 起） |
 | 開發說明檔 | 寫一份 `CLAUDE.md`，記下專案慣例與文件位置，方便之後和 AI 協作開發 |
-| 拿掉不用的欄位 | `dietary_profiles.recurring_rules` 已不使用（產品不做週期性規則），下一版 App 上線後用 migration 刪掉，連同權限測試裡的相關檢查 |
+| 拿掉不用的欄位 | `dietary_profiles.recurring_rules` 已不使用（產品不做週期性規則），直接用 migration 刪掉，連同權限測試裡的相關檢查 |
 | 食材回填的執行環境 | M0-21b 的舊食譜食材回填目前在部署流程（GitHub Actions）裡執行；儲存庫是公開的，已做到紀錄不印任何內容。**M2 有其他使用者的資料之前**，改成 Edge Function 或其他不經過 CI 執行環境的做法（要先驗證 Edge Function 部署時能引用 `packages/` 的共用程式） |
 
 ---
