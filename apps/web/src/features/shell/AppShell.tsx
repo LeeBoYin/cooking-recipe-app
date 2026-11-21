@@ -17,11 +17,11 @@ export function AppShell() {
       <Outlet />
       <nav
         aria-label="main"
-        className="fixed inset-x-0 bottom-0 z-10 mx-auto flex max-w-[560px] items-end justify-around bg-surface pb-[env(safe-area-inset-bottom)]"
+        className="fixed inset-x-0 bottom-0 z-10 mx-auto grid max-w-[560px] grid-cols-5 items-end bg-surface pb-[env(safe-area-inset-bottom)]"
       >
         {TABS.map((tab) =>
           tab.icon === 'plus' ? (
-            <NavLink key={tab.to} to={tab.to} className="relative -mt-3 flex min-h-14 min-w-14 flex-col items-center justify-end pb-2 no-underline">
+            <NavLink key={tab.to} to={tab.to} className="relative -mt-3 flex min-h-14 flex-col items-center justify-end pb-2 no-underline">
               <span className="flex size-12 items-center justify-center rounded-full border-2 border-ink bg-bulb text-ink">
                 <Icon name="plus" />
               </span>
@@ -35,7 +35,7 @@ export function AppShell() {
               to={tab.to}
               end={tab.end}
               className={({ isActive }) =>
-                `flex min-h-14 min-w-14 flex-1 flex-col items-center justify-center gap-0.5 no-underline ${
+                `flex min-h-14 flex-col items-center justify-center gap-0.5 no-underline ${
                   isActive ? 'font-bold text-ink' : 'text-ink-muted'
                 }`
               }

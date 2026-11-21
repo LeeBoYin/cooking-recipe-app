@@ -170,6 +170,9 @@ export function RecipePage() {
         >
           <Icon name="back" />
         </button>
+        <Link to={`/recipes/${r.id}/edit`} className="flex h-11 items-center justify-center rounded-card bg-bulb px-5 text-body font-bold text-ink no-underline">
+          <FormattedMessage id="recipe.view.edit" />
+        </Link>
       </div>
 
       {justPublished && id && <PublishedNote recipeId={id} />}
@@ -342,9 +345,6 @@ export function RecipePage() {
         <button type="button" onClick={() => void shareText()} className="flex h-12 flex-1 items-center justify-center rounded-card border border-line bg-surface font-[inherit] text-body font-bold text-ink">
           <FormattedMessage id="recipe.view.share" />
         </button>
-        <Link to={`/recipes/${r.id}/edit`} className="flex h-12 flex-1 items-center justify-center rounded-card bg-bulb text-body font-bold text-ink no-underline">
-          <FormattedMessage id="recipe.view.edit" />
-        </Link>
       </div>
 
       {buyOpen && <ShoppingSheet title={title} lines={ingredientLines} onClose={() => setBuyOpen(false)} />}

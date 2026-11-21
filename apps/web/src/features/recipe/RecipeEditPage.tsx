@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useLocation, useNavigate, useParams } from 'react-router';
-import { DIFFICULTY_FACETS, difficultyOverall, type DifficultyFacet } from '@zhusha/core';
 import type { RecipeVisibility } from '@zhusha/shared-types';
 import { useDeleteRecipe, useLinkBookmark, useMySettings, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
 import { recipeLimits, type Recipe } from '../../data/recipes.ts';
@@ -141,7 +140,6 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
   const [methodOpen, setMethodOpen] = useState(
     form.ingredients.length > 0 || form.steps.length > 0 || form.tips !== '',
   );
-  const [difficultyOpen, setDifficultyOpen] = useState(form.difficulty !== null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [leaveAsk, setLeaveAsk] = useState(false);
   const [publishing, setPublishing] = useState(false);
@@ -173,7 +171,6 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
   const storyOver = overBy(form.story, textLimits.story);
   const tipsOver = overBy(form.tips, textLimits.tips);
   const canPublish = hasContent(form) && ed.pendingCount === 0 && !over && !publishing;
-  const overall = form.difficulty ? difficultyOverall(form.difficulty) : null;
 
   async function publish() {
     setPublishing(true);
@@ -262,19 +259,6 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
         )}
       </div>
 
-      <PhotoStrip
-        photos={form.photos}
-        urlFor={urlFor}
-        statusOf={ed.photoStatus}
-        onAdd={(files) => void ed.addPhotos(files)}
-        onRemove={ed.removePhoto}
-        onReorder={ed.reorderPhotos}
-        onRetry={ed.retryUploads}
-      />
-      {!ed.isDraft && (
-        <p className="-mt-2 m-0 text-small text-ink-muted"><FormattedMessage id="recipe.photo.publishedHelp" /></p>
-      )}
-
       <section className={`${CARD} flex flex-col gap-1.5`}>
         <label className="flex flex-col">
           <span className="sr-only"><FormattedMessage id="recipe.field.title" /></span>
@@ -302,6 +286,19 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
         </label>
         {storyOver > 0 && <FieldError id="recipe.error.storyOver" values={{ limit: textLimits.story, over: storyOver }} />}
       </section>
+
+      <PhotoStrip
+        photos={form.photos}
+        urlFor={urlFor}
+        statusOf={ed.photoStatus}
+        onAdd={(files) => void ed.addPhotos(files)}
+        onRemove={ed.removePhoto}
+        onReorder={ed.reorderPhotos}
+        onRetry={ed.retryUploads}
+      />
+      {!ed.isDraft && (
+        <p className="-mt-2 m-0 text-small text-ink-muted"><FormattedMessage id="recipe.photo.publishedHelp" /></p>
+      )}
 
       <Section title={intl.formatMessage({ id: 'recipe.method' })} hint={methodOpen ? intl.formatMessage({ id: 'recipe.method.hint' }) : methodSummary} open={methodOpen} onToggle={() => setMethodOpen((o) => !o)}>
         <div className="flex items-center justify-between">
@@ -398,46 +395,6 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
           })}
         </div>
       </section>
-
-      <Section
-        title={intl.formatMessage({ id: 'recipe.difficulty' })}
-        hint={overall ? intl.formatMessage({ id: 'recipe.difficulty.overall' }, { value: overall }) : intl.formatMessage({ id: 'recipe.difficulty.hint' })}
-        open={difficultyOpen}
-        onToggle={() => setDifficultyOpen((o) => !o)}
-      >
-        {DIFFICULTY_FACETS.map((facet: DifficultyFacet) => {
-          const value = form.difficulty?.[facet] ?? 3;
-          return (
-            <label key={facet} className="flex flex-col gap-0.5">
-              <span className="flex justify-between text-caption">
-                <FormattedMessage id={`recipe.facet.${facet}`} />
-                <b>{form.difficulty ? value : '—'}</b>
-              </span>
-              <input
-                type="range"
-                min={1}
-                max={5}
-                step={1}
-                value={value}
-                onChange={(e) =>
-                  setForm((f) => ({
-                    ...f,
-                    difficulty: {
-                      ingredients: 3, equipment: 3, time: 3, technique: 3, failure_risk: 3,
-                      ...f.difficulty,
-                      [facet]: Number(e.target.value),
-                    },
-                  }))
-                }
-                className="m-0 h-8 w-full accent-bulb"
-              />
-              <span aria-hidden="true" className="flex justify-between px-1.5 text-small text-ink-muted">
-                {[1, 2, 3, 4, 5].map((n) => <span key={n}>{n}</span>)}
-              </span>
-            </label>
-          );
-        })}
-      </Section>
 
       {ed.removed && (
         <div role="status" className="fixed inset-x-4 bottom-[calc(112px+env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-[528px] min-h-12 items-center justify-between rounded-card bg-ink pr-1 pl-3.5 text-body text-surface">

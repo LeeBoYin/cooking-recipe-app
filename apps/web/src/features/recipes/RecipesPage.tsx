@@ -1,21 +1,25 @@
 import { useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Link, NavLink, Outlet } from 'react-router';
+import { Link, Outlet } from 'react-router';
 import { Icon } from '../shell/Icon.tsx';
+import { SegmentNav } from '../shell/SegmentNav.tsx';
 
 // 食譜分頁：「我的食譜｜收藏」分段加「更多」（只有最近刪除）。沒有檢視切換，也沒有篩選（17 我的食譜）
 export function RecipesPage() {
   const intl = useIntl();
   const [menu, setMenu] = useState(false);
-  const seg = ({ isActive }: { isActive: boolean }) =>
-    `flex h-9 flex-1 items-center justify-center rounded-[8px] text-[15px] no-underline ${isActive ? 'bg-surface font-bold text-ink' : 'text-ink-muted'}`;
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <nav aria-label={intl.formatMessage({ id: 'recipes.tabs.aria' })} className="flex flex-1 gap-1 rounded-[12px] bg-line-soft p-1">
-          <NavLink to="/recipes" end className={seg}><FormattedMessage id="recipes.tab.mine" /></NavLink>
-          <NavLink to="/recipes/saved" className={seg}><FormattedMessage id="recipes.tab.saved" /></NavLink>
-        </nav>
+        <div className="flex flex-1">
+          <SegmentNav
+            ariaLabel={intl.formatMessage({ id: 'recipes.tabs.aria' })}
+            items={[
+              { to: '/recipes', end: true, label: <FormattedMessage id="recipes.tab.mine" /> },
+              { to: '/recipes/saved', label: <FormattedMessage id="recipes.tab.saved" /> },
+            ]}
+          />
+        </div>
         <div className="relative">
           <button
             type="button"
