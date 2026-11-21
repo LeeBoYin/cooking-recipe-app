@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { Icon } from '../shell/Icon.tsx';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
 
@@ -48,8 +49,8 @@ export function VisionStep({ onDone, onSkip }: { onDone: () => void; onSkip: () 
             <p className="m-0 text-[15px] leading-relaxed text-ink-muted"><FormattedMessage id={`onboarding.vision.${n}.body`} /></p>
             {n === '2' && (
               <ul className="m-0 flex list-none flex-col gap-2 p-0 text-[15px] leading-relaxed">
-                <li><FormattedMessage id="onboarding.vision.2.recipes" values={{ b: (c) => <b>{c}</b> }} /></li>
-                <li><FormattedMessage id="onboarding.vision.2.kitchen" values={{ b: (c) => <b>{c}</b> }} /></li>
+                <li className="flex items-start gap-2"><Icon name="book" size={20} className="mt-0.5 shrink-0" /><span><FormattedMessage id="onboarding.vision.2.recipes" values={{ b: (c) => <b>{c}</b> }} /></span></li>
+                <li className="flex items-start gap-2"><Icon name="house" size={20} className="mt-0.5 shrink-0" /><span><FormattedMessage id="onboarding.vision.2.kitchen" values={{ b: (c) => <b>{c}</b> }} /></span></li>
               </ul>
             )}
             {n === '3' && (
