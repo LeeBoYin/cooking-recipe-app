@@ -768,7 +768,7 @@ interface Invite {                    // 邀請（M1 起），只存在後端
   type: 'account' | 'kitchen';        // 同一個邀請表單：account＝一般邀請，受邀者建立自己的廚房；kitchen＝勾了「也邀請他加入我的廚房」，受邀者加入 kitchenId。系統管理員兩種都能發，使用者能發 kitchen（account 在 M4 開放）
   invitedBy: string;                  // 產生邀請的人（管理者或使用者）
   kitchenId?: string;                 // kitchen 邀請要加入的廚房
-  befriendInviter: boolean;           // 預設 true：註冊後和邀請者成為好友
+  befriendInviter: boolean;           // 預設 true：註冊後和邀請者成為好友；M1a 只存旗標，M2 建好友關係時照旗標補上
   expiresAt: string;                  // 預設 14 天後
   linkRegeneratedAt?: string;         // 最近一次「重新產生連結」的時間；舊連結同時失效
   installCode?: {                     // iPhone 先安裝時用的 6 碼邀請碼：打開邀請連結時產生，在主畫面的 App 輸入
