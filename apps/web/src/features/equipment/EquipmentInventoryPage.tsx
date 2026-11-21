@@ -5,6 +5,7 @@ import { useAddKitchenEquipment, useCurrentKitchen, useKitchenEquipment } from '
 import { Icon } from '../shell/Icon.tsx';
 import { SubPage } from '../shell/SubPage.tsx';
 import { groupTypes, initialSelection, inventoryWall, typeName } from './logic.ts';
+import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
 // 快速盤點：圖示牆勾選「你的廚房有什麼」，按完成才一次新增。
 // 已登記的顯示成已勾選、不能在這裡取消，避免誤刪品牌、容量這些資料；要刪請到那件廚具的編輯頁。
@@ -80,9 +81,7 @@ export function EquipmentInventoryPage() {
                           <Icon name="check" size={14} />
                         </span>
                       )}
-                      <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-line-soft">
-                        <Icon name="pot" size={22} />
-                      </span>
+                      <ItemIcon kind="equipment" id={t.id} size={40} />
                       {typeName(t)}
                     </button>
                   );

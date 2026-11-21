@@ -224,9 +224,40 @@ App 的色彩、字型、版面、元件與動態。畫面上的樣子以這份�
 
 ## 七、圖示
 
-- 24px、2px 線寬、圓頭圓角，顏色 `ink`（沒選取的分頁用 `ink-muted`）。
+- 介面圖示：24px、2px 線寬、圓頭圓角，顏色 `ink`（沒選取的分頁用 `ink-muted`）。食材與廚具的 icon 另有格式，見下一小節。
 - **最後全部用手繪圖示**。M0 先用現成的圓頭線條圖示佔位，尺寸與名稱照手繪版規劃，之後一次替換。
 - 目前用到的：首頁、食譜、記錄、廚房、我的、搜尋、通知、用說的、留言、收藏、返回、加反應、更多。
+
+### 食材與廚具的 icon
+
+每個食材、廚具都有一個 icon：**墨色線條**，背後疊一層依類別上色的**淡色圓底**。線條和圓底分開存放，線條也能單獨用在別處（`ItemIcon` 的 `plain`）。
+
+**線條格式**（畫圖照這個）
+- 24×24 的格子，四邊各留 2 的空白（內容畫在 2～22 之間）。
+- `fill="none"`、`stroke="currentColor"`、`stroke-width` 1.75、圓角收尾與轉角。SVG 裡不寫死顏色、沒有底色。
+- 一個 icon 是一串 path 的 `d` 字串（`string[]`）。20px 看得清楚為準：不畫細節紋路，用 3 筆以內的輪廓表達。
+
+**存放**（`apps/web/src/icons/`）
+- 依顏色群組分檔：`veg.ts`、`fruit.ts`、`meat.ts`、`dairy.ts`、`staple.ts`、`seasoning.ts`、`equipment.ts`；每檔 `export const icons: Record<字典 ID, string[]>`。
+- 各群組用動態載入，221 個 icon 不會全進主程式；載入前先顯示類別通用 icon。
+- 還沒有專屬 icon 的食材、廚具，用**類別通用 icon**（`categories.ts`，食材 21 類、廚具 8 類）。
+- 類別與顏色群組的對照放在 `groups.ts`，有單元測試確保字典的每個類別都有對應。
+
+**顏色群組與圓底色票**（`styles.css` 的 `--color-icon-*`；深色模式的低明度版本在 `data-theme="dark"` 之下）
+
+| 群組 | 食材／廚具類別 | 淺色 | 深色 |
+|------|----------------|------|------|
+| `veg` 綠 | vegetable、mushroom、herb | `#DCEFDC` | `#2E4A33` |
+| `fruit` 橘 | fruit | `#FBE3CB` | `#5B3D26` |
+| `meat` 磚紅偏棕 | meat、poultry、seafood | `#F0E0D4` | `#543A2F` |
+| `dairy` 琥珀 | egg、dairy、tofu-bean | `#FBECC4` | `#5A4A22` |
+| `staple` 米色 | grain、noodle、dried-goods、nut-seed、processed、beverage、other | `#ECE3CF` | `#4A4333` |
+| `seasoning` 紫灰 | sauce、seasoning、spice、oil | `#E6E0EA` | `#433A50` |
+| `equipment` 藍灰 | 廚具的全部類別 | `#DFE7EF` | `#334150` |
+
+**`ItemIcon` 元件**：`kind`（`ingredient`／`equipment`）、字典 ID、`size`。圓底直徑就是 `size`，線條縮到約 80%；線條色用 `ink`（深色模式用淺墨色）。預設當裝飾（`aria-hidden`），需要文字說明時才傳 `label`。清單列用 28～32px（廚具列 40px，和照片縮圖同大）。
+
+**開發用總覽**：開發模式的 `/dev/icons` 依群組列出所有食材與廚具，標出「專屬」或「用類別 icon」，可切淺色／深色；補畫 icon 時用這頁檢查。
 
 ### 反應圖案
 

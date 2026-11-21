@@ -9,8 +9,8 @@ import { Icon } from '../shell/Icon.tsx';
 import { SubPage } from '../shell/SubPage.tsx';
 import { todayIn } from './dates.ts';
 import { ExpiryFields, type Expiry } from './ExpiryFields.tsx';
-import { emojiFor } from './labels.ts';
 import { ZoneSelect } from './ZoneSelect.tsx';
+import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
 // 一張食材卡：加入前可以設放哪裡、想先用掉、期限（02 快速新增）
 type Draft = {
@@ -46,7 +46,7 @@ function Card({ draft, today, onChange, onRemove }: { draft: Draft; today: strin
     <li className="rounded-card bg-surface p-3">
       <div className="flex items-center justify-between">
         <span className="text-card-title font-bold">
-          <span aria-hidden="true">{emojiFor(draft.ingredient_id)}</span> {draft.name}
+          <ItemIcon kind="ingredient" id={draft.ingredient_id} size={32} /> {draft.name}
         </span>
         <button
           type="button"
@@ -176,7 +176,7 @@ export function AddPage() {
                   onClick={() => addIngredient(r.id)}
                   className="flex min-h-12 w-full items-center gap-3 border-0 bg-transparent py-1 text-left text-body text-ink disabled:text-ink-muted"
                 >
-                  <span aria-hidden="true">{emojiFor(r.id)}</span>
+                  <ItemIcon kind="ingredient" id={r.id} size={32} />
                   <span className="flex-1">{r.name['zh-TW']}</span>
                   {have.has(r.id) && (
                     <span className="rounded-tag bg-green-soft px-1.5 text-small font-bold text-green">
@@ -214,7 +214,7 @@ export function AddPage() {
                   onClick={() => addIngredient(id)}
                   className={`min-h-11 rounded-full border px-3 text-caption ${used ? 'border-ink bg-bulb-soft font-bold' : 'border-line bg-surface'}`}
                 >
-                  <span aria-hidden="true">{emojiFor(id)}</span> {getIngredient(id)?.name['zh-TW']}
+                  <ItemIcon kind="ingredient" id={id} size={24} /> {getIngredient(id)?.name['zh-TW']}
                   {have.has(id) && !used && <span className="text-ink-muted"> ✓</span>}
                 </button>
               );

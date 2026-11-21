@@ -1,6 +1,7 @@
 import { FormattedMessage } from 'react-intl';
 import { useCurrentKitchen, useRecentlyRemovedPantry, useRestorePantryItem } from '../../data/hooks.ts';
-import { displayName, emojiFor } from '../pantry/labels.ts';
+import { displayName } from '../pantry/labels.ts';
+import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
 // 「我的 → 最近刪除」的食材區：只列目前所在廚房、30 天內拿掉的食材，一鍵復原（02 移除）
 export function TrashPantry() {
@@ -24,7 +25,7 @@ export function TrashPantry() {
           <ul className="m-0 list-none rounded-card bg-surface px-3 py-0">
             {items.map((item) => (
               <li key={item.id} className="flex items-center gap-3 border-b border-line-soft py-1 last:border-b-0">
-                <span aria-hidden="true" className="w-7 text-center text-card-title">{emojiFor(item.ingredient_id)}</span>
+                <ItemIcon kind="ingredient" id={item.ingredient_id} size={32} />
                 <span className="flex-1 text-body">{displayName(item)}</span>
                 <button
                   type="button"

@@ -5,8 +5,8 @@ import {
   useAddKitchenEquipment, useAddPantryItems, useCurrentKitchen, useKitchenEquipment, usePantryItems,
 } from '../../data/hooks.ts';
 import { groupTypes, initialSelection, inventoryWall, typeName } from '../equipment/logic.ts';
-import { emojiFor } from '../pantry/labels.ts';
 import { Icon } from '../shell/Icon.tsx';
+import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
 type Tab = 'staples' | 'sauces' | 'equipment';
 const TABS: Tab[] = ['staples', 'sauces', 'equipment'];
@@ -103,7 +103,7 @@ export function StockStep({ onDone, onLater }: { onDone: () => void; onLater: ()
             className={tile(on, owned)}
           >
             {on && <Check />}
-            <span aria-hidden="true" className="flex size-7 items-center justify-center rounded-full bg-line-soft text-[16px] leading-none">{emojiFor(id)}</span>
+            <ItemIcon kind="ingredient" id={id} size={32} />
             {getIngredient(id)?.name['zh-TW']}
           </button>
         );

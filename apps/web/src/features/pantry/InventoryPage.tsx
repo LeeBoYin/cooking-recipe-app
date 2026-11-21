@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router';
 import { commonIngredientIdsFor, getIngredient, rankFrequent } from '@zhusha/ingredients';
 import { useAddPantryItems, useCurrentKitchen, usePantryAdditions, usePantryItems, useRemovePantryItem } from '../../data/hooks.ts';
 import { SubPage } from '../shell/SubPage.tsx';
-import { ZONES, ZONE_EMOJI, emojiFor } from './labels.ts';
+import { ZONES, ZONE_EMOJI } from './labels.ts';
+import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
 // 快速盤點：常見食材的圖示牆，點一下「有」、再點一下「沒有」，按完成才一次送出（02 快速盤點）
 export function InventoryPage() {
@@ -93,7 +94,7 @@ export function InventoryPage() {
                           on ? 'border-ink bg-bulb-soft font-bold' : 'border-line bg-surface text-ink-muted'
                         }`}
                       >
-                        <span aria-hidden="true" className="text-heading leading-none">{emojiFor(id)}</span>
+                        <ItemIcon kind="ingredient" id={id} size={36} />
                         <span>{getIngredient(id)?.name['zh-TW']}</span>
                       </button>
                     );

@@ -7,6 +7,7 @@ import type { NewEquipment } from '../../data/equipment.ts';
 import { Icon } from '../shell/Icon.tsx';
 import { SubPage } from '../shell/SubPage.tsx';
 import { groupTypes, hasExactName, searchTypes, typeName } from './logic.ts';
+import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
 const ROW = 'flex min-h-14 w-full items-center gap-3 border-0 border-b border-line-soft bg-transparent px-3 text-left text-body text-ink last:border-b-0 disabled:opacity-50';
 
@@ -79,7 +80,7 @@ export function AddEquipmentPage() {
               {g.types.map((t) => (
                 <li key={t.id}>
                   <button type="button" disabled={add.isPending} onClick={() => void pick(t)} className={ROW}>
-                    <Circle><Icon name="pot" size={22} /></Circle>
+                    <ItemIcon kind="equipment" id={t.id} size={40} />
                     <span className="flex-1">{typeName(t)}</span>
                   </button>
                 </li>

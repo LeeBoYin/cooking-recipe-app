@@ -6,8 +6,8 @@ import { useCurrentKitchen, useEquipmentPhotos, useKitchenEquipment, usePhotoUrl
 import type { KitchenEquipment } from '../../data/equipment.ts';
 import { ActionBar } from '../kitchen/ActionBar.tsx';
 import { StockCard } from '../kitchen/StockCard.tsx';
-import { Icon } from '../shell/Icon.tsx';
 import { detailTags, groupEquipment } from './logic.ts';
+import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
 const TAG = 'rounded-tag bg-line-soft px-2 text-small font-bold text-ink-muted';
 
@@ -15,9 +15,13 @@ function Row({ item, thumbUrl }: { item: KitchenEquipment; thumbUrl?: string }) 
   return (
     <li className="border-b border-line-soft last:border-b-0">
       <Link to={`/kitchen/equipment/${item.id}`} className="flex min-h-14 items-center gap-3 px-3 py-2 text-ink no-underline">
-        <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-line-soft">
-          {thumbUrl ? <img src={thumbUrl} alt="" className="size-full object-cover" /> : <Icon name="pot" size={22} />}
-        </span>
+        {thumbUrl ? (
+          <span aria-hidden="true" className="size-10 shrink-0 overflow-hidden rounded-full bg-line-soft">
+            <img src={thumbUrl} alt="" className="size-full object-cover" />
+          </span>
+        ) : (
+          <ItemIcon kind="equipment" id={item.equipment_type_id} size={40} />
+        )}
         <span className="flex-1 text-body">{item.raw_name}</span>
         {detailTags(item).map((t) => (
           <span key={t} className={TAG}>{t}</span>
