@@ -13,6 +13,7 @@ import {
 import { deletePhoto, getAvatar, listEquipmentPhotos, listMyRecipePhotos, listRecipePhotos, replaceAvatar, signPhotoUrls, type Photo } from './photos.ts';
 import { deleteRecipe, getRecipe, listMyDeletedRecipes, listMyRecipes, restoreRecipe, searchMyRecipes } from './recipes.ts';
 import { currentUserId, getMyIdentity, getMySettings, updateDisplayName, updateMySettings, type UserSettings, type UserSettingsPatch } from './account.ts';
+import { bookmarkIdea, linkBookmarkToRecipe, listMyBookmarks, unbookmark } from './bookmarks.ts';
 import { getMyDietary, saveMyDietary, type Dietary } from './dietary.ts';
 import { getMyHardLimits, getMyTasteProfile, saveTasteProfile } from './taste.ts';
 import type { TasteProfile } from '@zhusha/core';
@@ -51,6 +52,7 @@ export const queryKeys = {
   myRecipes: (status: string) => ['recipes', 'mine', status] as const,
   myRecipePhotos: ['recipes', 'mine', 'photos'] as const,
   myDeleted: ['recipes', 'deleted'] as const,
+  bookmarks: ['bookmarks'] as const,
   recipeSearch: (q: string) => ['recipes', 'search', q] as const,
   recipe: (id: string) => ['recipe', id] as const,
   recipePhotos: (id: string) => ['recipe', id, 'photos'] as const,
@@ -391,5 +393,34 @@ export function useUpdateSettings() {
       if (ctx?.previous) queryClient.setQueryData(queryKeys.settings, ctx.previous);
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: queryKeys.settings }),
+  });
+}
+
+// 我的收藏（大廚的點子）
+export function useMyBookmarks() {
+  return useQuery({ queryKey: queryKeys.bookmarks, queryFn: listMyBookmarks });
+}
+
+export function useBookmarkIdea() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: bookmarkIdea,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks }),
+  });
+}
+
+export function useUnbookmark() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: unbookmark,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks }),
+  });
+}
+
+export function useLinkBookmark() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (v: { bookmarkId: string; recipeId: string }) => linkBookmarkToRecipe(v.bookmarkId, v.recipeId),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.bookmarks }),
   });
 }

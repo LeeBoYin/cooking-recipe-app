@@ -3,7 +3,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import { DIFFICULTY_FACETS, difficultyOverall, type DifficultyFacet } from '@zhusha/core';
 import type { RecipeVisibility } from '@zhusha/shared-types';
-import { useDeleteRecipe, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
+import { useDeleteRecipe, useLinkBookmark, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
 import { recipeLimits, type Recipe } from '../../data/recipes.ts';
 import type { Photo } from '../../data/photos.ts';
 import { preloadWebpEncoder } from '../../photos/encode.ts';
@@ -130,7 +130,9 @@ function Editor({ recipeId, recipe, photoRows }: { recipeId: string; recipe: Rec
   const intl = useIntl();
   const navigate = useNavigate();
   const location = useLocation();
-  const initialTitle = (location.state as { title?: string } | null)?.title;
+  const fromState = location.state as { title?: string; bookmarkId?: string } | null;
+  const initialTitle = fromState?.title;
+  const linkBookmark = useLinkBookmark();
   const ed = useRecipeEditor(recipeId, recipe, photoRows, initialTitle);
   const remove = useDeleteRecipe();
   const { form, patchForm, setForm } = ed;
@@ -171,7 +173,10 @@ function Editor({ recipeId, recipe, photoRows }: { recipeId: string; recipe: Rec
     setPublishing(true);
     const result = await ed.publish();
     setPublishing(false);
-    if (result) void navigate(`/recipes/${recipeId}`, { replace: true });
+    if (result) {
+      if (fromState?.bookmarkId) linkBookmark.mutate({ bookmarkId: fromState.bookmarkId, recipeId });
+      void navigate(`/recipes/${recipeId}`, { replace: true });
+    }
   }
 
   async function saveAndClose() {
