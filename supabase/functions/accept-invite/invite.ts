@@ -20,6 +20,8 @@ export const MAX_PASSWORD_LENGTH = 72; // bcrypt 只看前 72 bytes，超過的�
 
 const DEFAULT_TIMEZONE = 'Asia/Taipei';
 const DEFAULT_REGION = 'TW';
+// 和資料庫的 private.is_region_code 一致：兩個大寫字母的國碼，或加上子區（US-CA）
+const REGION_CODE = /^[A-Z]{2}(-[A-Z0-9]{1,3})?$/;
 
 function validTimezone(tz: string): boolean {
   try {
@@ -56,7 +58,7 @@ export function parseSignupBody(body: unknown): ParseResult {
 
   const name = typeof b.displayName === 'string' ? b.displayName.trim() : '';
   const timezone = typeof b.timezone === 'string' && validTimezone(b.timezone) ? b.timezone : DEFAULT_TIMEZONE;
-  const region = typeof b.region === 'string' && /^[A-Z]{2}$/.test(b.region) ? b.region : DEFAULT_REGION;
+  const region = typeof b.region === 'string' && REGION_CODE.test(b.region) ? b.region : DEFAULT_REGION;
   return {
     ok: true,
     value: {
