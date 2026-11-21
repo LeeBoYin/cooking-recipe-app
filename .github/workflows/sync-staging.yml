@@ -1,0 +1,26 @@
+name: Sync staging
+
+# 測試站（staging.tsu-siann.today）用 `staging` 分支部署，版本要和正式台一樣。
+# main 一更新就把 staging 對齊到同一個 commit；staging 只是鏡像，不要直接推東西進去。
+# Netlify 的分支部署會連測試專案，資料和正式台分開（見 netlify.toml）。
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-staging
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - run: git push --force origin HEAD:refs/heads/staging
