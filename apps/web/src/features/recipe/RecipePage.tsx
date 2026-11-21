@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
-import { DIFFICULTY_FACETS, difficultyOverall, formatTemperature, haveInKitchen, parseMeasurePref, parseTemperaturePref, renderIngredient, type UnitCode, type UnitLabels } from '@zhusha/core';
+import { DIFFICULTY_FACETS, difficultyOverall, formatTemperature, haveInKitchen, parseMeasurePref, parseTemperaturePref, renderIngredient, UNIT_CODES, type UnitLabels } from '@zhusha/core';
 import { getIngredient } from '@zhusha/ingredients';
 import type { RecipeIngredient, RecipeStep, RecipeVisibility } from '@zhusha/shared-types';
 import { Chef } from '../../chef/Chef.tsx';
@@ -12,8 +12,6 @@ import { DifficultyRadar } from './DifficultyRadar.tsx';
 import { knownHighlights } from './model.ts';
 import { PhotoViewer, type ViewerPhoto } from './PhotoViewer.tsx';
 import { ShoppingSheet } from './ShoppingSheet.tsx';
-
-const UNIT_CODES: UnitCode[] = ['g', 'kg', 'oz', 'lb', 'tw_jin', 'tw_liang', 'cn_jin', 'ml', 'l', 'tsp', 'tbsp', 'cup', 'cup_jp', 'rice_cup', 'fl_oz', 'qt', 'cm', 'inch'];
 
 const TILT = ['-rotate-3', 'rotate-2'];
 const HEADING = 'm-0 font-round text-card-title';
@@ -107,7 +105,12 @@ export function RecipePage() {
   const tempPref = flipUnits ? { unit: temperature.unit === 'F' ? ('C' as const) : ('F' as const), both: false } : temperature;
   const ingredientLines = ingredients.map((i) => ({
     id: i.id,
-    text: renderIngredient(i.raw_text, { factor, pref: measurePref, labels }),
+    // 存檔時解析好的數量優先；舊食譜或解析不出來的才用原文裡找到的
+    text: renderIngredient(i.raw_text, { factor, pref: measurePref, labels }, {
+      amount: i.amount,
+      amountMax: i.amount_max,
+      unit: UNIT_CODES.find((u) => u === i.unit),
+    }),
     have: haveInKitchen({ text: i.raw_text, ingredientId: i.ingredient_id }, kitchenHas),
   }));
   const originals = top.map((p): ViewerPhoto => ({ id: p.id, path: p.storage_path }));
