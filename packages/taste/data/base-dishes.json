@@ -2319,5 +2319,39 @@
       "technique": 2,
       "failureRisk": 1
     }
+  },
+  {
+    "id": "pancakes",
+    "name": {
+      "zh-TW": "美式鬆餅"
+    },
+    "regions": [
+      "TW",
+      "US-CA",
+      "JP"
+    ],
+    "cuisineKeys": [
+      "cuisine.american"
+    ],
+    "ingredientIds": [
+      "flour",
+      "egg",
+      "milk",
+      "sugar"
+    ],
+    "techniques": [
+      "pan-fry"
+    ],
+    "equipmentTypeIds": [
+      "frying-pan"
+    ],
+    "difficulty": {
+      "ingredients": 1,
+      "equipment": 1,
+      "time": 2,
+      "technique": 2,
+      "failureRisk": 2
+    },
+    "deprecated": true
   }
 ]
