@@ -747,6 +747,9 @@ isOneToOne: false
 "hook_before_user_created":
 { Args: { "event": Json }; Returns: Json
                            },
+"invite_inviter_name":
+{ Args: { "p_invite_id": string }; Returns: string
+                           },
 "log_error":
 { Args: { "p_app_version"?: string,"p_kind": string,"p_location": string,"p_platform"?: string,"p_severity": string }; Returns: undefined
                            },

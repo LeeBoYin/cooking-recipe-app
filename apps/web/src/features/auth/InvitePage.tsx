@@ -62,6 +62,6 @@ export function InvitePage() {
       </AuthLayout>
     );
   }
-  return <SignupForm email={invite.email} credential={{ token }} />;
+  return <SignupForm email={invite.email} credential={{ token }} inviterName={invite.inviterName ?? null} />;
 }
 

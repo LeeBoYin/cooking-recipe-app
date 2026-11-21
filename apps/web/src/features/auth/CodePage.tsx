@@ -16,9 +16,9 @@ export function CodePage({ onBack }: { onBack: () => void }) {
   const [code, setCode] = useState('');
   const [error, setError] = useState<InviteError | null>(null);
   const [pending, setPending] = useState(false);
-  const [redeemed, setRedeemed] = useState<{ email: string; code: string } | null>(null);
+  const [redeemed, setRedeemed] = useState<{ email: string; code: string; inviterName: string | null } | null>(null);
 
-  if (redeemed) return <SignupForm email={redeemed.email} credential={{ code: redeemed.code }} />;
+  if (redeemed) return <SignupForm email={redeemed.email} credential={{ code: redeemed.code }} inviterName={redeemed.inviterName} />;
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -27,7 +27,7 @@ export function CodePage({ onBack }: { onBack: () => void }) {
     setError(null);
     const r = await redeemInviteCode(code);
     setPending(false);
-    if (r.ok) setRedeemed({ email: r.value.email, code });
+    if (r.ok) setRedeemed({ email: r.value.email, code, inviterName: r.value.inviterName ?? null });
     else setError(r.error);
   }
 
