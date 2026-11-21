@@ -99,3 +99,24 @@
 - hook 和 `enable_signup` 都不在 migration 裡，CI 也不推 Auth 設定；雲端要自己開（Dashboard，或 `supabase config push`）。
 - 本機實跑（`supabase functions serve`）：打開連結產生邀請碼、重新產生後舊碼作廢、同一個來源錯 5 次暫停（暫停中連對的碼也不收、別的來源不受影響）、用邀請碼註冊並密碼登入、重設密碼（太弱的密碼不會用掉連結、用過一次就失效、舊密碼不能登入）都通過。本機的 Kong 會改寫 `x-real-ip`，所以測試時用 `cf-connecting-ip` 模擬不同來源；雲端是否真的帶 `cf-connecting-ip` 沒有驗證（見 PR 說明）。
 
+
+## 06 首頁大廚點子（M1a-06，2026-11-21，本機）
+
+資料夾：`supabase/functions/ai/home/`（提示詞 `prompt.ts`、檢查 `check.ts`、評估集 `eval/cases.ts`、實跑 `eval/run.ts`）
+
+| 項目 | 結果 |
+|------|------|
+| 評估集 10 組假使用者的自動測試（假的 AI 回應，測「檢查會拿掉違規的點子」） | ✅ 過敏原與關鍵字、五辛素、不吃牛與料理酒、過期食材、電鍋做不到的手法與廚具、偶爾下廚的難度、催促與帶單位的數字、槽位數量與重複，都會被拿掉 |
+| Edge Runtime 匯入 `supabase/functions` 以外的 `packages/`（`core`、字典） | ✅ 本機 `supabase functions serve` 正常；雲端打包第一次部署到測試專案時確認 |
+| 整條路徑（用假的 Claude 伺服器，`ANTHROPIC_BASE_URL` 指到本機） | ✅ 首頁先顯示、後端呼叫、檢查、存快取；重新整理用快取（不再呼叫）；換一組 2 次都是新的、第 3 次退回規則評分；Claude 連不上時退回規則評分；新手門檻不呼叫 AI。用量紀錄的費用與 token 數對得上 |
+| **真的 Claude 評估（Sonnet 5.5 與 Haiku 5.5 各跑 10 組）** | ❌ **沒驗證到**：測試專案已設 `ANTHROPIC_API_KEY`（`supabase secrets list` 看得到名稱），但這個工作階段沒有金鑰可用。token、快取讀寫、成本、自動檢查通過率、Haiku 能不能取代 Sonnet 都還沒有數字 |
+| 結構化輸出的 schema 在真的 API 上被接受 | ❌ 沒驗證到。為了降低風險，schema 只用 `type`、`enum`、`required`、`additionalProperties`，不放數量上限與數值範圍（由程式檢查） |
+| 前段規則（`stable`）夠不夠長到被快取 | ❌ 沒驗證到（約一千多個 token，要看實跑的 `cache_read_input_tokens`） |
+
+**手動實跑**（會花錢，每次 20 次呼叫左右；金鑰只放在這個指令的環境變數，不寫進檔案、不貼進對話）：
+
+```bash
+ANTHROPIC_API_KEY=... deno run --no-lock --no-config -A supabase/functions/ai/home/eval/run.ts
+```
+
+終端機只印數量與代號；輸出寫在 `supabase/functions/ai/home/eval/out/<時間>/`（已加進 `.gitignore`）：每組每個模型一個 JSON，加上 `summary.md`（彙整表：有效輸出、檢查後留下的比例、自動斷言通過數、平均 token、快取 token、平均成本與延遲；各組 Sonnet 與 Haiku 並排，附口吻與合理度的打分欄）。`--model sonnet|haiku` 只跑一個、`--case 05` 只跑一組。口吻與合理度由人工打分，Haiku 能不能取代 Sonnet（預算用到提醒門檻時 `BUDGET_DEGRADE` 會自動降成 Haiku、關思考）要看打分與留下比例。

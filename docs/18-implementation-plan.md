@@ -79,7 +79,7 @@
 | [x] M1a-03 | **方案與 `entitlements`**、`app_config` 的 AI 設定、`ai` 函式骨架與模型設定檔 | Sonnet | 03；16 第六節 |
 | [x] M1a-04 | **用量保護與異常清單**：速率限制、每人每日與每月上限、每月預算與 80%／100% 降級、Claude Console 花費上限的對照 | Sonnet | 03 成本與保護；02 L |
 | [x] M1a-05 | **食材正規化**：使用者自己的對應、全站對應、`add_pantry_items` 接上、背景任務 | Sonnet | 16 第五節；03〈食材正規化〉 |
-| [ ] M1a-06 | **大廚的點子（AI）**：`ai_suggestion_cache`、提示詞、過敏原與安全規則的程式檢查、輸出格式驗證。先在 Opus 定提示詞與輸出格式、寫 10 組評估集草稿、用真的 prompt 量每次的 token 與成本 | Opus 先討論，再 Sonnet | 03；01；07 |
+| [x] M1a-06 | **大廚的點子（AI）**：`ai_suggestion_cache`、提示詞、過敏原與安全規則的程式檢查、輸出格式驗證。先在 Opus 定提示詞與輸出格式、寫 10 組評估集草稿、用真的 prompt 量每次的 token 與成本 | Opus 先討論，再 Sonnet | 03；01；07 |
 | [ ] M1a-07 | **和大廚聊聊 ①**：`chef_conversations`、對話 API（後端呼叫 Claude 用串流，App 整段收到才顯示）、首頁對話框。先在 Opus 定對話體驗並畫視覺樣張 | Opus 先討論，再 Sonnet | 03；02；09；17 |
 | [ ] M1a-08 | **和大廚聊聊 ②**：大廚反問一次、點子卡片、接著聊 | Sonnet | 03；17 |
 | [ ] M1a-09 | **收藏的點子展開做法**：收藏的大廚點子第一次打開時，由大廚展開做法並存進 `bookmarks.idea.recipeDraft`；點子卡片的「看做法」「不想要」 | Sonnet | 05 Bookmark；02；03 |

@@ -5,6 +5,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { createClaude } from './claude.ts';
 import { type AiContext, type AiErrorCode, type Deps, ERROR_STATUS, runAi } from './pipeline.ts';
 import { TASKS } from './tasks.ts';
+import { runHomeIdeas } from './home/handler.ts';
 import { createProtection, sessionIdOf } from './usage.ts';
 
 const CORS = {
@@ -59,6 +60,15 @@ Deno.serve(async (req) => {
   };
 
   try {
+    // 首頁點子：自己讀資料、算候選、存快取，再走 runAi 的用量保護與呼叫（見 home/handler.ts）
+    if (body.task === 'home_ideas') {
+      const home = await runHomeIdeas({ ai: deps, rpc: async (fn, args) => await client.rpc(fn, args) }, auth.user.id, body.input);
+      if (!home.ok) {
+        console.error('ai: rejected', home.error);
+        return error(home.error);
+      }
+      return json({ data: home.data });
+    }
     const result = await runAi(deps, auth.user.id, body.task, body.input);
     if (!result.ok) {
       console.error('ai: rejected', result.error);
