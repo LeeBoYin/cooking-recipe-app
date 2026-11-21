@@ -8,6 +8,7 @@ import type { Photo } from '../../data/photos.ts';
 import { setUnsavedEdits } from '../../pwa/unsaved.ts';
 import { preloadWebpEncoder } from '../../photos/encode.ts';
 import { Icon } from '../shell/Icon.tsx';
+import { TopBar } from '../shell/SubPage.tsx';
 import {
   DEFAULT_SERVINGS,
   HIGHLIGHTS,
@@ -227,15 +228,12 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
 
   return (
     <div className="flex flex-col gap-3.5 pb-44">
-      <div className="flex items-center gap-2">
-        <button
-          type="button"
-          aria-label={intl.formatMessage({ id: 'common.back' })}
-          onClick={back}
-          className="flex size-11 items-center justify-center rounded-card border-0 bg-surface text-ink"
-        >
-          <Icon name="back" />
-        </button>
+      <TopBar
+        className=""
+        onBack={back}
+        rightFill
+        right={
+          <>
         <span role="status" className="flex flex-1 items-center justify-end gap-1.5 text-small text-ink-muted">
           {status?.dot === 'check' && <Icon name="check" size={16} className="text-green" />}
           {status?.dot === 'bulb' && <span aria-hidden="true" className="size-2 rounded-full bg-bulb" />}
@@ -249,7 +247,7 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
               aria-label={intl.formatMessage({ id: 'recipe.more' })}
               aria-expanded={menuOpen}
               onClick={() => setMenuOpen((o) => !o)}
-              className="flex size-11 items-center justify-center rounded-card border-0 bg-surface text-ink"
+              className="flex size-11 items-center justify-center rounded-card border-0 bg-transparent text-ink"
             >
               <Icon name="more" />
             </button>
@@ -267,7 +265,9 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
             )}
           </div>
         )}
-      </div>
+          </>
+        }
+      />
 
       <section className={`${CARD} flex flex-col gap-1.5`}>
         <label className="flex flex-col">

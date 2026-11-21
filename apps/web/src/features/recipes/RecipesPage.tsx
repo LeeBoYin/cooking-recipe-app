@@ -8,7 +8,7 @@ export function RecipesPage() {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
-        <div className="flex flex-1">
+        <div className="flex flex-1 justify-end">
           <SegmentNav
             ariaLabel={intl.formatMessage({ id: 'recipes.tabs.aria' })}
             items={[

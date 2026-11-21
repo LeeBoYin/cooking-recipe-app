@@ -15,7 +15,7 @@ export function KitchenSettingsPage() {
   const intl = useIntl();
   const { kitchen, isPending, error } = useCurrentKitchen();
   return (
-    <SubPage srTitle={intl.formatMessage({ id: 'kitchen.settings.title' })}>
+    <SubPage title={intl.formatMessage({ id: 'kitchen.settings.title' })}>
       {isPending ? (
         <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="common.loading" /></p>
       ) : error || !kitchen ? (
@@ -43,7 +43,6 @@ function Form({ kitchenId, initial }: { kitchenId: string; initial: Values }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <h2 className="m-0 font-round text-heading leading-[1.4]"><FormattedMessage id="kitchen.settings.title" /></h2>
       <label className="flex flex-col gap-1.5">
         <span className="text-[14px] font-bold"><FormattedMessage id="onboarding.kitchen.name" /></span>
         <input
