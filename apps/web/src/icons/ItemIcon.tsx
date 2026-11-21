@@ -45,11 +45,11 @@ export function iconPathsFor(group: ColorGroup, id: string | null | undefined): 
 }
 
 // 食材與廚具的 icon：墨色線條，背後疊一層依類別上色的淡色圓底（17 第七節）。
-// 線條格式：24×24、四邊留 2、線寬 1.75、圓角、不寫死顏色。
+// 線條格式：24×24、四邊留 2、線寬 1.75（放進圓底時用 1）、圓角、不寫死顏色。
 export function ItemIcon({ kind, id, category, size = 28, plain, className, label }: Props) {
   const { group, fallback } = resolve(kind, id, category);
   const paths = usePaths(group, id, fallback);
-  const inner = plain ? size : Math.round(size * 0.8);
+  const inner = plain ? size : Math.round(size * 0.6);
   const svg = (
     <svg
       width={inner}
@@ -57,7 +57,7 @@ export function ItemIcon({ kind, id, category, size = 28, plain, className, labe
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={plain ? 1.75 : 1}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden={label ? undefined : true}

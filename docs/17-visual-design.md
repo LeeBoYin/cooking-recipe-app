@@ -234,7 +234,7 @@ App 的色彩、字型、版面、元件與動態。畫面上的樣子以這份�
 
 **線條格式**（畫圖照這個）
 - 24×24 的格子，四邊各留 2 的空白（內容畫在 2～22 之間）。
-- `fill="none"`、`stroke="currentColor"`、`stroke-width` 1.75、圓角收尾與轉角。SVG 裡不寫死顏色、沒有底色。
+- `fill="none"`、`stroke="currentColor"`、`stroke-width` 1.75（放進圓底時用 1）、圓角收尾與轉角。SVG 裡不寫死顏色、沒有底色。
 - 一個 icon 是一串 path 的 `d` 字串（`string[]`）。20px 看得清楚為準：不畫細節紋路，用 3 筆以內的輪廓表達。
 
 **存放**（`apps/web/src/icons/`）
@@ -255,7 +255,7 @@ App 的色彩、字型、版面、元件與動態。畫面上的樣子以這份�
 | `seasoning` 紫灰 | sauce、seasoning、spice、oil | `#E6E0EA` | `#433A50` |
 | `equipment` 藍灰 | 廚具的全部類別 | `#DFE7EF` | `#334150` |
 
-**`ItemIcon` 元件**：`kind`（`ingredient`／`equipment`）、字典 ID、`size`。圓底直徑就是 `size`，線條縮到約 80%；線條色用 `ink`（深色模式用淺墨色）。預設當裝飾（`aria-hidden`），需要文字說明時才傳 `label`。清單列用 28～32px（廚具列 40px，和照片縮圖同大）。
+**`ItemIcon` 元件**：`kind`（`ingredient`／`equipment`）、字典 ID、`size`。圓底直徑就是 `size`，線條縮到約 60%、線寬 1；線條色用 `ink`（深色模式用淺墨色）。預設當裝飾（`aria-hidden`），需要文字說明時才傳 `label`。清單列用 28～32px（廚具列 40px，和照片縮圖同大）。
 
 **開發用總覽**：開發模式的 `/dev/icons` 依群組列出所有食材與廚具，標出「專屬」或「用類別 icon」，可切淺色／深色；補畫 icon 時用這頁檢查。
 
