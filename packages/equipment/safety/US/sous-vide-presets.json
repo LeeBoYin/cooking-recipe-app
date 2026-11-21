@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "region": "US",
+  "status": "待補",
+  "presets": [],
+  "note": "沒有找到可以直接引用於家庭舒肥的官方時間與溫度表。AI 不得自行產生舒肥的溫度與時間（SR-sous-vide），表是空的，所以任何舒肥建議都會被擋下。候選來源（給審查者參考）：美國 FDA Food Code、USDA FSIS 業者用的 lethality 指引；日本沒有對應的官方資料。"
+}

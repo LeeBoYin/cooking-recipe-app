@@ -15,7 +15,11 @@
     "requiresHeatSource": false,
     "isHeatSource": true,
     "onboarding": {
-      "default": "default-on"
+      "default": "default-on",
+      "byRegion": {
+        "US": "show",
+        "JP": "default-on"
+      }
     },
     "dishwasherSafe": "n/a",
     "iconKey": "gas-stove"
@@ -55,7 +59,10 @@
     "requiresHeatSource": false,
     "isHeatSource": true,
     "onboarding": {
-      "default": "show"
+      "default": "show",
+      "byRegion": {
+        "US": "show"
+      }
     },
     "dishwasherSafe": "n/a",
     "iconKey": "radiant-cooktop"
@@ -68,7 +75,9 @@
     "aliases": {
       "zh-TW": [
         "卡式瓦斯爐",
-        "露營爐"
+        "露營爐",
+        "卓上爐",
+        "カセットコンロ"
       ]
     },
     "category": "heat-source",
@@ -76,7 +85,10 @@
     "requiresHeatSource": false,
     "isHeatSource": true,
     "onboarding": {
-      "default": "show"
+      "default": "show",
+      "byRegion": {
+        "JP": "show"
+      }
     },
     "dishwasherSafe": "n/a",
     "iconKey": "portable-gas-stove"
@@ -108,7 +120,11 @@
     "requiresHeatSource": true,
     "isHeatSource": false,
     "onboarding": {
-      "default": "default-on"
+      "default": "default-on",
+      "byRegion": {
+        "US": "show",
+        "JP": "show"
+      }
     },
     "dishwasherSafe": "partial",
     "iconKey": "wok"
@@ -254,7 +270,8 @@
     },
     "aliases": {
       "zh-TW": [
-        "陶鍋"
+        "陶鍋",
+        "土鍋"
       ]
     },
     "category": "cookware",
@@ -266,7 +283,10 @@
     "requiresHeatSource": true,
     "isHeatSource": false,
     "onboarding": {
-      "default": "show"
+      "default": "show",
+      "byRegion": {
+        "JP": "show"
+      }
     },
     "dishwasherSafe": "no",
     "iconKey": "clay-pot"
@@ -336,7 +356,10 @@
     "requiresHeatSource": true,
     "isHeatSource": false,
     "onboarding": {
-      "default": "hidden"
+      "default": "hidden",
+      "byRegion": {
+        "JP": "show"
+      }
     },
     "dishwasherSafe": "partial",
     "iconKey": "tamagoyaki-pan"
@@ -408,7 +431,8 @@
     "onboarding": {
       "default": "default-on",
       "byRegion": {
-        "US": "show"
+        "US": "show",
+        "JP": "hidden"
       }
     },
     "dishwasherSafe": "partial",
@@ -435,7 +459,10 @@
     "requiresHeatSource": false,
     "isHeatSource": false,
     "onboarding": {
-      "default": "show"
+      "default": "show",
+      "byRegion": {
+        "JP": "default-on"
+      }
     },
     "dishwasherSafe": "partial",
     "iconKey": "electric-rice-cooker"
@@ -517,7 +544,10 @@
     "requiresHeatSource": false,
     "isHeatSource": false,
     "onboarding": {
-      "default": "show"
+      "default": "show",
+      "byRegion": {
+        "US": "show"
+      }
     },
     "dishwasherSafe": "partial",
     "iconKey": "toaster-oven"
@@ -702,7 +732,10 @@
     "requiresHeatSource": false,
     "isHeatSource": false,
     "onboarding": {
-      "default": "show"
+      "default": "show",
+      "byRegion": {
+        "US": "show"
+      }
     },
     "dishwasherSafe": "partial",
     "iconKey": "multi-cooker"
@@ -725,7 +758,10 @@
     "requiresHeatSource": false,
     "isHeatSource": false,
     "onboarding": {
-      "default": "hidden"
+      "default": "hidden",
+      "byRegion": {
+        "US": "show"
+      }
     },
     "dishwasherSafe": "partial",
     "iconKey": "slow-cooker"
@@ -903,7 +939,10 @@
     "requiresHeatSource": false,
     "isHeatSource": false,
     "onboarding": {
-      "default": "show"
+      "default": "show",
+      "byRegion": {
+        "US": "default-on"
+      }
     },
     "dishwasherSafe": "n/a",
     "iconKey": "dishwasher"
@@ -1087,7 +1126,9 @@
     "aliases": {
       "zh-TW": [
         "擂缽",
-        "搗臼"
+        "搗臼",
+        "研磨缽",
+        "すり鉢"
       ]
     },
     "category": "blending",
@@ -1098,7 +1139,10 @@
     "requiresHeatSource": false,
     "isHeatSource": false,
     "onboarding": {
-      "default": "hidden"
+      "default": "hidden",
+      "byRegion": {
+        "JP": "show"
+      }
     },
     "dishwasherSafe": "no",
     "iconKey": "mortar-pestle"
@@ -1166,7 +1210,11 @@
     "requiresHeatSource": false,
     "isHeatSource": false,
     "onboarding": {
-      "default": "show"
+      "default": "show",
+      "byRegion": {
+        "US": "default-on",
+        "JP": "default-on"
+      }
     },
     "dishwasherSafe": "no",
     "iconKey": "chef-knife"
@@ -1189,7 +1237,11 @@
     "requiresHeatSource": false,
     "isHeatSource": false,
     "onboarding": {
-      "default": "default-on"
+      "default": "default-on",
+      "byRegion": {
+        "US": "show",
+        "JP": "show"
+      }
     },
     "dishwasherSafe": "no",
     "iconKey": "cleaver"
@@ -1202,7 +1254,9 @@
     "aliases": {
       "zh-TW": [
         "刨刀",
-        "起司刨刀"
+        "起司刨刀",
+        "磨泥器",
+        "おろし金"
       ]
     },
     "category": "knife-prep",
@@ -1212,7 +1266,10 @@
     "requiresHeatSource": false,
     "isHeatSource": false,
     "onboarding": {
-      "default": "show"
+      "default": "show",
+      "byRegion": {
+        "JP": "default-on"
+      }
     },
     "dishwasherSafe": "yes",
     "iconKey": "grater"
@@ -1409,7 +1466,10 @@
     "requiresHeatSource": false,
     "isHeatSource": false,
     "onboarding": {
-      "default": "hidden"
+      "default": "hidden",
+      "byRegion": {
+        "US": "show"
+      }
     },
     "dishwasherSafe": "no",
     "iconKey": "charcoal-grill"
@@ -1530,7 +1590,11 @@
       "marinate"
     ],
     "onboarding": {
-      "default": "hidden"
+      "default": "hidden",
+      "byRegion": {
+        "US": "default-on",
+        "JP": "default-on"
+      }
     },
     "dishwasherSafe": "yes",
     "iconKey": "measuring-set"
@@ -1623,5 +1687,63 @@
     },
     "dishwasherSafe": "yes",
     "iconKey": "tart-pan"
+  },
+  {
+    "id": "fish-grill",
+    "name": {
+      "zh-TW": "烤魚爐"
+    },
+    "aliases": {
+      "zh-TW": [
+        "魚焼きグリル",
+        "瓦斯爐內建烤魚爐",
+        "烤魚架"
+      ]
+    },
+    "regions": [
+      "JP"
+    ],
+    "category": "appliance",
+    "techniques": [
+      "grill"
+    ],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden",
+      "byRegion": {
+        "JP": "default-on"
+      }
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "fish-grill"
+  },
+  {
+    "id": "sushi-mat",
+    "name": {
+      "zh-TW": "壽司竹簾"
+    },
+    "aliases": {
+      "zh-TW": [
+        "卷簾",
+        "巻き簾",
+        "捲壽司竹簾"
+      ]
+    },
+    "regions": [
+      "JP"
+    ],
+    "category": "special",
+    "techniques": [],
+    "requiresHeatSource": false,
+    "isHeatSource": false,
+    "onboarding": {
+      "default": "hidden",
+      "byRegion": {
+        "JP": "show"
+      }
+    },
+    "dishwasherSafe": "no",
+    "iconKey": "sushi-mat"
   }
 ]

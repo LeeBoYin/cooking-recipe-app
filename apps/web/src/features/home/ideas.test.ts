@@ -24,6 +24,36 @@ const recipe = (over: Partial<Recipe> = {}): Recipe =>
     difficulty: null, ...over,
   }) as unknown as Recipe;
 
+function enoughFor(keys: string[]) {
+  const p = emptyProfile();
+  for (const k of keys) p.dims[k] = { affinity: 0.9, confidence: 0.9, source: 'explored', updatedAt: '2026-01-01T00:00:00Z' };
+  return p;
+}
+
+describe('依廚房地區的點子', () => {
+  const pool = (region: string, keys: string[], month: number) =>
+    buildPool(sources({ region, profile: enoughFor(keys), now: new Date(`2026-${String(month).padStart(2, '0')}-15T04:00:00Z`), timezone: region === 'JP' ? 'Asia/Tokyo' : 'America/Los_Angeles' }))
+      .ideas.filter((i) => i.source === 'dish').map((i) => i.id);
+
+  it('日本的廚房看得到日本家常菜，看不到台灣限定的菜', () => {
+    const ids = pool('JP', ['cuisine.japan', 'cuisine.japan.washoku', 'cuisine.japan.yoshoku', 'protein.pork', 'form.rice'], 10);
+    expect(ids).toContain('miso-soup');
+    expect(ids).not.toContain('lu-rou-fan');
+  });
+  it('美國加州的廚房看得到美式家常菜', () => {
+    const ids = pool('US-CA', ['cuisine.american', 'protein.beef', 'richness.rich'], 10);
+    expect(ids.some((id) => ['cheeseburger', 'mac-and-cheese', 'grilled-cheese'].includes(id))).toBe(true);
+    expect(ids).not.toContain('lu-rou-fan');
+  });
+  it('當季食材跟著地區：日本 10 月的鮭魚比 2 月的分數高；同一道菜在台灣沒有日本的當季加分', () => {
+    const score = (region: string, month: number) =>
+      buildPool(sources({ region, timezone: 'Asia/Tokyo', profile: enoughFor(['cuisine.japan', 'cuisine.japan.washoku', 'protein.fish']), now: new Date(`2026-${month}-15T04:00:00Z`.replace(/-(\d)-/, '-0$1-')) }))
+        .ideas.find((i) => i.id === 'teriyaki-salmon')?.score ?? 0;
+    expect(score('JP', 10)).toBeGreaterThan(score('JP', 2));
+    expect(score('TW', 10)).toBe(score('TW', 2));
+  });
+});
+
 describe('首頁點子的資料組裝', () => {
   it('用真的字典算得出基礎菜色，而且一天內固定', () => {
     const pool = buildPool(sources());

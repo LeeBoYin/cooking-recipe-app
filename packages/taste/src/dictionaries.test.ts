@@ -102,10 +102,11 @@ describe('題庫', () => {
     }
   });
 
-  it('題庫共 73 題（20 題台灣限定），各題型數量符合規格', () => {
+  it('題庫共 85 題（20 題台灣限定、各 6 題日本與美國加州限定），各題型數量符合規格', () => {
     const count = (type: string) => quizItems.filter((q) => q.type === type).length;
-    expect([count('dish_card'), count('quick_fire'), count('this_or_that'), count('spectrum'), count('context')]).toEqual([37, 14, 11, 8, 3]);
-    expect(quizItems.filter((q) => q.regions.length === 1 && q.regions[0] === 'TW')).toHaveLength(20);
+    expect([count('dish_card'), count('quick_fire'), count('this_or_that'), count('spectrum'), count('context')]).toEqual([49, 14, 11, 8, 3]);
+    const only = (code: string) => quizItems.filter((q) => q.regions.length === 1 && q.regions[0] === code);
+    expect([only('TW').length, only('JP').length, only('US-CA').length]).toEqual([20, 6, 6]);
   });
 
   it('地區、後續題目、排除的過敏原與飲食限制都存在', () => {
@@ -130,6 +131,21 @@ describe('題庫', () => {
 });
 
 describe('基礎菜色', () => {
+  it('日本與美國加州各有自己的家常菜；節日的點子都是該地區看得到的菜', () => {
+    const visible = (code: string) => baseDishes.filter((d) => d.regions.includes(code));
+    expect(visible('JP').length).toBeGreaterThanOrEqual(20);
+    expect(visible('US-CA').length).toBeGreaterThanOrEqual(20);
+    for (const r of regionProfiles) {
+      for (const h of r.holidays) {
+        for (const id of h.dishIdeas) {
+          const dish = baseDishes.find((d) => d.id === id);
+          expect(dish, `${r.code}/${h.id} → ${id}`).toBeDefined();
+          expect(dish!.regions.length === 0 || dish!.regions.includes(r.code), `${r.code}/${h.id} → ${id}`).toBe(true);
+        }
+      }
+    }
+  });
+
   const ingredientIds = ids(ingredients);
   const techniqueIds = ids(techniques);
   const equipmentIds = ids(equipmentTypes);
