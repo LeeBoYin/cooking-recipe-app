@@ -188,8 +188,7 @@ interface Ingredient {
   traits: IngredientTrait[];  // 飲食特性，可以多個，飲食限制依它排除；例：魚露 ['animal', 'seafood']、味醂 ['alcohol']、大蒜 ['allium']
   category: IngredientCategory; // vegetable | meat | seafood | egg-dairy | tofu-bean | grain | seasoning | sauce | spice | ...
   defaultStorage: StorageZone;
-  isPerishable: boolean;             // 是否為生鮮；決定「最近買的」標記
-  recentDays?: number;               // 生鮮加入後維持「最近買的」幾天（例：葉菜 5、根莖類 14），之後自動淡化
+  isPerishable: boolean;             // 是否為生鮮
   densityGPerMl?: number;            // 容量換算重量用（1 杯麵粉 ≈ ? 克），P2
   seasonMonths?: Partial<Record<RegionCode, number[]>>;   // 依地區的當季月份，例 { TW: [11,12,1,2], 'US-CA': [10,11] }；目前先做台灣，美國加州與日本之後補
   flavorTags?: FlavorTag[];          // salty | sweet | sour | spicy | umami | aromatic | bitter
@@ -386,7 +385,7 @@ interface PantryItem extends KitchenEntity {   // 屬於廚房，同廚房的成
   ingredientId?: string;      // 對應到字典；對應不到時為空
   rawName: string;            // 使用者原本輸入的名稱，永遠保留
   zone: StorageZone;
-  addedOn: LocalDate;         // 加入的日期；生鮮依字典的 recentDays 決定「最近買的」
+  addedOn: LocalDate;         // 加入的日期
   wantToUseSoon: boolean;     // 🔥 想先用掉（使用者手動）
   expiresAt?: LocalDate;      // 選填：使用者自己設定的期限，以廚房時區解讀；有值才會提醒
   dateType?: 'use-by' | 'best-before';   // 有效日期／賞味期限；不做系統估算
@@ -402,7 +401,6 @@ interface PantryItem extends KitchenEntity {   // 屬於廚房，同廚房的成
 
 - 誰加的看 `createdBy`、誰移除的看 `removedBy`。兩位家人同時操作同一樣食材時，後送到的為準（只會是「有」或「沒有」，影響很小）。
 - 不記數量、用量、丟棄原因，也沒有購物清單與廚具使用事件。
-- 「最近買的」不存：由 `addedOn` 與字典的 `recentDays` 在查詢時判斷。
 
 
 ### Recipe — 食譜
@@ -1106,7 +1104,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 
 | 規則 | 約束 |
 |------|------|
-| 同一個廚房的同一種食材只有一筆「有」 | `pantry_items (kitchen_id, ingredient_id) WHERE status = 'active' AND ingredient_id IS NOT NULL`；再加入同一種食材時，更新 `addedOn`（重新算「最近買的」），不新增一筆；兩次都設了期限時，保留比較早的那個 |
+| 同一個廚房的同一種食材只有一筆「有」 | `pantry_items (kitchen_id, ingredient_id) WHERE status = 'active' AND ingredient_id IS NOT NULL`；再加入同一種食材時，更新 `addedOn`，不新增一筆；兩次都設了期限時，保留比較早的那個 |
 | 自己打的食材之後被 AI 對到字典 | 如果同一個廚房已經有那一種食材，兩筆合併成一筆（保留較早的加入日期與較早的期限），不讓唯一性限制擋下背景處理 |
 | 合併食材（加入別人的廚房時搬過去） | 和目標廚房已經有的同一種食材合併成一筆，保留較早的加入日期與較早的期限；廚具照樣搬過去 |
 | 兩人同時加同一種食材 | 新增一律用「已經有就更新日期、沒有才新增」（upsert）的寫法 |
@@ -1181,7 +1179,6 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | 查詢 | 索引 |
 |------|------|
 | 食材有哪些 | `pantry_items (kitchen_id, status)` 取目前廚房、狀態為 active 的食材（通常只有幾十到幾百筆） |
-| 最近買的 | 同上，依 `added_on` 與字典的 `recentDays` 判斷 |
 | 設了期限、快到期的 | 同上，篩有 `expires_at` 的，依比例計算提醒狀態；計算函式放在 `packages/core`，排程推播也用同一個 |
 | 最近移除（可復原） | `pantry_items (kitchen_id, removed_at)` |
 | 常買清單 | `pantry_items (kitchen_id, ingredient_id, added_on)`：過去 30 天加入過的食材依筆數排序（已移除的也算；再加入已有的食材只更新日期，所以一筆代表一段「有」的期間）；次數不顯示。新廚房用 `RegionProfile.commonPantryIngredientIds` |
@@ -1226,7 +1223,7 @@ interface ConnectedAiClient {         // 外部 AI 連接器的授權紀錄（M4
 | `Bookmark.ownerId`（M2） | 食譜的作者 | 刻意保留以加快查詢；作者不會變動 |
 | `AiSpendMonthly` | `AiUsageRecord` 的加總 | 每次 AI 呼叫時累加；每月對帳一次，不一致時以明細為準 |
 
-不存、改成查詢時計算的：季節（由 `cookedOn` 與食譜的廚房地區；那個廚房已刪除或作者已離開時，用作者目前所在廚房的地區）、「最近買的」（由 `addedOn` 與字典）、邀請是否過期（由 `expiresAt`）。
+不存、改成查詢時計算的：季節（由 `cookedOn` 與食譜的廚房地區；那個廚房已刪除或作者已離開時，用作者目前所在廚房的地區）、邀請是否過期（由 `expiresAt`）。
 
 ---
 

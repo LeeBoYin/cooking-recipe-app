@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useMyKitchens, useSetCurrentKitchen } from '../../data/hooks.ts';
 import { Icon } from '../shell/Icon.tsx';
+import { useToast } from '../shell/Toast.tsx';
 
 // 切換廚房：從底部彈出，列出我所在的所有廚房。
 // M0 只有切換；成員、設定、建立與加入廚房從 M2 起加在清單下面（02 多個廚房）。
@@ -9,6 +10,7 @@ export function KitchenSwitcher({ currentId, onClose }: { currentId: string | un
   const intl = useIntl();
   const kitchens = useMyKitchens();
   const switchTo = useSetCurrentKitchen();
+  const toast = useToast();
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
@@ -16,9 +18,14 @@ export function KitchenSwitcher({ currentId, onClose }: { currentId: string | un
     return () => window.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  function pick(id: string) {
+  function pick(id: string, name: string) {
     if (id === currentId) return onClose();
-    switchTo.mutate(id, { onSuccess: onClose });
+    switchTo.mutate(id, {
+      onSuccess: () => {
+        onClose();
+        toast(intl.formatMessage({ id: 'kitchen.switch.done' }, { name }));
+      },
+    });
   }
 
   return (
@@ -49,7 +56,7 @@ export function KitchenSwitcher({ currentId, onClose }: { currentId: string | un
                   type="button"
                   aria-current={on ? 'true' : undefined}
                   disabled={switchTo.isPending}
-                  onClick={() => pick(k.id)}
+                  onClick={() => pick(k.id, k.name)}
                   className={`flex min-h-14 w-full items-center gap-3 rounded-card border-0 px-3 text-left text-body text-ink ${
                     on ? 'bg-bulb-soft font-bold' : 'bg-transparent'
                   }`}

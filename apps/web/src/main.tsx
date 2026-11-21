@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { IntlProvider } from 'react-intl';
 import { App } from './App.tsx';
 import { installGlobalErrorReporting } from './data/errors.ts';
+import { ToastProvider } from './features/shell/Toast.tsx';
 import { locale, messages } from './i18n/index.ts';
 import { captureInstallPrompt } from './pwa/install.ts';
 import './styles.css';
@@ -22,7 +23,9 @@ createRoot(root).render(
   <StrictMode>
     <IntlProvider locale={locale} messages={messages}>
       <QueryClientProvider client={queryClient}>
-        <App />
+        <ToastProvider>
+          <App />
+        </ToastProvider>
       </QueryClientProvider>
     </IntlProvider>
   </StrictMode>,

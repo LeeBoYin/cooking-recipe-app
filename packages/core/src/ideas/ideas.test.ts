@@ -137,6 +137,19 @@ describe('分數與門檻', () => {
     const d = buildIdeaPool(base({ profile, pantry, baseDishes: [dish('d', ['tofu', 'tomato', 'pork', 'egg', 'shrimp', 'cilantro'], { cuisineKeys: [] })] }), dimensionKeys).ideas[0] as Idea;
     expect(d.reason.code).toBe('pantry_priority');
   });
+  it('手邊優先只看想先用掉和 3 天內到期，2 項算滿分', () => {
+    const profile = profileWith(['a', 'b', 'c']);
+    const ids = ['tofu', 'tomato', 'pork', 'egg', 'shrimp', 'cilantro'];
+    const dishes = [dish('d', ids, { cuisineKeys: [] })];
+    const pantryOf = (marks: Record<string, { wantToUseSoon?: boolean; expiresOn?: string }>) =>
+      ids.map((id) => ({ ingredientId: id, wantToUseSoon: false, ...marks[id] }));
+    const score = (marks: Record<string, { wantToUseSoon?: boolean; expiresOn?: string }>) =>
+      (buildIdeaPool(base({ profile, pantry: pantryOf(marks), baseDishes: dishes }), dimensionKeys).ideas[0] as Idea).score;
+    const plain = score({});
+    expect(score({ tofu: { wantToUseSoon: true } }) - plain).toBeCloseTo(0.075, 5);
+    expect(score({ tofu: { wantToUseSoon: true }, tomato: { expiresOn: '2026-06-17' } }) - plain).toBeCloseTo(0.15, 5);
+    expect(score({ tofu: { wantToUseSoon: true }, tomato: { expiresOn: '2026-06-17' }, egg: { wantToUseSoon: true } }) - plain).toBeCloseTo(0.15, 5);
+  });
 });
 
 describe('抽選與換一組', () => {

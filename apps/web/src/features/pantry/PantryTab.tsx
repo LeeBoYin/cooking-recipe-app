@@ -1,7 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link } from 'react-router';
-import { isRecentlyBought } from '@zhusha/ingredients';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
 import { useCurrentKitchen, usePantryItems, useRemovePantryItem, useRestorePantryItem } from '../../data/hooks.ts';
@@ -9,22 +7,20 @@ import type { PantryItem } from '../../data/pantry.ts';
 import { ActionBar } from '../kitchen/ActionBar.tsx';
 import { StockCard } from '../kitchen/StockCard.tsx';
 import { Icon } from '../shell/Icon.tsx';
-import { todayIn } from './dates.ts';
+import { useToast } from '../shell/Toast.tsx';
 import { ZONES, ZONE_EMOJI, displayName, emojiFor } from './labels.ts';
 
 const TAG = 'rounded-tag bg-line-soft px-1.5 text-small font-bold text-ink-muted';
 
-function Row({ item, today, onRemove }: { item: PantryItem; today: string; onRemove: (i: PantryItem) => void }) {
+function Row({ item, onRemove }: { item: PantryItem; onRemove: (i: PantryItem) => void }) {
   const intl = useIntl();
   const name = displayName(item);
-  const recent = isRecentlyBought(item.ingredient_id, item.added_on, today);
   return (
     <li className="flex items-center border-b border-line-soft last:border-b-0">
       <Link to={`/kitchen/pantry/${item.id}`} className="flex min-h-14 flex-1 items-center gap-3 py-2 text-ink no-underline">
         <span aria-hidden="true" className="w-7 text-center text-card-title">{emojiFor(item.ingredient_id)}</span>
         <span className="flex flex-1 flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-body">{name}</span>
-          {recent && <span className={TAG}>{intl.formatMessage({ id: 'pantry.tag.recent' })}</span>}
           {item.want_to_use_soon && (
             <span className="rounded-tag bg-bulb-soft px-1.5 text-small font-bold text-ink">
               {intl.formatMessage({ id: 'pantry.tag.useSoon' })}
@@ -55,19 +51,15 @@ export function PantryTab() {
   const pantry = usePantryItems(kitchen?.id);
   const remove = useRemovePantryItem(kitchen?.id);
   const restore = useRestorePantryItem(kitchen?.id);
-  const [undo, setUndo] = useState<PantryItem | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  useEffect(() => () => clearTimeout(timer.current), []);
-
-  const today = todayIn(kitchen?.timezone ?? 'Asia/Taipei');
+  const toast = useToast();
 
   function onRemove(item: PantryItem) {
     remove.mutate(item.id, {
-      onSuccess: () => {
-        setUndo(item);
-        clearTimeout(timer.current);
-        timer.current = setTimeout(() => setUndo(null), 6000);
-      },
+      onSuccess: () =>
+        toast(intl.formatMessage({ id: 'pantry.removed.toast' }, { name: displayName(item) }), {
+          action: { label: intl.formatMessage({ id: 'pantry.restore' }), onClick: () => restore.mutate(item.id) },
+          durationMs: 6000,
+        }),
     });
   }
 
@@ -103,7 +95,7 @@ export function PantryTab() {
               </h2>
               <ul className="m-0 list-none rounded-card bg-surface px-3 py-0">
                 {inZone.map((item) => (
-                  <Row key={item.id} item={item} today={today} onRemove={onRemove} />
+                  <Row key={item.id} item={item} onRemove={onRemove} />
                 ))}
               </ul>
             </section>
@@ -119,25 +111,6 @@ export function PantryTab() {
         <p role="alert" className="m-0 text-caption text-error"><FormattedMessage id="pantry.error.write" /></p>
       )}
 
-      {undo && (
-        <div
-          role="status"
-          className="fixed inset-x-4 bottom-[calc(96px+env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-[528px] items-center justify-between rounded-card bg-ink px-4 py-2 text-surface"
-        >
-          <span className="text-caption">{intl.formatMessage({ id: 'pantry.removed.toast' }, { name: displayName(undo) })}</span>
-          <button
-            type="button"
-            onClick={() => {
-              clearTimeout(timer.current);
-              restore.mutate(undo.id);
-              setUndo(null);
-            }}
-            className="min-h-11 border-0 bg-transparent px-2 text-caption font-bold text-bulb underline underline-offset-4"
-          >
-            <FormattedMessage id="pantry.restore" />
-          </button>
-        </div>
-      )}
     </div>
   );
 }

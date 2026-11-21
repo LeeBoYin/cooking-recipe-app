@@ -1,5 +1,5 @@
 import {
-  DEFAULT_RECENT_DAYS, DISH_WEIGHTS, EXPIRY_SOON_DAYS, IDEA_MIN_SCORE, LONG_AGO_FROM_DAYS, LONG_AGO_TO_DAYS, NEUTRAL,
+  DISH_WEIGHTS, EXPIRY_SOON_DAYS, IDEA_MIN_SCORE, LONG_AGO_FROM_DAYS, LONG_AGO_TO_DAYS, NEUTRAL,
   OWN_UNTAGGED, OWN_WEIGHTS, SEASONING_CATEGORIES, TASTE_CONFIDENT, TASTE_MIN_DIMENSIONS,
 } from './constants.ts';
 import type {
@@ -70,7 +70,7 @@ function availableIngredientIds(input: IdeaInput): Set<string> {
   return out;
 }
 
-// 手邊優先：想先用掉、快到期、剛買的
+// 手邊優先：想先用掉、快到期
 function priorityIngredientIds(input: IdeaInput): Set<string> {
   const today = dayNumber(input.context.today);
   const out = new Set<string>();
@@ -81,11 +81,6 @@ function priorityIngredientIds(input: IdeaInput): Set<string> {
       if (left <= EXPIRY_SOON_DAYS) out.add(item.ingredientId);
     }
     if (item.wantToUseSoon) out.add(item.ingredientId);
-    if (item.addedOn) {
-      const days = today - dayNumber(item.addedOn);
-      const recent = input.ingredients.get(item.ingredientId)?.recentDays ?? DEFAULT_RECENT_DAYS;
-      if (days >= 0 && days <= recent) out.add(item.ingredientId);
-    }
   }
   return out;
 }
