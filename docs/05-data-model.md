@@ -191,7 +191,6 @@ interface Ingredient {
   isPerishable: boolean;             // 是否為生鮮；決定「最近買的」標記
   recentDays?: number;               // 生鮮加入後維持「最近買的」幾天（例：葉菜 5、根莖類 14），之後自動淡化
   densityGPerMl?: number;            // 容量換算重量用（1 杯麵粉 ≈ ? 克），P2
-  unitHints?: UnitCode[];            // 編輯頁單位選單的「常用」，有特別慣用單位的才填（蒜 ['clove']、蛋 ['whole']、蔥 ['stalk']、豆腐 ['box', 'block']）；沒填就用分類的預設，見〈單位〉
   seasonMonths?: Partial<Record<RegionCode, number[]>>;   // 依地區的當季月份，例 { TW: [11,12,1,2], 'US-CA': [10,11] }；目前先做台灣，美國加州與日本之後補
   flavorTags?: FlavorTag[];          // salty | sweet | sour | spicy | umami | aromatic | bitter
   allergenIds?: string[];            // 對應過敏原字典
@@ -259,23 +258,6 @@ type UnitCode =
 interface Quantity { amount: number; unit: UnitCode; }
 interface Temperature { value: number; unit: 'C' | 'F'; }
 ```
-
-**編輯頁的單位選單**：依食材與使用者的單位偏好排序，分兩段。
-
-1. 最前面固定「適量」「少許」（`to_taste`、`pinch`），選了就不填數字。
-2. **常用**：食材的 `unitHints`；沒有就用食材分類的預設（下表），再依單位偏好濾掉另一套系統的單位。
-3. **其他單位**：同一類（重量、容量、計數）的其他單位，含另一套系統與台斤、兩，排在下面。
-4. 對不到字典的食材：常用是「克、毫升、大匙、小匙、個」。
-
-| 食材分類 | 常用（公制） | 常用（美制） |
-|---------|------------|------------|
-| 肉、海鮮 | 克、片、塊 | oz、lb、片、塊 |
-| 蔬菜、菇類 | 克、顆、根、把、片 | oz、顆、根、把、片 |
-| 豆腐、豆類 | 盒、塊、克 | 盒、塊、oz |
-| 蛋、乳製品 | 顆、毫升、克 | 顆、cup、oz |
-| 米、麵、穀物 | 米杯、杯、克 | cup、oz |
-| 調味料、醬料 | 大匙、小匙、毫升 | tbsp、tsp、fl oz |
-| 香料 | 小匙、少許、克 | tsp、少許 |
 
 - `cup` 代表美制杯與台灣量杯（237／240 毫升，視為相同）；`cup_jp`（200 毫升）與 `rice_cup`（約 180 毫升）分開記錄。
 - `tw_jin`（600 克）與 `cn_jin`（500 克）分開記錄。
@@ -502,8 +484,8 @@ type RecipeSnapshot = Pick<Recipe, 'title' | 'story' | 'highlights' | 'cookedOn'
 
 interface RecipeIngredient {
   id: string;                 // 穩定 ID，調整順序也不會對錯
-  rawText: string;            // 「醬油 2 大匙」：由名稱、數量、單位組出，給搜尋、分享與 AI 讀；編輯頁不直接改這一欄
-  ingredientId?: string;      // 解析後的標準食材
+  rawText: string;            // 「醬油 2 大匙」原文，使用者只編輯這一欄
+  ingredientId?: string;      // 以下由存檔時的解析填入（見 16 `save_recipe`）：解析後的標準食材
   amount?: number;
   amountMax?: number;         // 範圍的上限，例「蒜 2–3 瓣」
   unit?: UnitCode;            // 原始單位，顯示時依偏好換算
