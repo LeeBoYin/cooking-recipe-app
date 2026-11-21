@@ -42,9 +42,9 @@ export type Removed = { photo: EditorPhoto; stepId?: string; index: number; key:
 
 const AUTOSAVE_MS = 1000;
 
-export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRows: Photo[], initialTitle?: string) {
+export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRows: Photo[], initialTitle?: string, defaultServings?: number) {
   const queryClient = useQueryClient();
-  const initial = useMemo(() => (recipe ? formFromRecipe(recipe, photoRows) : { ...emptyForm(), title: initialTitle ?? '' }), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const initial = useMemo(() => (recipe ? formFromRecipe(recipe, photoRows) : { ...emptyForm(defaultServings), title: initialTitle ?? '' }), []); // eslint-disable-line react-hooks/exhaustive-deps
   const [form, setFormState] = useState<EditorForm>(initial);
   const formRef = useRef(form);
   const savedForm = useRef<EditorForm>(initial);
