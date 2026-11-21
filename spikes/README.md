@@ -82,3 +82,20 @@
 - `check_kitchen_has_admin` 是延後到交易結束才跑的觸發器，用的是最外層呼叫者的身分；服務權限沒有 `kitchen_members` 的讀取權限，註冊會報 `permission denied`。改成 `SECURITY DEFINER`。pgTAP 用「收回服務權限的資料表權限」模擬雲端，測得到這個問題。
 - 這次沒有改 `supabase/config.toml` 的 Auth 設定（`enable_signup = false`、`enable_confirmations = false` 已經是這樣）；函式用 admin API 建立使用者，不依賴「Confirm email」開關。測試專案 Auth 後台的這個開關沒有讀出來確認，不影響結果。
 - 用 `supabase db query --remote=<ref> --yes` 改雲端資料表後，PostgREST 的 schema 快取不會自動更新，要跑 `notify pgrst, 'reload schema'`；正式部署用 migration 不會有這個問題。
+
+## 05 Auth「建立使用者前」hook 在免費方案能用（2026-11-21，測試專案）
+
+對應 M1a-01b。在測試專案只建 `hook_before_user_created` 函式，用 `supabase config push`（只宣告要改的欄位，其他不動）開啟 hook 與「允許新使用者註冊」，測完把設定改回、函式與測試帳號清掉。
+
+| 項目 | 結果 |
+|------|------|
+| 免費方案設定 `before_user_created` 的 Postgres 函式 hook | ✅ 設定被接受，不需要付費方案 |
+| 公開的 `/auth/v1/signup`（密碼）在 hook 開啟後 | ✅ 回 403 `signup_requires_invite`（本機與測試專案結果相同）；試著在請求裡帶 `app_metadata`、`user_metadata` 的 `invite_signup` 也一樣被擋 |
+| admin API（`createUser`）建立的使用者 | ✅ 不經過 hook（本機與測試專案都實測：沒帶標記也建得起來），`accept-invite` 的密碼註冊不受影響 |
+| Google 登入的實際流程 | ❌ 沒測：需要使用者自己建 Google OAuth 用戶端。hook 的邏輯用模擬的事件在 pgTAP 測試（有邀請放行、沒邀請／過期／撤銷拒絕、不分大小寫），`complete_google_signup` 用模擬的 Google 使用者資料測試 |
+
+- 「允許新使用者註冊」（`enable_signup`）關著時，OAuth 的新使用者也會被擋，所以 Google 登入一定要把它打開；打開後公開的密碼註冊靠 hook 擋回去。
+- 測試專案的 Auth 設定有 Confirm email 開啟（`enable_confirmations = true`）；`createUser({ email_confirm: true })` 不受影響。
+- hook 和 `enable_signup` 都不在 migration 裡，CI 也不推 Auth 設定；雲端要自己開（Dashboard，或 `supabase config push`）。
+- 本機實跑（`supabase functions serve`）：打開連結產生邀請碼、重新產生後舊碼作廢、同一個來源錯 5 次暫停（暫停中連對的碼也不收、別的來源不受影響）、用邀請碼註冊並密碼登入、重設密碼（太弱的密碼不會用掉連結、用過一次就失效、舊密碼不能登入）都通過。本機的 Kong 會改寫 `x-real-ip`，所以測試時用 `cf-connecting-ip` 模擬不同來源；雲端是否真的帶 `cf-connecting-ip` 沒有驗證（見 PR 說明）。
+

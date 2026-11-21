@@ -291,16 +291,30 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
-                },"invites": {
+                },"invite_code_attempts": {
                   Row: {
-                    "accepted_at": string | null,"accepted_user_id": string | null,"accepted_via": string | null,"befriend_inviter": boolean,"created_at": string,"email": string,"expires_at": string,"id": string,"invited_by": string | null,"kitchen_id": string | null,"link_regenerated_at": string | null,"note": string | null,"plan": string,"status": string,"token_hash": string,"type": string,"updated_at": string
+                    "created_at": string,"failed_count": number,"last_failed_at": string | null,"locked_until": string | null,"source_hash": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "accepted_at"?: string | null,"accepted_user_id"?: string | null,"accepted_via"?: string | null,"befriend_inviter"?: boolean,"created_at"?: string,"email": string,"expires_at"?: string,"id": string,"invited_by"?: string | null,"kitchen_id"?: string | null,"link_regenerated_at"?: string | null,"note"?: string | null,"plan"?: string,"status"?: string,"token_hash": string,"type"?: string,"updated_at"?: string
+                    "created_at"?: string,"failed_count"?: number,"last_failed_at"?: string | null,"locked_until"?: string | null,"source_hash": string,"updated_at"?: string
                   }
                   Update: {
-                    "accepted_at"?: string | null,"accepted_user_id"?: string | null,"accepted_via"?: string | null,"befriend_inviter"?: boolean,"created_at"?: string,"email"?: string,"expires_at"?: string,"id"?: string,"invited_by"?: string | null,"kitchen_id"?: string | null,"link_regenerated_at"?: string | null,"note"?: string | null,"plan"?: string,"status"?: string,"token_hash"?: string,"type"?: string,"updated_at"?: string
+                    "created_at"?: string,"failed_count"?: number,"last_failed_at"?: string | null,"locked_until"?: string | null,"source_hash"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"invites": {
+                  Row: {
+                    "accepted_at": string | null,"accepted_user_id": string | null,"accepted_via": string | null,"befriend_inviter": boolean,"code_expires_at": string | null,"code_hash": string | null,"created_at": string,"email": string,"expires_at": string,"id": string,"invited_by": string | null,"kitchen_id": string | null,"link_regenerated_at": string | null,"note": string | null,"plan": string,"status": string,"token_hash": string,"type": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accepted_at"?: string | null,"accepted_user_id"?: string | null,"accepted_via"?: string | null,"befriend_inviter"?: boolean,"code_expires_at"?: string | null,"code_hash"?: string | null,"created_at"?: string,"email": string,"expires_at"?: string,"id": string,"invited_by"?: string | null,"kitchen_id"?: string | null,"link_regenerated_at"?: string | null,"note"?: string | null,"plan"?: string,"status"?: string,"token_hash": string,"type"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "accepted_at"?: string | null,"accepted_user_id"?: string | null,"accepted_via"?: string | null,"befriend_inviter"?: boolean,"code_expires_at"?: string | null,"code_hash"?: string | null,"created_at"?: string,"email"?: string,"expires_at"?: string,"id"?: string,"invited_by"?: string | null,"kitchen_id"?: string | null,"link_regenerated_at"?: string | null,"note"?: string | null,"plan"?: string,"status"?: string,"token_hash"?: string,"type"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -402,6 +416,20 @@ isOneToOne: false
       referencedRelation: "recipes"
       referencedColumns: ["id"]
     }
+                  ]
+                },"password_reset_links": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"expires_at": string,"id": string,"token_hash": string,"updated_at": string,"used_at": string | null,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"expires_at"?: string,"id": string,"token_hash": string,"updated_at"?: string,"used_at"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"expires_at"?: string,"id"?: string,"token_hash"?: string,"updated_at"?: string,"used_at"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    
                   ]
                 },"photos": {
                   Row: {
@@ -596,12 +624,23 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"claim_password_reset_link":
+{ Args: { "p_token_hash": string }; Returns: string
+                           },
+"complete_google_signup":
+{ Args: { "p_display_name"?: string,"p_region"?: string,"p_timezone"?: string }; Returns: string
+                           },
 "complete_invite_signup":
 { Args: { "p_display_name"?: string,"p_invite_id": string,"p_region"?: string,"p_timezone"?: string,"p_user_id": string }; Returns: string
                            },
 "create_invite":
 { Args: { "p_befriend_inviter"?: boolean,"p_email": string,"p_id": string,"p_invited_by"?: string,"p_kitchen_id"?: string,"p_note"?: string,"p_plan"?: string,"p_type"?: string }; Returns: {
               "expires_at": string,"invite_id": string,"token": string
+            }[]
+                           },
+"create_password_reset_link":
+{ Args: { "p_created_by"?: string,"p_id": string,"p_user_id": string }; Returns: {
+              "expires_at": string,"link_id": string,"token": string
             }[]
                            },
 "delete_recipe":
@@ -646,6 +685,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"hook_before_user_created":
+{ Args: { "event": Json }; Returns: Json
+                           },
 "log_error":
 { Args: { "p_app_version"?: string,"p_kind": string,"p_location": string,"p_platform"?: string,"p_severity": string }; Returns: undefined
                            },
@@ -691,6 +733,14 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"redeem_invite_code":
+{ Args: { "p_code_hash": string,"p_source_hash": string }; Returns: {
+              "email": string,"invite_id": string,"locked_until": string,"result": string
+            }[]
+                           },
+"release_password_reset_link":
+{ Args: { "p_token_hash": string }; Returns: undefined
+                           },
 "remove_pantry_item":
 { Args: { "p_id": string }; Returns: {
               "added_on": string,
@@ -847,6 +897,9 @@ isOneToOne: false
                            },
 "set_current_kitchen":
 { Args: { "p_kitchen_id": string }; Returns: undefined
+                           },
+"set_invite_code":
+{ Args: { "p_code_hash": string,"p_invite_id": string }; Returns: string
                            },
 "setup_new_user":
 { Args: { "p_create_kitchen"?: boolean,"p_display_name"?: string,"p_kitchen_name"?: string,"p_region"?: string,"p_timezone"?: string,"p_user_id": string }; Returns: string

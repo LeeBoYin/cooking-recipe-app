@@ -71,6 +71,7 @@
 | `entitlements` | `user_id` | `auth.users`（連動） | M1a |
 | `invites` | `id` | `invited_by`（佔位）；`kitchen_id`（連動）；`accepted_user_id`（空值） | M1a |
 | `password_reset_links` | `id` | `user_id`（連動） | M1a |
+| `invite_code_attempts` | `source_hash` | — | M1a |
 | `waitlist_entries` | `id` | — | M2 |
 | `push_subscriptions` | `id` | `user_id`（連動） | M2 |
 
@@ -190,6 +191,12 @@
 | `create_invite` | 系統管理員經 `admin` 函式；服務權限（本機用 `scripts/create-invite.sh`）；廚房成員發廚房邀請 M2 才開放 | 檢查人數上限（已註冊加上還沒過期的待接受邀請）後建立邀請，回傳邀請 ID 與原始 token（只此一次，資料庫只存 SHA-256 雜湊）；email 存小寫；14 天有效；同一個 email 還有沒過期的待接受邀請時拒絕（`invite_pending_exists`），過期的舊邀請改成已撤銷；已註冊的 email 拒絕（`already_registered`）。M1a 只發一般邀請，`type = 'kitchen'` 回 `invite_type_unsupported`（M2 才做）；`befriend_inviter` 只存旗標，M2 建好友關係時照旗標補上。對方已經是使用者時改成產生一則加入廚房的通知（M2） |
 | `setup_new_user` | 只有後端（初始化腳本、`accept-invite`） | 建立註冊時的資料（見第八節）；重複呼叫不會多建一份 |
 | `complete_invite_signup` | 只有後端（`accept-invite`） | 同一個交易裡先認領邀請（待接受、沒過期、一般邀請，否則 `invite_not_usable`）、再呼叫 `setup_new_user`，並記下 `user_profiles.invite_id`；整段失敗時呼叫端刪掉剛建立的 Auth 使用者 |
+| `set_invite_code` | 只有後端（`accept-invite`） | 把 6 碼邀請碼的雜湊存進邀請（`invites.code_hash`、`code_expires_at`，1 小時後到期）；同一筆邀請再產生時覆蓋舊的；邀請已用掉、撤銷、過期或不是一般邀請時 `invite_not_usable` |
+| `redeem_invite_code` | 只有後端（`accept-invite`） | 用邀請碼的雜湊換回邀請，回傳 `ok`／`invalid`／`locked`。來源（連線 IP 的雜湊，不存原始 IP）15 分鐘內錯 5 次就暫停 15 分鐘，次數與暫停時間記在 `invite_code_attempts`，暫停中連對的碼也不收；成功不會清掉失敗次數。邀請碼到期、邀請用掉或撤銷時一起失效 |
+| `hook_before_user_created` | 只有 Supabase Auth（Auth hook） | 見第六節末的說明 |
+| `complete_google_signup` | 已登入的人（Google 登入後第一次） | 用登入者自己的 `auth.users` 資料（email 要已驗證、登入方式含 Google，不信任手機送的 email）找對應的待接受、沒過期的一般邀請，同一個交易裡認領邀請（`accepted_via = 'google'`）並呼叫 `setup_new_user`；時區、地區、暱稱用手機送來的值。已經初始化的人重複呼叫回傳現有的廚房；沒有可用的邀請時 `invite_not_usable` |
+| `create_password_reset_link` | 系統管理員經 `admin` 函式；服務權限（本機用 `scripts/create-password-reset.sh`） | 為啟用中的使用者產生重設密碼連結，回傳原始 token（只此一次，資料庫只存 SHA-256 雜湊）；24 小時有效；同一個人先前還沒用的連結同時作廢；使用者不存在或已停用回 `user_not_found` |
+| `claim_password_reset_link`、`release_password_reset_link` | 只有後端（`accept-invite`） | 用掉連結：還沒用過、沒過期、帳號啟用中才成功並回傳使用者 ID，同時標成已用，所以同一條連結只能用一次；改密碼失敗（例如密碼太弱）時 `release` 還回去，讓對方換個密碼再試 |
 | `delete_account` | 本人 | 依 04 的規則處理所有資料，別人資料裡的參照改成空值（顯示「已刪除的使用者」），排入照片清理的背景任務 |
 | `search_recipes` | 已登入的人 | PGroonga 查詢，只回傳讀得到的食譜與收藏 |
 | `feed_page` | 已登入的人 | 朋友與家人的動態，用 `(published_at, id)` 游標分頁 |
@@ -205,7 +212,13 @@
 | 函式 | 誰能呼叫 | 做什麼 |
 |------|---------|-------|
 | `ai` | 已登入、啟用中的使用者 | 任務：首頁點子、對話、展開做法、口述整理、用說的改食譜、從網址匯入、發佈後整理（標籤、難易度、一句話）、正規化、靈感彩蛋。每個任務的模型與 effort 讀設定檔（見 [03 模型選擇](03-ai-design.md#模型選擇)）。依序檢查帳號狀態、速率、合理使用上限、預算；口味檔案過期時先用 `core` 重算；組 prompt、呼叫 Claude、驗證輸出、過敏原與安全二次檢查、寫用量紀錄 |
-| `accept-invite` | 持有邀請連結或邀請碼的人 | 新註冊（密碼）或已有帳號的人接受家人邀請；建立帳號與初始資料（見第八節）。密碼註冊：驗證 token（存在、沒撤銷、沒用過、沒過期、email 相符，不分大小寫）→ 用 admin API 建立已確認 email 的使用者（不寄信）→ `complete_invite_signup`；失敗時刪掉剛建的使用者，回應與紀錄不含 email 與 token。另外兩個動作：打開邀請連結時產生 6 碼邀請碼（1 小時內有效）；在主畫面的 App 用邀請碼換回那筆邀請，錯誤 5 次暫停 15 分鐘 |
+| `accept-invite` | 持有邀請連結或邀請碼的人 | 新註冊（密碼）或已有帳號的人接受家人邀請；建立帳號與初始資料（見第八節）。密碼註冊：驗證 token（存在、沒撤銷、沒用過、沒過期、email 相符，不分大小寫）→ 用 admin API 建立已確認 email 的使用者（不寄信）→ `complete_invite_signup`；失敗時刪掉剛建的使用者，回應與紀錄不含 email 與 token。用 `body.action` 分四個動作（沒填當作 `signup`）：
+- `signup`：同上，驗證邀請的憑證可以是連結的 `token`，也可以是 6 碼 `code`（走 `redeem_invite_code`，一樣計錯誤次數）。
+- `open`：打開邀請連結時，驗證 token 後產生 6 碼邀請碼（字母表去掉 0/O、1/I/L，1 小時內有效，只存雜湊，重新產生時舊的作廢），回傳邀請碼與邀請的 email。
+- `redeem_code`：在主畫面的 App 用邀請碼換回那筆邀請（回傳 email，讓註冊畫面帶入）；來源錯 5 次暫停 15 分鐘，回應 `code_locked` 與 `lockedUntil`（HTTP 429）。「來源」是連線 IP（優先 `cf-connecting-ip`）的 SHA-256，只存雜湊。
+- `reset_password`：用管理員產生的重設連結（`token`）與新密碼改密碼：`claim_password_reset_link` → admin API 改密碼，失敗就 `release_password_reset_link`；連結不存在、過期、用過或帳號已停用都回 `invalid_link`。
+
+這個函式不開 JWT 驗證。|
 | `share` | 任何人（公開頁）；作者（建立） | 輸出公開分享頁；建立分享連結時存公開照片副本與手機產生的預覽圖 |
 | `push` | 只有資料庫（`pg_net`）與排程 | 送 Web Push，清掉失效的訂閱 |
 | `track` | 已登入的人 | 收產品事件與手機的錯誤紀錄，由後端填分析 ID 後寫入 |
@@ -213,7 +226,12 @@
 | `maintenance` | 只有排程 | 需要 Storage API 的清理（孤兒照片、刪除帳號後的照片） |
 | `mcp` | 經 OAuth 授權的外部 AI | M4 |
 
-Supabase Auth 另設「建立使用者前」的 hook：Google 登入時檢查 email 有對應的有效邀請。
+**Auth「建立使用者前」hook**（`hook_before_user_created`，Postgres 函式 hook，只有 `supabase_auth_admin` 能執行）：
+- Google 登入（任何非密碼的登入方式）：email 要有對應的待接受、沒過期、一般邀請（不分大小寫），沒有就回 403 `invite_required`。
+- 公開的密碼註冊（`/auth/v1/signup`）一律回 403 `signup_requires_invite`；只有 `app_metadata.invite_signup = true` 的放行（`accept-invite` 建立使用者時帶；使用者自己送的註冊填不了 `app_metadata`）。實測 admin API 建立的使用者本來就不經過這個 hook，所以這個標記只是保險。
+- 為什麼要這樣：Google 登入要開 Auth 的「允許新使用者註冊」（關著時連 OAuth 的新使用者也會被擋），開了之後 `/auth/v1/signup` 也跟著開放，所以由 hook 把公開的密碼註冊擋回去。
+- hook 只檢查、不改資料。邀請的認領與初始化放在第一次登入後由 `complete_google_signup` 一次做完（同一個交易，整批成功或整批不做）；這樣暱稱、時區、地區可以用手機送來的值，也不用在 Auth 內部的交易裡執行 `setup_new_user`。
+- hook 的設定不在 migration 裡：本機看 `supabase/config.toml`；雲端專案在 Dashboard 的 Authentication → Auth Hooks 設定，或用 `supabase config push`，CI 不會推 Auth 設定。步驟見 [spikes/README.md](../spikes/README.md#05-auth-hook-與-google-登入) 與 M1a-01b 的 PR 說明。
 
 ## 七、觸發器
 
