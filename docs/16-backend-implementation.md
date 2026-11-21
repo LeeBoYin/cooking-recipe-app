@@ -120,7 +120,7 @@
 | `ingredient_mappings` | M0 | 全站共用的食材對應快取（只來自 AI 與你的審查） |
 | `background_jobs` | M1a | 背景任務佇列 |
 | `ai_usage_records`、`ai_spend_monthly`、`ai_rate_counters`、`ai_usage_alerts` | M1a | AI 用量與保護 |
-| `admin_audit_logs` | M1a | 只能新增 |
+| `admin_audit_logs` | M1a | 管理員每個寫入操作的紀錄（誰、何時、做了什麼；`detail` 只放代號、數字與設定的前後值，不放 email 與 token）。只能新增：沒有任何角色能直接讀寫，修改、刪除、清空由觸發器擋下（連資料庫擁有者也一樣）；`admin_user_id` 不設外鍵，免得刪帳號時被「不能修改」擋住 |
 | `product_events`、`analytics_identities`、`product_metrics_monthly` | M1a | 產品數據 |
 | `feedback`、`announcements` | M2 | |
 | `feature_flags` | M3 | |
@@ -197,6 +197,7 @@
 | `complete_google_signup` | 已登入的人（Google 登入後第一次） | 用登入者自己的 `auth.users` 資料（email 要已驗證、登入方式含 Google，不信任手機送的 email）找對應的待接受、沒過期的一般邀請，同一個交易裡認領邀請（`accepted_via = 'google'`）並呼叫 `setup_new_user`；時區、地區、暱稱用手機送來的值。已經初始化的人重複呼叫回傳現有的廚房；沒有可用的邀請時 `invite_not_usable` |
 | `create_password_reset_link` | 系統管理員經 `admin` 函式；服務權限（本機用 `scripts/create-password-reset.sh`） | 為啟用中的使用者產生重設密碼連結，回傳原始 token（只此一次，資料庫只存 SHA-256 雜湊）；24 小時有效；同一個人先前還沒用的連結同時作廢；使用者不存在或已停用回 `user_not_found` |
 | `claim_password_reset_link`、`release_password_reset_link` | 只有後端（`accept-invite`） | 用掉連結：還沒用過、沒過期、帳號啟用中才成功並回傳使用者 ID，同時標成已用，所以同一條連結只能用一次；改密碼失敗（例如密碼太弱）時 `release` 還回去，讓對方換個密碼再試 |
+| `admin_*`（`admin_is_admin`、`admin_list_users`、`admin_list_invites`、`admin_get_config`、`admin_list_audit_logs`、`admin_create_invite`、`admin_regenerate_invite`、`admin_revoke_invite`、`admin_extend_invite`、`admin_update_invite_email`、`admin_set_user_status`、`admin_create_reset_link`、`admin_update_config`） | 只有服務權限（`admin` Edge Function） | 後台的讀取與操作。第一個參數是管理員的 ID，每個函式先確認它是啟用中的系統管理員（雙重保險）。寫入函式在同一個交易裡檢查、操作、寫 `admin_audit_logs`，失敗就整個不做、不留紀錄。讀取只回傳帳號資料與統計（使用者清單：email、暱稱、角色、狀態、註冊時間、最後使用時間、加入方式；邀請清單：狀態分待接受／已接受／已過期／已撤銷）。停用帳號時 Auth 的封鎖由 `admin` 函式另外處理，不能停用自己或另一位系統管理員。系統設定目前只有 `max_users`（1–1000）與 `soft_delete_retention_days`（1–365） |
 | `delete_account` | 本人 | 依 04 的規則處理所有資料，別人資料裡的參照改成空值（顯示「已刪除的使用者」），排入照片清理的背景任務 |
 | `search_recipes` | 已登入的人 | PGroonga 查詢，只回傳讀得到的食譜與收藏 |
 | `feed_page` | 已登入的人 | 朋友與家人的動態，用 `(published_at, id)` 游標分頁 |
@@ -222,7 +223,7 @@
 | `share` | 任何人（公開頁）；作者（建立） | 輸出公開分享頁；建立分享連結時存公開照片副本與手機產生的預覽圖 |
 | `push` | 只有資料庫（`pg_net`）與排程 | 送 Web Push，清掉失效的訂閱 |
 | `track` | 已登入的人 | 收產品事件與手機的錯誤紀錄，由後端填分析 ID 後寫入 |
-| `admin` | 系統管理員（兩步驟驗證） | 後台的所有資料與操作，每次寫操作紀錄 |
+| `admin` | 系統管理員（兩步驟驗證） | 後台的所有資料與操作，每次寫操作紀錄。不開閘道的 JWT 驗證，自己依序檢查：token 交給 Auth 驗證（401 `unauthorized`）→ 是啟用中的系統管理員（403 `forbidden`，不是管理員的人只看到這個）→ JWT 的 `aal` 是 `aal2`（403 `mfa_required`，前端據此引導綁定或輸入驗證碼）。`body.action`：`get_config`、`list_users`、`list_invites`、`list_audit_logs`、`create_invite`、`regenerate_invite`、`revoke_invite`、`extend_invite`、`update_invite_email`、`set_user_status`、`create_reset_link`、`update_config`；邀請與重設連結只回傳原始 token（只此一次），由前端組成網址。資料庫錯誤對應成代號（`invite_not_usable`、`invite_pending_exists`、`already_registered`、`invite_capacity`、`cannot_target_self`…），沒見過的一律 `server_error`，回應與紀錄不含 email 與 token。`is_system_admin()`（RLS 與 `create_invite` 等用的判斷）同樣要求 `aal2`。兩步驟驗證用 Supabase Auth 的 TOTP（本機 `config.toml` 已開；測試與正式專案在 Dashboard → Authentication → MFA 開啟） |
 | `maintenance` | 只有排程 | 需要 Storage API 的清理（孤兒照片、刪除帳號後的照片） |
 | `mcp` | 經 OAuth 授權的外部 AI | M4 |
 

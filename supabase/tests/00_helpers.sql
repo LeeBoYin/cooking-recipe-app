@@ -20,12 +20,12 @@ end;
 $$;
 
 -- 用某個使用者的身分執行後面的查詢（交易結束時自動恢復）
-create or replace function tests.login_as(p_user_id uuid)
+create or replace function tests.login_as(p_user_id uuid, p_aal text default 'aal1')
 returns void
 language plpgsql
 as $$
 begin
-  perform set_config('request.jwt.claims', json_build_object('sub', p_user_id, 'role', 'authenticated')::text, true);
+  perform set_config('request.jwt.claims', json_build_object('sub', p_user_id, 'role', 'authenticated', 'aal', p_aal)::text, true);
   execute 'set local role authenticated';
 end;
 $$;

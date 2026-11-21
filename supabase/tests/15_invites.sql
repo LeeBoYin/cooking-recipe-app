@@ -22,7 +22,7 @@ select throws_ok($$select public.complete_invite_signup(private.uuid_v7(), priva
 reset role;
 
 -- 系統管理員可以發；email 存小寫、邀請者是他、14 天有效、只存雜湊
-select tests.login_as((select id from auth.users where email = 'admin@zhusha.test'));
+select tests.login_as((select id from auth.users where email = 'admin@zhusha.test'), 'aal2');
 create temp table made as
   select * from public.create_invite(private.uuid_v7(), '  Friend@Zhusha.Test ', ' 小美，大學同學 ');
 grant select on made to public;

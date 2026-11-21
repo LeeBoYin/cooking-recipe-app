@@ -315,8 +315,8 @@ max_enrolled_factors = 10
 
 # Control MFA via App Authenticator (TOTP)
 [auth.mfa.totp]
-enroll_enabled = false
-verify_enabled = false
+enroll_enabled = true
+verify_enabled = true
 
 # Configure MFA via Phone Messaging
 [auth.mfa.phone]
@@ -438,4 +438,8 @@ verify_jwt = false
 
 # accept-invite 的呼叫者還沒有帳號，憑邀請連結的 token 驗證，不走使用者的 JWT
 [functions.accept-invite]
+verify_jwt = false
+
+# admin 自己用 Auth 驗證 token，再檢查系統管理員與 aal2（兩步驟驗證）
+[functions.admin]
 verify_jwt = false
