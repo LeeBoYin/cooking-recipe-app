@@ -1,13 +1,8 @@
 import { useEffect, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
+import { InstallGuide } from '../../pwa/InstallGuide.tsx';
 import { Chef } from '../../chef/Chef.tsx';
 import { installMode, promptInstall, type InstallMode } from '../../pwa/install.ts';
-
-const ShareIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="inline align-[-3px]">
-    <path d="M12 3v12M8 7l4-4 4 4M5 12v7h14v-7" />
-  </svg>
-);
 
 // ② 加到主畫面（12 ②）：iPhone 圖文教學、Android 系統的安裝提示；電腦或已經從主畫面打開就跳過。
 // onDone：做完這一步（記成已完成）；onAutoSkip：這一步用不到，直接往下，不記。
@@ -35,22 +30,7 @@ export function InstallStep({ onDone, onAutoSkip }: { onDone: () => void; onAuto
       <div className="flex justify-center pt-4"><Chef size={96} /></div>
       <h1 className="m-0 font-round text-display leading-[1.4]"><FormattedMessage id="onboarding.install.title" /></h1>
       <p className="m-0 text-[15px] leading-relaxed text-ink-muted"><FormattedMessage id="onboarding.install.body" /></p>
-      {mode === 'ios' && (
-        <ol className="m-0 flex list-none flex-col gap-4 rounded-chef bg-surface p-4">
-          {(['1', '2', '3'] as const).map((n) => (
-            <li key={n} className="flex items-start gap-3">
-              <span className="grid size-7 shrink-0 place-items-center rounded-full bg-bulb text-[14px] font-bold">{n}</span>
-              <div className="flex flex-col gap-1">
-                <b className="text-body">
-                  <FormattedMessage id={`onboarding.install.ios.${n}`} />
-                  {n === '1' && <> <ShareIcon /></>}
-                </b>
-                <span className="text-caption leading-normal text-ink-muted"><FormattedMessage id={`onboarding.install.ios.${n}.hint`} /></span>
-              </div>
-            </li>
-          ))}
-        </ol>
-      )}
+      {mode === 'ios' && <InstallGuide />}
       <div className="mt-auto flex flex-col gap-1">
         <button
           type="button"

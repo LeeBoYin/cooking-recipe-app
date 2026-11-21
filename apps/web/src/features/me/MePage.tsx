@@ -15,6 +15,8 @@ import {
 } from '../../data/hooks.ts';
 import { Chef } from '../../chef/Chef.tsx';
 import { preloadWebpEncoder } from '../../photos/encode.ts';
+import { InstallSheet } from '../../pwa/InstallSheet.tsx';
+import { installMode } from '../../pwa/install.ts';
 import { Icon } from '../shell/Icon.tsx';
 import { Avatar } from './Avatar.tsx';
 import { AvatarCropper } from './AvatarCropper.tsx';
@@ -55,6 +57,9 @@ export function MePage() {
   const [picked, setPicked] = useState<File | null>(null);
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState('');
+  const [installOpen, setInstallOpen] = useState(false);
+  // 還沒從主畫面打開、而且這個瀏覽器能教或能裝，才顯示入口
+  const [canInstall] = useState(() => installMode() !== null);
 
   // 打開頁面時先預載 WebP 轉檔程式（iPhone 的 Safari 才需要）
   useEffect(() => {
@@ -209,10 +214,13 @@ export function MePage() {
       </div>
 
       <div className="overflow-hidden rounded-card bg-surface">
+        {canInstall && <Row label={intl.formatMessage({ id: 'me.install' })} onClick={() => setInstallOpen(true)} />}
         <Row to="/onboarding" label={intl.formatMessage({ id: 'me.onboarding.redo' })} />
         <Row label={intl.formatMessage({ id: 'me.account' })} value={session?.user.email ? maskEmail(session.user.email) : undefined} />
         <Row danger label={intl.formatMessage({ id: 'signOut' })} onClick={() => void signOut()} />
       </div>
+
+      {installOpen && <InstallSheet onClose={() => setInstallOpen(false)} />}
 
       {picked && (
         <AvatarCropper

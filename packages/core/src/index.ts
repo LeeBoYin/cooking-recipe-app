@@ -31,3 +31,4 @@ export {
 export {
   buildIngredientIndex, matchIngredient, parseIngredientLine, type DictIngredient, type IngredientIndex, type ParsedIngredient,
 } from './units/ingredient-line.ts';
+export { formatRecipeText, type RecipeTextInput, type RecipeTextLabels } from './share/recipe-text.ts';

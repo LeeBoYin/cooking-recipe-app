@@ -6,6 +6,7 @@ import type { RecipeVisibility } from '@zhusha/shared-types';
 import { useDeleteRecipe, useLinkBookmark, useMySettings, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
 import { recipeLimits, type Recipe } from '../../data/recipes.ts';
 import type { Photo } from '../../data/photos.ts';
+import { setUnsavedEdits } from '../../pwa/unsaved.ts';
 import { preloadWebpEncoder } from '../../photos/encode.ts';
 import { Icon } from '../shell/Icon.tsx';
 import {
@@ -156,7 +157,11 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
     if (ed.isDraft || !ed.dirty) return;
     const handler = (e: BeforeUnloadEvent) => e.preventDefault();
     window.addEventListener('beforeunload', handler);
-    return () => window.removeEventListener('beforeunload', handler);
+    setUnsavedEdits(true); // 讓「有新版本」的提示知道，重新整理前要先提醒
+    return () => {
+      window.removeEventListener('beforeunload', handler);
+      setUnsavedEdits(false);
+    };
   }, [ed.isDraft, ed.dirty]);
 
   const paths = [...form.photos, ...form.steps.flatMap((s) => (s.photo ? [s.photo] : []))].flatMap((p) => (p.thumbPath ? [p.thumbPath] : []));
