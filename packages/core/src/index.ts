@@ -9,6 +9,10 @@ export {
   RHYTHM, STOP, QUICK_FIRE_GROUP_SIZE, startSession, nextStep, submitAnswers, finishSession, itemValue, coreConfidence, preferenceAnsweredCount,
   type QuizEnv, type QuizMode, type QuizSession, type QuizStep,
 } from './taste/session.ts';
+export {
+  computeTasteProfile, toSnapshotData, fromSnapshotData, SAVED_WEIGHT, COOKED_WEIGHT, CHAT_SIGNAL_WEIGHT, PANTRY_WEIGHT, HALF_LIFE_DAYS,
+  type SavedIdeaSignal, type ChatSignal, type TasteInputs, type TasteSources, type ComputedTaste, type TasteSnapshotData,
+} from './taste/learn.ts';
 export { buildCard, EXPLORER_CODE, LIGHT_CODE, type TasteCard } from './taste/card.ts';
 export * from './ideas/types.ts';
 export * from './ideas/constants.ts';

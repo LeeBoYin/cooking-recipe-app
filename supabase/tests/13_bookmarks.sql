@@ -1,6 +1,6 @@
 -- 收藏大廚的點子：只有本人、同一道只收一筆、主要食材由字典算、取消收藏、連到自己的食譜
 begin;
-select plan(17);
+select plan(18);
 
 create function tests.save(p jsonb)
 returns public.recipes
@@ -47,7 +47,8 @@ select throws_ok(format($$insert into public.bookmarks (id, user_id, kind, idea)
 
 -- 連到自己的食譜
 select tests.save(format('{"id":"%s","title":"我的版本"}', :'r1')::jsonb);
-select lives_ok(format($$update public.bookmarks set cooked_recipe_id = '%s' where id = '%s'$$, :'r1', :'b1'), '可以連到自己的食譜');
+select lives_ok(format($$select public.record_bookmark_cooked('%s', '%s')$$, :'b1', :'r1'), '可以連到自己的食譜');
+select throws_ok(format($$update public.bookmarks set cooked_recipe_id = '%s' where id = '%s'$$, :'r1', :'b1'), '42501', null, '不能直接改 cooked_recipe_id（只經 record_bookmark_cooked）');
 select tests.logout();
 
 select tests.login_as(:'other');
@@ -57,7 +58,7 @@ select lives_ok(format($$select public.bookmark_recipe('%s', '別人收藏', nul
 select tests.logout();
 
 select tests.login_as(:'owner');
-select throws_ok(format($$update public.bookmarks set cooked_recipe_id = '%s' where id = '%s'$$, :'r2', :'b1'),
+select throws_ok(format($$select public.record_bookmark_cooked('%s', '%s')$$, :'b1', :'r2'),
   '23503', null, '不能連到別人的食譜');
 select throws_ok(format($$select public.bookmark_recipe('%s', 'x', null, '%s')$$, :'b2', :'d2'),
   '23505', null, 'id 已被別人用掉不回傳別人的資料');

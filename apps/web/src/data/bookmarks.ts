@@ -7,7 +7,7 @@ export type Bookmark = Row<'bookmarks'>;
 
 // 點子的快照（bookmarks.idea）
 // 家常菜的點子有 baseDishId；AI 想的點子沒有，用 suggestionId（點子在快取裡的 id）＋菜名判斷重複
-export type BookmarkIdea = { schemaVersion: 1; title: string; why?: string; baseDishId?: string; suggestionId?: string; recipeDraft?: RecipeDraft };
+export type BookmarkIdea = { schemaVersion: 1; title: string; why?: string; baseDishId?: string; suggestionId?: string; origin?: { suggestionId: string; ideaId: string }; recipeDraft?: RecipeDraft };
 
 export function ideaOf(b: Bookmark): BookmarkIdea {
   return b.idea as unknown as BookmarkIdea;
@@ -49,8 +49,8 @@ export async function unbookmark(id: string): Promise<void> {
   if (error) throw error;
 }
 
-// 從收藏記錄了自己的版本後，連到那一篇（有值就是「做過了」）
+// 從收藏記錄了自己的版本後，連到那一篇（有值就是「做過了」），同時記一筆「做了」的回饋（同一個動作，一起成功或一起不做）
 export async function linkBookmarkToRecipe(id: string, recipeId: string): Promise<void> {
-  const { error } = await supabase().from('bookmarks').update({ cooked_recipe_id: recipeId }).eq('id', id);
+  const { error } = await supabase().rpc('record_bookmark_cooked', { p_bookmark: id, p_recipe: recipeId });
   if (error) throw error;
 }

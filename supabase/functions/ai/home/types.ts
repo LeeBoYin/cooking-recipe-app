@@ -1,5 +1,5 @@
 // 首頁點子（M1a-06）的型別：ai_home_context 回來的資料、AI 的輸出、存進快取與回給手機的格式。
-import type { IdeaSlot } from '../../../../packages/core/src/index.ts';
+import type { ComputedTaste, IdeaSlot, TasteSnapshotData } from '../../../../packages/core/src/index.ts';
 
 export type Slot = IdeaSlot;
 export const SLOT_LIMITS: Readonly<Record<Slot, number>> = { familiar: 2, twist: 2, adventure: 1 };
@@ -7,9 +7,18 @@ export const SLOTS = Object.keys(SLOT_LIMITS) as Slot[];
 
 // ai_home_context 的回傳（snake_case，和資料庫一致）
 export interface HomeContextRow {
+  read_at?: string; // 讀這份資料的資料庫時間；存口味檔案時用來判斷讀完之後有沒有新的變動
   kitchen: { id: string; region: string; timezone: string };
   settings: { locale: string; chef_persona: string };
   taste: { dims: Record<string, { affinity: number; confidence: number; source: 'user_set' | 'explored' | 'learned'; updated_at: string }>; context: Record<string, unknown> } | null;
+  // 口味檔案：快照（不存在是 null）；過期或不存在時 taste_inputs 附上重算用的原始資料
+  taste_snapshot?: { stale: boolean; data: TasteSnapshotData } | null;
+  taste_inputs?: {
+    saved: { base_dish_id: string | null; ingredient_ids: string[]; cooked: boolean; at: string }[];
+    signals: { at: string; signals: { dimension_key?: string; affinity?: number; scope?: string }[] }[];
+  } | null;
+  // ai 函式讀口味前算好的（withMergedTaste）：口味地圖加上收藏、回饋、對話與食材；沒有時 buildHomeEnv 退回只用口味地圖
+  merged_taste?: ComputedTaste;
   dietary: { allergen_ids: string[]; restriction_ids: string[]; dislike_ingredient_ids: string[]; no_cooking_alcohol: boolean } | null;
   pantry: { ingredient_id: string; want_to_use_soon: boolean; expires_at: string | null }[];
   equipment: { equipment_type_id: string | null; enabled_optional_techniques: string[] }[];
