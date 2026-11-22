@@ -14,7 +14,7 @@ import { chatKeys, useChatConversation, useLatestChat, useSendChat } from './use
 // 全螢幕的對話頁（17〈對話頁〉、03〈和大廚聊聊〉）。
 // 進來的方式：首頁的輸入框（開新的一段）或「接著聊」（state.resume，回到 6 小時內同一個廚房的那一段）。
 // 送出後整段回應完成才一次出現；失敗時使用者的話留在畫面上，什麼都沒存，可以再送一次。
-export type ChatNav = { resume?: boolean; about?: string } | null;
+export type ChatNav = { resume?: boolean } | null;
 
 export function ChatPage() {
   const intl = useIntl();
@@ -22,7 +22,6 @@ export function ChatPage() {
   const location = useLocation();
   const queryClient = useQueryClient();
   const resume = (location.state as ChatNav)?.resume === true;
-  const about = (location.state as ChatNav)?.about; // 首頁點子的「就聊這道」：開新的一段，代送「想做〇〇」
   const { kitchen, isPending: kitchenPending } = useCurrentKitchen();
   const settings = useMySettings();
   const tempPref = parseTemperaturePref(settings.data?.temperature_unit);
@@ -78,15 +77,6 @@ export function ChatPage() {
     e.preventDefault();
     sendText(draft.trim());
   }
-
-  const aboutSent = useRef(false);
-  useEffect(() => {
-    if (!about || aboutSent.current || loading) return;
-    aboutSent.current = true;
-    void navigate('.', { replace: true, state: null });
-    sendText(intl.formatMessage({ id: 'chat.about' }, { title: about }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [about, loading]);
 
   function sendText(text: string) {
     if (!text || send.isPending || loading || full) return;
@@ -232,15 +222,7 @@ export function ChatPage() {
         </form>
       )}
 
-      {open && <IdeaSheet
-          view={open}
-          onClose={() => setOpen(null)}
-          chatDisabled={send.isPending || loading || full}
-          onChat={(v) => {
-            setOpen(null);
-            sendText(intl.formatMessage({ id: 'chat.about' }, { title: v.title }));
-          }}
-        />}
+      {open && <IdeaSheet view={open} onClose={() => setOpen(null)} />}
     </div>
   );
 }
