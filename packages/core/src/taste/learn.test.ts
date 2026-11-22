@@ -86,6 +86,20 @@ describe('computeTasteProfile', () => {
     expect(out.dims['protein.pork']!.confidence).toBeGreaterThan(0.5);
   });
 
+  it('探索來的維度：隱含訊號不能讓正負號翻轉，只能停在 0', () => {
+    const base = profile({ 'protein.pork': dim(0.1, 0.2, 'explored'), 'taste.spicy': dim(-0.1, 0.2, 'explored') });
+    const out = run({
+      base,
+      saved: Array.from({ length: 20 }, () => porkDish(NOW, true)).map((s) => s),
+      chatSignals: [sig({ dimensionKey: 'taste.spicy', affinity: 1 })],
+      pantryIngredientIds: [],
+    });
+    expect(out.dims['taste.spicy']!.affinity).toBeLessThanOrEqual(0);
+    const down = run({ base, chatSignals: [sig({ dimensionKey: 'protein.pork', affinity: -1 })] });
+    expect(down.dims['protein.pork']!.affinity).toBeGreaterThanOrEqual(0);
+    expect(down.dims['protein.pork']!.confidence).toBeGreaterThan(0.2); // 把握仍會變
+  });
+
   it('隱含訊號隨時間變輕：一年前的力道剩一半', () => {
     const recent = run({ saved: [porkDish(NOW, true)] });
     const old = run({ saved: [porkDish('2025-11-22T00:00:00.000Z', true)] });

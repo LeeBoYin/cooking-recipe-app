@@ -2,7 +2,7 @@
 // 輸入：口味地圖（探索與自己設定的）＋收藏的點子＋「做了」的點子＋對話裡說的長期偏好＋手邊的食材。
 // 自己記錄的食譜要等發佈後整理寫好標籤才算（M1b），這裡還沒有。
 // 規則：
-//   • 「你設定的」（user_set）維度不會被隱含訊號覆蓋；
+//   • 「你設定的」（user_set）維度不會被隱含訊號覆蓋；探索來的（explored）也是明確的，只能調整強度與把握，喜好的正負號不會翻轉；
 //   • 隱含訊號隨時間變輕，一年後剩一半；
 //   • 同一個點子只算一次：收藏過又做了的，只算「做了」（權重較高那一個），不會兩個都加；
 //   • 把握程度不夠的維度不會被擋掉，但下游（口味相似度、口味名片）本來就只看夠把握的。
@@ -15,6 +15,8 @@ export const COOKED_WEIGHT = 0.5; // 做了並記錄的點子（中，比收藏�
 export const CHAT_SIGNAL_WEIGHT = 0.35; // 對話裡說的長期偏好（中）
 export const PANTRY_WEIGHT = 0.04; // 手邊常有的食材（很小）
 export const HALF_LIFE_DAYS = 365; // 隱含訊號一年後剩一半
+// 快照超過幾天沒重算就當作過期（淡化才會發生）。資料庫的 ai_home_context 用同一個天數（30），改的時候兩邊一起改
+export const SNAPSHOT_MAX_AGE_DAYS = 30;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
@@ -88,7 +90,9 @@ function learn(current: DimensionState | undefined, e: Evidence, now: string): D
   const a = current?.affinity ?? 0;
   const s = e.sign * mag;
   const confidence = 1 - (1 - c) * (1 - 0.5 * mag);
-  const affinity = clamp((a * c + 0.5 * s) / (c + 0.5 * mag), -1, 1);
+  let affinity = clamp((a * c + 0.5 * s) / (c + 0.5 * mag), -1, 1);
+  // 探索的結果也算明確的：隱含訊號可以調整強度，但不能讓喜好的正負號翻轉
+  if (current?.source === 'explored') affinity = a > 0 ? Math.max(0, affinity) : a < 0 ? Math.min(0, affinity) : affinity;
   const updatedAt = current && Date.parse(current.updatedAt) > Date.parse(e.at) ? current.updatedAt : e.at;
   return { affinity, confidence, source: current?.source ?? 'learned', updatedAt };
 }
