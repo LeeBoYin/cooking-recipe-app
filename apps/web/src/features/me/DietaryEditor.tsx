@@ -1,3 +1,4 @@
+import { track } from '../../data/track.ts';
 import { useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { allergens, dietaryRestrictions, getIngredient, regionChain, searchIngredients, type Allergen } from '@zhusha/ingredients';
@@ -43,7 +44,10 @@ function Fields({ initial, region, onDone, doneId }: { initial: Dietary; region:
     [query, draft.dislikeIngredientIds],
   );
 
-  const commit = (value: Dietary) => save.mutate(value, { onSuccess: onDone });
+  const commit = (value: Dietary) => {
+    track('settings.changed', { key: 'dietary' });
+    save.mutate(value, { onSuccess: onDone });
+  };
 
   return (
     <div className="flex flex-col gap-4">

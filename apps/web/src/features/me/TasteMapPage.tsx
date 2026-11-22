@@ -1,3 +1,4 @@
+import { track } from '../../data/track.ts';
 import { useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useNavigate } from 'react-router';
@@ -69,6 +70,7 @@ export function TasteMapPage() {
   const levelLabel = (id: LevelId) => intl.formatMessage({ id: `tastemap.level.${id}` });
   const apply = (next: TasteProfile) => {
     setEditing(null);
+    track('settings.changed', { key: 'taste_map' });
     save.mutate({ profile: next, cardTitle: buildCard(next, preferenceDimensions).titleCode ?? null, previousContext: context });
   };
 

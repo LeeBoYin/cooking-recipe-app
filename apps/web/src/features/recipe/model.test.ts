@@ -8,6 +8,7 @@ import {
   overBy,
   overLimit,
   photosChanged,
+  recordProgress,
   toIngredient,
   toPhotoInputs,
   type EditorForm,
@@ -128,5 +129,15 @@ describe('toIngredient：存檔時解析食材', () => {
   });
   it('對不到字典的食材沒有 ingredient_id，數量照解析', () => {
     expect(toIngredient('e', '阿嬤的辣醬 1 大匙')).toEqual({ id: 'e', raw_text: '阿嬤的辣醬 1 大匙', name: '阿嬤的辣醬', amount: 1, unit: 'tbsp', optional: false });
+  });
+});
+
+describe('recordProgress（放棄時做到哪）', () => {
+  it('依有沒有內容分四段，只看有沒有、不看內容', () => {
+    const f = emptyForm();
+    expect(recordProgress(f)).toBe('blank');
+    expect(recordProgress({ ...f, photos: [photo('a')] })).toBe('photo');
+    expect(recordProgress({ ...f, photos: [photo('a')], title: '紅燒肉' })).toBe('text');
+    expect(recordProgress({ ...f, title: '紅燒肉', tips: '小火' })).toBe('method');
   });
 });

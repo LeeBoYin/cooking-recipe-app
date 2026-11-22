@@ -1,6 +1,6 @@
 // 首頁點子卡片與抽屜要顯示的內容。AI 想的點子先轉成 IdeaView，畫面只認它。
 // 卡片不顯示槽位標籤（熟悉的、變化版、新挑戰）：由 why 自然說明（03）。
-import { formatTemperature, replaceTempMarks, type AiIdea, type TemperaturePref } from '@zhusha/core';
+import { formatTemperature, replaceTempMarks, type AiIdea, type IdeaSlot, type TemperaturePref } from '@zhusha/core';
 import { getIngredient } from '@zhusha/ingredients';
 import { techniques as techniqueDict } from '@zhusha/equipment';
 import { baseDishes } from '@zhusha/taste';
@@ -18,6 +18,7 @@ export interface IdeaView {
   source: 'own' | 'dish' | 'ai';
   recipeId?: string; // 自己的食譜：打開食譜
   baseDishId?: string; // 家常菜：可以收藏
+  slot?: IdeaSlot; // 產品事件用
   suggestionId?: string; // AI 想的點子在快取裡的 id：沒有 baseDishId 的點子用它收藏
 }
 
@@ -37,6 +38,7 @@ export function viewOfAiIdea(idea: AiIdea, pref: TemperaturePref, suggestionId?:
   const familiar = idea.slot === 'familiar';
   return {
     key: idea.id,
+    slot: idea.slot,
     title: idea.title,
     why: renderMarks(idea.why, pref),
     kitchenHas: idea.usesPantryIds.length + (idea.usesMentionedIds?.length ?? 0) > 0 && idea.otherIngredients.length === 0,

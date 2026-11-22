@@ -1,3 +1,4 @@
+import { track } from '../../data/track.ts';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useMySettings, useUpdateSettings } from '../../data/hooks.ts';
 import { SheetFrame } from './ChoiceSheet.tsx';
@@ -36,7 +37,12 @@ export function SettingsSheet({ kind, onClose }: { kind: SettingsSheetKind; onCl
   if (!s) return null;
   const title = intl.formatMessage({ id: `me.${kind}` });
   const size = s.household_size;
-  const setSize = (n: number) => update.mutate({ household_size: Math.min(20, Math.max(1, n)) });
+  // 產品事件只記改了哪一項，不記值
+  const change = (patch: Parameters<typeof update.mutate>[0], key: 'units' | 'chef_persona' | 'servings') => {
+    track('settings.changed', { key });
+    update.mutate(patch);
+  };
+  const setSize = (n: number) => change({ household_size: Math.min(20, Math.max(1, n)) }, 'servings');
   // 資料庫也允許同時顯示兩種單位（例 C+F）；這裡只提供單選，以第一個為準
   const temperature = s.temperature_unit.startsWith('F') ? 'F' : 'C';
   const measure = s.measure_unit.startsWith('us') ? 'us' : 'metric';
@@ -60,13 +66,13 @@ export function SettingsSheet({ kind, onClose }: { kind: SettingsSheetKind; onCl
             label={intl.formatMessage({ id: 'settings.temperature' })}
             value={temperature}
             options={[{ id: 'C', label: intl.formatMessage({ id: 'settings.temperature.C' }) }, { id: 'F', label: intl.formatMessage({ id: 'settings.temperature.F' }) }]}
-            onPick={(id) => update.mutate({ temperature_unit: id })}
+            onPick={(id) => change({ temperature_unit: id }, 'units')}
           />
           <Segmented
             label={intl.formatMessage({ id: 'settings.measure' })}
             value={measure}
             options={[{ id: 'metric', label: intl.formatMessage({ id: 'settings.measure.metric' }) }, { id: 'us', label: intl.formatMessage({ id: 'settings.measure.us' }) }]}
-            onPick={(id) => update.mutate({ measure_unit: id })}
+            onPick={(id) => change({ measure_unit: id }, 'units')}
           />
         </>
       )}
@@ -79,7 +85,7 @@ export function SettingsSheet({ kind, onClose }: { kind: SettingsSheetKind; onCl
               type="button"
               role="radio"
               aria-checked={s.chef_persona === p}
-              onClick={() => update.mutate({ chef_persona: p })}
+              onClick={() => change({ chef_persona: p }, 'chef_persona')}
               className="flex w-full items-start gap-2.5 border-0 border-b border-line-soft bg-transparent p-3 text-left font-[inherit] text-ink last:border-b-0"
             >
               <span aria-hidden="true" className={`mt-0.5 grid size-[22px] shrink-0 place-items-center rounded-full border-2 ${s.chef_persona === p ? 'border-ink' : 'border-line-strong'}`}>

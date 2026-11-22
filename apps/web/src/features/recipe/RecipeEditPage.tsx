@@ -5,6 +5,7 @@ import type { RecipeVisibility } from '@zhusha/shared-types';
 import { useDeleteRecipe, useLinkBookmark, useMySettings, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
 import { recipeLimits, type Recipe } from '../../data/recipes.ts';
 import type { Photo } from '../../data/photos.ts';
+import { track } from '../../data/track.ts';
 import { setUnsavedEdits } from '../../pwa/unsaved.ts';
 import { preloadWebpEncoder } from '../../photos/encode.ts';
 import { Icon } from '../shell/Icon.tsx';
@@ -14,16 +15,22 @@ import {
   HIGHLIGHTS,
   canAddStep,
   hasContent,
+  isBlank,
   overBy,
   overLimit,
+  recordProgress,
   textLimits,
   type EditorDraft,
   type EditorPhoto,
   type EditorStep,
 } from './model.ts';
+
 import { PhotoStrip } from './PhotoStrip.tsx';
 import { SortableItem, SortableList } from './SortableList.tsx';
 import { useRecipeEditor } from './useRecipeEditor.ts';
+
+// 這次打開 App 已經記過 record.start 的食譜（StrictMode 與重新渲染不重複記）
+const startedRecipes = new Set<string>();
 
 const VISIBILITIES: RecipeVisibility[] = ['friends', 'household', 'private'];
 const CARD = 'rounded-card bg-surface p-3';
@@ -157,6 +164,27 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
   const [publishing, setPublishing] = useState(false);
   const [focusId, setFocusId] = useState<string | null>(null); // 剛新增的列，游標放進去
 
+  // 產品事件：新的一篇開始記錄；離開時沒發佈就記放棄（做到哪一步）。只記步驟，不記內容。
+  // 開發模式的 StrictMode 會假裝卸載再掛上，所以用 microtask 確認真的離開了才記
+  const mounted = useRef(false);
+  const published = useRef(false);
+  const latest = useRef({ form, wasDraft: ed.isDraft });
+  latest.current = { form, wasDraft: ed.isDraft };
+  useEffect(() => {
+    mounted.current = true;
+    if (recipe === null && !startedRecipes.has(recipeId)) {
+      startedRecipes.add(recipeId);
+      track('record.start', { entry: fromState?.bookmarkId ? 'bookmark' : 'plus' });
+    }
+    return () => {
+      mounted.current = false;
+      queueMicrotask(() => {
+        const { form: f, wasDraft } = latest.current;
+        if (!mounted.current && !published.current && wasDraft && !isBlank(f)) track('record.abandon', { step: recordProgress(f) });
+      });
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   // iPhone 的 Safari 才需要 WebP 轉檔程式，打開編輯頁時先預載
   useEffect(() => {
     void preloadWebpEncoder().catch(() => undefined);
@@ -189,7 +217,11 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
     const result = await ed.publish();
     setPublishing(false);
     if (result) {
-      if (fromState?.bookmarkId) linkBookmark.mutate({ bookmarkId: fromState.bookmarkId, recipeId });
+      published.current = true;
+      if (fromState?.bookmarkId) {
+        track('suggestion.recorded');
+        linkBookmark.mutate({ bookmarkId: fromState.bookmarkId, recipeId });
+      }
       void navigate(`/recipes/${recipeId}`, { replace: true, state: { published: true } });
     }
   }
@@ -257,7 +289,7 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
                 <button
                   type="button"
                   disabled={remove.isPending}
-                  onClick={() => remove.mutate(recipeId, { onSuccess: () => void navigate('/recipes', { replace: true }) })}
+                  onClick={() => remove.mutate(recipeId, { onSuccess: () => { published.current = true; void navigate('/recipes', { replace: true }); } })}
                   className="h-12 w-full border-0 bg-transparent p-0 text-left text-body font-[inherit] text-error"
                 >
                   <FormattedMessage id="recipe.delete" />

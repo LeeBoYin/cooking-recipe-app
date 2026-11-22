@@ -3,6 +3,7 @@
 import { ideaOf, type Bookmark } from '../../data/bookmarks.ts';
 import { useBookmarkAiIdea, useBookmarkIdea, useMyBookmarks, useUnbookmark } from '../../data/hooks.ts';
 import type { IdeaView } from './ideaView.ts';
+import { trackIdea, type IdeaSource } from './trackIdea.ts';
 
 export function findBookmark(list: Bookmark[] | undefined, view: IdeaView): Bookmark | undefined {
   return (list ?? []).find((b) => {
@@ -12,7 +13,7 @@ export function findBookmark(list: Bookmark[] | undefined, view: IdeaView): Book
   });
 }
 
-export function useIdeaBookmark(view: IdeaView) {
+export function useIdeaBookmark(view: IdeaView, source?: IdeaSource) {
   const bookmarks = useMyBookmarks();
   const addDish = useBookmarkIdea();
   const addAi = useBookmarkAiIdea();
@@ -21,6 +22,7 @@ export function useIdeaBookmark(view: IdeaView) {
   const can = !!view.baseDishId || (view.source === 'ai' && !!view.suggestionId);
 
   function toggle() {
+    if (!bookmark && source) trackIdea('suggestion.bookmarked', view, source);
     if (bookmark) remove.mutate(bookmark.id);
     else if (view.baseDishId) addDish.mutate({ title: view.title, why: view.why, baseDishId: view.baseDishId, ...(view.suggestionId ? { suggestionId: view.suggestionId, ideaId: view.key } : {}) });
     else if (view.suggestionId) addAi.mutate({ suggestionId: view.suggestionId, title: view.title });

@@ -65,23 +65,25 @@
 
 資料表只看得到結果，看不到過程，例如「開了記錄畫面卻沒有發佈」。事件格式見 [05 ProductEvent](05-data-model.md#衍生快取資料由程式算出或後端產生)。
 
-**事件清單**（名稱用「區域.動作」；屬性只能是白名單內的值，不能是自由文字）：
+**事件清單**（名稱用「區域.動作」；屬性只能是白名單內的值，不能是自由文字）。白名單寫在 `packages/core/src/track/events.ts`，前端和 `track` 函式共用；**加粗**的是 M1a 已經接上的，其他等對應的畫面做好再加進白名單：
 
 | 區域 | 事件 | 屬性 |
 |------|------|------|
-| App | `app.open`（回到前景；30 分鐘內算同一次）、`screen.view` | `screen`；`installed`（是否加到主畫面）、`platform` |
-| 記錄 | `record.start`、`record.dictation_used`、`record.ai_filled`、`record.publish`、`record.abandon`、`record.draft_saved`、`record.draft_published`、`recipe.cook_again`、`recipe.refine_by_voice` | `entry`（＋記錄、烹飪模式、收藏、點子、又做了一次）；`photoCount`、`hasSteps`、`visibility`、`highlightCount`；`fieldsEditedAfterAi`（作者改了哪幾類 AI 填的欄位，只記類別，不記內容）；放棄時的 `step` |
+| App | **`app.open`**（回到前景；30 分鐘內算同一次）、**`screen.view`**（換頁時） | `screen`（固定的畫面清單，不是路徑）；`installed`（是否加到主畫面）、`platform` |
+| 記錄 | **`record.start`**、`record.dictation_used`、`record.ai_filled`、**`record.publish`**、**`record.abandon`**、**`record.draft_saved`**、**`record.draft_published`**、`recipe.cook_again`、`recipe.refine_by_voice` | `entry`（`plus`＝＋記錄、`bookmark`＝收藏；烹飪模式、點子、又做了一次之後加）；`photoCount`、`hasSteps`、`visibility`、`highlightCount`；`fieldsEditedAfterAi`（作者改了哪幾類 AI 填的欄位，只記類別，不記內容）；放棄時的 `step`（`blank`、`photo`、`text`、`method`：做到哪裡，只看有沒有內容）。`record.draft_saved` 是這篇第一次存成草稿；`record.draft_published` 是打開時就是草稿的那一篇發佈 |
 | 食譜 | `recipe.cooking_mode_start`、`recipe.cooking_mode_finish`、`recipe.shopping_list_shared`、`recipe.import` | `importType`（網址） |
-| 靈感 | `chat.start`、`chat.message_sent`、`chat.ingredients_added`、`suggestion.shown`、`suggestion.opened`、`suggestion.bookmarked`、`suggestion.recorded`、`suggestion.dismissed` | `turn`、`count`、`source`（首頁、對話）、`slot`、`dismissReason`；**不記對話內容** |
+| 靈感 | **`chat.start`**、**`chat.message_sent`**、`chat.ingredients_added`、**`suggestion.shown`**、**`suggestion.opened`**、**`suggestion.bookmarked`**、**`suggestion.recorded`**、`suggestion.dismissed`（還沒接上：目前沒有「不想要」的入口） | `turn`、`count`、`source`（`home`、`chat`）、`slot`（`familiar`、`twist`、`adventure`）、`dismissReason`；`suggestion.recorded` 是從收藏的點子記錄並發佈，收藏沒存槽位與來源，所以不帶屬性。**不記對話內容，也不記點子的 ID**（點子 ID 能對回使用者，會破壞匿名） |
 | 食材 | `pantry.add`、`pantry.remove`、`pantry.restore`、`pantry.expiry_set`、`pantry.stocktake` | `method`（快速新增、搜尋、盤點）、`count` |
 | 社群 | `friend.added`、`feed.end_reached`、`social.reaction`、`social.comment`、`social.bookmark`、`social.version_recorded`、`social.share_to_friend` | `via`（好友連結、QR Code、邀請） |
 | 分享 | `share.link_created`、`share.text_copied`、`share.card_saved` | — |
-| 新手引導 | `onboarding.step`、`taste.answered` | `step`、`action`（開始、完成、跳過）；`questionType` |
-| 設定 | `settings.changed` | `key`（例：單位、大廚模式、預設可見範圍） |
-| 錯誤 | `error` | `kind`（照片上傳、AI 被擋下、權限、網路） |
+| 新手引導 | **`onboarding.step`**、**`taste.answered`** | `step`、`action`（`start`、`complete`、`skip`）；`questionType`（題型代碼） |
+| 設定 | **`settings.changed`** | `key`（`units`、`chef_persona`、`servings`、`dietary`、`taste_map`；之後的設定再加）；只記改了哪一項，不記值 |
+| 錯誤 | **`error`** | `kind`（`photo_upload`、`ai_blocked`、`permission`、`network`） |
 | 微問卷 | `survey.answered` | `question`、`answer`（👍／👎） |
 
-- 前端送事件時批次送出（例：每 10 秒或離開畫面時），不影響操作速度；送不出去就丟掉，不重試、不暫存。
+- 前端送事件時批次送出（每 10 秒、離開畫面時再送一次，一批最多 50 個），不影響操作速度；送不出去就丟掉，不重試、不暫存；沒登入不送。`track` 函式只收白名單裡的事件與值，不合格的丟掉、其他照收。
+- **錯誤紀錄和 `error` 事件分工**：錯誤紀錄（`error_logs`，04 ADR-21）記錯誤的類型與位置，給排查用，不帶分析 ID；`error` 事件只記上面 4 類的次數，給「穩定度」指標用，走 `track`。兩邊獨立，互不影響。
+- 使用者設定裡的「不參與使用統計」：後端照樣檢查（開著就整批不記），開關的畫面在正式邀請朋友前補上。
 - 原始事件保留 **13 個月**，每月匯總成統計表後，舊的原始事件刪除；匯總結果長期保留。
 - 事件裡存的是每人一組隨機的**分析 ID**，不是使用者 ID；對照表只有後端的匯總排程讀得到，刪除帳號時刪掉對照，留下的事件就無法對回這個人。
 - 新增事件要更新這份清單與隱私說明，不能在程式裡隨意加。
@@ -141,7 +143,7 @@
 | 階段 | 內容 |
 |------|------|
 | M0 | 只有你自己使用，不記錄事件；直接用體感驗收 |
-| M1a | 事件記錄開始（和邀請朋友同時）：App、記錄、靈感、新手引導、錯誤；隱私說明（口頭）告知記錄範圍；設定加上「不參與使用統計」 |
+| M1a | 事件記錄開始（和邀請朋友同時）：App、記錄、靈感、新手引導、錯誤；隱私說明（口頭）告知記錄範圍；設定加上「不參與使用統計」（開關的畫面在正式邀請前補上，見 08） |
 | M2 | 補上社群、分享、食材的事件；後台「產品數據」模組；微問卷；第一次季訪談 |
 | M3 之後 | 依需要增加事件；唯讀帳號接報表工具 |
 

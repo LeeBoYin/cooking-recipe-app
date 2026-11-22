@@ -1,11 +1,12 @@
 import { useIntl } from 'react-intl';
 import type { IdeaView } from './ideaView.ts';
+import type { IdeaSource } from './trackIdea.ts';
 import { useIdeaBookmark } from './useIdeaBookmark.ts';
 
 // 卡片右上角的收藏圖示（20px 線條，收藏後填 bulb；點擊範圍 44px）：點一下收藏或取消，不打開抽屜
-export function BookmarkButton({ view }: { view: IdeaView }) {
+export function BookmarkButton({ view, source }: { view: IdeaView; source: IdeaSource }) {
   const intl = useIntl();
-  const { can, bookmark, toggle, busy, failed } = useIdeaBookmark(view);
+  const { can, bookmark, toggle, busy, failed } = useIdeaBookmark(view, source);
   if (!can) return null;
   const saved = !!bookmark;
   return (

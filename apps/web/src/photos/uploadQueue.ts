@@ -1,5 +1,6 @@
 // 照片上傳：壓縮好的照片先暫存在手機（IndexedDB），上傳成功才刪；關掉 App 再回來會自動續傳（04 ADR-06）。
 // 這不是離線模式：暫存只保護「正在送出的內容」，不能在沒網路時瀏覽資料。
+import { trackError } from '../data/trackError.ts';
 import { createStore, del, entries, set } from 'idb-keyval';
 import { commitEquipmentPhoto, kitchenPhotoPaths, removeFiles, uploadFile, userPhotoPaths } from '../data/photos.ts';
 import { attachPhotoToDraft } from '../data/recipes.ts';
@@ -123,6 +124,7 @@ async function send(p: Pending): Promise<void> {
       }
     }
   } catch (e) {
+    trackError('photo_upload');
     if (isPermanent(e)) {
       // 例如廚具在上傳期間被刪掉：丟掉暫存，也清掉已經傳上去的檔案
       await del(p.id, store());

@@ -119,6 +119,20 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"analytics_identities": {
+                  Row: {
+                    "analytics_id": string,"created_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "analytics_id"?: string,"created_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "analytics_id"?: string,"created_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"app_config": {
                   Row: {
                     "ai_budget_alert_ratio": number,"ai_enabled": boolean,"ai_monthly_budget_usd": number,"ai_protection": NonNullable<Json>,"id": boolean,"max_steps": number,"max_users": number,"photo_limits": NonNullable<Json>,"registration_mode": string,"soft_delete_retention_days": number,"text_limits": NonNullable<Json>,"updated_at": string
@@ -625,6 +639,20 @@ isOneToOne: false
                   }
                   Update: {
                     "answered_item_ids"?: (string)[],"card_title"?: string | null,"context"?: NonNullable<Json>,"created_at"?: string,"dims"?: NonNullable<Json>,"last_explored_at"?: string | null,"schema_version"?: number,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"product_events": {
+                  Row: {
+                    "analytics_id": string,"app_version": string,"at": string,"id": string,"installed": boolean,"name": string,"platform": string,"props": NonNullable<Json>,"screen": string | null,"session_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "analytics_id": string,"app_version": string,"at": string,"id"?: string,"installed": boolean,"name": string,"platform": string,"props"?: NonNullable<Json>,"screen"?: string | null,"session_id": string
+                  }
+                  Update: {
+                    "analytics_id"?: string,"app_version"?: string,"at"?: string,"id"?: string,"installed"?: boolean,"name"?: string,"platform"?: string,"props"?: NonNullable<Json>,"screen"?: string | null,"session_id"?: string
                   }
                   Relationships: [
                     
@@ -1265,6 +1293,9 @@ isOneToOne: false
                            },
 "taste_profile_save":
 { Args: { "p_data": Json,"p_read_at": string,"p_user": string }; Returns: undefined
+                           },
+"track_events":
+{ Args: { "p_app_version": string,"p_dropped"?: number,"p_events": Json,"p_installed": boolean,"p_platform": string,"p_user_id": string }; Returns: number
                            },
 "unbookmark_recipe":
 { Args: { "p_id": string }; Returns: undefined

@@ -1,7 +1,8 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import { useMySettings, useUpdateSettings } from '../../data/hooks.ts';
+import { track } from '../../data/track.ts';
 import { DietaryEditor } from '../me/DietaryEditor.tsx';
 import { Chef } from '../../chef/Chef.tsx';
 import { TastePage } from '../taste/TastePage.tsx';
@@ -50,7 +51,8 @@ function Steps({ completed, redo }: { completed: string[]; redo: boolean }) {
   // mark：記成已完成（自動跳過的步驟不記）。重跑時不動設定
   // extra：同時記下的旗標（⑦ 選「之後再說」記 stock_later）
   const advance = useCallback(
-    (id: StepId, mark: boolean, extra?: string) => {
+    (id: StepId, mark: boolean, extra?: string, action: 'complete' | 'skip' = 'complete') => {
+      if (mark) track('onboarding.step', { step: id, action }); // 自動跳過的步驟（沒顯示）不記
       const marked = mark && !done.includes(id) ? [...done, id] : done;
       const steps = extra && !marked.includes(extra) ? [...marked, extra] : marked;
       const next = nextStepId(id, steps, redo);
@@ -68,12 +70,17 @@ function Steps({ completed, redo }: { completed: string[]; redo: boolean }) {
     [done, redo, update, navigate],
   );
 
+  // 產品事件：每一步顯示時記一次開始
+  useEffect(() => {
+    if (current) track('onboarding.step', { step: current, action: 'start' });
+  }, [current]);
+
   if (current === null) return null;
   const bar = barPosition(current);
   return (
     <div className="mx-auto flex min-h-dvh max-w-[560px] flex-col gap-4 px-5 pt-[calc(16px+env(safe-area-inset-top))] pb-[calc(24px+env(safe-area-inset-bottom))]">
       {bar && <ProgressBar now={bar[0]} total={bar[1]} />}
-      {current === 'vision' && <VisionStep onDone={() => advance('vision', true)} onSkip={() => advance('vision', true)} />}
+      {current === 'vision' && <VisionStep onDone={() => advance('vision', true)} onSkip={() => advance('vision', true, undefined, 'skip')} />}
       {current === 'install' && <InstallStep onDone={() => advance('install', true)} onAutoSkip={() => advance('install', false)} />}
       {current === 'diet' && (
         <div className="flex flex-col gap-4">
@@ -87,7 +94,7 @@ function Steps({ completed, redo }: { completed: string[]; redo: boolean }) {
       )}
       {current === 'taste' && <TastePage onFinish={() => advance('taste', true)} doneId="onboarding.taste.continue" />}
       {current === 'kitchen' && <KitchenStep redo={redo} onDone={() => advance('kitchen', true)} />}
-      {current === 'stock' && <StockStep onDone={() => advance('stock', true)} onLater={() => advance('stock', true, STOCK_LATER)} />}
+      {current === 'stock' && <StockStep onDone={() => advance('stock', true)} onLater={() => advance('stock', true, STOCK_LATER, 'skip')} />}
       {current === 'done' && <DoneStep onStart={() => advance('done', true)} />}
     </div>
   );
