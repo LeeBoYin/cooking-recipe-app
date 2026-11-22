@@ -92,6 +92,6 @@ Deno.test('首頁快取的雜湊跟著合併後的口味變（夠把握的維度
   const plain = await hashHomeInputs(buildHomeEnv(c, NOW));
   const learned = { ...c, merged_taste: fromSnapshotData(snapshot()) };
   assertNotEquals(await hashHomeInputs(buildHomeEnv(learned, NOW)), plain);
-  const weak = { ...c, merged_taste: fromSnapshotData(snapshot({ dims: { 'taste.spicy': { affinity: 0.8, confidence: 0.2, source: 'learned', updatedAt: 'x' } } })) };
+  const weak = { ...c, merged_taste: fromSnapshotData(snapshot({ dims: { 'taste.spicy': { affinity: 0.8, confidence: 0.2, source: 'learned', updatedAt: 'x' } }, context: { adventure: 0.3, goals: [], festiveDishes: false } })) };
   assertEquals(await hashHomeInputs(buildHomeEnv(weak, NOW)), plain);
 });
