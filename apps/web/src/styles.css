@@ -176,6 +176,9 @@ html[data-vt='back']::view-transition-new(root) {
 @keyframes vt-fade-in {
   from {
     opacity: 0;
+  }
+}
+
 /* 骨架卡：大廚的點子還沒到時的佔位，淡淡的光掃過；減少動態時不動 */
 @keyframes skeleton-shimmer {
   from {
