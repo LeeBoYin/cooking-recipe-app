@@ -83,3 +83,10 @@ export function ingredientBadges(view: Pick<IdeaView, 'ingredients'>, ingredient
   const hit = view.ingredients.find((i) => i.id === ingredientId);
   return { said: !!hit?.said, have: !!hit?.have };
 }
+
+// 卡片上的主要食材標籤（首頁、對話、收藏共用）：點子用到的廚房食材與使用者提到的食材，最多 3 個，其餘算進 extra
+export const MAX_INGREDIENT_TAGS = 3;
+export function mainIngredientTags(view: Pick<IdeaView, 'ingredients'>): { names: string[]; extra: number } {
+  const names = [...new Set(view.ingredients.filter((i) => i.have || i.said).map((i) => i.name))];
+  return { names: names.slice(0, MAX_INGREDIENT_TAGS), extra: Math.max(0, names.length - MAX_INGREDIENT_TAGS) };
+}
