@@ -1,7 +1,7 @@
 // home_ideas（M1a-06）：首頁的大廚點子。
 // 流程（03〈第二階段〉）：讀資料 → L1 候選（core）→ 新手門檻 → 快取 → 呼叫 Claude → 驗證格式 → 程式再檢查 → 存快取 → 回傳。
 // 快取：輸入的雜湊沒變、或離上次不到 6 小時，就用上次的（重新檢查過）；「換一組」同一個 6 小時內最多 2 次。
-// AI 不能用、被擋下、或檢查後一個都不剩時回錯誤代號，手機改用 M0 的規則評分。紀錄只有數量與原因代號，不含內容。
+// AI 不能用、被擋下、或檢查後一個都不剩時回錯誤代號，手機顯示「現在想不出新點子」（不改用別的挑法）。紀錄只有數量與原因代號，不含內容。
 import { type AiErrorCode, type ClaudeResponse, type Deps, runAi, type TaskDefinition } from '../pipeline.ts';
 import { recordOutcome, type Rpc } from '../usage.ts';
 import { checkHomeOutput, normalizeTitle, recheckCachedIdeas } from './check.ts';
