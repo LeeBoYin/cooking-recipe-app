@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useIntl } from 'react-intl';
 
-// 首頁的點子輪播：一次一張、左右露邊，下方圓點只是指示（不能點）。
-// 卡片寬度 = 螢幕寬 − 48px，由 children 用 w-full 撐滿這個容器的內容寬
+// 首頁的點子輪播：一次一張、左右露邊，下方圓點只是指示（不能點），最後一張「換一組」也算一點。
+// count 含最後的「換一組」卡片。卡片寬度 = 螢幕寬 − 48px，由 children 用 w-full 撐滿這個容器的內容寬
 export function IdeaCarousel({ count, resetKey, children }: { count: number; resetKey: string; children: ReactNode }) {
   const intl = useIntl();
   const listRef = useRef<HTMLUListElement>(null);

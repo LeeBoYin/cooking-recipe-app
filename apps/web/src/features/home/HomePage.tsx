@@ -13,6 +13,7 @@ import { buildPool, hasNextIdeaSet, ideaSet } from './ideas.ts';
 import { renderMarks, viewOfAiIdea, viewOfRuleIdea, type IdeaView } from './ideaView.ts';
 import { IdeaCard } from './IdeaCard.tsx';
 import { IdeaCarousel } from './IdeaCarousel.tsx';
+import { IdeaSkeletons } from './IdeaSkeletons.tsx';
 import { IdeaSheet } from './IdeaSheet.tsx';
 import { useResumableChat } from '../chat/useChat.ts';
 
@@ -174,10 +175,8 @@ export function HomePage() {
           <p className="m-0 text-caption text-ink-muted">
             <FormattedMessage id="common.loading" />
           </p>
-        ) : aiPending && views.length === 0 ? (
-          <p role="status" className="m-0 font-round text-caption text-ink-muted">
-            <FormattedMessage id="home.ideas.thinking" />
-          </p>
+        ) : (aiPending && views.length === 0) || shuffleAi.isPending ? (
+          <IdeaSkeletons />
         ) : views.length === 0 ? (
           <div className="flex flex-col gap-2.5 rounded-card bg-chef-soft p-3.5">
             <Chef size={40} mood="quiet" />
@@ -197,26 +196,23 @@ export function HomePage() {
         ) : (
           <>
             {limitLine && <p className="m-0 mb-1.5 font-round text-caption text-ink-muted">{limitLine}</p>}
-            <IdeaCarousel count={views.length} resetKey={views.map((v) => v.key).join('|')}>
+            <IdeaCarousel count={views.length + (hasNext ? 1 : 0)} resetKey={views.map((v) => v.key).join('|')}>
               {views.map((view, i) => (
                 <IdeaCard key={view.key} index={i} view={view} onOpen={() => setOpen(view)} />
               ))}
+              {hasNext && (
+                <li data-index={views.length} className="w-full flex-none snap-center snap-always">
+                  <button
+                    type="button"
+                    onClick={shuffle}
+                    className="flex h-full min-h-[117px] w-full flex-col items-center justify-center gap-1 rounded-card border-0 bg-chef-soft font-[inherit] text-body font-bold text-ink"
+                  >
+                    <Chef size={40} />
+                    <FormattedMessage id="home.ideas.shuffle" />
+                  </button>
+                </li>
+              )}
             </IdeaCarousel>
-            {hasNext && (
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={shuffle}
-                  disabled={shuffleAi.isPending}
-                  className="inline-flex h-10 items-center gap-1 border-0 bg-transparent font-[inherit] text-caption text-ink-muted"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M20 11a8 8 0 0 0-14.5-4.5L4 8M4 4v4h4M4 13a8 8 0 0 0 14.5 4.5L20 16M20 20v-4h-4" />
-                  </svg>
-                  <FormattedMessage id="home.ideas.shuffle" />
-                </button>
-              </div>
-            )}
           </>
         )}
       </div>

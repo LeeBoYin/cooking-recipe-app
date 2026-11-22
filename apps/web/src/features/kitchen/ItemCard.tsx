@@ -30,7 +30,7 @@ export function ItemCard({
       <span className="w-full truncate text-center">{name}</span>
     </>
   );
-  const cls = 'flex min-h-[72px] w-full flex-col items-center justify-center gap-0.5 rounded-card border border-line bg-surface px-1 py-1.5 text-small text-ink no-underline';
+  const cls = 'flex min-h-[112px] w-full flex-col items-center justify-center gap-2 rounded-card border border-line bg-surface px-1 py-1.5 text-small text-ink no-underline';
   return (
     <li className="relative">
       {editing ? <div className={cls}>{body}</div> : <Link to={to} className={cls}>{body}</Link>}
@@ -39,35 +39,21 @@ export function ItemCard({
           type="button"
           aria-label={intl.formatMessage({ id: 'pantry.remove.aria' }, { name })}
           onClick={onRemove}
-          className="absolute top-0 right-0 flex size-8 items-center justify-center rounded-full border-0 bg-transparent text-error"
+          className="absolute -top-2.5 -right-2.5 flex size-6 items-center justify-center rounded-full border-2 border-bg bg-surface p-0 text-error shadow-sm after:absolute after:-inset-2 after:content-['']"
         >
-          <span className="flex size-6 items-center justify-center rounded-full bg-surface shadow-sm">
-            <Icon name="trash" size={16} />
-          </span>
+          <Icon name="trash" size={14} />
         </button>
       ) : (
         badge && (
-          <span role="img" aria-label={intl.formatMessage({ id: `kitchen.badge.${badge}` })} className={`pointer-events-none absolute top-1 right-1 flex ${BADGE[badge].cls}`}>
+          <span
+            role="img"
+            aria-label={intl.formatMessage({ id: `kitchen.badge.${badge}` })}
+            className={`pointer-events-none absolute -top-2.5 -right-2.5 flex size-6 items-center justify-center rounded-full border-2 border-bg bg-surface shadow-sm ${BADGE[badge].cls}`}
+          >
             <Icon name={BADGE[badge].icon} size={14} />
           </span>
         )
       )}
     </li>
-  );
-}
-
-// 「編輯」「完成」切換鈕，放在清單上方
-export function EditToggle({ editing, onToggle }: { editing: boolean; onToggle: () => void }) {
-  const intl = useIntl();
-  return (
-    <div className="flex justify-end">
-      <button
-        type="button"
-        onClick={onToggle}
-        className="h-9 rounded-card border border-line bg-surface px-3 text-caption font-bold text-ink"
-      >
-        {intl.formatMessage({ id: editing ? 'kitchen.list.editDone' : 'kitchen.list.edit' })}
-      </button>
-    </div>
   );
 }
