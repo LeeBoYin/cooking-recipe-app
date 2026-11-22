@@ -1,6 +1,6 @@
 // `ai` Edge Function 的呼叫（16 第六節）。前端不直接呼叫 Claude，也不自己判斷額度；
 // 失敗時只拿到錯誤代號，由各畫面依代號走退路（03〈AI 不能用時〉），不顯示次數。
-import type { AiIdea, AiIdeasPayload, ChatInput, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse } from '@zhusha/core';
+import type { AiIdea, AiIdeasPayload, ChatInput, ChatMention, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse } from '@zhusha/core';
 import { supabase } from './supabase.ts';
 
 // 和 supabase/functions/ai/pipeline.ts 的 AiErrorCode 一致，加上手機端的 network
@@ -106,6 +106,7 @@ export interface ChatConversation {
   kitchenId: string | null;
   turnCount: number;
   messages: ChatMessage[];
+  mentioned: ChatMention[]; // 使用者在這段對話提過的食材（點子卡片列「你提到的食材」）
   lastMessageAt: string;
   // 大廚每一則回應附的點子：key 是 ChatMessage.suggestionId
   suggestions: Map<string, AiIdea[]>;
@@ -113,7 +114,7 @@ export interface ChatConversation {
 
 const asMessages = (v: unknown): ChatMessage[] => (Array.isArray(v) ? (v as ChatMessage[]) : []);
 
-async function withSuggestions(row: { id: string; kitchen_id: string | null; turn_count: number; messages: unknown; last_message_at: string }): Promise<ChatConversation> {
+async function withSuggestions(row: { id: string; kitchen_id: string | null; turn_count: number; messages: unknown; mentioned_ingredients: unknown; last_message_at: string }): Promise<ChatConversation> {
   const { data, error } = await supabase().from('ai_suggestion_cache').select('id, payload').eq('conversation_id', row.id);
   if (error) throw error;
   const suggestions = new Map<string, AiIdea[]>();
@@ -121,10 +122,10 @@ async function withSuggestions(row: { id: string; kitchen_id: string | null; tur
     const p = s.payload as unknown as AiIdeasPayload;
     if (p?.schemaVersion === 1 && Array.isArray(p.ideas)) suggestions.set(s.id, p.ideas);
   }
-  return { id: row.id, kitchenId: row.kitchen_id, turnCount: row.turn_count, messages: asMessages(row.messages), lastMessageAt: row.last_message_at, suggestions };
+  return { id: row.id, kitchenId: row.kitchen_id, turnCount: row.turn_count, messages: asMessages(row.messages), mentioned: Array.isArray(row.mentioned_ingredients) ? (row.mentioned_ingredients as ChatMention[]) : [], lastMessageAt: row.last_message_at, suggestions };
 }
 
-const CONVERSATION_COLUMNS = 'id, kitchen_id, turn_count, messages, last_message_at';
+const CONVERSATION_COLUMNS = 'id, kitchen_id, turn_count, messages, mentioned_ingredients, last_message_at';
 
 // 一段對話（只有本人讀得到，RLS）
 export async function getChatConversation(id: string): Promise<ChatConversation | null> {

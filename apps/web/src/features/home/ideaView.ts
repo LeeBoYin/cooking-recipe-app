@@ -90,3 +90,10 @@ export function mainIngredientTags(view: Pick<IdeaView, 'ingredients'>): { names
   const names = [...new Set(view.ingredients.filter((i) => i.have || i.said).map((i) => i.name))];
   return { names: names.slice(0, MAX_INGREDIENT_TAGS), extra: Math.max(0, names.length - MAX_INGREDIENT_TAGS) };
 }
+
+// 對話裡的點子卡片「你提到的食材」：這道有沒有用到那一樣。ID 對得上，或字出現在菜名與其他材料裡
+export function mentionUsed(view: Pick<IdeaView, 'ingredients' | 'others' | 'title'>, m: { text: string; ingredientId: string | null }): boolean {
+  if (m.ingredientId && view.ingredients.some((i) => i.id === m.ingredientId && (i.have || i.said))) return true;
+  const t = m.text.trim();
+  return t.length > 0 && [view.title, ...view.others].some((x) => x.includes(t));
+}

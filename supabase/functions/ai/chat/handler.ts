@@ -6,7 +6,7 @@ import { CHAT_MAX_TURNS, CHAT_MAX_USER_CHARS, type AiIdea, type ChatInput, type 
 import { type AiErrorCode, type Deps, runAi, type TaskDefinition } from '../pipeline.ts';
 import type { Rpc } from '../usage.ts';
 import type { HomeContextRow } from '../home/types.ts';
-import { checkChatOutput } from './check.ts';
+import { checkChatOutput, retryHint, type ChatCheck } from './check.ts';
 import { buildChatEnv } from './env.ts';
 import { buildChatPrompt, buildChatSchema } from './prompt.ts';
 import type { ChatConversationRow, RawChatOutput } from './types.ts';
@@ -23,7 +23,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function parseChatInput(raw: unknown): { ok: true; value: ChatInput } | { ok: false } {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return { ok: false };
-  const { message, conversationId, continueFrom, ...rest } = raw as Record<string, unknown>;
+  const { message, conversationId, continueFrom, wantIdeas, ...rest } = raw as Record<string, unknown>;
   if (Object.keys(rest).length > 0) return { ok: false };
   if (typeof message !== 'string') return { ok: false };
   const text = message.trim();
@@ -31,9 +31,10 @@ export function parseChatInput(raw: unknown): { ok: true; value: ChatInput } | {
   if (conversationId !== undefined && (typeof conversationId !== 'string' || !UUID.test(conversationId))) return { ok: false };
   if (continueFrom !== undefined && (typeof continueFrom !== 'string' || !UUID.test(continueFrom))) return { ok: false };
   if (conversationId !== undefined && continueFrom !== undefined) return { ok: false };
+  if (wantIdeas !== undefined && typeof wantIdeas !== 'boolean') return { ok: false };
   return {
     ok: true,
-    value: { message: text, ...(conversationId ? { conversationId } : {}), ...(continueFrom ? { continueFrom } : {}) },
+    value: { message: text, ...(conversationId ? { conversationId } : {}), ...(continueFrom ? { continueFrom } : {}), ...(wantIdeas === true ? { wantIdeas } : {}) },
   };
 }
 
@@ -77,20 +78,38 @@ export async function runChat(deps: ChatDeps, userId: string, rawInput: unknown)
   if (!ctxRes.data) return { ok: false, error: 'invalid_input' }; // 沒有廚房：沒有東西可以聊
   const ce = buildChatEnv(ctxRes.data as HomeContextRow, now, conv, input.message);
 
-  const prompt = buildChatPrompt(ce, conv, carrySummary, input.message);
-  const def: TaskDefinition<Record<string, never>> = {
-    parseInput: () => ({ ok: true, value: {} }),
-    buildPrompt: () => prompt,
-    outputSchema: buildChatSchema(),
-    stream: true,
-    inputSize: () => ({ length: [...input.message].length, limit: CHAT_MAX_USER_CHARS }),
-  };
-  const result = await runAi({ ...deps.ai, tasks: { chat: def as never } }, userId, 'chat', { message: input.message });
-  if (!result.ok) return result;
+  // 這是大廚在這段對話的第幾輪回應：看對話裡大廚已經回應了幾次，不靠模型自己數
+  const chefTurn = (conv?.messages ?? []).filter((m) => m.role === 'chef').length + 1;
+  const carried = carrySummary !== null;
+  const wantIdeas = input.wantIdeas === true;
+  const gaveBefore = (conv?.suggestions.length ?? 0) > 0;
 
-  const checked = checkChatOutput(result.output as RawChatOutput, ce);
-  console.log('ai: chat checked', JSON.stringify({ ok: checked.ok, ideas: checked.ok ? checked.ideas.length : 0, dropped: checked.dropped }));
-  if (!checked.ok) return { ok: false, error: 'invalid_output' };
+  // 輸出沒守「至少 3 輪」或沒用到提到的食材時，整批重寫一次；重寫後食材還是用得少就照給，
+  // 還是太早給點子就當作這一輪失敗（回 invalid_output，手機請使用者再送一次）
+  let hint: string | undefined;
+  let checked: ChatCheck | null = null;
+  let fallback: { checked: ChatCheck; result: Extract<Awaited<ReturnType<typeof runAi>>, { ok: true }> } | null = null; // 第一次其實可以用（只是食材用得少）
+  let result: Extract<Awaited<ReturnType<typeof runAi>>, { ok: true }> | null = null;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const prompt = buildChatPrompt(ce, conv, carrySummary, input.message, { chefTurn, wantIdeas, carried, gaveBefore, ...(hint ? { retryHint: hint } : {}) });
+    const def: TaskDefinition<Record<string, never>> = {
+      parseInput: () => ({ ok: true, value: {} }),
+      buildPrompt: () => prompt,
+      outputSchema: buildChatSchema(),
+      stream: true,
+      inputSize: () => ({ length: [...input.message].length, limit: CHAT_MAX_USER_CHARS }),
+    };
+    const res = await runAi({ ...deps.ai, tasks: { chat: def as never } }, userId, 'chat', { message: input.message });
+    if (!res.ok) return res;
+    result = res;
+    checked = checkChatOutput(res.output as RawChatOutput, ce, { chefTurn, wantIdeas, carried, gaveBefore });
+    console.log('ai: chat checked', JSON.stringify({ attempt, ok: checked.ok, ideas: checked.ok ? checked.ideas.length : 0, dropped: checked.dropped }));
+    hint = attempt === 0 ? retryHint(checked, chefTurn) : undefined;
+    if (!hint) break;
+    if (checked.ok) fallback = { checked, result: res };
+  }
+  if (fallback && (!checked || !checked.ok)) ({ checked, result } = fallback);
+  if (!checked || !checked.ok || !result) return { ok: false, error: 'invalid_output' };
 
   const saved = await deps.rpc('ai_chat_append', {
     p_user: userId,

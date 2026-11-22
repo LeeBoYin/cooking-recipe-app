@@ -1,11 +1,8 @@
 // 和大廚聊聊（M1a-07）的型別：ai_chat_get 回來的對話、AI 的輸出。回給手機的格式放在 core（ChatResponse）。
-import type { ChatMessage } from '../../../../packages/core/src/index.ts';
+import type { ChatMention, ChatMessage } from '../../../../packages/core/src/index.ts';
 import type { RawIdea } from '../home/types.ts';
 
-export interface ChatMention {
-  text: string;
-  ingredientId: string | null;
-}
+export type { ChatMention };
 
 export interface ChatSignal {
   dimensionKey: string;
@@ -27,11 +24,12 @@ export interface ChatConversationRow {
 
 export interface RawChatOutput {
   reply: string;
-  ask: string | null;
+  ask: { question: string; options: string[]; multi: boolean } | null;
   suggestions: RawIdea[];
   mentioned_ingredients: { text: string; ingredient_id: string | null }[];
   preference_signals: { dimension_key: string; affinity: number; scope: 'long_term' | 'today' }[];
   summary: string;
+  user_wants_ideas: boolean; // 使用者這一則是不是明說要點子（按了「直接給我點子」由程式另外帶）
 }
 
-export type ChatDropReason = 'reply_wording' | 'reply_excluded' | 'ask_wording' | 'ask_excluded' | 'mention' | 'signal' | 'summary';
+export type ChatDropReason = 'reply_wording' | 'reply_excluded' | 'ask_wording' | 'ask_excluded' | 'ask_options' | 'mention' | 'signal' | 'too_early' | 'low_coverage' | 'summary';

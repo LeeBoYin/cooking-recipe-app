@@ -859,7 +859,7 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: string
                            },
 "ai_chat_append":
-{ Args: { "p_ask": string,"p_carry_summary": string,"p_chef_text": string,"p_conversation": string,"p_ideas": Json,"p_kitchen": string,"p_lang": string,"p_mentioned": Json,"p_model": string,"p_signals": Json,"p_summary": string,"p_user": string,"p_user_text": string }; Returns: Json
+{ Args: { "p_ask": Json,"p_carry_summary": string,"p_chef_text": string,"p_conversation": string,"p_ideas": Json,"p_kitchen": string,"p_lang": string,"p_mentioned": Json,"p_model": string,"p_signals": Json,"p_summary": string,"p_user": string,"p_user_text": string }; Returns: Json
                            },
 "ai_chat_get":
 { Args: { "p_conversation": string,"p_user": string }; Returns: Json

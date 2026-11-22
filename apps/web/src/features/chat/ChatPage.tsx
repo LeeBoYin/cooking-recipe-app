@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useLocation, useNavigate } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { CHAT_MAX_TURNS, CHAT_MAX_USER_CHARS, parseTemperaturePref, type ChatMessage } from '@zhusha/core';
+import { CHAT_MAX_TURNS, CHAT_MAX_USER_CHARS, parseTemperaturePref, type ChatAsk, type ChatMessage } from '@zhusha/core';
 import { Chef } from '../../chef/Chef.tsx';
 import { AiCallError, isResumable, type AiError, type ChatConversation } from '../../data/ai.ts';
 import { useCurrentKitchen, useMySettings } from '../../data/hooks.ts';
@@ -78,13 +78,13 @@ export function ChatPage() {
     sendText(draft.trim());
   }
 
-  function sendText(text: string) {
+  function sendText(text: string, wantIdeas = false) {
     if (!text || send.isPending || loading || full) return;
     setFailed(null);
     setPending(text);
     setDraft('');
     send.mutate(
-      { message: text, ...(convId ? { conversationId: convId } : carryFrom ? { continueFrom: carryFrom } : {}) },
+      { message: text, ...(wantIdeas ? { wantIdeas: true } : {}), ...(convId ? { conversationId: convId } : carryFrom ? { continueFrom: carryFrom } : {}) },
       {
         onSuccess: (r) => {
           setPending(null);
@@ -105,6 +105,13 @@ export function ChatPage() {
       },
     );
   }
+
+  // 最後一則是大廚的、沒有在等回應：選項按鈕（單選點了就送出，多選按「好了」）；還沒給過點子時另外有「直接給我點子」
+  const last = messages.at(-1);
+  const idle = !loading && !conv.isError && !pending && !failed && !send.isPending && !full;
+  const lastAsk = idle && last?.role === 'chef' ? (last.ask ?? null) : null;
+  const gaveIdeas = messages.some((m) => m.role === 'chef' && m.suggestionId);
+  const showGiveIdeas = !loading && !conv.isError && !full && !gaveIdeas && (messages.length > 0 || !!pending || !!failed);
 
   const unavailableLine = failed ? intl.formatMessage({ id: failed.code === 'rate_limited' ? 'chat.slowDown' : 'chat.unavailable' }) : '';
 
@@ -144,6 +151,7 @@ export function ChatPage() {
         {messages.map((m) => (
           <Message key={m.id} message={m} conv={conv.data ?? null} tempPref={tempPref} onOpen={setOpen} />
         ))}
+        {lastAsk && <Options key={last?.id} ask={lastAsk} onPick={(text) => sendText(text)} />}
 
         {pending && (
           <>
@@ -187,6 +195,19 @@ export function ChatPage() {
         <div ref={bottom} />
       </div>
 
+      {showGiveIdeas && (
+        <div className="flex flex-none justify-end px-3 pt-2">
+          <button
+            type="button"
+            disabled={send.isPending || loading}
+            onClick={() => sendText(intl.formatMessage({ id: 'chat.giveIdeas' }), true)}
+            className="h-11 rounded-full border border-line bg-bg px-4 font-[inherit] text-[15px] text-ink disabled:opacity-50"
+          >
+            <FormattedMessage id="chat.giveIdeas" />
+          </button>
+        </div>
+      )}
+
       {!full && (
         <form onSubmit={submit} className="flex flex-none items-end gap-2 border-t border-line bg-bg px-3 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))]">
           <label className="flex-1">
@@ -227,6 +248,47 @@ export function ChatPage() {
   );
 }
 
+// 大廚的選項：單選點了就送出；多選先勾，按「好了」一起送出。使用者也可以直接在輸入框打字
+function Options({ ask, onPick }: { ask: ChatAsk; onPick: (text: string) => void }) {
+  const intl = useIntl();
+  const [picked, setPicked] = useState<string[]>([]);
+  return (
+    <div role="group" aria-label={intl.formatMessage({ id: 'chat.optionsLabel' })} className="ml-8 flex flex-col items-start gap-2">
+      {ask.multi && (
+        <span className="text-caption text-ink-muted">
+          <FormattedMessage id="chat.optionsMultiHint" />
+        </span>
+      )}
+      <div className="flex flex-wrap gap-2">
+        {ask.options.map((option) => {
+          const on = picked.includes(option);
+          return (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={ask.multi ? on : undefined}
+              onClick={() => (ask.multi ? setPicked((p) => (on ? p.filter((x) => x !== option) : [...p, option])) : onPick(option))}
+              className={`min-h-11 rounded-full border px-4 font-[inherit] text-[15px] text-ink ${on ? 'border-bulb bg-bulb' : 'border-line bg-surface'}`}
+            >
+              {option}
+            </button>
+          );
+        })}
+        {ask.multi && (
+          <button
+            type="button"
+            disabled={picked.length === 0}
+            onClick={() => onPick(picked.join('、'))}
+            className="min-h-11 rounded-full border-0 bg-bulb px-4 font-[inherit] text-[15px] font-bold text-ink disabled:bg-line"
+          >
+            <FormattedMessage id="chat.optionsDone" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function UserBubble({ text }: { text: string }) {
   return <p className="m-0 max-w-[78%] self-end whitespace-pre-wrap rounded-[14px_14px_4px_14px] bg-surface px-3 py-2.5 text-[16px] leading-normal">{text}</p>;
 }
@@ -249,13 +311,13 @@ function Message({ message, conv, tempPref, onOpen }: {
         <Chef size={24} mood={ideas.length > 0 ? 'idea' : 'normal'} className="flex-none" />
         <div className="rounded-[4px_14px_14px_14px] bg-chef-soft px-3 py-2.5 font-round text-[16px] leading-normal">
           {message.text && <p className="m-0">{renderMarks(message.text, tempPref)}</p>}
-          {message.ask && <p className="m-0 mt-1.5">{renderMarks(message.ask, tempPref)}</p>}
+          {message.ask && <p className="m-0 mt-1.5">{renderMarks(message.ask.question, tempPref)}</p>}
         </div>
       </div>
       {ideas.length > 0 && (
         <ul aria-label={intl.formatMessage({ id: 'chat.ideasHeading' })} className="m-0 ml-8 flex list-none flex-col gap-2 p-0">
           {ideas.map((view) => (
-            <IdeaCard key={view.key} view={view} layout="chat" onOpen={() => onOpen(view)} />
+            <IdeaCard key={view.key} view={view} layout="chat" mentioned={conv?.mentioned ?? []} onOpen={() => onOpen(view)} />
           ))}
         </ul>
       )}

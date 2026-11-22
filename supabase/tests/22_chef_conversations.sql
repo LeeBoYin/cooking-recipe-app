@@ -1,6 +1,6 @@
 -- 和大廚聊聊 ①（M1a-07）：chef_conversations 的權限、ai_chat_get／ai_chat_append、20 輪上限、30 天清除、收藏 AI 想的點子
 begin;
-select plan(33);
+select plan(34);
 
 select tests.create_user('alice@zhusha.test') as alice \gset
 select tests.create_user('bob@zhusha.test') as bob \gset
@@ -38,8 +38,9 @@ select is((select count(*)::int from public.ai_suggestion_cache where conversati
 select is((public.ai_chat_get(:'alice', :'c1'::uuid) ->> 'turn_count')::int, 2, '第 2 輪');
 select is((public.ai_chat_get(:'alice', :'c1'::uuid) ->> 'summary'), '有高麗菜', '沒給新摘要就沿用舊的');
 -- 反問存在大廚那一則
-select public.ai_chat_append(:'alice', :'ka', :'c1'::uuid, null, 'zh-Hant-TW', '想吃點熱的', '好', '想吃飯還是麵？', '[]', 'm', null, '[]', '[]');
-select is((public.ai_chat_get(:'alice', :'c1'::uuid) -> 'messages' -> 5 ->> 'ask'), '想吃飯還是麵？', '反問跟著大廚那一則存下');
+select public.ai_chat_append(:'alice', :'ka', :'c1'::uuid, null, 'zh-Hant-TW', '想吃點熱的', '好', '{"question":"想吃飯還是麵？","options":["飯","麵"],"multi":false}'::jsonb, '[]', 'm', null, '[]', '[]');
+select is((public.ai_chat_get(:'alice', :'c1'::uuid) -> 'messages' -> 5 -> 'ask' ->> 'question'), '想吃飯還是麵？', '反問（問題與選項）跟著大廚那一則存下');
+select is(jsonb_array_length(public.ai_chat_get(:'alice', :'c1'::uuid) -> 'messages' -> 5 -> 'ask' -> 'options'), 2, '選項一起存下');
 -- 同樣的食材不重複記
 select public.ai_chat_append(:'alice', :'ka', :'c1'::uuid, null, 'zh-Hant-TW', '還有高麗菜', '好', null, '[]', 'm', null, '[{"text":"高麗菜","ingredientId":"cabbage"}]', '[]');
 select is(jsonb_array_length(public.ai_chat_get(:'alice', :'c1'::uuid) -> 'mentioned_ingredients'), 1, '同一個說法只留一筆');
