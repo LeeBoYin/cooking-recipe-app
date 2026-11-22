@@ -150,7 +150,7 @@ export function IdeaSheet({ view, onClose, onChat, chatDisabled, bookmarkId, onR
 }
 
 // 做法區塊：食材與步驟。三種狀態：思考中（大廚）、寫好了、需要再想想；沒有 AI 可問的家常菜只有骨架
-function MethodSection({ view, hasInput, pending, failed, retrying, draft, onRetry }: {
+export function MethodSection({ view, hasInput, pending, failed, retrying, draft, onRetry }: {
   view: IdeaView;
   hasInput: boolean;
   pending: boolean;

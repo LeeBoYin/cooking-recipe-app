@@ -21,6 +21,7 @@ import { InventoryPage } from './features/pantry/InventoryPage.tsx';
 import { DraftsPage } from './features/recipes/DraftsPage.tsx';
 import { MyRecipesTab } from './features/recipes/MyRecipesTab.tsx';
 import { RecipesPage } from './features/recipes/RecipesPage.tsx';
+import { SavedIdeaPage } from './features/recipes/SavedIdeaPage.tsx';
 import { SavedTab } from './features/recipes/SavedTab.tsx';
 import { NewRecipe } from './features/recipe/NewRecipe.tsx';
 import { RecipeEditPage } from './features/recipe/RecipeEditPage.tsx';
@@ -90,6 +91,7 @@ export function App() {
               <Route path="recipes/drafts" element={<DraftsPage />} />
               <Route path="me/trash" element={<TrashPage />} />
               <Route path="recipes/deleted" element={<Navigate to="/me/trash" replace />} />
+              <Route path="recipes/saved/:bookmarkId" element={<SavedIdeaPage />} />
               <Route path="recipes/:id" element={<RecipePage />} />
               <Route path="recipes/:id/edit" element={<RecipeEditPage />} />
               <Route path="taste" element={<TastePage />} />
