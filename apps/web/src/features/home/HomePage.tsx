@@ -109,7 +109,7 @@ export function HomePage() {
   // 接著聊：6 小時內、同一個廚房的上一段對話，顯示大廚的上一句話
   const resumable = useResumableChat(kitchen?.id);
   const lastChef = resumable ? [...resumable.messages].reverse().find((m) => m.role === 'chef') : undefined;
-  const resumeLine = lastChef ? renderMarks(lastChef.ask ?? lastChef.text, tempPref) : null;
+  const resumeLine = lastChef ? renderMarks(lastChef.ask?.question ?? lastChef.text, tempPref) : null;
 
   function shuffle() {
     if (!computed) return;

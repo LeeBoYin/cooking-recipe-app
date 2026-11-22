@@ -12,7 +12,7 @@ import { useIdeaBookmark } from './useIdeaBookmark.ts';
 // 點子抽屜（首頁與對話共用；收藏的點子是完整頁 SavedIdeaPage，共用下面的 MethodSection）：菜名、理由、食材標籤，接著直接是做法（沒有另外的「看做法」按鈕）。
 // 第一次打開要等大廚寫：標籤先顯示，做法區塊放思考中的大廚；寫好、檢查過才一次顯示。寫不出來顯示「大廚需要再想想」。
 // 家常菜先顯示骨架（主要食材與手法）。自己的食譜不呼叫 AI，只有「打開食譜」。
-// 底部的「收藏／已收藏」和卡片右上角的收藏是同一個狀態（useIdeaBookmark）。從「食譜 → 收藏」打開時（有 bookmarkId），做法讀收藏的，底下是「做了，記錄一篇」，沒有收藏切換。
+// 底部的「收藏／已收藏」和卡片右上角的收藏是同一個狀態（useIdeaBookmark）。
 // 外框是共用的 Sheet（可拖曳關閉）。
 export function IdeaSheet({ view, onClose }: { view: IdeaView; onClose: () => void }) {
   const intl = useIntl();

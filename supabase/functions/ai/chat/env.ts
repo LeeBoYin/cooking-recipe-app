@@ -14,6 +14,8 @@ export interface ChatEnv {
   mentioned: { id: string; name: string }[];
   // 說過但字典對不到的說法（沒有踩到排除清單的才留）
   unknownMentions: string[];
+  // 這段對話之前記下的全部「說過的食材」（含廚房有的；排除清單的不留）：「盡量用到提到的食材」的檢查用
+  allMentions: ChatMention[];
   // 這段對話使用者說過的全部話（含這一則），正規化後，驗證 AI 回報的「說了什麼食材」用
   userText: string;
 }
@@ -56,5 +58,8 @@ export function buildChatEnv(ctx: HomeContextRow, now: Date, conv: Pick<ChatConv
     .slice(0, IDEA_TOP_POOL);
   const env: HomeEnv = { ...base, candidates: ranked.map(({ idea }, i) => ({ ref: `c${i + 1}`, idea })) };
 
-  return { env, mentioned, unknownMentions, userText: norm(userTexts.join('\n')) };
+  const allMentions = ((conv?.mentioned_ingredients ?? []) as ChatMention[]).filter(
+    (m) => m.text && !(m.ingredientId && violatesLimits([m.ingredientId], {}, base.limits, ideaIngredients)) && ![...base.hardTerms, ...base.dislikeTerms].some((term) => term.length > 0 && norm(m.text).includes(norm(term))),
+  );
+  return { env, mentioned, unknownMentions, allMentions, userText: norm(userTexts.join('\n')) };
 }

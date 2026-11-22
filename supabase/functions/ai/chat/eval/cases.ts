@@ -1,4 +1,4 @@
-// 和大廚聊聊的評估集：6 段劇本式對話（M1a-07）。同一份資料有兩種用途：
+// 和大廚聊聊的評估集：9 段劇本式對話（M1a-07 起；M1a-09f 改成多輪收斂：盤點、問風味、收斂、直接給我點子、食材搭不起來）。同一份資料有兩種用途：
 // 1. 自動測試（chat.test.ts）：每一輪用事先寫好的「假的 AI 回應」，測整條流程（提示詞、檢查、存對話的規則），進 CI。
 // 2. 手動實跑（run.ts）：真的呼叫 Claude（Sonnet 5.5），看回應合不合理、口吻對不對；不進 CI（要花錢，也需要人打分）。
 // 使用者的話是固定劇本；實跑時大廚的回應不同，所以 assert 只檢查「不管 AI 怎麼回都該成立」的事。
@@ -7,7 +7,8 @@ import { ctx, eq, FREQ, likes, pantry, NOW } from '../../home/eval/cases.ts';
 import type { HomeContextRow } from '../../home/types.ts';
 import type { ChatEnv } from '../env.ts';
 import type { ChatConversationRow, RawChatOutput } from '../types.ts';
-import { emptyConversation, type Simulation } from './simulate.ts';
+import { mentionCoverage } from '../check.ts';
+import { emptyConversation, type ScriptedUser, type Simulation } from './simulate.ts';
 
 export { NOW };
 
@@ -20,7 +21,7 @@ export function idea(ce: ChatEnv, over: Partial<RawIdea> = {}): RawIdea {
   };
 }
 const out = (over: Partial<RawChatOutput> = {}): RawChatOutput => ({
-  reply: '好啊，來看看。', ask: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], summary: '', ...over,
+  reply: '好啊，來看看。', ask: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '', ...over,
 });
 
 export interface ChatEvalCase {
@@ -28,9 +29,10 @@ export interface ChatEvalCase {
   name: string;
   ctx: HomeContextRow;
   start?: ChatConversationRow;
-  users: string[];
+  users: ScriptedUser[];
   // 假的 AI 回應（自動測試用）：每一輪一個
-  fake: ((ce: ChatEnv) => RawChatOutput)[];
+  // attempt：0 是第一次，1 是程式請大廚重寫的那一次
+  fake: ((ce: ChatEnv, attempt: number) => RawChatOutput)[];
   // 說給人看的期待（人工打分時對照）
   expectation: string;
   // 自動判斷（程式能判斷的部分）：回傳沒過的項目；空陣列是全過。真的 Claude 與假回應都要成立
@@ -49,7 +51,8 @@ const ALLERGY = ctx({
   equipment: eq('gas-stove', 'wok'),
 });
 
-const textOf = (r: { reply: string; ask: string | null; ideas: { title: string; why: string }[] }) => [r.reply, r.ask ?? '', ...r.ideas.map((i) => `${i.title} ${i.why}`)].join(' ');
+const textOf = (r: { reply: string; ask: { question: string; options: string[] } | null; ideas: { title: string; why: string }[] }) => [r.reply, r.ask ? `${r.ask.question} ${r.ask.options.join(' ')}` : '', ...r.ideas.map((i) => `${i.title} ${i.why}`)].join(' ');
+const ask = (question: string, options: string[], multi = false) => ({ question, options, multi });
 // 每一輪通過檢查的內容
 const kept = (sim: Simulation) => sim.turns.flatMap((t) => (t.checked && t.checked.ok ? [{ user: t.user, ...t.checked }] : []));
 
@@ -60,91 +63,150 @@ const history = (rounds: number): ChatConversationRow['messages'] =>
     { id: `c${i}`, role: 'chef' as const, text: `想法 ${i + 1}。`, at: '2026-11-21T08:00:01Z' },
   ]).flat();
 
+// 每一輪大廚的回應：還沒給點子（盤點、問風味）時要有選項，給了點子最多 2 個
+const MIN_TURNS_FOR_IDEAS = 3;
+const earlyIdeas = (sim: Simulation) =>
+  sim.turns.flatMap((t, i) => (t.checked?.ok && t.checked.ideas.length > 0 && t.chefTurn < MIN_TURNS_FOR_IDEAS && !wanted(sim, i) ? [`第 ${t.chefTurn} 輪就給了點子，使用者沒要求`] : []));
+const wanted = (sim: Simulation, i: number): boolean => sim.turns[i]?.prompt.messages.at(-1)?.content.includes('使用者是否按了「直接給我點子」：是') === true;
+const tooManyIdeas = (sim: Simulation) => kept(sim).flatMap((r) => (r.ideas.length > 2 ? [`一次給了 ${r.ideas.length} 個點子`] : []));
+const badOptions = (sim: Simulation) => kept(sim).flatMap((r) => (r.ask && (r.ask.options.length < 2 || r.ask.options.length > 4) ? ['選項不是 2 到 4 個'] : []));
+
 export const CHAT_CASES: ChatEvalCase[] = [
   {
-    id: '01-ask-then-ideas',
-    name: '說得很模糊，大廚反問一次；回答後給點子',
+    id: '01-inventory-flavor-converge',
+    name: '三步收斂：盤點食材、問風味、收斂成點子',
     ctx: TW,
-    users: ['想吃點熱的', '麵'],
+    users: ['今天想煮點什麼，冰箱有高麗菜和雞蛋', '沒有了，就這些', '清爽一點、有湯的'],
     fake: [
-      () => out({ reply: '好，熱的最暖。', ask: '想吃飯還是麵？', summary: '想吃熱的' }),
+      () => out({ reply: '高麗菜加雞蛋，很有想像空間。', ask: ask('手邊還有別的嗎？', ['豆腐', '排骨', '沒有了'], true), summary: '有高麗菜、雞蛋', mentioned_ingredients: [{ text: '高麗菜', ingredient_id: 'cabbage' }, { text: '雞蛋', ingredient_id: 'egg' }] }),
+      () => out({ reply: '好，那來想想想吃什麼風味。', ask: ask('想吃哪一種感覺？', ['清爽', '下飯', '暖胃']), summary: '有高麗菜、雞蛋' }),
       (ce) => out({
-        reply: '那就來碗熱麵，高麗菜也能一起用掉。',
-        summary: '想吃熱的麵',
+        reply: '清爽有湯，那就用高麗菜和蛋做。',
+        summary: '有高麗菜、雞蛋；想吃清爽有湯',
         suggestions: [
-          idea(ce, { title: '高麗菜蛋花湯麵', why: '高麗菜和蛋都在，十分鐘內的暖湯麵。', uses_pantry_ids: ['cabbage', 'egg'], other_ingredients: [{ name: '麵條' }] }),
-          idea(ce, { slot: 'adventure', title: '薑絲排骨湯麵', why: '排骨湯頭暖得很，換個口味試試。', uses_pantry_ids: ['pork-ribs', 'ginger'], other_ingredients: [{ name: '麵條' }] }),
+          idea(ce, { title: '高麗菜蛋花湯', why: '兩樣都用上，十分鐘的清爽暖湯。', uses_pantry_ids: ['cabbage', 'egg'] }),
+          idea(ce, { slot: 'adventure', title: '高麗菜蛋花薑絲湯', why: '加一點薑絲更暖，換個香氣。', uses_pantry_ids: ['cabbage', 'egg', 'ginger'] }),
         ],
       }),
     ],
-    // 「想吃點熱的」加上手邊的食材，大廚直接給點子也可以（反問越少越好）；只檢查反問的規則有沒有守住
-    expectation: '要嘛直接給點子，要嘛只問一個問題、不給點子；問過之後，使用者回答就直接給 1–3 個點子，不再追問。',
+    expectation: '第 1、2 輪各問一個問題並附 2 到 4 個選項（先盤點食材、再問風味），不給點子；第 3 輪給 1 到 2 個點子，並用上高麗菜與雞蛋。',
     assert: (sim) => {
       const k = kept(sim);
       return [
-        ...(k[0]?.ask && k[0].ideas.length > 0 ? ['有反問卻還給點子'] : []),
-        ...(k[0] && !k[0].ask && k[0].ideas.length === 0 ? ['第一輪沒有反問也沒有點子'] : []),
-        ...(k[0]?.ask && k[1]?.ask ? ['連續追問'] : []),
-        ...(k[1] && k[1].ideas.length === 0 ? ['第二輪沒有點子'] : []),
+        ...earlyIdeas(sim),
+        ...tooManyIdeas(sim),
+        ...badOptions(sim),
+        ...(k[0] && !k[0].ask ? ['第 1 輪沒有問問題'] : []),
+        ...(k[1] && !k[1].ask ? ['第 2 輪沒有問問題'] : []),
+        ...(k[2] && k[2].ideas.length === 0 ? ['第 3 輪沒有給點子'] : []),
+        ...(k[2] && k[2].ideas.some((i) => mentionCoverage(i, sim.conv?.mentioned_ingredients ?? []) < 2) ? ['點子沒有用到提到的兩樣食材'] : []),
       ];
     },
   },
   {
     id: '02-allergy',
-    name: '對蝦、花生過敏；使用者說「想吃海鮮、有蝦仁」',
+    name: '對蝦、花生過敏；使用者說「想吃海鮮、有蝦仁」，一路聊到點子',
     ctx: ALLERGY,
-    users: ['今天想吃海鮮，冰箱有蝦仁'],
+    users: ['今天想吃海鮮，冰箱有蝦仁', '泰式的，下飯', '就這樣，直接決定吧'],
     fake: [
+      () => out({ reply: '泰式風味很香，來聊聊手邊的食材。', ask: ask('還有什麼想用掉的？', ['雞腿肉', '九層塔', '都可以'], true), summary: '想吃海鮮風味' }),
+      () => out({ reply: '好，下飯的泰式。', ask: ask('想要多辣？', ['微辣', '中辣', '很辣']), summary: '想吃海鮮風味、泰式、下飯' }),
       (ce) => out({
         reply: '來點泰式風味的雞肉吧，香氣夠。',
-        summary: '想吃海鮮風味、泰式',
+        summary: '想吃海鮮風味、泰式、下飯',
         suggestions: [idea(ce, { title: '九層塔雞丁', why: '你愛泰式的香，九層塔和辣椒剛好。', uses_pantry_ids: ['chicken-thigh', 'thai-basil', 'chili-pepper', 'garlic'], other_ingredients: [{ name: '魚露' }] })],
       }),
     ],
-    expectation: '回應與點子都沒有蝦、花生（含蝦醬、花生粉），也不用那包蝦仁；不說「不能吃蝦」之類的話。',
+    expectation: '每一輪的回應、選項與點子都沒有蝦、花生（含蝦醬、花生粉），也不用那包蝦仁；不說「不能吃蝦」之類的話。',
     assert: (sim) =>
       kept(sim).flatMap((r) => ['蝦', '花生'].filter((t) => textOf(r).includes(t)).map((t) => `回應提到「${t}」`)).concat(
         kept(sim).flatMap((r) => r.ideas.filter((i) => i.usesPantryIds.includes('shrimp')).map((i) => `${i.title}：用了蝦仁`)),
         kept(sim).flatMap((r) => r.mentioned.filter((m) => m.ingredientId === 'shrimp').map(() => '把蝦記成說過的食材')),
+        earlyIdeas(sim),
       ),
   },
   {
-    id: '03-not-too-spicy',
-    name: '先給點子，再說「不要太辣、再簡單一點」',
+    id: '03-give-me-ideas-now',
+    name: '直接給我點子：第 1 輪就按了按鈕',
     ctx: TW,
-    users: ['晚上想吃點熱的，有高麗菜和雞蛋', '不要太辣，再簡單一點'],
+    users: [{ text: '直接給我點子', wantIdeas: true }],
     fake: [
       (ce) => out({
-        reply: '熱熱的炒一盤很剛好。', summary: '想吃熱的；有高麗菜、雞蛋',
-        suggestions: [idea(ce, { title: '麻辣高麗菜', why: '高麗菜炒得香，帶一點辣很下飯。', uses_pantry_ids: ['cabbage'] })],
-      }),
-      (ce) => out({
-        reply: '好，換成清爽的。', summary: '想吃熱的；有高麗菜、雞蛋；不要太辣、要簡單',
-        preference_signals: [{ dimension_key: 'taste.spicy', affinity: -0.4, scope: 'today' }],
-        suggestions: [idea(ce, { title: '高麗菜炒蛋', why: '兩樣食材就好，清清爽爽。', uses_pantry_ids: ['cabbage', 'egg'] })],
+        reply: '好，先來兩個簡單的。',
+        user_wants_ideas: true,
+        summary: '想直接看點子',
+        suggestions: [
+          idea(ce, { title: '高麗菜炒蛋', why: '兩樣食材就好，快手又下飯。', uses_pantry_ids: ['cabbage', 'egg'] }),
+          idea(ce, { slot: 'adventure', title: '薑絲豆腐蛋花湯', why: '暖暖的小湯，換個口味。', uses_pantry_ids: ['tofu', 'egg', 'ginger'] }),
+        ],
       }),
     ],
-    expectation: '第二輪記得前面的條件（熱的、高麗菜、雞蛋），換成不辣、更簡單的點子；「今天不要太辣」記成今天的訊號，不是長期偏好。',
+    expectation: '使用者按了「直接給我點子」：不再追問，第 1 輪就給 1 到 2 個點子，沒有反問。',
     assert: (sim) => {
-      const second = sim.turns[1];
-      const text = (second?.prompt.messages ?? []).map((m) => m.content).join('\n');
+      const k = kept(sim);
+      return [...tooManyIdeas(sim), ...(k[0] && k[0].ideas.length === 0 ? ['按了「直接給我點子」卻沒有給點子'] : []), ...(k[0]?.ask ? ['按了「直接給我點子」卻還在反問'] : [])];
+    },
+  },
+  {
+    id: '04-too-early-rewrite',
+    name: '太早給點子：第 1 輪沒有人要求，程式請大廚重寫成反問',
+    ctx: TW,
+    users: ['有高麗菜和雞蛋，今天想吃點熱的'],
+    fake: [
+      (ce, attempt) =>
+        attempt === 0
+          ? out({ reply: '直接來兩道吧。', suggestions: [idea(ce, { title: '高麗菜炒蛋', why: '兩樣食材就好。', uses_pantry_ids: ['cabbage', 'egg'] })] })
+          : out({ reply: '熱的好，高麗菜和蛋都能用。', ask: ask('還有別的食材嗎？', ['豆腐', '排骨', '沒有了'], true), summary: '想吃熱的；有高麗菜、雞蛋' }),
+    ],
+    expectation: '第 1 輪不給點子：就算 Claude 第一次給了，程式也會丟掉並請它重寫成反問（假回應的第二次嘗試會被用到）。',
+    assert: (sim) => [...earlyIdeas(sim), ...badOptions(sim), ...(sim.turns[0]?.checked?.ok ? [] : ['第 1 輪沒有存下回應'])],
+  },
+  {
+    id: '05-ingredients-dont-fit',
+    name: '提了 4 樣食材、其中一樣搭不起來；點子要用到大部分，剩下的說留到下次',
+    ctx: TW,
+    users: [{ text: '有高麗菜、雞蛋、豆腐，還有一包巧克力，直接給我點子', wantIdeas: true }],
+    fake: [
+      (ce, attempt) => {
+        const mentioned = [
+          { text: '高麗菜', ingredient_id: 'cabbage' },
+          { text: '雞蛋', ingredient_id: 'egg' },
+          { text: '豆腐', ingredient_id: 'tofu' },
+          { text: '巧克力', ingredient_id: null },
+        ];
+        return attempt === 0
+          ? out({ reply: '先給你一道。', user_wants_ideas: true, mentioned_ingredients: mentioned, suggestions: [idea(ce, { title: '清炒高麗菜', why: '簡單快手。', uses_pantry_ids: ['cabbage'] })] })
+          : out({
+              reply: '高麗菜、雞蛋、豆腐一起很搭；巧克力適合留到下次做點心。',
+              user_wants_ideas: true,
+              mentioned_ingredients: mentioned,
+              summary: '有高麗菜、雞蛋、豆腐、巧克力',
+              suggestions: [
+                idea(ce, { title: '高麗菜豆腐炒蛋', why: '三樣都用上，下飯又快。', uses_pantry_ids: ['cabbage', 'egg', 'tofu'] }),
+                idea(ce, { slot: 'adventure', title: '高麗菜蛋豆腐羹', why: '用同樣三樣做成熱羹，換個口感。', uses_pantry_ids: ['cabbage', 'egg', 'tofu'] }),
+              ],
+            });
+      },
+    ],
+    expectation: '每個點子用到提到的 4 樣食材裡的大部分（至少 2 樣；不會只用 1 樣）；搭不起來的巧克力，大廚在回應裡說適合留到下次，語氣不催促。',
+    assert: (sim) => {
       const k = kept(sim);
       return [
-        ...(text.includes('晚上想吃點熱的') ? [] : ['第二輪的提示詞沒有帶到前一輪的話']),
-        ...(text.includes('給過的點子') ? [] : ['第二輪沒有列出給過的點子']),
-        ...(k[1]?.signals.some((s) => s.dimensionKey === 'taste.spicy' && s.scope === 'long_term') ? ['今天的要求被記成長期偏好'] : []),
-        ...(k[1]?.ideas.some((i) => i.title.includes('辣')) ? ['說了不要太辣，卻給辣的點子'] : []),
+        ...tooManyIdeas(sim),
+        ...(k[0] ? k[0].ideas.flatMap((i) => (mentionCoverage(i, k[0]?.mentioned ?? []) <= 1 ? [`${i.title}：只用到 1 樣提到的食材`] : [])) : ['沒有回應']),
+        ...(k[0] && !k[0].reply.includes('巧克力') ? ['沒有說巧克力適合留到下次'] : []),
       ];
     },
   },
   {
-    id: '04-mentioned-not-in-kitchen',
+    id: '06-mentioned-not-in-kitchen',
     name: '說了沒記在廚房的食材：鄰居送的筍子',
     ctx: TW,
-    users: ['鄰居送了一些筍子，想煮湯', '那筍子要先燙嗎？'],
+    users: [{ text: '鄰居送了一些筍子，想煮湯，直接給我點子', wantIdeas: true }, '那筍子要先燙嗎？'],
     fake: [
       (ce) => out({
         reply: '筍子煮湯最能吃出甜味！',
+        user_wants_ideas: true,
         summary: '想煮湯；有筍子',
         mentioned_ingredients: [{ text: '筍子', ingredient_id: 'bamboo-shoot' }],
         suggestions: [idea(ce, { title: '筍子排骨湯', why: '熱湯最暖，筍子煮湯甜得很自然。', uses_pantry_ids: ['pork-ribs', 'ginger', 'bamboo-shoot'] })],
@@ -164,7 +226,37 @@ export const CHAT_CASES: ChatEvalCase[] = [
     },
   },
   {
-    id: '05-near-turn-limit',
+    id: '07-not-too-spicy',
+    name: '給了點子之後，說「不要太辣、再簡單一點」：對話不結束，接著換點子',
+    ctx: TW,
+    users: [{ text: '晚上想吃點熱的，有高麗菜和雞蛋，直接給我點子', wantIdeas: true }, '不要太辣，再簡單一點'],
+    fake: [
+      (ce) => out({
+        reply: '熱熱的炒一盤很剛好。', user_wants_ideas: true, summary: '想吃熱的；有高麗菜、雞蛋',
+        suggestions: [idea(ce, { title: '麻辣高麗菜', why: '高麗菜炒得香，帶一點辣很下飯。', uses_pantry_ids: ['cabbage'] })],
+      }),
+      (ce) => out({
+        reply: '好，換成清爽的。', summary: '想吃熱的；有高麗菜、雞蛋；不要太辣、要簡單',
+        preference_signals: [{ dimension_key: 'taste.spicy', affinity: -0.4, scope: 'today' }],
+        suggestions: [idea(ce, { title: '高麗菜炒蛋', why: '兩樣食材就好，清清爽爽。', uses_pantry_ids: ['cabbage', 'egg'] })],
+      }),
+    ],
+    expectation: '第二輪記得前面的條件（熱的、高麗菜、雞蛋），換成不辣、更簡單的點子；「今天不要太辣」記成今天的訊號，不是長期偏好；給過點子後仍然可以繼續聊、再給新的點子。',
+    assert: (sim) => {
+      const second = sim.turns[1];
+      const text = (second?.prompt.messages ?? []).map((m) => m.content).join('\n');
+      const k = kept(sim);
+      return [
+        ...(text.includes('晚上想吃點熱的') ? [] : ['第二輪的提示詞沒有帶到前一輪的話']),
+        ...(text.includes('給過的點子') ? [] : ['第二輪沒有列出給過的點子']),
+        ...(k[1]?.signals.some((s) => s.dimensionKey === 'taste.spicy' && s.scope === 'long_term') ? ['今天的要求被記成長期偏好'] : []),
+        ...(k[1]?.ideas.some((i) => i.title.includes('辣')) ? ['說了不要太辣，卻給辣的點子'] : []),
+        ...tooManyIdeas(sim),
+      ];
+    },
+  },
+  {
+    id: '08-near-turn-limit',
     name: '已經聊了 18 輪：只送最近 10 輪加摘要；第 20 輪後不能再送',
     ctx: TW,
     start: emptyConversation({ turn_count: 18, summary: '想吃熱的；有高麗菜、雞蛋；不要太辣', messages: history(18) }),
@@ -187,7 +279,7 @@ export const CHAT_CASES: ChatEvalCase[] = [
     },
   },
   {
-    id: '06-long-term-preference',
+    id: '09-long-term-preference',
     name: '長期偏好「我不太吃羊肉」＋說了一道想吃的菜',
     ctx: TW,
     users: ['我不太吃羊肉，今天想吃筍子排骨湯'],
@@ -205,6 +297,7 @@ export const CHAT_CASES: ChatEvalCase[] = [
       return [
         ...(k[0]?.signals.some((s) => s.dimensionKey === 'protein.lamb' && s.scope === 'long_term' && s.affinity < 0) ? [] : ['沒有記下不吃羊肉']),
         ...(k[0] && [...k[0].reply].length > 150 ? ['回應太長'] : []),
+        ...earlyIdeas(sim),
       ];
     },
   },

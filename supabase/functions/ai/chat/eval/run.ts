@@ -1,6 +1,6 @@
-// 對話評估集實跑（手動，不進 CI）：用真的 Claude（只跑 Sonnet 5.5，對話的正式模型）跑 6 段劇本，
+// 對話評估集實跑（手動，不進 CI）：用真的 Claude（只跑 Sonnet 5.5，對話的正式模型）跑 9 段多輪劇本，
 // 記下每輪的 token、快取、成本、自動斷言的結果，並把每輪的使用者的話與大廚的回應整理成 summary.md，給人工打分口吻與合理度。
-// 會花錢（6 段約 12 輪，合計不到 1 美元）。
+// 會花錢（9 段約 17 輪，加上重寫，合計約 1 美元）。
 //
 //   ANTHROPIC_API_KEY=... deno run --no-lock --no-config -A supabase/functions/ai/chat/eval/run.ts [--case 03] [--out 資料夾]
 //
@@ -105,7 +105,7 @@ for (const c of CHAT_CASES) {
   console.log(`${c.id}: 自動斷言 ${fails.length === 0 ? '全過' : `失敗 ${fails.length} 項`}`);
   await Deno.writeTextFile(
     `${out}/${c.id}.json`,
-    JSON.stringify({ rows, turns: sim.turns.map((t) => ({ user: t.user, raw: t.raw, checked: t.checked, full: t.full })), fails }, null, 2),
+    JSON.stringify({ rows, turns: sim.turns.map((t) => ({ user: t.user, chefTurn: t.chefTurn, attempts: t.attempts, raw: t.raw, checked: t.checked, full: t.full })), fails }, null, 2),
   );
 
   body += `\n## ${c.id}　${c.name}\n\n期待：${c.expectation}\n\n自動斷言：${fails.length ? fails.join('；') : '全過'}\n\n`;
@@ -117,14 +117,14 @@ for (const c of CHAT_CASES) {
       continue;
     }
     const k = t.checked;
-    if (!t.raw) body += `（呼叫失敗或格式不合：${rows[apiTurn]?.error ?? ''}）\n\n`;
+    if (!t.raw) body += `（呼叫失敗或格式不合：${rows[apiTurn + t.attempts - 1]?.error ?? ''}）\n\n`;
     else if (!k || !k.ok) body += `（沒過檢查：${k?.reason}，被拿掉：${JSON.stringify(k?.dropped)}）\n\n`;
     else {
-      body += `**大廚**：${k.reply}${k.ask ? `\n\n反問：${k.ask}` : ''}\n\n`;
+      body += `**大廚**（第 ${t.chefTurn} 輪${t.attempts > 1 ? '，重寫過一次' : ''}）：${k.reply}${k.ask ? `\n\n反問：${k.ask.question}（${k.ask.multi ? '複選' : '單選'}：${k.ask.options.join('／')}）` : ''}\n\n`;
       body += k.ideas.map((x) => `- [${x.slot}] **${x.title}**（難度 ${x.difficulty.overall}）${x.why}`).join('\n') + (k.ideas.length ? '\n\n' : '');
       body += `說過的食材：${JSON.stringify(k.mentioned)}　偏好訊號：${JSON.stringify(k.signals)}　摘要：${k.summary ?? '（沒更新）'}　被拿掉：${JSON.stringify(k.dropped)}\n\n`;
     }
-    apiTurn += 1;
+    apiTurn += t.attempts;
     body += `打分：口吻 ＿　合理度 ＿\n\n`;
   }
 }

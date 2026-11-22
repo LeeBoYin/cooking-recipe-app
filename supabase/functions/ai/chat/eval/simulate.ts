@@ -2,16 +2,23 @@
 // 自動測試給假的 AI 回應（進 CI），run.ts 給真的 Claude（不進 CI）。存對話的規則和 ai_chat_append 一致。
 import { CHAT_MAX_TURNS, type ChatMessage } from '../../../../../packages/core/src/index.ts';
 import type { PromptParts } from '../../pipeline.ts';
-import { checkChatOutput, type ChatCheck } from '../check.ts';
+import { checkChatOutput, retryHint, type ChatCheck } from '../check.ts';
 import { buildChatEnv, type ChatEnv } from '../env.ts';
 import { buildChatPrompt } from '../prompt.ts';
 import type { ChatConversationRow, RawChatOutput } from '../types.ts';
 import type { HomeContextRow } from '../../home/types.ts';
 
-export type Responder = (prompt: PromptParts, turnIndex: number, ce: ChatEnv) => Promise<RawChatOutput | null> | RawChatOutput | null;
+// attempt：0 是第一次，1 是程式請大廚重寫的那一次
+export type Responder = (prompt: PromptParts, turnIndex: number, ce: ChatEnv, attempt: number) => Promise<RawChatOutput | null> | RawChatOutput | null;
+
+// 劇本裡的一句使用者的話：wantIdeas 是按了「直接給我點子」
+export type ScriptedUser = string | { text: string; wantIdeas?: boolean };
+export const userText = (u: ScriptedUser): string => (typeof u === 'string' ? u : u.text);
 
 export interface TurnResult {
   user: string;
+  chefTurn: number; // 大廚在這段對話的第幾輪回應
+  attempts: number; // 呼叫了幾次 AI（2 = 程式請大廚重寫過）
   prompt: PromptParts;
   raw: RawChatOutput | null; // 沒有 = AI 呼叫失敗或輸出不合 schema
   checked: ChatCheck | null;
@@ -27,20 +34,38 @@ export function emptyConversation(over: Partial<ChatConversationRow> = {}): Chat
   return { id: '0192f000-0000-7000-8000-0000000000c1', kitchen_id: null, summary: null, turn_count: 0, messages: [], mentioned_ingredients: [], last_message_at: '2026-11-21T09:00:00Z', suggestions: [], ...over };
 }
 
-export async function simulate(ctx: HomeContextRow, now: Date, users: string[], respond: Responder, start: ChatConversationRow | null = null): Promise<Simulation> {
+export async function simulate(ctx: HomeContextRow, now: Date, users: ScriptedUser[], respond: Responder, start: ChatConversationRow | null = null): Promise<Simulation> {
   let conv = start;
   const turns: TurnResult[] = [];
   let n = 0;
-  for (const user of users) {
+  for (const scripted of users) {
+    const user = userText(scripted);
+    const wantIdeas = typeof scripted !== 'string' && scripted.wantIdeas === true;
+    const chefTurn = (conv?.messages ?? []).filter((m) => m.role === 'chef').length + 1;
     if (conv && conv.turn_count >= CHAT_MAX_TURNS) {
-      turns.push({ user, prompt: { stable: '', messages: [] }, raw: null, checked: null, full: true });
+      turns.push({ user, chefTurn, attempts: 0, prompt: { stable: '', messages: [] }, raw: null, checked: null, full: true });
       continue;
     }
     const ce = buildChatEnv(ctx, now, conv, user);
-    const prompt = buildChatPrompt(ce, conv, null, user);
-    const raw = await respond(prompt, n++, ce);
-    const checked = raw ? checkChatOutput(raw, ce, { makeId: () => `idea-${n}` }) : null;
-    turns.push({ user, prompt, raw, checked, full: false });
+    let hint: string | undefined;
+    let prompt: PromptParts = { stable: '', messages: [] };
+    let raw: RawChatOutput | null = null;
+    let checked: ChatCheck | null = null;
+    let fallback: { raw: RawChatOutput; checked: ChatCheck } | null = null;
+    let attempts = 0;
+    // 和 handler.ts 同一套：太早給點子、或點子用到的提到食材太少時重寫一次
+    for (let attempt = 0; attempt < 2; attempt++) {
+      attempts++;
+      prompt = buildChatPrompt(ce, conv, null, user, { chefTurn, wantIdeas, carried: false, gaveBefore: (conv?.suggestions.length ?? 0) > 0, ...(hint ? { retryHint: hint } : {}) });
+      raw = await respond(prompt, n, ce, attempt);
+      checked = raw ? checkChatOutput(raw, ce, { makeId: () => `idea-${n}`, chefTurn, wantIdeas, gaveBefore: (conv?.suggestions.length ?? 0) > 0 }) : null;
+      hint = attempt === 0 && checked ? retryHint(checked, chefTurn) : undefined;
+      if (!hint) break;
+      if (checked?.ok && raw) fallback = { raw, checked };
+    }
+    if (fallback && (!checked || !checked.ok)) ({ raw, checked } = fallback);
+    n++;
+    turns.push({ user, chefTurn, attempts, prompt, raw, checked, full: false });
     if (!checked || !checked.ok) continue; // 沒過檢查：什麼都不存，下一則還是從同一個狀態開始
     const at = now.toISOString();
     const suggestionId = checked.ideas.length ? `s-${n}` : undefined;

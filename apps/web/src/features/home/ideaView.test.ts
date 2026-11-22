@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { replaceTempMarks, type AiIdea } from '@zhusha/core';
-import { ingredientBadges, mainIngredientTags, renderMarks, viewOfAiIdea } from './ideaView.ts';
+import { ingredientBadges, mainIngredientTags, mentionUsed, renderMarks, viewOfAiIdea } from './ideaView.ts';
 
 const idea = (over: Partial<AiIdea> = {}): AiIdea => ({
   id: 'i1', slot: 'twist', title: '豆瓣醬燒茄子', why: '用{{temp:180:C}}煎到金黃。', candidateRef: null, usesPantryIds: ['eggplant', 'doubanjiang'], usesPriorityIds: ['eggplant'],
@@ -70,5 +70,19 @@ describe('主要食材標籤', () => {
   it('AI 點子：用到的廚房食材加上使用者說的', () => {
     const v = viewOfAiIdea(idea({ usesMentionedIds: ['tofu'] }), { unit: 'C', both: false });
     expect(mainIngredientTags(v).names).toHaveLength(3);
+  });
+});
+
+describe('mentionUsed（對話卡片的「你提到的食材」）', () => {
+  const view = { title: '高麗菜豆腐湯', others: ['麵條'], ingredients: [{ id: 'cabbage', name: '高麗菜', have: true }, { id: 'bamboo-shoot', name: '竹筍', have: false, said: true }, { id: 'egg', name: '雞蛋', have: false }] };
+  it('ID 對得上（廚房有或你說的）算用到；只是骨架裡列出的不算', () => {
+    expect(mentionUsed(view, { text: '高麗菜', ingredientId: 'cabbage' })).toBe(true);
+    expect(mentionUsed(view, { text: '筍子', ingredientId: 'bamboo-shoot' })).toBe(true);
+    expect(mentionUsed(view, { text: '雞蛋', ingredientId: 'egg' })).toBe(false);
+  });
+  it('沒有 ID 時，字出現在菜名或其他材料裡才算', () => {
+    expect(mentionUsed(view, { text: '麵條', ingredientId: null })).toBe(true);
+    expect(mentionUsed(view, { text: '豆腐', ingredientId: null })).toBe(true);
+    expect(mentionUsed(view, { text: '巧克力', ingredientId: null })).toBe(false);
   });
 });

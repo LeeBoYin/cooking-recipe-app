@@ -1,13 +1,15 @@
 import type { IdeaView } from './ideaView.ts';
-import { IdeaTags } from './IdeaTags.tsx';
+import type { ChatMention } from '@zhusha/core';
+import { IdeaTags, MentionedTags } from './IdeaTags.tsx';
 import { BookmarkButton } from './BookmarkButton.tsx';
 
 // 大廚的點子卡片（17〈大廚的點子卡片〉）：菜名、一句理由、主要食材標籤，右上角收藏。
 // 首頁：輪播裡的一張（寬度由輪播決定）、chef-soft 底；對話：全寬、直排、白底（放在 chef-soft 的對話旁邊）
-export function IdeaCard({ view, layout = 'home', index, onOpen }: {
+export function IdeaCard({ view, layout = 'home', index, mentioned, onOpen }: {
   view: IdeaView;
   index?: number; // 輪播裡的第幾張（圓點指示用）
   layout?: 'home' | 'chat';
+  mentioned?: readonly ChatMention[]; // 對話裡使用者提到的食材：有的話，標籤列改列「你提到的食材」
   onOpen: () => void;
 }) {
   const chat = layout === 'chat';
@@ -20,7 +22,7 @@ export function IdeaCard({ view, layout = 'home', index, onOpen }: {
       >
         <b className="w-full text-body">{view.title}</b>
         <span className="text-small leading-[1.4] text-ink-muted">{view.why}</span>
-        <IdeaTags view={view} tone={chat ? 'bg' : 'surface'} />
+        {chat && mentioned && mentioned.length > 0 ? <MentionedTags view={view} mentioned={mentioned} /> : <IdeaTags view={view} tone={chat ? 'bg' : 'surface'} />}
       </button>
       <BookmarkButton view={view} />
     </li>
