@@ -21,7 +21,7 @@ export function idea(ce: ChatEnv, over: Partial<RawIdea> = {}): RawIdea {
   };
 }
 const out = (over: Partial<RawChatOutput> = {}): RawChatOutput => ({
-  reply: '好啊，來看看。', ask: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '', ...over,
+  reply: '好啊，來看看。', ask: null, hint: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '', ...over,
 });
 
 export interface ChatEvalCase {
@@ -69,6 +69,8 @@ const earlyIdeas = (sim: Simulation) =>
   sim.turns.flatMap((t, i) => (t.checked?.ok && t.checked.ideas.length > 0 && t.chefTurn < MIN_TURNS_FOR_IDEAS && !wanted(sim, i) ? [`第 ${t.chefTurn} 輪就給了點子，使用者沒要求`] : []));
 const wanted = (sim: Simulation, i: number): boolean => sim.turns[i]?.prompt.messages.at(-1)?.content.includes('使用者是否按了「直接給我點子」：是') === true;
 const tooManyIdeas = (sim: Simulation) => kept(sim).flatMap((r) => (r.ideas.length > 2 ? [`一次給了 ${r.ideas.length} 個點子`] : []));
+// hint：有反問時不該有；有的話不超過 20 字（程式檢查會拿掉不合格的，這裡看 AI 原始輸出有沒有照規矩）
+const badHints = (sim: Simulation) => sim.turns.flatMap((t) => (t.raw && typeof t.raw.hint === 'string' && ([...t.raw.hint].length > 20 || (t.raw.ask && t.raw.hint)) ? [`第 ${t.chefTurn} 輪的 hint 太長或和反問同時出現`] : []));
 const badOptions = (sim: Simulation) => kept(sim).flatMap((r) => (r.ask && (r.ask.options.length < 2 || r.ask.options.length > 4) ? ['選項不是 2 到 4 個'] : []));
 
 export const CHAT_CASES: ChatEvalCase[] = [
@@ -96,6 +98,7 @@ export const CHAT_CASES: ChatEvalCase[] = [
         ...earlyIdeas(sim),
         ...tooManyIdeas(sim),
         ...badOptions(sim),
+        ...badHints(sim),
         ...(k[0] && !k[0].ask ? ['第 1 輪沒有問問題'] : []),
         ...(k[1] && !k[1].ask ? ['第 2 輪沒有問問題'] : []),
         ...(k[2] && k[2].ideas.length === 0 ? ['第 3 輪沒有給點子'] : []),
@@ -159,7 +162,7 @@ export const CHAT_CASES: ChatEvalCase[] = [
           : out({ reply: '熱的好，高麗菜和蛋都能用。', ask: ask('還有別的食材嗎？', ['豆腐', '排骨', '沒有了'], true), summary: '想吃熱的；有高麗菜、雞蛋' }),
     ],
     expectation: '第 1 輪不給點子：就算 Claude 第一次給了，程式也會丟掉並請它重寫成反問（假回應的第二次嘗試會被用到）。',
-    assert: (sim) => [...earlyIdeas(sim), ...badOptions(sim), ...(sim.turns[0]?.checked?.ok ? [] : ['第 1 輪沒有存下回應'])],
+    assert: (sim) => [...earlyIdeas(sim), ...badOptions(sim), ...badHints(sim), ...(sim.turns[0]?.checked?.ok ? [] : ['第 1 輪沒有存下回應'])],
   },
   {
     id: '05-ingredients-dont-fit',

@@ -16,6 +16,29 @@ import { chatKeys, useChatConversation, useLatestChat, useSendChat } from './use
 // 送出後整段回應完成才一次出現；失敗時使用者的話留在畫面上，什麼都沒存，可以再送一次。
 export type ChatNav = { resume?: boolean } | null;
 
+// iPhone 的鍵盤出現時，版面高度（dvh）不會變，輸入框會被擋住。改成跟著 visualViewport 的高度與位置（17〈對話頁〉）。
+// 沒有 visualViewport 的瀏覽器回傳 null，版面用 h-dvh。
+function useVisualViewport(): { height: number; top: number } | null {
+  const [vv, setVv] = useState<{ height: number; top: number } | null>(() => read());
+  useEffect(() => {
+    const v = window.visualViewport;
+    if (!v) return;
+    const update = () => setVv(read());
+    update();
+    v.addEventListener('resize', update);
+    v.addEventListener('scroll', update);
+    return () => {
+      v.removeEventListener('resize', update);
+      v.removeEventListener('scroll', update);
+    };
+  }, []);
+  return vv;
+}
+function read(): { height: number; top: number } | null {
+  const v = typeof window === 'undefined' ? null : window.visualViewport;
+  return v ? { height: Math.round(v.height), top: Math.round(v.offsetTop) } : null;
+}
+
 export function ChatPage() {
   const intl = useIntl();
   const navigate = useNavigate();
@@ -37,6 +60,8 @@ export function ChatPage() {
   const send = useSendChat();
   const bottom = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
+  const [hint, setHint] = useState<string | null>(null); // 這一輪大廚給的「接著說」提示；只留在這個畫面，重開就沒有
+  const vv = useVisualViewport();
 
   useEffect(() => {
     if (convId !== undefined || kitchenPending || !latest.isFetched) return;
@@ -52,7 +77,7 @@ export function ChatPage() {
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: 'end' });
-  }, [messages.length, pending, failed, full]);
+  }, [messages.length, pending, failed, full, vv?.height]);
   // 進來、新對話、開新的一段之後，游標回到輸入框
   useEffect(() => {
     if (!full) input.current?.focus();
@@ -69,6 +94,7 @@ export function ChatPage() {
     setDraft('');
     setPending(null);
     setFailed(null);
+    setHint(null);
     send.reset();
     void navigate('.', { replace: true, state: null });
   }
@@ -81,6 +107,7 @@ export function ChatPage() {
   function sendText(text: string, wantIdeas = false) {
     if (!text || send.isPending || loading || full) return;
     setFailed(null);
+    setHint(null);
     setPending(text);
     setDraft('');
     send.mutate(
@@ -90,6 +117,7 @@ export function ChatPage() {
           setPending(null);
           if (r.status === 'ok') {
             setConvId(r.conversationId);
+            setHint(r.hint);
             setCarryFrom(null);
           } else {
             // 這一段已經滿了（兩台裝置同時送）：重新讀，顯示「開新的一段」
@@ -116,7 +144,10 @@ export function ChatPage() {
   const unavailableLine = failed ? intl.formatMessage({ id: failed.code === 'rate_limited' ? 'chat.slowDown' : 'chat.unavailable' }) : '';
 
   return (
-    <div className="mx-auto flex h-dvh w-full max-w-[560px] flex-col bg-bg">
+    <div
+      className={`mx-auto flex w-full max-w-[560px] flex-col bg-bg ${vv ? 'fixed inset-x-0' : 'h-dvh'}`}
+      style={vv ? { height: vv.height, top: vv.top } : undefined}
+    >
       <header className="flex h-[52px] flex-none items-center border-b border-line px-2">
         <button
           type="button"
@@ -226,7 +257,7 @@ export function ChatPage() {
                 el.style.height = 'auto';
                 el.style.height = `${Math.min(el.scrollHeight, 144)}px`;
               }}
-              placeholder={intl.formatMessage({ id: 'chat.placeholder' })}
+              placeholder={hint && !lastAsk ? intl.formatMessage({ id: 'chat.placeholderHint' }, { hint }) : intl.formatMessage({ id: 'chat.placeholder' })}
               className="block max-h-36 min-h-11 w-full resize-none rounded-card border-0 bg-surface px-3 py-[11px] font-[inherit] text-[16px] leading-normal text-ink placeholder:text-ink-muted read-only:opacity-60"
             />
           </label>
