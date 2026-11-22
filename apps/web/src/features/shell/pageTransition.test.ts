@@ -42,10 +42,11 @@ describe('systemBackAnimates', () => {
   const iphone = 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1';
   const chrome = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/130.0 Safari/537.36';
   const safari = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/18.0 Safari/605.1.15';
-  it('iOS 與 Safari 有，standalone 與 Chrome 沒有', () => {
+  it('iOS（含加到主畫面）與 Safari 有，其他 standalone 與 Chrome 沒有', () => {
     expect(systemBackAnimates(iphone, false)).toBe(true);
     expect(systemBackAnimates(safari, false)).toBe(true);
-    expect(systemBackAnimates(iphone, true)).toBe(false);
+    expect(systemBackAnimates(iphone, true)).toBe(true);
+    expect(systemBackAnimates(safari, true)).toBe(false);
     expect(systemBackAnimates(chrome, false)).toBe(false);
   });
 });

@@ -370,7 +370,7 @@ App 的色彩、字型、版面、元件與動態。畫面上的樣子以這份�
 - 進入下層頁（含下層頁再進下層頁）：新頁從右滑入，上一頁往左移約 30%、opacity 降到 0.6。離開：目前這頁往右滑出，上一頁從左 30% 回到原位。約 220ms、ease-out，只用 transform 與 opacity。
 - 主要畫面之間（底部分頁、頁內分頁切換）、`replace`、直接開網址的第一次載入不播。減少動態時改成 120ms 的淡入淡出。不支援 View Transitions 的瀏覽器沒有動畫，功能不變。
 - 返回後還原原本的捲動位置；進入新頁從頂端開始。
-- Safari 瀏覽器（iOS 全部瀏覽器、macOS Safari）的返回手勢與上一頁已有系統動畫，App 不再疊一層：App 自己的返回按鈕（`navigate(-1)`）會先做記號，有記號的返回才播；沒記號的（手勢、瀏覽器上一頁）在這些瀏覽器不播。加到主畫面（standalone）一律播。
+- iOS（所有瀏覽器與加到主畫面的 App）和 macOS Safari 的返回手勢與上一頁已有系統動畫，App 不再疊一層：App 自己的返回按鈕（`navigate(-1)`）會先做記號，有記號的返回才播；沒記號的（手勢、瀏覽器上一頁）在這些環境不播。其他加到主畫面的環境（standalone）一律播。
 - 做法：`TransitionRouter` 取代 `BrowserRouter`，在換畫面那一刻包 `document.startViewTransition`；路由表上標 `handle.inner` 的是下層頁。新增內頁放進 `InnerLayout` 底下即可。
 - 音效與震動回饋可以關閉。
 

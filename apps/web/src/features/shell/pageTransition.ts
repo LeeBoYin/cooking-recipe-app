@@ -24,9 +24,10 @@ export function decideTransition(i: TransitionInput): TransitionDirection | null
   return i.nextInner ? 'forward' : null;
 }
 
-// iOS 上所有瀏覽器（含 Chrome）和 macOS 的 Safari，往右滑返回都有系統動畫；加到主畫面（standalone）沒有。
+// iOS 上所有瀏覽器（含 Chrome）和加到主畫面的 App（standalone），以及 macOS 的 Safari，
+// 往右滑返回都有系統動畫（會拍下畫面一起滑）。其他加到主畫面的環境沒有。
 export function systemBackAnimates(ua: string, standalone: boolean): boolean {
-  if (standalone) return false;
   if (/iPhone|iPad|iPod/.test(ua)) return true;
+  if (standalone) return false;
   return /Safari/.test(ua) && !/Chrome|Chromium|Edg|Android/.test(ua);
 }
