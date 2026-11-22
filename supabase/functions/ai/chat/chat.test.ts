@@ -65,7 +65,7 @@ Deno.test('檢查：點子違規會被拿掉；給了點子卻一個都不剩，
   const c = CHAT_CASES[1];
   assert(c);
   const ce = buildChatEnv(c.ctx, NOW, null, '想吃蝦仁');
-  const base: RawChatOutput = { reply: '好。', ask: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '' };
+  const base: RawChatOutput = { reply: '好。', ask: null, hint: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '' };
   // 過敏原：蝦仁、蝦醬、花生粉都不行
   const bad = checkChatOutput({ ...base, suggestions: [idea(ce, { title: '蝦仁炒飯', other_ingredients: [{ name: '蝦仁' }] })] }, ce, { makeId: ids() });
   assertEquals(bad.ok, false);
@@ -87,7 +87,7 @@ Deno.test('檢查：大廚的話、反問、偏好訊號、摘要', () => {
   const c = CHAT_CASES[0];
   assert(c);
   const ce = buildChatEnv(c.ctx, NOW, null, '想吃點熱的');
-  const base: RawChatOutput = { reply: '熱的最暖。', ask: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '想吃熱的' };
+  const base: RawChatOutput = { reply: '熱的最暖。', ask: null, hint: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '想吃熱的' };
   assertEquals(checkChatOutput({ ...base, reply: '燙 30 秒就好' }, ce).ok, false); // 帶單位的數字
   assertEquals(checkChatOutput({ ...base, reply: '燙三分鐘就好' }, ce).ok, false);
   assertEquals(checkChatOutput({ ...base, reply: '' }, ce).ok, false);
@@ -100,6 +100,14 @@ Deno.test('檢查：大廚的話、反問、偏好訊號、摘要', () => {
   // 選項：不合格的個別拿掉，剩不到 2 個就整個不用；最多留 4 個
   const fewOptions = checkChatOutput({ ...base, ask: { ...A, options: ['飯', '煮 30 分鐘'] } }, ce);
   assert(fewOptions.ok && fewOptions.ask === null);
+  const okHint = checkChatOutput({ ...base, hint: '那配菜呢？' }, ce);
+  assert(okHint.ok && okHint.hint === '那配菜呢？');
+  const longHint = checkChatOutput({ ...base, hint: '一二三四五六七八九十一二三四五六七八九十一' }, ce);
+  assert(longHint.ok && longHint.hint === null && longHint.reply === '熱的最暖。');
+  const badHint = checkChatOutput({ ...base, hint: '要不要試 30 分鐘的？' }, ce);
+  assert(badHint.ok && badHint.hint === null);
+  const nullHint = checkChatOutput({ ...base, hint: '   ' }, ce);
+  assert(nullHint.ok && nullHint.hint === null);
   const manyOptions = checkChatOutput({ ...base, ask: { ...A, options: ['飯', '麵', '粥', '粉', '餃'], multi: true } }, ce);
   assert(manyOptions.ok && manyOptions.ask?.options.length === 4 && manyOptions.ask.multi);
   const sig = checkChatOutput({
@@ -123,7 +131,7 @@ Deno.test('檢查：至少 3 輪才給點子（按了按鈕或明說要點子例
     { text: '雞蛋', ingredient_id: 'egg' },
     { text: '豆腐', ingredient_id: 'tofu' },
   ];
-  const base: RawChatOutput = { reply: '好。', ask: null, suggestions: [], mentioned_ingredients: mentioned, preference_signals: [], user_wants_ideas: false, summary: '' };
+  const base: RawChatOutput = { reply: '好。', ask: null, hint: null, suggestions: [], mentioned_ingredients: mentioned, preference_signals: [], user_wants_ideas: false, summary: '' };
   const one = idea(ce, { uses_pantry_ids: ['cabbage', 'egg', 'tofu'] });
   const early = checkChatOutput({ ...base, suggestions: [one] }, ce, { chefTurn: 2, wantIdeas: false });
   assert(!early.ok && early.reason === 'too_early');
@@ -194,7 +202,7 @@ function fakeRpc(opts: { conv?: unknown; appendError?: string } = {}) {
   return { rpc: rpc as never, calls };
 }
 
-const GOOD = (): string => JSON.stringify({ reply: '來碗熱湯吧。', ask: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '想吃熱的' });
+const GOOD = (): string => JSON.stringify({ reply: '來碗熱湯吧。', ask: null, hint: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '想吃熱的' });
 
 Deno.test('handler：成功時用串流呼叫 Sonnet 5.5、存對話並回傳', async () => {
   const claudeCalls = { claude: [] as ClaudeRequest[] };
@@ -220,7 +228,7 @@ Deno.test('handler：停用、暫停、輸入不合法、輸出沒過檢查都�
   assertEquals(paused.r.ok === false && paused.r.error, 'ai_paused');
   const invalid = await run(deps(GOOD), { message: '' });
   assertEquals(invalid.r.ok === false && invalid.r.error, 'invalid_input');
-  const wording = await run(deps(() => JSON.stringify({ reply: '燙 30 秒', ask: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '' })), { message: 'x' });
+  const wording = await run(deps(() => JSON.stringify({ reply: '燙 30 秒', ask: null, hint: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '' })), { message: 'x' });
   assertEquals(wording.r.ok === false && wording.r.error, 'invalid_output');
   assertEquals(wording.appended, false);
   const notJson = await run(deps(() => 'oops'), { message: 'x' });
@@ -255,8 +263,8 @@ Deno.test('handler：第 1 輪就給點子、使用者沒要求：重寫一次�
   const c = CHAT_CASES[0];
   assert(c);
   const ce = buildChatEnv(c.ctx, NOW, null, 'x');
-  const withIdea = JSON.stringify({ reply: '來兩道。', ask: null, suggestions: [idea(ce, { uses_pantry_ids: ['cabbage'] })], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '' });
-  const withAsk = JSON.stringify({ reply: '先聊聊。', ask: { question: '想吃什麼風味？', options: ['清爽', '下飯'], multi: false }, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '' });
+  const withIdea = JSON.stringify({ reply: '來兩道。', ask: null, hint: null, suggestions: [idea(ce, { uses_pantry_ids: ['cabbage'] })], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '' });
+  const withAsk = JSON.stringify({ reply: '先聊聊。', ask: { question: '想吃什麼風味？', options: ['清爽', '下飯'], multi: false }, hint: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '' });
 
   const claudeCalls = { claude: [] as ClaudeRequest[] };
   let n = 0;

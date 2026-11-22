@@ -25,6 +25,7 @@ export interface ChatConversationRow {
 export interface RawChatOutput {
   reply: string;
   ask: { question: string; options: string[]; multi: boolean } | null;
+  hint: string | null; // 使用者可能接著說的一句話（輸入框的提示，不超過 20 字）
   suggestions: RawIdea[];
   mentioned_ingredients: { text: string; ingredient_id: string | null }[];
   preference_signals: { dimension_key: string; affinity: number; scope: 'long_term' | 'today' }[];
@@ -32,4 +33,4 @@ export interface RawChatOutput {
   user_wants_ideas: boolean; // 使用者這一則是不是明說要點子（按了「直接給我點子」由程式另外帶）
 }
 
-export type ChatDropReason = 'reply_wording' | 'reply_excluded' | 'ask_wording' | 'ask_excluded' | 'ask_options' | 'mention' | 'signal' | 'too_early' | 'low_coverage' | 'summary';
+export type ChatDropReason = 'reply_wording' | 'reply_excluded' | 'ask_wording' | 'ask_excluded' | 'ask_options' | 'hint' | 'mention' | 'signal' | 'too_early' | 'low_coverage' | 'summary';

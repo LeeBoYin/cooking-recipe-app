@@ -16,6 +16,37 @@ import { chatKeys, useChatConversation, useLatestChat, useSendChat } from './use
 // 送出後整段回應完成才一次出現；失敗時使用者的話留在畫面上，什麼都沒存，可以再送一次。
 export type ChatNav = { resume?: boolean } | null;
 
+// iPhone 的鍵盤出現時，版面高度（dvh）不會變，輸入框會被擋住。改成讓對話頁永遠貼著 visualViewport 的可見範圍（17〈對話頁〉）。
+// iOS 的 resize 與 scroll 事件不同時到，用事件更新會落後幾格、整頁上下跳，所以用 requestAnimationFrame 每一格直接讀、直接寫（不經過 React）。
+// 沒有 visualViewport 的瀏覽器回傳 false，版面用 h-dvh。
+function useVisualViewportFit(root: React.RefObject<HTMLDivElement | null>): number | null {
+  const [height, setHeight] = useState<number | null>(() => (typeof window === 'undefined' || !window.visualViewport ? null : Math.round(window.visualViewport.height)));
+  useEffect(() => {
+    const v = window.visualViewport;
+    if (!v) return;
+    let frame = 0;
+    let lastH = -1;
+    let lastTop = Number.NaN;
+    const tick = () => {
+      const el = root.current;
+      const h = Math.round(v.height);
+      const top = Math.round(v.offsetTop);
+      if (el && (h !== lastH || top !== lastTop)) {
+        el.style.height = `${h}px`;
+        el.style.top = `${top}px`;
+        if (h !== lastH) setHeight(h);
+        lastH = h;
+        lastTop = top;
+      }
+      frame = requestAnimationFrame(tick);
+    };
+    tick();
+    return () => cancelAnimationFrame(frame);
+  }, [root]);
+  return height;
+}
+
+
 export function ChatPage() {
   const intl = useIntl();
   const navigate = useNavigate();
@@ -37,6 +68,9 @@ export function ChatPage() {
   const send = useSendChat();
   const bottom = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
+  const [hint, setHint] = useState<string | null>(null); // 這一輪大廚給的「接著說」提示；只留在這個畫面，重開就沒有
+  const rootRef = useRef<HTMLDivElement>(null);
+  const vv = useVisualViewportFit(rootRef);
 
   useEffect(() => {
     if (convId !== undefined || kitchenPending || !latest.isFetched) return;
@@ -52,7 +86,7 @@ export function ChatPage() {
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: 'end' });
-  }, [messages.length, pending, failed, full]);
+  }, [messages.length, pending, failed, full, vv]);
   // 進來、新對話、開新的一段之後，游標回到輸入框
   useEffect(() => {
     if (!full) input.current?.focus();
@@ -69,6 +103,7 @@ export function ChatPage() {
     setDraft('');
     setPending(null);
     setFailed(null);
+    setHint(null);
     send.reset();
     void navigate('.', { replace: true, state: null });
   }
@@ -81,6 +116,7 @@ export function ChatPage() {
   function sendText(text: string, wantIdeas = false) {
     if (!text || send.isPending || loading || full) return;
     setFailed(null);
+    setHint(null);
     setPending(text);
     setDraft('');
     send.mutate(
@@ -90,6 +126,7 @@ export function ChatPage() {
           setPending(null);
           if (r.status === 'ok') {
             setConvId(r.conversationId);
+            setHint(r.hint);
             setCarryFrom(null);
           } else {
             // 這一段已經滿了（兩台裝置同時送）：重新讀，顯示「開新的一段」
@@ -116,7 +153,10 @@ export function ChatPage() {
   const unavailableLine = failed ? intl.formatMessage({ id: failed.code === 'rate_limited' ? 'chat.slowDown' : 'chat.unavailable' }) : '';
 
   return (
-    <div className="mx-auto flex h-dvh w-full max-w-[560px] flex-col bg-bg">
+    <div
+      ref={rootRef}
+      className={`mx-auto flex w-full max-w-[560px] flex-col bg-bg ${vv ? 'fixed inset-x-0' : 'h-dvh'}`}
+    >
       <header className="flex h-[52px] flex-none items-center border-b border-line px-2">
         <button
           type="button"
@@ -226,7 +266,7 @@ export function ChatPage() {
                 el.style.height = 'auto';
                 el.style.height = `${Math.min(el.scrollHeight, 144)}px`;
               }}
-              placeholder={intl.formatMessage({ id: 'chat.placeholder' })}
+              placeholder={hint && !lastAsk ? intl.formatMessage({ id: 'chat.placeholderHint' }, { hint }) : intl.formatMessage({ id: 'chat.placeholder' })}
               className="block max-h-36 min-h-11 w-full resize-none rounded-card border-0 bg-surface px-3 py-[11px] font-[inherit] text-[16px] leading-normal text-ink placeholder:text-ink-muted read-only:opacity-60"
             />
           </label>
