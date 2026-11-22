@@ -12,6 +12,7 @@ import { AiCallError, fetchHomeIdeas, getLastHomeIdeas } from '../../data/ai.ts'
 import { buildPool, hasNextIdeaSet, ideaSet } from './ideas.ts';
 import { renderMarks, viewOfAiIdea, viewOfRuleIdea, type IdeaView } from './ideaView.ts';
 import { IdeaCard } from './IdeaCard.tsx';
+import { IdeaCarousel } from './IdeaCarousel.tsx';
 import { IdeaSheet } from './IdeaSheet.tsx';
 import { useResumableChat } from '../chat/useChat.ts';
 
@@ -196,11 +197,11 @@ export function HomePage() {
         ) : (
           <>
             {limitLine && <p className="m-0 mb-1.5 font-round text-caption text-ink-muted">{limitLine}</p>}
-            <ul className="-mx-4 my-0 flex snap-x snap-mandatory scroll-px-4 list-none gap-2 overflow-x-auto px-4 pb-0 [scrollbar-width:none]">
-              {views.map((view) => (
-                <IdeaCard key={view.key} view={view} onOpen={() => setOpen(view)} />
+            <IdeaCarousel count={views.length} resetKey={views.map((v) => v.key).join('|')}>
+              {views.map((view, i) => (
+                <IdeaCard key={view.key} index={i} view={view} onOpen={() => setOpen(view)} />
               ))}
-            </ul>
+            </IdeaCarousel>
             {hasNext && (
               <div className="flex justify-end">
                 <button
