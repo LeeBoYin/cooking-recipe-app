@@ -92,10 +92,10 @@
 | `recipe_revisions` | `id` | `recipe_id`（連動） | M1b |
 | `photos` | `id` | `user_id`（連動，廚具照片為空）；`kitchen_id`（連動，廚具照片）；`created_by`（佔位） | M0（廚具、食譜、步驟照片、頭像；近況的寫入規則等好友關係建好再補） |
 | `bookmarks` | `id` | `user_id`（連動）；`recipe_id`（空值，顯示「已收起來」）；`cooked_recipe_id`（空值） | M0（大廚的點子；朋友的食譜 M2） |
-| `chef_conversations` | `id` | `user_id`（連動）；`kitchen_id`（刪廚房時設空） | M1a-07。一段對話一列：`messages`（jsonb，只經 `ai_chat_append` 附加）、`summary`、`turn_count`（0–20）、`mentioned_ingredients`、`preference_signals`（先存下，M1a-10 才算進口味）、`last_message_at`；`diners` 延後。最後一則訊息起算 30 天由每日維護刪除（`purge_old_chat_conversations`），對話的點子快取跟著刪 |
+| `chef_conversations` | `id` | `user_id`（連動）；`kitchen_id`（刪廚房時設空） | M1a-07。一段對話一列：`messages`（jsonb，只經 `ai_chat_append` 附加）、`summary`、`turn_count`（0–20）、`mentioned_ingredients`、`preference_signals`（只算長期的進口味，M1a-10a）、`last_message_at`；`diners` 延後。最後一則訊息起算 30 天由每日維護刪除（`purge_old_chat_conversations`），對話的點子快取跟著刪 |
 | `preference_profiles` | `user_id` | `auth.users`（連動） | M0 |
-| `taste_profile_snapshots` | `user_id` | `auth.users`（連動） | M1a |
-| `ai_suggestion_cache` | `id` | `user_id`（連動）；`kitchen_id`（刪廚房時設空）；`conversation_id`（空值，對話的點子用，M1a-07；連動刪除） | M1a-06（首頁點子；`drafts`、`feedback` 欄位先留，M1a-09、10 才寫） |
+| `taste_profile_snapshots` | `user_id` | `auth.users`（連動） | M1a-10a。每人一列：`computed_at`、`stale`、`period`（目前只有 `all_time`）、`data`（`schemaVersion` 1，`dims`、`context`、`sources`，`pg_jsonschema` 檢查）。本人只能讀，只經 `taste_profile_save` 寫（只給 `service_role`）；沒有這一列當作過期，所以註冊時不預先建立 |
+| `ai_suggestion_cache` | `id` | `user_id`（連動）；`kitchen_id`（刪廚房時設空）；`conversation_id`（空值，對話的點子用，M1a-07；連動刪除） | M1a-06（首頁點子；`drafts` M1a-09 起寫，`feedback` M1a-10a 起寫：收藏記 `bookmarked`、做了記 `recorded`，格式用 `pg_jsonschema` 檢查，同一個點子的同一種回饋只記一次） |
 | `share_links` | `id` | `recipe_id`（連動） | M2 |
 | `user_ingredient_mappings` | `(user_id, raw_text_normalized)` | `user_id`（連動） | M1a-05 |
 
@@ -207,7 +207,9 @@
 | `bookmark_ai_idea` | 已登入的人 | 收藏 AI 想的點子（首頁或對話，沒有 `baseDishId`）：傳點子所在的快取列 id 與菜名，理由與主要食材由那一列讀；同一則點子＋同一個菜名每人一筆（再收藏回傳既有那筆） |
 | `ai_expand_get`、`ai_expand_save` | 只給 `service_role`（`ai` 函式） | M1a-09 展開做法。`ai_expand_get(p_user, p_suggestion, p_idea, p_bookmark)` 讀點子本身（快取列加點子 ID，或收藏）、已經展開的做法（快取的 `drafts` 優先，沒有就用收藏的 `recipeDraft`）、對應的收藏、平常煮幾人份；不是本人的、不存在的回空。`ai_expand_save(p_user, p_cache, p_idea_id, p_bookmark, p_draft)` 把做法存進快取列的 `drafts`，點子已經收藏就同時存進收藏的 `recipeDraft`；`p_draft` 不是物件回 `22023` |
 | `ai_chat_get`、`ai_chat_append` | 只給 `service_role`（`ai` 函式） | `ai_chat_append` 在同一個動作中附加「使用者的話＋大廚的回應」、建立點子快取列、更新摘要與說過的食材；`p_conversation` 空的就開新的一段（可帶上一段的摘要）；滿 20 輪回 `23514`；不是本人的回 `P0002` |
-| `bookmark_recipe`、`unbookmark_recipe` | 已登入的人 | 收藏時存下菜名快照；大廚的點子另存理由與 `baseDishId`，同一道家常菜每人只能收藏一筆（再收藏回傳既有那筆）；`ideaIngredientIds` 由家常菜的主要食材算出，不信任手機送來的值。`bookmark_recipe` 可帶 `p_suggestion_id`＋`p_idea_id`，`bookmark_ai_idea` 傳的快取列也一樣：那個點子已經展開過做法就從快取讀出來一起存進 `recipeDraft`（不信任手機送來的內容）；`idea` 的其他欄位收藏後不能改，只有 `recipeDraft` 可以由後端補 |
+| `record_bookmark_cooked` | 已登入的人 | 從收藏的點子按「做了，記錄一篇」、存檔成功後呼叫：把收藏連到自己那一篇食譜（`cookedRecipeId`，只能連自己還在的），同一個動作在點子的快取還在時記一筆 `recorded` 回饋；重複呼叫不會多記。`bookmarks.cooked_recipe_id` 不能再由手機直接改 |
+| `taste_profile_save` | 只給 `service_role`（`ai` 函式） | 存重算好的口味檔案；`p_read_at` 是讀原始資料的時間，讀完之後觸發器又把這一列標成過期的，維持過期，下次再算 |
+| `bookmark_recipe`、`unbookmark_recipe` | 已登入的人 | 收藏時存下菜名快照；大廚的點子另存理由與 `baseDishId`，同一道家常菜每人只能收藏一筆（再收藏回傳既有那筆）；`ideaIngredientIds` 由家常菜的主要食材算出，不信任手機送來的值。`bookmark_recipe` 可帶 `p_suggestion_id`＋`p_idea_id`，`bookmark_ai_idea` 傳的快取列也一樣：那個點子已經展開過做法就從快取讀出來一起存進 `recipeDraft`，並記下 `origin`（快取列與點子 ID，點子真的在那一組裡才記，不信任手機送來的 ID）、在快取寫一筆 `bookmarked` 回饋（不信任手機送來的內容）；`idea` 的其他欄位收藏後不能改，只有 `recipeDraft` 可以由後端補 |
 | `share_to_friend`、`revoke_friend_share` | 作者 | 分享與收回 |
 | `toggle_reaction`、`add_comment`、`delete_comment` | 讀得到食譜的人 | 回覆只能一層 |
 | `regenerate_friend_link`、`accept_friend_link`、`remove_friend` | 本人 | 好友連結與移除好友 |
@@ -224,11 +226,13 @@
 
 用量保護（M1a-04，`functions/ai/usage.ts`＋資料庫函式）：`guard` 呼叫 `ai_guard_check`，回傳 `budget_exhausted`（全站用到 100%，含背景任務）、`over_limit`（個人合理使用上限，同時寫 `ai_usage_alerts`）、`rate_limited`（每分鐘 6／每小時 60，背景任務不算）；全站用到 80% 時依 `_shared/ai-models.ts` 的 `BUDGET_DEGRADE` 覆寫設定（首頁點子改 Haiku 5.5 關思考、靈感彩蛋回 `budget_exhausted` 讓前端用模板，對話不變）。檢查本身出錯時不放行（回 `server_error`，前端走不用 AI 的退路）。`onUsage` 用價格表（`MODEL_PRICES`，每百萬 token 的美元）算費用後呼叫 `ai_record_usage`，寫失敗只記錯誤代號、不影響回應。輸入的 SHA-256 前 32 碼與長度比例、JWT 的 `session_id` 供異常偵測用，不存內容。背景任務佇列在排隊前呼叫 `ai_budget_state()`（`ok`／`degraded`／`exhausted`），`exhausted` 時暫停。沒有設 `ANTHROPIC_API_KEY` 是 500 `not_configured`。紀錄只有任務與錯誤代號，不含使用者輸入與 AI 的回應。
 
-首頁點子（M1a-06，`functions/ai/home/`）：`index.ts` 遇到任務 `home_ideas` 時交給 `home/handler.ts`，其他任務照舊走 `runAi`。handler 先檢查帳號與開關，呼叫 `ai_home_context(p_user)`（只給 `service_role`，一次讀齊口味、飲食限制、現在廚房的食材與廚具、自己最近 200 篇已發佈的食譜、最近的首頁點子），用 `core` 的規則評分（`env.ts`，和手機同一份）算出前 15 名候選，再走新手門檻 → 快取 → `runAi`（任務定義是這一次才組好的 prompt 與 schema，所以用量保護、預算降級、停用都照常套用）→ `check.ts` 的程式再檢查 → `ai_home_cache_save`（每人只留最近 6 筆）。請求 `{ shuffle?: boolean }`，回應 `{ data: HomeIdeasResponse }`（`ok`、`not_enough`、`rules`，格式在 `core/ideas/ai-types.ts`）或錯誤代號；檢查後一個都不剩回 `invalid_output`。`dietary_profiles` 的過敏原、飲食原則、不吃的食物、不用料理酒一改，觸發器清掉這個人的點子快取。後端的程式直接用相對路徑匯入 `packages/`（本機 Edge Runtime 驗證過；雲端打包第一次部署時確認）。評估集與實跑指令見 `home/eval/`。
+首頁點子（M1a-06，`functions/ai/home/`）：`index.ts` 遇到任務 `home_ideas` 時交給 `home/handler.ts`，其他任務照舊走 `runAi`。handler 先檢查帳號與開關，呼叫 `ai_home_context(p_user)`（只給 `service_role`，一次讀齊口味、飲食限制、現在廚房的食材與廚具、自己最近 200 篇已發佈的食譜、最近的首頁點子；M1a-10a 起另附口味快照，過期或不存在時再附上重算用的原始資料：收藏的點子與對話裡的偏好），用 `core` 的規則評分（`env.ts`，和手機同一份）算出前 15 名候選，再走新手門檻 → 快取 → `runAi`（任務定義是這一次才組好的 prompt 與 schema，所以用量保護、預算降級、停用都照常套用）→ `check.ts` 的程式再檢查 → `ai_home_cache_save`（每人只留最近 6 筆）。請求 `{ shuffle?: boolean }`，回應 `{ data: HomeIdeasResponse }`（`ok`、`not_enough`、`rules`，格式在 `core/ideas/ai-types.ts`）或錯誤代號；檢查後一個都不剩回 `invalid_output`。`dietary_profiles` 的過敏原、飲食原則、不吃的食物、不用料理酒一改，觸發器清掉這個人的點子快取。後端的程式直接用相對路徑匯入 `packages/`（本機 Edge Runtime 驗證過；雲端打包第一次部署時確認）。評估集與實跑指令見 `home/eval/`。
 
 和大廚聊聊（M1a-07，`functions/ai/chat/`）：任務 `chat` 同樣由 `index.ts` 交給 `chat/handler.ts`。輸入 `{ message, conversationId?, continueFrom?, wantIdeas? }`（`wantIdeas`：按了「直接給我點子」）（`message` 每則上限 500 字；`conversationId` 接著聊，`continueFrom` 是滿 20 輪的那一段，新的一段從它的條件摘要開始）。流程：帳號與開關 → `ai_chat_get` → `ai_home_context`（和首頁同一份資料）→ `chat/env.ts` 在首頁的環境上依這段對話說過的食材調整 L1 候選 → `chat/prompt.ts`（stable 與 volatile 一起快取，最近 10 輪原文加摘要，這一則的食材與候選放在最後一則使用者的話前面）→ `runAi`（串流呼叫 Claude、收完整段）→ `chat/check.ts`（點子走首頁同一套 `checkHomeOutput`，另外檢查大廚的話、反問、說過的食材、偏好訊號、摘要）→ 太早給點子（還不到 3 輪、使用者沒要求）或點子用到的提到食材太少時，帶 `retryHint` 重寫一次（M1a-09f；輪數由程式看對話裡大廚回應了幾次）→ `ai_chat_append`（`p_ask` 是 `{ question, options, multi }` 的 jsonb，沒有反問就 null）→ 回傳 `ChatResponse`。輸出 schema 每次都一樣；回應沒過檢查（`reply` 帶單位的數字、碰到排除清單，或給了點子卻一個都不剩）回 `invalid_output`，什麼都不存。使用者說的食材不寫進食材，只放在這段對話的 `mentioned_ingredients`，點子可以用，存成 `usesMentionedIds`。
 
 展開做法（M1a-09，`functions/ai/expand/`）：任務 `expand_steps` 由 `index.ts` 交給 `expand/handler.ts`。輸入 `{ suggestionId, ideaId }`（首頁或對話的點子）或 `{ bookmarkId }`（收藏的點子），其他一律 `invalid_input`；自己的食譜（候選是 `own:`）也是 `invalid_input`，手機直接打開食譜。流程：帳號與開關 → `ai_expand_get`（點子與已經展開的做法）→ `ai_home_context` → 已經展開過的重新檢查過敏原與限制，過了就直接回（來源 `cache`，不呼叫 AI、不算用量；點子後來才收藏就補存進收藏）→ `expand/prompt.ts`（stable 固定、volatile 放語氣、口味、排除清單、廚具與當地的中心溫度表，這個點子與手邊食材在最後）→ `runAi`（照常過 `guard`／`onUsage`）→ `expand/check.ts` → 沒過就整份重寫一次（只告訴 AI 哪一類沒過）→ `ai_expand_save` → 回傳 `ExpandResponse`。輸出 schema 每個人都一樣（單位的 enum 固定為公制與計數單位）。失敗（逾時、AI 不能用、兩次都沒過）回錯誤代號、什麼都不存。舒肥的安全表（`packages/equipment/safety/*/sous-vide-presets.json`）目前是空的，所以任何舒肥步驟都會被擋下。
+
+口味檔案（M1a-10a，`functions/ai/taste.ts`）：首頁、對話、展開做法讀口味前都先呼叫 `withMergedTaste`：快照新鮮就直接用；過期或不存在就用 `core` 的 `computeTasteProfile` 重算，經 `taste_profile_save`（帶讀取時間）存回去，存失敗只記代號、這一次照用算好的。算出來的合併口味放進 `buildHomeEnv`，首頁快取的雜湊用它，所以口味變了不沿用舊點子。收藏的家常菜用基礎菜色的菜系、食材、手法；AI 想的點子只有主要食材。
 
 模型設定檔在 `functions/_shared/ai-models.ts`：每個任務的模型、effort、思考開關（`adaptive`／`off`）、輸出上限；改這個檔就換模型。`admin` 函式的 `get_ai_models` 唯讀顯示它（不含內部任務）。任務的輸入檢查、prompt、輸出 schema 登記在 `functions/ai/tasks.ts`；目前只有內部測試用的 `_selftest`，只有環境變數 `AI_ALLOW_INTERNAL_TASKS=true`（本機與測試專案）才能呼叫，正式專案不設。輸出用 `_shared/json-schema.ts` 的小型驗證器檢查（不用 ajv：它靠 `new Function`，Edge Runtime 不保證能跑）。|
 | `accept-invite` | 持有邀請連結或邀請碼的人 | 新註冊（密碼）或已有帳號的人接受家人邀請；建立帳號與初始資料（見第八節）。密碼註冊：驗證 token（存在、沒撤銷、沒用過、沒過期、email 相符，不分大小寫）→ 用 admin API 建立已確認 email 的使用者（不寄信）→ `complete_invite_signup`；失敗時刪掉剛建的使用者，回應與紀錄不含 email 與 token。用 `body.action` 分四個動作（沒填當作 `signup`）：
@@ -264,7 +268,7 @@
 | `comments` 新增 | 回覆只能一層 |
 | `notifications` 新增 | Realtime 推給收件人，「我的」分頁出現紅點 |
 | `pantry_items`、`kitchen_equipment` 變更 | Realtime 推給同廚房的成員 |
-| `preference_profiles`、`recipes`、`bookmarks`、`ai_suggestion_cache`（回饋）、`pantry_items` 變更 | 把相關使用者的 `taste_profile_snapshots.stale` 設為真；實際重算在 `ai` 函式裡做 |
+| `preference_profiles`（維度或情境）、`bookmarks`（新增、取消收藏、連到食譜）、`ai_suggestion_cache`（回饋）、`pantry_items`（新增、移除、食材或廚房改變；同廚房的成員都標）、`chef_conversations`（偏好訊號）變更 | 把相關使用者的 `taste_profile_snapshots.stale` 設為真（已經是過期就不寫）；實際重算在 `ai` 函式裡做。`recipes` 要等 M1b 發佈後整理寫好標籤才接 |
 
 衍生欄位不靠觸發器，在 `save_recipe` 等函式裡一起計算，比較好測試。
 

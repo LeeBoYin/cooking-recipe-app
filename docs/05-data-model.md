@@ -550,6 +550,7 @@ interface Bookmark extends UserEntity {
     why?: string;
     recipeDraft?: RecipeDraft;   // 展開好的做法（見 AiSuggestionCache）；收藏前已經展開過就一起存，沒有的話第一次打開收藏時才產生並存進來
     suggestionId?: string;
+    origin?: { suggestionId: string; ideaId: string };   // 點子在哪一組快取的哪一個；記「做了」的回饋時用（點子沒收藏過快取就沒有）
     baseDishId?: string;      // 點子來自內建家常菜時記下：展開做法時當依據，也用來判斷同一道是否已收藏（每人每道最多一筆）；AI 想的點子沒有 baseDishId，用 suggestionId＋菜名判斷
   };
   ideaIngredientIds?: string[];   // 衍生（只有 chef_idea）：點子的主要食材；friend_recipe 直接讀原作的 ingredientIds，不另存，原作更新也不用改別人的資料
@@ -569,7 +570,7 @@ interface ChefConversation extends UserEntity {   // 只有本人能讀；管理
   turnCount: number;          // 最多 20 輪（用量保護）
   messages: ChefMessage[];    // 內嵌陣列（jsonb）；只由後端的 ai 函式在同一個動作中附加「使用者的話＋大廚的回應」，手機不直接改這個欄位，兩台裝置同時送也不會互相蓋掉
   mentionedIngredients: { text: string; ingredientId?: string }[];   // 對話中說的食材（含廚房有的）；只用在這段對話，不寫進食材；點子卡片的「你提到的食材」用它
-  preferenceSignals: { dimensionKey: string; affinity: number; scope: 'long_term' | 'today' }[];   // 從對話學口味（P1）：M1a-07 先存下，M1a-10 才算進口味
+  preferenceSignals: { dimensionKey: string; affinity: number; scope: 'long_term' | 'today' }[];   // 從對話學口味（P1）：M1a-07 存下，長期的由 M1a-10a 算進口味檔案
   lastMessageAt: Instant;
 }
 
@@ -716,12 +717,12 @@ interface UserSettings extends UserEntity {   // 只有本人能讀
 ### 衍生／快取資料（由程式算出或後端產生）
 
 ```ts
-interface TasteProfileSnapshot {      // 由後端用 core 套件計算（不信任手機上傳的結果）；只有本人與 AI 代理能讀，手機只讀來顯示
+interface TasteProfileSnapshot {      // 由 ai 函式用 core 套件計算（不信任手機上傳的結果）；本人只能讀，只經資料庫函式寫入；每人一列，沒有這一列當作過期
   userId: string;
   computedAt: Instant;
-  stale: boolean;                     // 口味地圖、食譜、收藏、點子回饋、食材改變時由觸發器標記；下次呼叫 AI 或打開口味頁前重算
-  period: 'last_30_days' | 'last_90_days' | 'all_time';
-  data: TasteProfile;                 // 見 03 AI 設計
+  stale: boolean;                     // 口味地圖、收藏、點子回饋、食材櫃、對話的偏好改變時由觸發器標記；ai 函式用到口味前重算
+  period: 'all_time';                 // 之後要做「最近 30／90 天」再放寬
+  data: { schemaVersion: 1; dims; context; sources };   // dims 與 context 同 TasteProfile，sources 是各來源的筆數（見 03〈口味檔案〉）；用 pg_jsonschema 檢查格式
 }
 
 // 展開好的做法（快取的 drafts 與收藏的 recipeDraft 同一種格式）：份量與溫度用結構化欄位（公制與攝氏），手機依偏好顯示
@@ -746,7 +747,7 @@ interface AiSuggestionCache {       // 存在後端，換手機也看得到上�
   expiresAt: string;                  // 產生後一天；每人的首頁點子只留最近 6 筆
   payload: unknown;                   // 結構化輸出（點子卡片，不含做法）：{ schemaVersion: 1, ideas: AiIdea[], chefComment: string | null, model: string }，見 03〈輸出格式〉
   drafts?: Record<string, RecipeDraft>;   // 依點子 ID 存「展開做法」的結果；同一個點子不重算，失敗的不存
-  feedback: { ideaId: string; action: 'bookmarked' | 'recorded' | 'dismissed'; reason?: string; at: Instant }[];   // 每個點子各自的回饋（首頁一組最多 5 個點子），用來學口味（M1a-10 才寫）
+  feedback: { ideaId: string; action: 'bookmarked' | 'recorded' | 'dismissed'; reason?: string; at: Instant }[];   // 每個點子各自的回饋（首頁一組最多 5 個點子），用來學口味（M1a-10a 起寫：收藏記 `bookmarked`、「做了，記錄一篇」記 `recorded`；`dismissed` 還沒有來源）。快取過期被刪就沒有回饋，口味的計算不靠它，靠收藏本身
 }
 // 飲食限制（過敏原、飲食原則、不吃的食物、不用料理酒）一改，由觸發器清掉這個人所有的點子快取：
 // 手機打開首頁會先顯示上次的點子，不能讓剛加了過敏原的人看到舊的點子。

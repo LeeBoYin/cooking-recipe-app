@@ -197,6 +197,7 @@ function harness(c: ExpandCase, responses: (RawDraft | 'upstream' | 'refusal')[]
     rpc: ((fn: string, args: Record<string, unknown>) => {
       if (fn === 'ai_expand_get') return Promise.resolve({ data: { ...c.row, ...rowOver }, error: null });
       if (fn === 'ai_home_context') return Promise.resolve({ data: c.ctx, error: null });
+      if (fn === 'taste_profile_save') return Promise.resolve({ data: null, error: null });
       if (fn === 'ai_expand_save') {
         saves.push(args);
         return Promise.resolve({ data: null, error: null });

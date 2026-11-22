@@ -150,7 +150,10 @@ export function termsOf(id: string, minAlias = 2): string[] {
 }
 
 export function buildHomeEnv(ctx: HomeContextRow, now: Date): HomeEnv {
-  const { profile, occasional } = profileFrom(ctx.taste);
+  const explicit = profileFrom(ctx.taste);
+  const occasional = explicit.occasional;
+  // 合併後的口味（口味地圖＋收藏、回饋、對話、食材）；沒有時只用口味地圖
+  const profile: TasteProfile = ctx.merged_taste ?? explicit.profile;
   const limits = limitsFrom(ctx.dietary);
   const today = todayInTimeZone(now, ctx.kitchen.timezone);
   const owned: OwnedEquipment[] | null =

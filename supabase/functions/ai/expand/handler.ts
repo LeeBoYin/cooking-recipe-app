@@ -8,6 +8,7 @@ import { type AiErrorCode, type Deps, runAi, type TaskDefinition } from '../pipe
 import type { Rpc } from '../usage.ts';
 import { buildHomeEnv } from '../home/env.ts';
 import type { HomeContextRow } from '../home/types.ts';
+import { withMergedTaste } from '../taste.ts';
 import { checkDraft, storedDraftOk } from './check.ts';
 import { ideaFromRow } from './idea.ts';
 import { buildExpandPrompt, buildExpandSchema } from './prompt.ts';
@@ -69,7 +70,7 @@ export async function runExpandSteps(deps: ExpandDeps, userId: string, rawInput:
     throw new Error('home_context');
   }
   if (!ctx.data) return { ok: false, error: 'invalid_input' };
-  const env = buildHomeEnv(ctx.data as HomeContextRow, now);
+  const env = buildHomeEnv(await withMergedTaste(ctx.data as HomeContextRow, deps.rpc, userId, now), now);
 
   const save = async (draft: RecipeDraft): Promise<void> => {
     const saved = await deps.rpc('ai_expand_save', {

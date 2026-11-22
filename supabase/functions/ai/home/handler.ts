@@ -6,6 +6,7 @@ import { type AiErrorCode, type ClaudeResponse, type Deps, runAi, type TaskDefin
 import type { Rpc } from '../usage.ts';
 import { checkHomeOutput, normalizeTitle, recheckCachedIdeas } from './check.ts';
 import { buildHomeEnv, type HomeEnv } from './env.ts';
+import { withMergedTaste } from '../taste.ts';
 import { buildHomePrompt, buildHomeSchema } from './prompt.ts';
 import type { HomeContextRow, HomeIdea, HomePayload, HomeResponse, RawOutput } from './types.ts';
 
@@ -82,7 +83,7 @@ export async function runHomeIdeas(deps: HomeDeps, userId: string, rawInput: unk
     throw new Error('home_context');
   }
   if (!data) return { ok: true, data: { status: 'rules' } }; // 沒有廚房：沒有東西可以算
-  const env = buildHomeEnv(data as HomeContextRow, now);
+  const env = buildHomeEnv(await withMergedTaste(data as HomeContextRow, deps.rpc, userId, now), now);
 
   // 新手門檻（12）：口味不夠把握、又沒有自己的食譜，不叫 AI
   if (env.notEnough) return { ok: true, data: { status: 'not_enough' } };

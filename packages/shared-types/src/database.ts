@@ -675,6 +675,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"taste_profile_snapshots": {
+                  Row: {
+                    "computed_at": string,"created_at": string,"data": NonNullable<Json>,"period": string,"stale": boolean,"updated_at": string,"user_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "computed_at"?: string,"created_at"?: string,"data": NonNullable<Json>,"period"?: string,"stale"?: boolean,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "computed_at"?: string,"created_at"?: string,"data"?: NonNullable<Json>,"period"?: string,"stale"?: boolean,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"user_identities": {
                   Row: {
                     "created_at": string,"display_name": string,"updated_at": string,"user_id": string
@@ -1050,6 +1064,25 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"record_bookmark_cooked":
+{ Args: { "p_bookmark": string,"p_recipe": string }; Returns: {
+              "cooked_recipe_id": string | null,
+"created_at": string,
+"deleted_at": string | null,
+"id": string,
+"idea": NonNullable<Json>,
+"idea_ingredient_ids": (string)[],
+"kind": string,
+"note": string | null,
+"updated_at": string,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "bookmarks"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "redeem_invite_code":
 { Args: { "p_code_hash": string,"p_source_hash": string }; Returns: {
               "email": string,"invite_id": string,"locked_until": string,"result": string
@@ -1226,6 +1259,9 @@ isOneToOne: false
                            },
 "setup_new_user":
 { Args: { "p_create_kitchen"?: boolean,"p_display_name"?: string,"p_kitchen_name"?: string,"p_region"?: string,"p_timezone"?: string,"p_user_id": string }; Returns: string
+                           },
+"taste_profile_save":
+{ Args: { "p_data": Json,"p_read_at": string,"p_user": string }; Returns: undefined
                            },
 "unbookmark_recipe":
 { Args: { "p_id": string }; Returns: undefined

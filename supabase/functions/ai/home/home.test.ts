@@ -250,6 +250,7 @@ function harness(caseId: string, opts: { account?: AiContext; reply?: (env: Home
         recent = [{ id: `row${saved.length}`, input_hash: String(args.p_input_hash), round: Number(args.p_round), created_at: (c.now ?? NOW).toISOString(), expires_at: new Date((c.now ?? NOW).getTime() + CACHE_TTL_HOURS * 3600_000).toISOString(), payload: args.p_payload }, ...recent];
         return Promise.resolve({ data: 'row', error: null });
       }
+      if (fn === 'taste_profile_save') return Promise.resolve({ data: null, error: null });
       return Promise.resolve({ data: null, error: { code: 'unknown' } });
     },
   };

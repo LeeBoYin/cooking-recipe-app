@@ -108,6 +108,7 @@
 | 什麼時候看 | 項目 | 類型 | 細節 |
 |-----------|------|------|------|
 | M0 開發時 | 字型子集化，減少中文字型的下載量 | 優化 | [04](04-architecture.md#之後可以擴充與檢討) |
+| M1b 之後 | 口味「不一致時問一句」：最近記錄了好幾道辣的菜、辣度設定卻很低，最多每月在首頁問一次「要把辣度調高嗎」（見 [13 第六節](13-taste-preferences.md)）。M1a-10a 沒做；要等食譜的標籤寫好、記錄的食譜算進口味之後，才有「最近記錄」的資料可以比對 | 擴充 | [13](13-taste-preferences.md) |
 | M1a 之後 | 食材對應的手動修正畫面（「這其實是○○」）：後端的 `set_my_ingredient_mapping` 已有，看測試時常錯在哪，再決定入口放食材清單、食譜頁或兩邊 | 擴充 | [16](16-backend-implementation.md) |
 | M1b 前 | 手法的技巧等級（必要） | 擴充 | [07](07-equipment-techniques.md#七之後可以擴充與檢討) |
 |  | 首頁點子與口述整理改用 Haiku 5.5 的比較 | 優化 | [03](03-ai-design.md#之後可以擴充與檢討) |
@@ -160,7 +161,6 @@
 |  | 收藏的材料齊了提醒 | `recipes.ingredient_ids`、`bookmarks.idea_ingredient_ids` 的索引 | M3 |
 |  | 節日與節氣靈感 | `RegionProfile.holidays`、`BaseDish`（補資料） | M3 |
 |  | 「換手法」變奏、沒有某件廚具時的替代做法 | 廚具字典的手法、`TechniqueSubstitute` | M1b |
-|  | 從對話學口味 | `PreferenceProfile` 的 `learned` 來源 | M3 |
 |  | 「對你來說」的個人化難易度 | 讀取時換算，不改 `Recipe.difficulty` | 難易度上線半年後 |
 | 回顧 | 季節回顧、一年前的今天 | `cookedDates`、`aiTags.cuisineKeys`、`techniques` | M3 |
 |  | 翻車博物館、家的味道 | 「值得記住的原因」、可見範圍「家人」 | M3、M4 |

@@ -6,6 +6,7 @@ import { CHAT_MAX_TURNS, CHAT_MAX_USER_CHARS, type AiIdea, type ChatInput, type 
 import { type AiErrorCode, type Deps, runAi, type TaskDefinition } from '../pipeline.ts';
 import type { Rpc } from '../usage.ts';
 import type { HomeContextRow } from '../home/types.ts';
+import { withMergedTaste } from '../taste.ts';
 import { checkChatOutput, retryHint, type ChatCheck } from './check.ts';
 import { buildChatEnv } from './env.ts';
 import { buildChatPrompt, buildChatSchema } from './prompt.ts';
@@ -76,7 +77,7 @@ export async function runChat(deps: ChatDeps, userId: string, rawInput: unknown)
     throw new Error('home_context');
   }
   if (!ctxRes.data) return { ok: false, error: 'invalid_input' }; // 沒有廚房：沒有東西可以聊
-  const ce = buildChatEnv(ctxRes.data as HomeContextRow, now, conv, input.message);
+  const ce = buildChatEnv(await withMergedTaste(ctxRes.data as HomeContextRow, deps.rpc, userId, now), now, conv, input.message);
 
   // 這是大廚在這段對話的第幾輪回應：看對話裡大廚已經回應了幾次，不靠模型自己數
   const chefTurn = (conv?.messages ?? []).filter((m) => m.role === 'chef').length + 1;
