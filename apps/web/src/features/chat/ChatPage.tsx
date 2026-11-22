@@ -16,34 +16,36 @@ import { chatKeys, useChatConversation, useLatestChat, useSendChat } from './use
 // 送出後整段回應完成才一次出現；失敗時使用者的話留在畫面上，什麼都沒存，可以再送一次。
 export type ChatNav = { resume?: boolean } | null;
 
-// iPhone 的鍵盤出現時，版面高度（dvh）不會變，輸入框會被擋住。改成只跟著 visualViewport 的高度，top 固定 0（17〈對話頁〉）。
-// iOS 在鍵盤動畫途中會暫時捲動 layout viewport（offsetTop 變大），跟著它整頁會上下跳，所以鎖住頁面捲動、一有捲動就拉回 0。
-// 沒有 visualViewport 的瀏覽器回傳 null，版面用 h-dvh。
-function useVisualViewport(): number | null {
-  const [vv, setVv] = useState<number | null>(() => read());
+// iPhone 的鍵盤出現時，版面高度（dvh）不會變，輸入框會被擋住。改成讓對話頁永遠貼著 visualViewport 的可見範圍（17〈對話頁〉）。
+// iOS 的 resize 與 scroll 事件不同時到，用事件更新會落後幾格、整頁上下跳，所以用 requestAnimationFrame 每一格直接讀、直接寫（不經過 React）。
+// 沒有 visualViewport 的瀏覽器回傳 false，版面用 h-dvh。
+function useVisualViewportFit(root: React.RefObject<HTMLDivElement | null>): number | null {
+  const [height, setHeight] = useState<number | null>(() => (typeof window === 'undefined' || !window.visualViewport ? null : Math.round(window.visualViewport.height)));
   useEffect(() => {
     const v = window.visualViewport;
     if (!v) return;
-    const html = document.documentElement;
-    const prev = { html: html.style.overflow, body: document.body.style.overflow };
-    html.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
-    const update = () => {
-      if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0);
-      setVv(read());
+    let frame = 0;
+    let lastH = -1;
+    let lastTop = Number.NaN;
+    const tick = () => {
+      const el = root.current;
+      const h = Math.round(v.height);
+      const top = Math.round(v.offsetTop);
+      if (el && (h !== lastH || top !== lastTop)) {
+        el.style.height = `${h}px`;
+        el.style.top = `${top}px`;
+        if (h !== lastH) setHeight(h);
+        lastH = h;
+        lastTop = top;
+      }
+      frame = requestAnimationFrame(tick);
     };
-    update();
-    v.addEventListener('resize', update);
-    v.addEventListener('scroll', update);
-    return () => {
-      v.removeEventListener('resize', update);
-      v.removeEventListener('scroll', update);
-      html.style.overflow = prev.html;
-      document.body.style.overflow = prev.body;
-    };
-  }, []);
-  return vv;
+    tick();
+    return () => cancelAnimationFrame(frame);
+  }, [root]);
+  return height;
 }
+
 // 暫時的除錯浮層（網址加 ?kbdebug=1 才出現）：記下鍵盤動畫中 visualViewport 的數值。查完鍵盤跳動就拿掉。
 function KbDebug({ root }: { root: React.RefObject<HTMLDivElement | null> }) {
   const [lines, setLines] = useState<string[]>([]);
@@ -80,10 +82,6 @@ function KbDebug({ root }: { root: React.RefObject<HTMLDivElement | null> }) {
   );
 }
 
-function read(): number | null {
-  const v = typeof window === 'undefined' ? null : window.visualViewport;
-  return v ? Math.round(v.height) : null;
-}
 
 export function ChatPage() {
   const intl = useIntl();
@@ -107,8 +105,8 @@ export function ChatPage() {
   const bottom = useRef<HTMLDivElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const [hint, setHint] = useState<string | null>(null); // 這一輪大廚給的「接著說」提示；只留在這個畫面，重開就沒有
-  const vv = useVisualViewport();
   const rootRef = useRef<HTMLDivElement>(null);
+  const vv = useVisualViewportFit(rootRef);
   const kbDebug = new URLSearchParams(location.search).has('kbdebug');
 
   useEffect(() => {
@@ -194,8 +192,7 @@ export function ChatPage() {
   return (
     <div
       ref={rootRef}
-      className={`mx-auto flex w-full max-w-[560px] flex-col bg-bg ${vv ? 'fixed inset-x-0 top-0' : 'h-dvh'}`}
-      style={vv ? { height: vv } : undefined}
+      className={`mx-auto flex w-full max-w-[560px] flex-col bg-bg ${vv ? 'fixed inset-x-0' : 'h-dvh'}`}
     >
       <header className="flex h-[52px] flex-none items-center border-b border-line px-2">
         <button
