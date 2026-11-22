@@ -47,6 +47,17 @@ Deno.test('快照新鮮：直接用，不重算、不存', async () => {
   assertEquals(calls.length, 0);
 });
 
+Deno.test('快照超過 30 天沒重算：即使 stale 是 false 也重算', async () => {
+  const { rpc, calls } = fakeRpc();
+  const c = withInputs({ taste_snapshot: { stale: false, computed_at: '2026-10-01T00:00:00Z', data: snapshot() } });
+  await withMergedTaste(c, rpc, 'u1', NOW);
+  assertEquals(calls.length, 1);
+  const young = withInputs({ taste_snapshot: { stale: false, computed_at: '2026-11-10T00:00:00Z', data: snapshot() } });
+  const { rpc: rpc2, calls: calls2 } = fakeRpc();
+  await withMergedTaste(young, rpc2, 'u1', NOW);
+  assertEquals(calls2.length, 0);
+});
+
 Deno.test('沒有快照：重算並存回去（帶讀取時間），格式是 schemaVersion 1', async () => {
   const { rpc, calls } = fakeRpc();
   const out = await withMergedTaste(withInputs(), rpc, 'u1', NOW);

@@ -401,6 +401,7 @@ declare
   v_kitchen public.kitchens;
   v_snapshot public.taste_profile_snapshots;
   v_need boolean;
+  v_stale boolean;
 begin
   select * into v_settings from public.user_settings where user_id = p_user;
   if not found then
@@ -420,7 +421,9 @@ begin
 
   -- 口味檔案的快照：不存在或過期就一併回傳重算要用的原始資料（ai 函式用 core 重算再存回去）
   select * into v_snapshot from public.taste_profile_snapshots where user_id = p_user;
-  v_need := v_snapshot.user_id is null or v_snapshot.stale;
+  -- 超過 30 天沒重算的也當過期，隱含訊號隨時間變輕才會發生（core 的 SNAPSHOT_MAX_AGE_DAYS 同一個天數）
+  v_stale := v_snapshot.stale or v_snapshot.computed_at < now() - interval '30 days';
+  v_need := v_snapshot.user_id is null or v_stale;
 
   return jsonb_build_object(
     'read_at', now(),
@@ -431,7 +434,7 @@ begin
       from public.preference_profiles pp where pp.user_id = p_user
     ),
     'taste_snapshot', case when v_snapshot.user_id is null then null
-      else jsonb_build_object('stale', v_snapshot.stale, 'data', v_snapshot.data) end,
+      else jsonb_build_object('stale', v_stale, 'computed_at', v_snapshot.computed_at, 'data', v_snapshot.data) end,
     'taste_inputs', case when not v_need then null else jsonb_build_object(
       -- 收藏的點子（還在收藏裡的）；cooked：已經從這個收藏記錄了自己的版本
       'saved', coalesce((
