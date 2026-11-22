@@ -44,6 +44,42 @@ function useVisualViewport(): number | null {
   }, []);
   return vv;
 }
+// 暫時的除錯浮層（網址加 ?kbdebug=1 才出現）：記下鍵盤動畫中 visualViewport 的數值。查完鍵盤跳動就拿掉。
+function KbDebug({ root }: { root: React.RefObject<HTMLDivElement | null> }) {
+  const [lines, setLines] = useState<string[]>([]);
+  useEffect(() => {
+    const v = window.visualViewport;
+    if (!v) return;
+    let t0 = performance.now();
+    const log = (ev: string) => {
+      const top = root.current?.getBoundingClientRect().top ?? NaN;
+      const line = `${Math.round(performance.now() - t0)}ms ${ev} vh=${Math.round(v.height)} vtop=${Math.round(v.offsetTop)} sy=${Math.round(window.scrollY)} ih=${window.innerHeight} root=${Math.round(top)}`;
+      setLines((l) => [...l.slice(-13), line]);
+    };
+    const on = (name: string) => () => log(name);
+    const fin = () => { t0 = performance.now(); setLines([]); log('focusin'); };
+    const fout = () => { t0 = performance.now(); log('focusout'); };
+    const r = on('vv.resize'), sc = on('vv.scroll'), ws = on('win.scroll');
+    v.addEventListener('resize', r);
+    v.addEventListener('scroll', sc);
+    window.addEventListener('scroll', ws);
+    document.addEventListener('focusin', fin);
+    document.addEventListener('focusout', fout);
+    return () => {
+      v.removeEventListener('resize', r);
+      v.removeEventListener('scroll', sc);
+      window.removeEventListener('scroll', ws);
+      document.removeEventListener('focusin', fin);
+      document.removeEventListener('focusout', fout);
+    };
+  }, [root]);
+  return (
+    <pre className="pointer-events-none fixed top-14 left-0 z-50 m-0 max-w-full whitespace-pre-wrap bg-black/70 p-1 font-mono text-[9px] leading-tight text-white">
+      {lines.join('\n')}
+    </pre>
+  );
+}
+
 function read(): number | null {
   const v = typeof window === 'undefined' ? null : window.visualViewport;
   return v ? Math.round(v.height) : null;
@@ -72,6 +108,8 @@ export function ChatPage() {
   const input = useRef<HTMLTextAreaElement>(null);
   const [hint, setHint] = useState<string | null>(null); // 這一輪大廚給的「接著說」提示；只留在這個畫面，重開就沒有
   const vv = useVisualViewport();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const kbDebug = new URLSearchParams(location.search).has('kbdebug');
 
   useEffect(() => {
     if (convId !== undefined || kitchenPending || !latest.isFetched) return;
@@ -155,6 +193,7 @@ export function ChatPage() {
 
   return (
     <div
+      ref={rootRef}
       className={`mx-auto flex w-full max-w-[560px] flex-col bg-bg ${vv ? 'fixed inset-x-0 top-0' : 'h-dvh'}`}
       style={vv ? { height: vv } : undefined}
     >
@@ -284,6 +323,7 @@ export function ChatPage() {
         </form>
       )}
 
+      {kbDebug && <KbDebug root={rootRef} />}
       {open && <IdeaSheet view={open} onClose={() => setOpen(null)} />}
     </div>
   );
