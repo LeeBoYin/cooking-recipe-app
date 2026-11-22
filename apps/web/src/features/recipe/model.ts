@@ -246,4 +246,12 @@ export function isBlank(form: EditorForm): boolean {
   );
 }
 
+// 產品事件用：這篇做到哪（放棄時記 step）。只看有沒有內容，不記內容本身
+export function recordProgress(form: EditorForm): 'blank' | 'photo' | 'text' | 'method' {
+  if (form.ingredients.some((i) => i.text.trim() !== '') || form.steps.some((s) => s.text.trim() !== '') || form.tips.trim() !== '') return 'method';
+  if (form.title.trim() !== '' || form.story.trim() !== '') return 'text';
+  if (allPhotos(form).length > 0) return 'photo';
+  return 'blank';
+}
+
 export { difficultyOverall };

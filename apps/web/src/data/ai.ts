@@ -2,6 +2,7 @@
 // 失敗時只拿到錯誤代號，由各畫面依代號顯示「目前無法使用」的說法（03〈AI 不能用時〉），不顯示次數，也不改用別的挑法。
 import type { AiIdea, AiIdeasPayload, ChatInput, ChatMention, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse } from '@zhusha/core';
 import { supabase } from './supabase.ts';
+import { trackAiError } from './trackError.ts';
 
 // 和 supabase/functions/ai/pipeline.ts 的 AiErrorCode 一致，加上手機端的 network
 export type AiError =
@@ -51,7 +52,9 @@ export async function callAi<T>(task: string, input: unknown): Promise<T> {
     }
     return (data as { data: T }).data;
   } catch (e) {
-    throw e instanceof AiCallError ? e : new AiCallError('network');
+    const err = e instanceof AiCallError ? e : new AiCallError('network');
+    trackAiError(err.code);
+    throw err;
   }
 }
 

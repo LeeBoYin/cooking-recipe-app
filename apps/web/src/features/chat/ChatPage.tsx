@@ -7,6 +7,8 @@ import { Chef } from '../../chef/Chef.tsx';
 import { AiCallError, isResumable, type AiError, type ChatConversation } from '../../data/ai.ts';
 import { useCurrentKitchen, useMySettings } from '../../data/hooks.ts';
 import { IdeaCard } from '../home/IdeaCard.tsx';
+import { trackIdea, trackIdeaShown } from '../home/trackIdea.ts';
+import { track } from '../../data/track.ts';
 import { IdeaSheet } from '../home/IdeaSheet.tsx';
 import { renderMarks, viewOfAiIdea, type IdeaView } from '../home/ideaView.ts';
 import { chatKeys, useChatConversation, useLatestChat, useSendChat } from './useChat.ts';
@@ -115,6 +117,9 @@ export function ChatPage() {
 
   function sendText(text: string, wantIdeas = false) {
     if (!text || send.isPending || loading || full) return;
+    // 產品事件：新的一段第一則算開始；只記第幾輪，不記內容
+    if (messages.length === 0) track('chat.start');
+    track('chat.message_sent', { turn: Math.min((conv.data?.turnCount ?? 0) + 1, CHAT_MAX_TURNS) });
     setFailed(null);
     setHint(null);
     setPending(text);
@@ -189,7 +194,7 @@ export function ChatPage() {
         ) : null}
 
         {messages.map((m) => (
-          <Message key={m.id} message={m} conv={conv.data ?? null} tempPref={tempPref} onOpen={setOpen} />
+          <Message key={m.id} message={m} conv={conv.data ?? null} tempPref={tempPref} onOpen={(view) => { trackIdea('suggestion.opened', view, 'chat'); setOpen(view); }} />
         ))}
         {lastAsk && <Options key={last?.id} ask={lastAsk} onPick={(text) => sendText(text)} />}
 
@@ -283,7 +288,7 @@ export function ChatPage() {
         </form>
       )}
 
-      {open && <IdeaSheet view={open} onClose={() => setOpen(null)} />}
+      {open && <IdeaSheet view={open} source="chat" onClose={() => setOpen(null)} />}
     </div>
   );
 }
@@ -344,6 +349,9 @@ function Message({ message, conv, tempPref, onOpen }: {
     () => (message.suggestionId ? (conv?.suggestions.get(message.suggestionId) ?? []).map((i) => viewOfAiIdea(i, tempPref, message.suggestionId)) : []),
     [message.suggestionId, conv, tempPref],
   );
+  useEffect(() => {
+    for (const view of ideas) trackIdeaShown(view, 'chat');
+  }, [ideas]);
   if (message.role === 'user') return <UserBubble text={message.text} />;
   return (
     <>
@@ -357,7 +365,7 @@ function Message({ message, conv, tempPref, onOpen }: {
       {ideas.length > 0 && (
         <ul aria-label={intl.formatMessage({ id: 'chat.ideasHeading' })} className="m-0 ml-8 flex list-none flex-col gap-2 p-0">
           {ideas.map((view) => (
-            <IdeaCard key={view.key} view={view} layout="chat" mentioned={conv?.mentioned ?? []} onOpen={() => onOpen(view)} />
+            <IdeaCard key={view.key} view={view} source="chat" layout="chat" mentioned={conv?.mentioned ?? []} onOpen={() => onOpen(view)} />
           ))}
         </ul>
       )}

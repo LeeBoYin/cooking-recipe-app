@@ -1,3 +1,4 @@
+import { track } from '../../data/track.ts';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate, useSearchParams } from 'react-router';
@@ -91,6 +92,8 @@ function Explore({ onFinish, doneId, initial: stored, allergenNames, previousCon
   const answer = (answers: QuizAnswer[]) => {
     if (step.kind !== 'items') return;
     if (step.phase === 'context') setContextAnswered((n) => n + 1);
+    const questionType = step.items[0]?.type;
+    if (questionType) track('taste.answered', { questionType });
     setReaction(reactionFor(answers, session.step));
     setSession(submitAnswers(session, step, answers, env, new Date().toISOString()));
   };

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useNavigate } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -13,6 +13,7 @@ import { IdeaCarousel } from './IdeaCarousel.tsx';
 import { IdeaSkeletons } from './IdeaSkeletons.tsx';
 import { IdeaSheet } from './IdeaSheet.tsx';
 import { useResumableChat } from '../chat/useChat.ts';
+import { trackIdea, trackIdeaShown } from './trackIdea.ts';
 
 // 登入後的首頁：大廚區塊＋大廚的點子。先顯示上次的點子，再問後端（後端決定用快取或重新想，見 03〈第二階段〉）。
 // AI 不能用時不退回別的挑法：有上次的點子就繼續顯示並說想不出新的，沒有就只說現在想不出來；朋友的動態之後再做
@@ -52,6 +53,10 @@ export function HomePage() {
     () => (aiShown ? aiShown.ideas.map((i) => viewOfAiIdea(i, tempPref, aiShown.suggestionId)) : []),
     [aiShown, tempPref],
   );
+
+  useEffect(() => {
+    for (const view of views) trackIdeaShown(view, 'home');
+  }, [views]);
 
   // AI 現在不能用：問後端失敗、後端說這一輪不給新的，或「換一組」失敗。原因只分「太快」「今天用多了」和其他
   const shuffleDown = shuffleAi.isError || shuffleAi.data?.status === 'unavailable';
@@ -140,7 +145,7 @@ export function HomePage() {
             {downLine && <p className="m-0 mb-1.5 font-round text-caption text-ink-muted">{downLine}</p>}
             <IdeaCarousel count={views.length + (hasNext ? 1 : 0)} resetKey={views.map((v) => v.key).join('|')}>
               {views.map((view, i) => (
-                <IdeaCard key={view.key} index={i} view={view} onOpen={() => setOpen(view)} />
+                <IdeaCard key={view.key} index={i} view={view} source="home" onOpen={() => { trackIdea('suggestion.opened', view, 'home'); setOpen(view); }} />
               ))}
               {hasNext && (
                 <li data-index={views.length} className="w-full flex-none snap-center snap-always">
@@ -159,7 +164,7 @@ export function HomePage() {
         )}
       </div>
 
-      {open && <IdeaSheet view={open} onClose={() => setOpen(null)} />}
+      {open && <IdeaSheet view={open} source="home" onClose={() => setOpen(null)} />}
     </div>
   );
 }

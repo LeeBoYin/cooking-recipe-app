@@ -449,5 +449,9 @@ verify_jwt = false
 verify_jwt = false
 
 # background-jobs 只給資料庫排程（pg_net）呼叫，自己用 BACKGROUND_JOBS_TOKEN 驗證，不走使用者的 JWT
+# track 自己用 Auth 驗證 token，只收白名單裡的產品事件（見 functions/track/handle.ts）
+[functions.track]
+verify_jwt = false
+
 [functions.background-jobs]
 verify_jwt = false

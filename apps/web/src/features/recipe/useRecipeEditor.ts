@@ -9,6 +9,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { queryKeys } from '../../data/hooks.ts';
 import { currentUserId } from '../../data/account.ts';
 import { reportError } from '../../data/errors.ts';
+import { track } from '../../data/track.ts';
+import { trackErrorKind } from '../../data/trackError.ts';
 import type { Photo } from '../../data/photos.ts';
 import { createRecipe, publishRecipe, updateRecipe, type Recipe } from '../../data/recipes.ts';
 import { processPhoto } from '../../photos/process.ts';
@@ -75,6 +77,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
   const uploaded = useSyncExternalStore(subscribeUploads, getUploadedPhotoIds);
 
   const isDraft = !recipeState || recipeState.status === 'draft';
+  const startedAsDraft = useRef(recipe?.status === 'draft'); // 產品事件：打開時就是草稿，才算「草稿變成發佈」
 
   // 檔案已經在 Storage 裡：資料庫有的、或這次傳完的
   const serverIds = useRef(new Set(allPhotos(initial).map((p) => p.id)));
@@ -106,9 +109,11 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
       setSaveState('saving');
       try {
         const options = photosDiff ? { photos: toPhotoInputs(current, ready) } : {};
+        const firstSave = !savedRecipe.current;
         const result = savedRecipe.current
           ? await updateRecipe(recipeId, patch, savedRecipe.current.updated_at, options)
           : await createRecipe(patch, { id: recipeId, ...options });
+        if (firstSave) track('record.draft_saved');
         savedRecipe.current = result;
         setRecipeState(result);
         // 這次存進去的內容；還沒傳完的照片不算
@@ -127,6 +132,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
         const { kind, onServer } = failureKind(error);
         setSaveFailedOnServer(onServer);
         void reportError(`recipe_save_${kind}`, 'recipe-edit', 'warning');
+        trackErrorKind(kind);
         setSaveState('error');
         return savedRecipe.current;
       }
@@ -307,6 +313,14 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
     if (!saved || Object.keys(buildPatch(savedForm.current, formRef.current)).length > 0) return null;
     try {
       const result = await publishRecipe(recipeId);
+      const published = formRef.current;
+      track('record.publish', {
+        photoCount: Math.min(allPhotos(published).length, 30),
+        hasSteps: published.steps.some((s) => s.text.trim() !== ''),
+        visibility: published.visibility,
+        highlightCount: Math.min(published.highlights.length, 20),
+      });
+      if (startedAsDraft.current) track('record.draft_published');
       savedRecipe.current = result;
       setRecipeState(result);
       queryClient.setQueryData(queryKeys.recipe(recipeId), result);
@@ -316,6 +330,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
       const { kind, onServer } = failureKind(error);
       setSaveFailedOnServer(onServer);
       void reportError(`recipe_publish_${kind}`, 'recipe-edit', 'warning');
+      trackErrorKind(kind);
       setSaveState('error');
       return null;
     }

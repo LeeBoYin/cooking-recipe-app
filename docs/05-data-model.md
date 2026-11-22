@@ -964,15 +964,15 @@ interface ProductEvent {              // 產品事件（M1a 起），只存在�
   analyticsId: string;                // 每人一組隨機的分析 ID，不是使用者 ID；對照表 AnalyticsIdentity 只有後端讀得到，刪除帳號時刪掉對照就等於匿名化
   sessionId: string;                  // 一次打開 App（30 分鐘內算同一次）
   name: string;                       // 「區域.動作」，例 'record.publish'、'suggestion.dismissed'；只能用 14 的事件清單
-  screen?: string;
-  props?: Record<string, string | number | boolean>;   // 只能是白名單內的屬性；不記任何內容（食譜文字、照片、食材名稱、留言）
-  suggestionId?: string;              // 點子相關事件對應 AiSuggestionCache
+  screen?: string;                    // 固定的畫面代碼清單（不是路徑）
+  props?: Record<string, string | number | boolean>;   // 只能是白名單內的屬性（列舉、整數、布林），帶 schemaVersion；不記任何內容（食譜文字、照片、食材名稱、留言）
   appVersion: string;
   platform: 'ios' | 'android' | 'desktop';
   installed: boolean;                 // 是否加到主畫面
   at: Instant;
 }
 // 使用者在設定關閉「使用統計」時不記錄。原始事件保留 13 個月，每月匯總進 ProductMetricMonthly 後刪除
+// 不存點子的 ID：點子 ID 透過 AiSuggestionCache.userId 就能對回使用者，會破壞分析 ID 的匿名；點子事件只記來源（首頁、對話）與槽位
 
 interface PushSubscription {          // 推播訂閱，每台裝置一筆，只有本人與後端的推播函式能讀
   id: string;

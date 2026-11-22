@@ -7,6 +7,7 @@ import { Sheet } from '../../ui/Sheet.tsx';
 import { useExpandSteps, useMySettings } from '../../data/hooks.ts';
 import { ingredientLines, stepLines, tipsText, unitPrefs } from './draft.ts';
 import { ingredientBadges, type IdeaView } from './ideaView.ts';
+import type { IdeaSource } from './trackIdea.ts';
 import { useIdeaBookmark } from './useIdeaBookmark.ts';
 
 // 點子抽屜（首頁與對話共用；收藏的點子是完整頁 SavedIdeaPage，共用下面的 MethodSection）：菜名、理由、食材標籤，接著直接是做法（沒有另外的「看做法」按鈕）。
@@ -14,7 +15,7 @@ import { useIdeaBookmark } from './useIdeaBookmark.ts';
 // 家常菜先顯示骨架（主要食材與手法）。自己的食譜不呼叫 AI，只有「打開食譜」。
 // 底部的「收藏／已收藏」和卡片右上角的收藏是同一個狀態（useIdeaBookmark）。
 // 外框是共用的 Sheet（可拖曳關閉）。
-export function IdeaSheet({ view, onClose }: { view: IdeaView; onClose: () => void }) {
+export function IdeaSheet({ view, source, onClose }: { view: IdeaView; source: IdeaSource; onClose: () => void }) {
   const intl = useIntl();
   const navigate = useNavigate();
   const reason = view.why;
@@ -23,7 +24,7 @@ export function IdeaSheet({ view, onClose }: { view: IdeaView; onClose: () => vo
   const expand = useExpandSteps(input);
   const draft = expand.data?.draft ?? null;
 
-  const { can, bookmark, toggle, busy, failed } = useIdeaBookmark(view);
+  const { can, bookmark, toggle, busy, failed } = useIdeaBookmark(view, source);
   const saved = !!bookmark;
 
   return (

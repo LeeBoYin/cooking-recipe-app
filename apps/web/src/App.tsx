@@ -30,6 +30,7 @@ import { PantryTab } from './features/pantry/PantryTab.tsx';
 import { TrashPage } from './features/me/TrashPage.tsx';
 import { AppShell } from './features/shell/AppShell.tsx';
 import { InnerLayout } from './features/shell/InnerLayout.tsx';
+import { ScreenTracker } from './features/shell/ScreenTracker.tsx';
 import { TransitionRouter } from './features/shell/TransitionRouter.tsx';
 import { TastePage } from './features/taste/TastePage.tsx';
 import { MePage } from './features/me/MePage.tsx';
@@ -121,6 +122,7 @@ export function App() {
         <GoogleGate userId={session.user.id}>
         <TransitionRouter isInner={isInnerPath}>
           <PhotoSync />
+          <ScreenTracker />
           <Routes>
             {signedInRoutes}
           </Routes>
