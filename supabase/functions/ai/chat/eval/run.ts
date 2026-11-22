@@ -120,7 +120,7 @@ for (const c of CHAT_CASES) {
     if (!t.raw) body += `（呼叫失敗或格式不合：${rows[apiTurn + t.attempts - 1]?.error ?? ''}）\n\n`;
     else if (!k || !k.ok) body += `（沒過檢查：${k?.reason}，被拿掉：${JSON.stringify(k?.dropped)}）\n\n`;
     else {
-      body += `**大廚**（第 ${t.chefTurn} 輪${t.attempts > 1 ? '，重寫過一次' : ''}）：${k.reply}${k.ask ? `\n\n反問：${k.ask.question}（${k.ask.multi ? '複選' : '單選'}：${k.ask.options.join('／')}）` : ''}\n\n`;
+      body += `**大廚**（第 ${t.chefTurn} 輪${t.attempts > 1 ? '，重寫過一次' : ''}）：${k.reply}${k.ask ? `\n\n反問：${k.ask.question}（${k.ask.multi ? '複選' : '單選'}：${k.ask.options.join('／')}）` : ''}${k.hint ? `\n\n提示：${k.hint}` : ''}\n\n`;
       body += k.ideas.map((x) => `- [${x.slot}] **${x.title}**（難度 ${x.difficulty.overall}）${x.why}`).join('\n') + (k.ideas.length ? '\n\n' : '');
       body += `說過的食材：${JSON.stringify(k.mentioned)}　偏好訊號：${JSON.stringify(k.signals)}　摘要：${k.summary ?? '（沒更新）'}　被拿掉：${JSON.stringify(k.dropped)}\n\n`;
     }

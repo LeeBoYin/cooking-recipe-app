@@ -120,5 +120,5 @@ export interface ChatInput {
 }
 
 export type ChatResponse =
-  | { status: 'ok'; conversationId: string; turnCount: number; userMessage: ChatMessage; chefMessage: ChatMessage; ideas: AiIdea[] }
+  | { status: 'ok'; conversationId: string; turnCount: number; userMessage: ChatMessage; chefMessage: ChatMessage; ideas: AiIdea[]; hint: string | null }
   | { status: 'full' }; // 這一段已經滿 20 輪
