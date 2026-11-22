@@ -16,27 +16,37 @@ import { chatKeys, useChatConversation, useLatestChat, useSendChat } from './use
 // 送出後整段回應完成才一次出現；失敗時使用者的話留在畫面上，什麼都沒存，可以再送一次。
 export type ChatNav = { resume?: boolean } | null;
 
-// iPhone 的鍵盤出現時，版面高度（dvh）不會變，輸入框會被擋住。改成跟著 visualViewport 的高度與位置（17〈對話頁〉）。
+// iPhone 的鍵盤出現時，版面高度（dvh）不會變，輸入框會被擋住。改成只跟著 visualViewport 的高度，top 固定 0（17〈對話頁〉）。
+// iOS 在鍵盤動畫途中會暫時捲動 layout viewport（offsetTop 變大），跟著它整頁會上下跳，所以鎖住頁面捲動、一有捲動就拉回 0。
 // 沒有 visualViewport 的瀏覽器回傳 null，版面用 h-dvh。
-function useVisualViewport(): { height: number; top: number } | null {
-  const [vv, setVv] = useState<{ height: number; top: number } | null>(() => read());
+function useVisualViewport(): number | null {
+  const [vv, setVv] = useState<number | null>(() => read());
   useEffect(() => {
     const v = window.visualViewport;
     if (!v) return;
-    const update = () => setVv(read());
+    const html = document.documentElement;
+    const prev = { html: html.style.overflow, body: document.body.style.overflow };
+    html.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+    const update = () => {
+      if (window.scrollY !== 0 || window.scrollX !== 0) window.scrollTo(0, 0);
+      setVv(read());
+    };
     update();
     v.addEventListener('resize', update);
     v.addEventListener('scroll', update);
     return () => {
       v.removeEventListener('resize', update);
       v.removeEventListener('scroll', update);
+      html.style.overflow = prev.html;
+      document.body.style.overflow = prev.body;
     };
   }, []);
   return vv;
 }
-function read(): { height: number; top: number } | null {
+function read(): number | null {
   const v = typeof window === 'undefined' ? null : window.visualViewport;
-  return v ? { height: Math.round(v.height), top: Math.round(v.offsetTop) } : null;
+  return v ? Math.round(v.height) : null;
 }
 
 export function ChatPage() {
@@ -77,7 +87,7 @@ export function ChatPage() {
 
   useEffect(() => {
     bottom.current?.scrollIntoView({ block: 'end' });
-  }, [messages.length, pending, failed, full, vv?.height]);
+  }, [messages.length, pending, failed, full, vv]);
   // 進來、新對話、開新的一段之後，游標回到輸入框
   useEffect(() => {
     if (!full) input.current?.focus();
@@ -145,8 +155,8 @@ export function ChatPage() {
 
   return (
     <div
-      className={`mx-auto flex w-full max-w-[560px] flex-col bg-bg ${vv ? 'fixed inset-x-0' : 'h-dvh'}`}
-      style={vv ? { height: vv.height, top: vv.top } : undefined}
+      className={`mx-auto flex w-full max-w-[560px] flex-col bg-bg ${vv ? 'fixed inset-x-0 top-0' : 'h-dvh'}`}
+      style={vv ? { height: vv } : undefined}
     >
       <header className="flex h-[52px] flex-none items-center border-b border-line px-2">
         <button
