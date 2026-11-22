@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { replaceTempMarks, type AiIdea } from '@zhusha/core';
-import { ingredientBadges, renderMarks, viewOfAiIdea } from './ideaView.ts';
+import { ingredientBadges, mainIngredientTags, renderMarks, viewOfAiIdea } from './ideaView.ts';
 
 const idea = (over: Partial<AiIdea> = {}): AiIdea => ({
   id: 'i1', slot: 'twist', title: '豆瓣醬燒茄子', why: '用{{temp:180:C}}煎到金黃。', candidateRef: null, usesPantryIds: ['eggplant', 'doubanjiang'], usesPriorityIds: ['eggplant'],
@@ -52,5 +52,23 @@ describe('ingredientBadges', () => {
     expect(ingredientBadges(view, 'salt')).toEqual({ said: false, have: false });
     expect(ingredientBadges(view, null)).toEqual({ said: false, have: false });
     expect(ingredientBadges(view, undefined)).toEqual({ said: false, have: false });
+  });
+});
+
+describe('主要食材標籤', () => {
+  const ing = (name: string, over: { have?: boolean; said?: boolean } = {}) => ({ id: name, name, have: false, ...over });
+  it('取廚房有的與使用者說的，沒有的不放', () => {
+    expect(mainIngredientTags({ ingredients: [ing('茄子', { have: true }), ing('豆腐', { said: true }), ing('豬肉')] })).toEqual({ names: ['茄子', '豆腐'], extra: 0 });
+  });
+  it('最多 3 個，超過的算進 extra', () => {
+    const ingredients = ['a', 'b', 'c', 'd', 'e'].map((n) => ing(n, { have: true }));
+    expect(mainIngredientTags({ ingredients })).toEqual({ names: ['a', 'b', 'c'], extra: 2 });
+  });
+  it('沒有任何食材時回空', () => {
+    expect(mainIngredientTags({ ingredients: [] })).toEqual({ names: [], extra: 0 });
+  });
+  it('AI 點子：用到的廚房食材加上使用者說的', () => {
+    const v = viewOfAiIdea(idea({ usesMentionedIds: ['tofu'] }), { unit: 'C', both: false });
+    expect(mainIngredientTags(v).names).toHaveLength(3);
   });
 });
