@@ -109,13 +109,13 @@
   background: var(--color-bg);
 }
 ::view-transition-group(root) {
-  animation-duration: 300ms;
+  animation-duration: 220ms;
   animation-timing-function: ease-out;
 }
 ::view-transition-old(root),
 ::view-transition-new(root) {
   mix-blend-mode: normal;
-  animation-duration: 300ms;
+  animation-duration: 220ms;
   animation-timing-function: ease-out;
   animation-fill-mode: both;
 }
