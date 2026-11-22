@@ -14,6 +14,7 @@ export const MAX_ASK = 60;
 export const MAX_SUMMARY = 120;
 export const MAX_IDEAS = CHAT_MAX_IDEAS;
 export const MAX_OPTION = 20;
+export const MAX_HINT = 20;
 export const MAX_NEW_MENTIONS = 8;
 export const MAX_SIGNALS = 3;
 
@@ -23,6 +24,7 @@ export type ChatCheck =
       ok: true;
       reply: string;
       ask: ChatAsk | null;
+      hint: string | null;
       ideas: AiIdea[];
       mentioned: ChatMention[];
       signals: ChatSignal[];
@@ -99,6 +101,15 @@ export function checkChatOutput(raw: RawChatOutput, ce: ChatEnv, opts: ChatCheck
     }
   }
 
+  // 接著聊的提示：同反問的檢查，沒過只丟掉提示
+  let hint: string | null = null;
+  const rawHint = typeof raw.hint === 'string' ? raw.hint.trim() : '';
+  if (rawHint) {
+    const h = textOk(rawHint, ce);
+    if ([...rawHint].length > MAX_HINT || !h.wording || !h.excluded) drop('hint');
+    else hint = rawHint;
+  }
+
   // 使用者說了什麼食材：字要真的是他說過的話
   const mentioned: ChatMention[] = [];
   const newIds = new Set<string>();
@@ -160,7 +171,7 @@ export function checkChatOutput(raw: RawChatOutput, ce: ChatEnv, opts: ChatCheck
   const summaryOk = s.length > 0 && [...s].length <= MAX_SUMMARY && !s.includes('{{') && !includesAny(s, env.hardTerms);
   if (s.length > 0 && !summaryOk) drop('summary');
 
-  return { ok: true, reply, ask, ideas, mentioned, signals, summary: summaryOk ? s : null, lowCoverage, dropped };
+  return { ok: true, reply, ask, hint, ideas, mentioned, signals, summary: summaryOk ? s : null, lowCoverage, dropped };
 }
 
 // 這次的輸出要不要請 Claude 重寫一次（只重寫一次）：太早給點子、或點子用到的提到食材太少。回傳重寫時給 Claude 的說明；不用重寫就是 undefined

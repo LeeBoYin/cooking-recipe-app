@@ -137,6 +137,6 @@ export async function runChat(deps: ChatDeps, userId: string, rawInput: unknown)
   const ideas: AiIdea[] = checked.ideas;
   return {
     ok: true,
-    data: { status: 'ok', conversationId: out.conversation_id, turnCount: out.turn_count, userMessage: out.user_message, chefMessage: out.chef_message, ideas },
+    data: { status: 'ok', conversationId: out.conversation_id, turnCount: out.turn_count, userMessage: out.user_message, chefMessage: out.chef_message, ideas, hint: checked.ask ? null : checked.hint },
   };
 }

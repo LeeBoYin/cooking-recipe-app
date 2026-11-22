@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router';
+import { BrowserRouter, Navigate, Outlet, Route, Routes, createRoutesFromChildren, matchRoutes } from 'react-router';
 import { useMySettings } from './data/hooks.ts';
 import { Onboarding } from './features/onboarding/Onboarding.tsx';
 import { useSession } from './data/auth.ts';
@@ -30,6 +30,7 @@ import { PantryTab } from './features/pantry/PantryTab.tsx';
 import { TrashPage } from './features/me/TrashPage.tsx';
 import { AppShell } from './features/shell/AppShell.tsx';
 import { InnerLayout } from './features/shell/InnerLayout.tsx';
+import { TransitionRouter } from './features/shell/TransitionRouter.tsx';
 import { TastePage } from './features/taste/TastePage.tsx';
 import { MePage } from './features/me/MePage.tsx';
 import { DietPage } from './features/me/DietPage.tsx';
@@ -53,24 +54,17 @@ function OnboardingGate() {
   return <Outlet />;
 }
 
-export function App() {
-  const session = useSession();
-
-  return (
-    <>
-      {/* 還在讀取登入狀態時只顯示底色，避免登入頁閃一下 */}
-      {session === undefined ? null : session ? (
-        <GoogleGate userId={session.user.id}>
-        <BrowserRouter>
-          <PhotoSync />
-          <Routes>
+// 下層頁（有「返回」的內頁與對話頁）在路由上標 handle.inner；進出它們的轉場才播（17 第九節）。
+// 從同一份路由表比對，新增內頁時不用另外維護清單。
+const signedInRoutes = (
+  <>
             {IconsPage && <Route path="dev/icons" element={<Suspense><IconsPage /></Suspense>} />}
             {/* 後台自己確認管理員與兩步驟驗證，不走新手引導 */}
             <Route path="admin/*" element={<Suspense fallback={null}><AdminApp /></Suspense>} />
             <Route element={<OnboardingGate />}>
             <Route path="onboarding" element={<Onboarding redo />} />
             {/* 和大廚聊聊：全螢幕，沒有分頁列 */}
-            <Route path="chat" element={<ChatPage />} />
+            <Route path="chat" element={<ChatPage />} handle={{ inner: true }} />
             <Route element={<AppShell />}>
               <Route index element={<HomePage />} />
               <Route path="recipes" element={<RecipesPage />}>
@@ -86,7 +80,7 @@ export function App() {
               <Route path="*" element={<Placeholder />} />
             </Route>
             {/* 內頁：沒有分頁列，由 SubPage 提供返回 */}
-            <Route element={<InnerLayout />}>
+            <Route element={<InnerLayout />} handle={{ inner: true }}>
               <Route path="recipes/new" element={<NewRecipe />} />
               <Route path="recipes/drafts" element={<DraftsPage />} />
               <Route path="me/trash" element={<TrashPage />} />
@@ -110,8 +104,27 @@ export function App() {
             {/* 已經登入還點到邀請或重設連結：回首頁 */}
             <Route path="invite/*" element={<Navigate to="/" replace />} />
             <Route path="reset/*" element={<Navigate to="/" replace />} />
+  </>
+);
+const signedInRouteObjects = createRoutesFromChildren(signedInRoutes);
+function isInnerPath(pathname: string): boolean {
+  return matchRoutes(signedInRouteObjects, pathname)?.some((m) => (m.route.handle as { inner?: boolean } | undefined)?.inner) ?? false;
+}
+
+export function App() {
+  const session = useSession();
+
+  return (
+    <>
+      {/* 還在讀取登入狀態時只顯示底色，避免登入頁閃一下 */}
+      {session === undefined ? null : session ? (
+        <GoogleGate userId={session.user.id}>
+        <TransitionRouter isInner={isInnerPath}>
+          <PhotoSync />
+          <Routes>
+            {signedInRoutes}
           </Routes>
-        </BrowserRouter>
+        </TransitionRouter>
         </GoogleGate>
       ) : (
         <BrowserRouter>

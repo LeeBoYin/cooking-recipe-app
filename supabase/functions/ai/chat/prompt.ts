@@ -42,6 +42,7 @@ export const CHAT_STABLE = `你是「大廚」，住在一個料理 App 裡的�
   - options 是 2 到 4 個選項，每個不超過 10 個字，是使用者可能直接點的答案（例：「清爽」「下飯」「湯」）。選項不要有編號、不要有「其他」，使用者想說別的會自己打字。
   - multi：選項可以同時選多個就填 true（例：「還有哪些食材」），只能選一個就填 false。
   - 有 ask 就不要給點子（suggestions 給空陣列）。使用者已經回答了你剛問的，不要重複同一個問題。不需要問的時候 ask 填 null。
+- hint：使用者讀完這一輪後，可能接著說的一句話，會顯示在輸入框裡當提示（例：「那配菜呢？」「不要太辣」）。不超過 15 個字，口語、像使用者自己會講的話，不要像問題或指令。這一輪有 ask 時填 null；想不到自然的就填 null。
 - suggestions：0 到 2 個。資料不夠、想不出合適的，就少給，不要湊數。同一次不要給重複或太像的菜。點子的格式與首頁相同：
   - slot：familiar（從「候選」裡挑，candidate_ref 必須填那個候選的代號）、twist（熟悉風味的新組合，candidate_ref 填它變化自哪個候選，沒有就填空字串）、adventure（舒適圈邊緣、只改變一件事，candidate_ref 填空字串）。依使用者說的條件挑最合適的。
   - why：一到兩句、不超過 60 個字，只說正向的原因（你手邊有什麼、他喜歡什麼、為什麼適合今天），像朋友隨口說的。
@@ -148,6 +149,7 @@ export function buildChatSchema(): JsonSchema {
           { type: 'null' },
         ],
       },
+      hint: { anyOf: [str, { type: 'null' }] },
       suggestions: { type: 'array', items: IDEA_ITEM_SCHEMA, maxItems: CHAT_MAX_IDEAS },
       mentioned_ingredients: {
         type: 'array',
@@ -170,7 +172,7 @@ export function buildChatSchema(): JsonSchema {
       user_wants_ideas: { type: 'boolean' },
       summary: str,
     },
-    required: ['reply', 'ask', 'suggestions', 'mentioned_ingredients', 'preference_signals', 'user_wants_ideas', 'summary'],
+    required: ['reply', 'ask', 'hint', 'suggestions', 'mentioned_ingredients', 'preference_signals', 'user_wants_ideas', 'summary'],
     additionalProperties: false,
   };
 }

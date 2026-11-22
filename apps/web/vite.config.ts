@@ -20,6 +20,8 @@ export default defineConfig({
         lang: 'zh-Hant-TW',
         start_url: '/',
         display: 'standalone',
+        // 直向：Android 安裝後會鎖住；iOS 不支援，不另外處理
+        orientation: 'portrait',
         background_color: '#F4EDE2',
         theme_color: '#F4EDE2',
         icons: [

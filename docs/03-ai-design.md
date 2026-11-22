@@ -247,6 +247,7 @@ M0 還沒有 AI，首頁的點子全部由程式挑，理由用模板。評分�
     "options": ["清爽", "下飯", "暖胃"],
     "multi": false                               // 可以複選就是 true（例：「還有哪些食材」）
   },
+  "hint": "那配菜呢？",                            // 使用者可能接著說的一句話（不超過 20 字），給輸入框當提示；有 ask 或想不到就是 null。程式檢查同 ask（字數、過敏原與排除的字），沒過只丟掉 hint
   "suggestions": [ /* 同上方的點子格式，收斂後 1–2 個 */ ],
   "mentioned_ingredients": [                     // 使用者在對話中說的食材，對到字典
     { "text": "鄰居送的筍子", "ingredient_id": "bamboo-shoot" }

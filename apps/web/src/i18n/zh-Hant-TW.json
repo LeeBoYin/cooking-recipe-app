@@ -829,6 +829,7 @@
   "chat.new": "新對話",
   "chat.messageLabel": "跟大廚說",
   "chat.placeholder": "跟大廚說…",
+  "chat.placeholderHint": "例如：{hint}",
   "chat.send": "送出",
   "chat.thinking": "大廚想一下…",
   "chat.empty": "說說今天想吃什麼、有什麼心情、手邊有什麼，我來想想。",
