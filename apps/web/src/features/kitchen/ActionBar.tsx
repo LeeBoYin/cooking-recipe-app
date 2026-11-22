@@ -18,10 +18,12 @@ export function ActionBar({
   const quiet = 'flex h-11 items-center gap-1 rounded-card border-0 bg-transparent px-2 text-caption font-bold text-ink-muted no-underline';
   return (
     <div className="flex items-center justify-between">
-      <Link to={inventoryTo} className={quiet}>
-        <Icon name='zonePantry' size={18} />
-        <FormattedMessage id={inventoryId} />
-      </Link>
+      {editing ? <span /> : (
+        <Link to={inventoryTo} className={quiet}>
+          <Icon name="zonePantry" size={18} />
+          <FormattedMessage id={inventoryId} />
+        </Link>
+      )}
       <div className="flex items-center gap-1">
         {canEdit && (
           <button type="button" onClick={onToggleEdit} className={quiet}>
@@ -29,10 +31,12 @@ export function ActionBar({
             <FormattedMessage id={editing ? 'kitchen.list.editDone' : 'kitchen.list.edit'} />
           </button>
         )}
-        <Link to={addTo} className="flex h-11 items-center gap-1 rounded-card bg-bulb-soft px-3 text-caption font-bold text-ink no-underline">
-          <Icon name="plus" size={18} />
-          <FormattedMessage id={addId} />
-        </Link>
+        {!editing && (
+          <Link to={addTo} className="flex h-11 items-center gap-1 rounded-card bg-bulb-soft px-3 text-caption font-bold text-ink no-underline">
+            <Icon name="plus" size={18} />
+            <FormattedMessage id={addId} />
+          </Link>
+        )}
       </div>
     </div>
   );

@@ -24,8 +24,8 @@ export function RecipesPage() {
   const query = useDebounced(input.trim(), 300);
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex items-center gap-2">
-        <label className="flex h-11 min-w-0 flex-1 items-center gap-2 rounded-card bg-surface pr-1 pl-3 focus-within:outline-2 focus-within:outline-ink">
+      <div className="flex h-11 items-stretch gap-2">
+        <label className="box-border flex h-full min-w-0 flex-1 items-center gap-2 rounded-card bg-surface pr-1 pl-3 focus-within:outline-2 focus-within:outline-ink">
           <Icon name="search" size={20} className="shrink-0 text-ink-muted" />
           <span className="sr-only"><FormattedMessage id="recipes.search.label" /></span>
           <input
@@ -47,13 +47,15 @@ export function RecipesPage() {
             </button>
           )}
         </label>
-        <SegmentNav
-          ariaLabel={intl.formatMessage({ id: 'recipes.tabs.aria' })}
-          items={[
-            { to: '/recipes', end: true, label: <FormattedMessage id="recipes.tab.mine" /> },
-            { to: '/recipes/saved', label: <FormattedMessage id="recipes.tab.saved" /> },
-          ]}
-        />
+        <div className="flex h-full shrink-0 [&>nav]:h-full">
+          <SegmentNav
+            ariaLabel={intl.formatMessage({ id: 'recipes.tabs.aria' })}
+            items={[
+              { to: '/recipes', end: true, label: <FormattedMessage id="recipes.tab.mine" /> },
+              { to: '/recipes/saved', label: <FormattedMessage id="recipes.tab.saved" /> },
+            ]}
+          />
+        </div>
       </div>
       <Outlet context={{ query } satisfies RecipesContext} />
     </div>

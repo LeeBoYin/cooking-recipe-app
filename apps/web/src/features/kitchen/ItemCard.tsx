@@ -30,7 +30,7 @@ export function ItemCard({
       <span className="w-full truncate text-center">{name}</span>
     </>
   );
-  const cls = 'flex min-h-[104px] w-full flex-col items-center justify-center gap-0.5 rounded-card border border-line bg-surface px-1 py-1.5 text-small text-ink no-underline';
+  const cls = 'flex min-h-[112px] w-full flex-col items-center justify-center gap-2 rounded-card border border-line bg-surface px-1 py-1.5 text-small text-ink no-underline';
   return (
     <li className="relative">
       {editing ? <div className={cls}>{body}</div> : <Link to={to} className={cls}>{body}</Link>}
@@ -39,11 +39,9 @@ export function ItemCard({
           type="button"
           aria-label={intl.formatMessage({ id: 'pantry.remove.aria' }, { name })}
           onClick={onRemove}
-          className="absolute -top-3 -right-3 flex size-11 items-center justify-center rounded-full border-0 bg-transparent p-0 text-error"
+          className="absolute -top-2.5 -right-2.5 flex size-6 items-center justify-center rounded-full border-2 border-bg bg-surface p-0 text-error shadow-sm after:absolute after:-inset-2 after:content-['']"
         >
-          <span className="flex size-6 items-center justify-center rounded-full border-2 border-bg bg-surface shadow-sm">
-            <Icon name="trash" size={14} />
-          </span>
+          <Icon name="trash" size={14} />
         </button>
       ) : (
         badge && (
