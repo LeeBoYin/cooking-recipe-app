@@ -180,6 +180,7 @@ const USAGE = { inputTokens: 10, outputTokens: 10, cacheReadTokens: 0, cacheWrit
 function harness(c: ExpandCase, responses: (RawDraft | 'upstream' | 'refusal')[], rowOver: Partial<typeof c.row> = {}) {
   const requests: ClaudeRequest[] = [];
   const saves: Record<string, unknown>[] = [];
+  const outcomes: string[] = [];
   let n = 0;
   const deps = {
     ai: {
@@ -198,6 +199,10 @@ function harness(c: ExpandCase, responses: (RawDraft | 'upstream' | 'refusal')[]
       if (fn === 'ai_expand_get') return Promise.resolve({ data: { ...c.row, ...rowOver }, error: null });
       if (fn === 'ai_home_context') return Promise.resolve({ data: c.ctx, error: null });
       if (fn === 'taste_profile_save') return Promise.resolve({ data: null, error: null });
+      if (fn === 'ai_record_outcome') {
+        outcomes.push(String(args.p_outcome));
+        return Promise.resolve({ data: null, error: null });
+      }
       if (fn === 'ai_expand_save') {
         saves.push(args);
         return Promise.resolve({ data: null, error: null });
@@ -206,7 +211,7 @@ function harness(c: ExpandCase, responses: (RawDraft | 'upstream' | 'refusal')[]
     }) as Rpc,
     now: () => NOW,
   };
-  return { deps, requests, saves };
+  return { deps, requests, saves, outcomes };
 }
 const U = '0192f000-0000-7000-8000-000000000001';
 const INPUT = { suggestionId: U, ideaId: U };
@@ -263,6 +268,7 @@ Deno.test('流程：第一次沒過檢查，整份重寫一次，第二次過了
   assert(res.ok);
   assertEquals(h.requests.length, 2);
   assertEquals(h.saves.length, 1);
+  assertEquals(h.outcomes, ['rewritten']);
   // 重寫時告訴 AI 哪一類沒過（只有類別，不含內容）
   const retry = h.requests[1]?.messages[0]?.content ?? '';
   assert(retry.includes('上一次寫的沒有通過檢查'));
@@ -276,6 +282,7 @@ Deno.test('流程：兩次都沒過就失敗，什麼都不存', async () => {
   assertEquals(res, { ok: false, error: 'invalid_output' });
   assertEquals(h.requests.length, MAX_ATTEMPTS);
   assertEquals(h.saves.length, 0);
+  assertEquals(h.outcomes, ['blocked']);
 });
 
 Deno.test('流程：AI 不能用、拒答、逾時都失敗，什麼都不存', async () => {

@@ -1,8 +1,5 @@
 // 門檻與權重（08〈需要實測後再調整的數值〉）
 export const IDEA_MIN_SCORE = 0.5;
-export const IDEA_MAX_OWN = 2;
-export const IDEA_MAX_DISH = 3;
-export const IDEA_MAX_TOTAL = 5;
 export const IDEA_TOP_POOL = 15; // 從分數最高的幾個裡抽
 export const TASTE_CONFIDENT = 0.5; // 把握程度夠的門檻
 export const TASTE_MIN_DIMENSIONS = 3; // 夠把握的喜好維度至少幾個才給基礎菜色

@@ -8,8 +8,8 @@ const catalog = buildChefCatalog(Object.keys(lines));
 // 畫面會用到的情境（改了畫面就要同步）
 const SITUATIONS = [
   'home.morning', 'home.noon', 'home.afternoon', 'home.evening', 'home.night',
-  'ideasNone', 'ideasNotEnough', 'ideasSlowDown', 'ideasDailyLimit', 'emptyRecipes', 'emptySaved', 'emptyPantry', 'emptyEquipment',
-  'recordDone', 'recordFirst', 'bookmarked', 'reasonPantry', 'reasonSeason',
+  'ideasUnavailable', 'ideasStale', 'ideasNotEnough', 'ideasSlowDown', 'ideasDailyLimit', 'emptyRecipes', 'emptySaved', 'emptyPantry', 'emptyEquipment',
+  'recordDone', 'recordFirst', 'bookmarked',
   'vision1', 'vision2', 'vision3', 'onboardDone',
   'tasteAsk.dish_card', 'tasteAsk.this_or_that', 'tasteAsk.spectrum', 'tasteAsk.quick_fire', 'tasteAsk.context',
   'tasteReact.remember', 'tasteReact.teach', 'tasteReact.next',

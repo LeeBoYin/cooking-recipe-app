@@ -5,7 +5,7 @@
 // 紀錄只有數量與原因代號，不含內容。
 import type { ExpandInput, ExpandResponse, RecipeDraft } from '../../../../packages/core/src/index.ts';
 import { type AiErrorCode, type Deps, runAi, type TaskDefinition } from '../pipeline.ts';
-import type { Rpc } from '../usage.ts';
+import { recordOutcome, type Rpc } from '../usage.ts';
 import { buildHomeEnv } from '../home/env.ts';
 import type { HomeContextRow } from '../home/types.ts';
 import { withMergedTaste } from '../taste.ts';
@@ -104,15 +104,18 @@ export async function runExpandSteps(deps: ExpandDeps, userId: string, rawInput:
     if (!result.ok) {
       // 格式不對、被截斷：和沒過檢查一樣重寫一次；其他（AI 不能用、被擋下、逾時…）直接失敗
       if ((result.error === 'invalid_output' || result.error === 'truncated') && attempt < MAX_ATTEMPTS) continue;
+      if (result.error === 'invalid_output') await recordOutcome(deps.rpc, userId, 'expand_steps', 'blocked');
       return result;
     }
     const checked = checkDraft(result.output as RawDraft, env, { servings, model: result.model });
     console.log('ai: expand_steps checked', JSON.stringify({ attempt, ok: checked.ok, problems: checked.ok ? {} : checked.problems }));
     if (checked.ok) {
       await save(checked.draft);
+      await recordOutcome(deps.rpc, userId, 'expand_steps', attempt === 1 ? 'passed' : 'rewritten');
       return { ok: true, data: { status: 'ok', source: 'ai', draft: checked.draft } };
     }
     problems = Object.keys(checked.problems) as DraftProblem[];
   }
+  await recordOutcome(deps.rpc, userId, 'expand_steps', 'blocked');
   return { ok: false, error: 'invalid_output' };
 }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { emptyProfile, type TasteProfile } from '../taste/types.ts';
-import { hasNextIdeaSet, ideaSet, todayInTimeZone } from './pick.ts';
+import { todayInTimeZone } from './pick.ts';
 import { buildIdeaPool, confidentLikeCount, longAgoValue } from './score.ts';
 import type { Idea, IdeaBaseDish, IdeaIngredient, IdeaInput, IdeaLimits, IdeaOwnRecipe } from './types.ts';
 
@@ -149,46 +149,6 @@ describe('分數與門檻', () => {
     expect(score({ tofu: { wantToUseSoon: true } }) - plain).toBeCloseTo(0.075, 5);
     expect(score({ tofu: { wantToUseSoon: true }, tomato: { expiresOn: '2026-06-17' } }) - plain).toBeCloseTo(0.15, 5);
     expect(score({ tofu: { wantToUseSoon: true }, tomato: { expiresOn: '2026-06-17' }, egg: { wantToUseSoon: true } }) - plain).toBeCloseTo(0.15, 5);
-  });
-});
-
-describe('抽選與換一組', () => {
-  const many = Array.from({ length: 12 }, (_, i) => dish(`d${i}`, ['tofu']));
-  const recipes = Array.from({ length: 4 }, (_, i) => own(`r${i}`));
-  const pool = buildIdeaPool(base({ baseDishes: many, ownRecipes: recipes }), dimensionKeys);
-
-  it('同一個種子、同一組一定一樣；不同天通常不同', () => {
-    const a = ideaSet(pool, 'u1|2026-06-15', 0).map((i) => i.key);
-    expect(ideaSet(pool, 'u1|2026-06-15', 0).map((i) => i.key)).toEqual(a);
-    const days = new Set(Array.from({ length: 10 }, (_, d) => ideaSet(pool, `u1|2026-06-${10 + d}`, 0).map((i) => i.key).join()));
-    expect(days.size).toBeGreaterThan(1);
-  });
-  it('數量規則：最多 5 個，自己的食譜 ≤ 2、基礎菜色 ≤ 3', () => {
-    for (let r = 0; r < 4; r += 1) {
-      const set = ideaSet(pool, 'u1|2026-06-15', r);
-      expect(set.length).toBeLessThanOrEqual(5);
-      expect(set.filter((i) => i.source === 'own').length).toBeLessThanOrEqual(2);
-      expect(set.filter((i) => i.source === 'dish').length).toBeLessThanOrEqual(3);
-    }
-  });
-  it('換一組不會重複，換到沒有就沒有下一組', () => {
-    const seen = new Set<string>();
-    let round = 0;
-    while (ideaSet(pool, 'u1|2026-06-15', round).length > 0) {
-      for (const i of ideaSet(pool, 'u1|2026-06-15', round)) {
-        expect(seen.has(i.key)).toBe(false);
-        seen.add(i.key);
-      }
-      expect(hasNextIdeaSet(pool, 'u1|2026-06-15', round)).toBe(ideaSet(pool, 'u1|2026-06-15', round + 1).length > 0);
-      round += 1;
-      expect(round).toBeLessThan(30);
-    }
-    expect(seen.size).toBe(pool.ideas.length);
-  });
-  it('不夠就少給，不湊數', () => {
-    const small = buildIdeaPool(base({ ownRecipes: [own('only')] }), dimensionKeys);
-    expect(ideaSet(small, 'k', 0)).toHaveLength(1);
-    expect(hasNextIdeaSet(small, 'k', 0)).toBe(false);
   });
 });
 

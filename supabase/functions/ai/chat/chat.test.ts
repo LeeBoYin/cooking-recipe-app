@@ -276,11 +276,13 @@ Deno.test('handler：第 1 輪就給點子、使用者沒要求：重寫一次�
   const append = calls.find((x) => x.fn === 'ai_chat_append');
   assertEquals((append?.args.p_ask as { options: string[] }).options, ['清爽', '下飯']);
   assertEquals(append?.args.p_ideas, []);
+  assertEquals(calls.filter((x) => x.fn === 'ai_record_outcome').map((x) => x.args.p_outcome), ['rewritten']);
 
   const stubborn = fakeRpc();
   const failed = await runChat({ ai: deps(() => withIdea), rpc: stubborn.rpc, now: () => NOW }, 'u1', { message: '想吃點熱的' });
   assertEquals(failed.ok === false && failed.error, 'invalid_output');
   assertEquals(stubborn.calls.some((x) => x.fn === 'ai_chat_append'), false);
+  assertEquals(stubborn.calls.filter((x) => x.fn === 'ai_record_outcome').map((x) => x.args.p_outcome), ['blocked']);
 
   // 按了「直接給我點子」：不用重寫，第 1 輪就存點子
   const direct = fakeRpc();
@@ -288,5 +290,6 @@ Deno.test('handler：第 1 輪就給點子、使用者沒要求：重寫一次�
   const ok = await runChat({ ai: deps(() => withIdea, {}, claude2), rpc: direct.rpc, now: () => NOW }, 'u1', { message: '直接給我點子', wantIdeas: true });
   assert(ok.ok && ok.data.status === 'ok' && ok.data.ideas.length === 1);
   assertEquals(claude2.claude.length, 1);
+  assertEquals(direct.calls.filter((x) => x.fn === 'ai_record_outcome').map((x) => x.args.p_outcome), ['passed']);
   assert((claude2.claude[0]?.messages.at(-1)?.content ?? '').includes('第 1 輪回應'));
 });
