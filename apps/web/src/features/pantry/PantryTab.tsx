@@ -1,50 +1,29 @@
 import { FormattedMessage, useIntl } from 'react-intl';
+import { useState } from 'react';
 import { Link } from 'react-router';
+import { EXPIRY_SOON_DAYS } from '@zhusha/core';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
 import { useCurrentKitchen, usePantryItems, useRemovePantryItem, useRestorePantryItem } from '../../data/hooks.ts';
 import type { PantryItem } from '../../data/pantry.ts';
 import { ActionBar } from '../kitchen/ActionBar.tsx';
+import { EditToggle, ItemCard, type CardBadge } from '../kitchen/ItemCard.tsx';
 import { StockCard } from '../kitchen/StockCard.tsx';
 import { Icon } from '../shell/Icon.tsx';
 import { useToast } from '../shell/Toast.tsx';
 import { ZONES, ZONE_ICON, displayName } from './labels.ts';
+import { addDays, todayIn } from './dates.ts';
 import { ItemIcon } from '../../icons/ItemIcon.tsx';
 
-const TAG = 'rounded-tag bg-line-soft px-1.5 text-small font-bold text-ink-muted';
-
-function Row({ item, onRemove }: { item: PantryItem; onRemove: (i: PantryItem) => void }) {
-  const intl = useIntl();
-  const name = displayName(item);
-  return (
-    <li className="flex items-center border-b border-line-soft last:border-b-0">
-      <Link to={`/kitchen/pantry/${item.id}`} className="flex min-h-14 flex-1 items-center gap-3 py-2 text-ink no-underline">
-        <ItemIcon kind="ingredient" id={item.ingredient_id} size={32} />
-        <span className="flex flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="text-body">{name}</span>
-          {item.want_to_use_soon && (
-            <span className="rounded-tag bg-bulb-soft px-1.5 text-small font-bold text-ink">
-              {intl.formatMessage({ id: 'pantry.tag.useSoon' })}
-            </span>
-          )}
-          {item.expires_at && (
-            <span className={TAG}>{intl.formatMessage({ id: 'pantry.tag.expires' }, { date: item.expires_at.slice(5).replace('-', '/') })}</span>
-          )}
-        </span>
-      </Link>
-      <button
-        type="button"
-        aria-label={intl.formatMessage({ id: 'pantry.remove.aria' }, { name })}
-        onClick={() => onRemove(item)}
-        className="flex size-11 items-center justify-center border-0 bg-transparent text-ink-muted"
-      >
-        <Icon name="close" size={20} />
-      </button>
-    </li>
-  );
+function badgeOf(item: PantryItem, today: string): CardBadge | undefined {
+  if (item.expires_at) {
+    if (item.expires_at < today) return 'expired';
+    if (item.expires_at <= addDays(today, EXPIRY_SOON_DAYS)) return 'soon';
+  }
+  return item.want_to_use_soon ? 'useSoon' : undefined;
 }
 
-// 廚房頁的「食材」：依放哪裡分組，一項一列。移除一鍵完成、可以復原（02 食材）
+// 廚房頁的「食材」：依放哪裡分組，小卡片網格。移除一鍵完成、可以復原（02 食材）
 export function PantryTab() {
   const chef = useChef();
   const intl = useIntl();
@@ -53,6 +32,8 @@ export function PantryTab() {
   const remove = useRemovePantryItem(kitchen?.id);
   const restore = useRestorePantryItem(kitchen?.id);
   const toast = useToast();
+  const [editing, setEditing] = useState(false);
+  const today = todayIn(kitchen?.timezone ?? 'Asia/Taipei');
 
   function onRemove(item: PantryItem) {
     remove.mutate(item.id, {
@@ -69,6 +50,8 @@ export function PantryTab() {
   return (
     <div className="flex flex-col gap-3">
       <ActionBar inventoryTo="/kitchen/pantry/inventory" addTo="/kitchen/pantry/add" inventoryId="pantry.inventory" addId="pantry.add" />
+
+      {items.length > 0 && <EditToggle editing={editing} onToggle={() => setEditing((v) => !v)} />}
 
       {pantry.isPending ? (
         <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="common.loading" /></p>
@@ -95,9 +78,17 @@ export function PantryTab() {
                 <Icon name={ZONE_ICON[zone]} size={20} />
                 <FormattedMessage id={`pantry.zone.${zone}`} />
               </h2>
-              <ul className="m-0 list-none rounded-card bg-surface px-3 py-0">
+              <ul className="m-0 grid list-none grid-cols-4 gap-2 p-0">
                 {inZone.map((item) => (
-                  <Row key={item.id} item={item} onRemove={onRemove} />
+                  <ItemCard
+                    key={item.id}
+                    to={`/kitchen/pantry/${item.id}`}
+                    name={displayName(item)}
+                    visual={<ItemIcon kind="ingredient" id={item.ingredient_id} size={36} />}
+                    badge={badgeOf(item, today)}
+                    editing={editing}
+                    onRemove={() => onRemove(item)}
+                  />
                 ))}
               </ul>
             </section>
