@@ -1,7 +1,7 @@
 -- 口味檔案快照與點子回饋（M1a-10a）：taste_profile_snapshots 的權限、觸發器標成過期、taste_profile_save、
 -- ai_home_context 的快照與原始資料、點子回饋（收藏、做了）寫進 ai_suggestion_cache.feedback
 begin;
-select plan(43);
+select plan(46);
 
 create function tests.save(p jsonb)
 returns public.recipes
@@ -160,6 +160,16 @@ select is(public.ai_home_context(:'alice') -> 'taste_snapshot' ->> 'stale', 'tru
 select is(jsonb_array_length(public.ai_home_context(:'alice') -> 'taste_inputs' -> 'saved'), 1, '原始資料只有還在收藏裡的點子');
 select is(public.ai_home_context(:'alice') -> 'taste_inputs' -> 'saved' -> 0 ->> 'cooked', 'false', '還沒記錄的收藏 cooked 是 false');
 select is(jsonb_array_length(public.ai_home_context(:'alice') -> 'taste_inputs' -> 'signals'), 1, '附上對話裡的偏好訊號');
+-- 超過 30 天沒重算：ai_home_context 當作過期並附原始資料（先把標記清掉，只看天數）
+reset role;
+update public.taste_profile_snapshots set stale = false, computed_at = now() - interval '31 days' where user_id = :'alice';
+set local role service_role;
+select is(public.ai_home_context(:'alice') -> 'taste_snapshot' ->> 'stale', 'true', '超過 30 天沒重算：當作過期');
+select ok(jsonb_typeof(public.ai_home_context(:'alice') -> 'taste_inputs') = 'object', '過期就附原始資料');
+reset role;
+update public.taste_profile_snapshots set computed_at = now() - interval '29 days' where user_id = :'alice';
+set local role service_role;
+select is(public.ai_home_context(:'alice') -> 'taste_snapshot' ->> 'stale', 'false', '29 天內仍是新鮮的');
 -- 讀完後又有變動：save 之後仍維持過期
 select public.taste_profile_save(:'alice', (select data from public.taste_profile_snapshots where user_id = :'alice'), now() - interval '1 day');
 select is(public.ai_home_context(:'alice') -> 'taste_snapshot' ->> 'stale', 'true', '讀取之後又有變動（updated_at 比讀取時間新）：存完仍然過期');

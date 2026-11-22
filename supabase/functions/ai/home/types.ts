@@ -12,7 +12,7 @@ export interface HomeContextRow {
   settings: { locale: string; chef_persona: string };
   taste: { dims: Record<string, { affinity: number; confidence: number; source: 'user_set' | 'explored' | 'learned'; updated_at: string }>; context: Record<string, unknown> } | null;
   // 口味檔案：快照（不存在是 null）；過期或不存在時 taste_inputs 附上重算用的原始資料
-  taste_snapshot?: { stale: boolean; data: TasteSnapshotData } | null;
+  taste_snapshot?: { stale: boolean; computed_at?: string; data: TasteSnapshotData } | null; // stale 已含「超過 30 天沒重算」
   taste_inputs?: {
     saved: { base_dish_id: string | null; ingredient_ids: string[]; cooked: boolean; at: string }[];
     signals: { at: string; signals: { dimension_key?: string; affinity?: number; scope?: string }[] }[];
