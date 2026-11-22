@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Link, useLocation, useParams } from 'react-router';
+import { Link, Navigate, useLocation, useParams } from 'react-router';
 import { DIFFICULTY_FACETS, difficultyOverall, formatRecipeText, formatTemperature, haveInKitchen, parseMeasurePref, parseTemperaturePref, renderIngredient, UNIT_CODES, type UnitLabels } from '@zhusha/core';
 import { getIngredient } from '@zhusha/ingredients';
 import type { RecipeIngredient, RecipeStep, RecipeVisibility } from '@zhusha/shared-types';
@@ -83,9 +83,8 @@ export function RecipePage() {
   if (recipe.isError || photos.isError) {
     return <p role="alert" className="m-0 text-caption text-error"><FormattedMessage id="recipe.loadError" /></p>;
   }
-  if (!r || r.deleted_at) {
-    return <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="recipe.notFound" /></p>;
-  }
+  // 已刪除或找不到（例如刪除後按上一頁回到這裡）：直接換成「食譜」清單，不停在找不到的畫面
+  if (!r || r.deleted_at) return <Navigate to="/recipes" replace />;
 
   const date = intl.formatDate(r.cooked_at ?? r.published_at ?? r.created_at, { month: 'numeric', day: 'numeric' });
   const title = r.title?.trim() || intl.formatMessage({ id: 'recipe.view.untitled' }, { date });

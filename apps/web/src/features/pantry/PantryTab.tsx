@@ -7,7 +7,7 @@ import { useChef } from '../../chef/useChef.ts';
 import { useCurrentKitchen, usePantryItems, useRemovePantryItem, useRestorePantryItem } from '../../data/hooks.ts';
 import type { PantryItem } from '../../data/pantry.ts';
 import { ActionBar } from '../kitchen/ActionBar.tsx';
-import { EditToggle, ItemCard, type CardBadge } from '../kitchen/ItemCard.tsx';
+import { ItemCard, type CardBadge } from '../kitchen/ItemCard.tsx';
 import { StockCard } from '../kitchen/StockCard.tsx';
 import { Icon } from '../shell/Icon.tsx';
 import { useToast } from '../shell/Toast.tsx';
@@ -49,9 +49,7 @@ export function PantryTab() {
 
   return (
     <div className="flex flex-col gap-3">
-      <ActionBar inventoryTo="/kitchen/pantry/inventory" addTo="/kitchen/pantry/add" inventoryId="pantry.inventory" addId="pantry.add" />
-
-      {items.length > 0 && <EditToggle editing={editing} onToggle={() => setEditing((v) => !v)} />}
+      <ActionBar inventoryTo="/kitchen/pantry/inventory" addTo="/kitchen/pantry/add" inventoryId="pantry.inventory" addId="pantry.add" editing={editing} canEdit={items.length > 0} onToggleEdit={() => setEditing((v) => !v)} />
 
       {pantry.isPending ? (
         <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="common.loading" /></p>
@@ -78,13 +76,13 @@ export function PantryTab() {
                 <Icon name={ZONE_ICON[zone]} size={20} />
                 <FormattedMessage id={`pantry.zone.${zone}`} />
               </h2>
-              <ul className="m-0 grid list-none grid-cols-4 gap-2 p-0">
+              <ul className="m-0 grid list-none grid-cols-4 gap-x-2 gap-y-3 p-0 pt-2">
                 {inZone.map((item) => (
                   <ItemCard
                     key={item.id}
                     to={`/kitchen/pantry/${item.id}`}
                     name={displayName(item)}
-                    visual={<ItemIcon kind="ingredient" id={item.ingredient_id} size={36} />}
+                    visual={<ItemIcon kind="ingredient" id={item.ingredient_id} size={54} />}
                     badge={badgeOf(item, today)}
                     editing={editing}
                     onRemove={() => onRemove(item)}

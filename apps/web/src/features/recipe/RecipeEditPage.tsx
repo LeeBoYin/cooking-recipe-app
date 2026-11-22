@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { useLocation, useNavigate, useParams } from 'react-router';
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router';
 import type { RecipeVisibility } from '@zhusha/shared-types';
 import { useDeleteRecipe, useLinkBookmark, useMySettings, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
 import { recipeLimits, type Recipe } from '../../data/recipes.ts';
@@ -512,7 +512,7 @@ export function RecipeEditPage() {
       ) : recipe.isError || photos.isError ? (
         <p role="alert" className="m-0 text-caption text-error"><FormattedMessage id="recipe.loadError" /></p>
       ) : recipe.data?.deleted_at ? (
-        <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="recipe.notFound" /></p>
+        <Navigate to="/recipes" replace />
       ) : (
         // key：換一篇時整個重新開始；null 就是還沒存過的新草稿
         <Editor key={id} recipeId={id as string} recipe={recipe.data ?? null} photoRows={photos.data ?? []} defaultServings={settings.data?.household_size ?? DEFAULT_SERVINGS} />

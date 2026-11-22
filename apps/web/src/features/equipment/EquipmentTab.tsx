@@ -5,7 +5,7 @@ import { useChef } from '../../chef/useChef.ts';
 import { useCurrentKitchen, useDeleteKitchenEquipment, useEquipmentPhotos, useKitchenEquipment, usePhotoUrls } from '../../data/hooks.ts';
 import type { KitchenEquipment } from '../../data/equipment.ts';
 import { ActionBar } from '../kitchen/ActionBar.tsx';
-import { EditToggle, ItemCard } from '../kitchen/ItemCard.tsx';
+import { ItemCard } from '../kitchen/ItemCard.tsx';
 import { StockCard } from '../kitchen/StockCard.tsx';
 import { removeFiles } from '../../data/photos.ts';
 import { groupEquipment } from './logic.ts';
@@ -43,8 +43,10 @@ export function EquipmentTab() {
         addTo="/kitchen/equipment/add"
         inventoryId="equipment.inventory"
         addId="equipment.add"
+        editing={editing}
+        canEdit={groups.length > 0}
+        onToggleEdit={() => { setEditing((v) => !v); setConfirming(null); }}
       />
-      {groups.length > 0 && <EditToggle editing={editing} onToggle={() => { setEditing((v) => !v); setConfirming(null); }} />}
       {confirming && (
         <div role="alertdialog" className="flex items-center gap-2 rounded-card border border-line bg-surface p-3">
           <span className="flex-1 text-caption">{intl.formatMessage({ id: 'equipment.delete.confirm' }, { name: confirming.raw_name })}</span>
@@ -75,7 +77,7 @@ export function EquipmentTab() {
             <h2 id={`eq-${g.key}`} className="mx-0 mt-2 mb-2 font-round text-body font-bold text-ink-muted">
               <FormattedMessage id={`equipment.category.${g.key}`} />
             </h2>
-            <ul className="m-0 grid list-none grid-cols-4 gap-2 p-0">
+            <ul className="m-0 grid list-none grid-cols-4 gap-x-2 gap-y-3 p-0 pt-2">
               {g.items.map((i) => {
                 const thumbUrl = thumbUrls?.[photos?.get(i.id)?.thumb_path ?? ''];
                 return (
@@ -85,11 +87,11 @@ export function EquipmentTab() {
                     name={i.raw_name}
                     visual={
                       thumbUrl ? (
-                        <span aria-hidden="true" className="size-9 shrink-0 overflow-hidden rounded-full bg-line-soft">
+                        <span aria-hidden="true" className="size-[54px] shrink-0 overflow-hidden rounded-full bg-line-soft">
                           <img src={thumbUrl} alt="" className="size-full object-cover" />
                         </span>
                       ) : (
-                        <ItemIcon kind="equipment" id={i.equipment_type_id} size={36} />
+                        <ItemIcon kind="equipment" id={i.equipment_type_id} size={54} />
                       )
                     }
                     editing={editing}

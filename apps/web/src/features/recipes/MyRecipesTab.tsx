@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useMemo } from 'react';
+import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
@@ -7,28 +7,18 @@ import { useCurrentKitchen, useMyRecipePhotos, useMyRecipes, usePhotoUrls, useSe
 import { todayIn } from '../pantry/dates.ts';
 import { Icon } from '../shell/Icon.tsx';
 import { Highlighted, RecipeCard } from './RecipeCard.tsx';
+import { useRecipesQuery } from './RecipesPage.tsx';
 import { buildTimeline, groupByMonth, type TimelineEntry } from './timeline.ts';
 
-function useDebounced<T>(value: T, ms: number): T {
-  const [v, setV] = useState(value);
-  useEffect(() => {
-    const t = setTimeout(() => setV(value), ms);
-    return () => clearTimeout(t);
-  }, [value, ms]);
-  return v;
-}
-
-// 我的食譜：草稿列、搜尋框、依月分組的時間軸（沒有篩選與其他排序，02 時間軸）
+// 我的食譜：草稿列、依月分組（搜尋框在食譜頁外框）的時間軸（沒有篩選與其他排序，02 時間軸）
 export function MyRecipesTab() {
   const chef = useChef();
-  const intl = useIntl();
   const { kitchen } = useCurrentKitchen();
   const timeZone = kitchen?.timezone ?? 'Asia/Taipei';
   const published = useMyRecipes('published');
   const drafts = useMyRecipes('draft');
   const photos = useMyRecipePhotos();
-  const [input, setInput] = useState('');
-  const query = useDebounced(input.trim(), 300);
+  const query = useRecipesQuery();
   const search = useSearchMyRecipes(query);
 
   const entries = useMemo(
@@ -47,29 +37,6 @@ export function MyRecipesTab() {
 
   return (
     <div className="flex flex-col gap-3">
-      <label className="flex h-11 items-center gap-2 rounded-card bg-surface pr-2 pl-3 focus-within:outline-2 focus-within:outline-ink">
-        <Icon name="search" size={20} className="shrink-0 text-ink-muted" />
-        <span className="sr-only"><FormattedMessage id="recipes.search.label" /></span>
-        <input
-          type="text"
-          enterKeyHint="search"
-          value={input}
-          placeholder={intl.formatMessage({ id: 'recipes.search.placeholder' })}
-          onChange={(e) => setInput(e.target.value)}
-          className="min-w-0 flex-1 border-0 bg-transparent text-body text-ink outline-none placeholder:text-ink-muted"
-        />
-        {input && (
-          <button
-            type="button"
-            aria-label={intl.formatMessage({ id: 'recipes.search.clear' })}
-            onClick={() => setInput('')}
-            className="flex size-8 items-center justify-center border-0 bg-transparent text-ink"
-          >
-            <Icon name="close" size={18} />
-          </button>
-        )}
-      </label>
-
       {!searching && draftCount > 0 && (
         <Link to="/recipes/drafts" className="flex h-12 items-center justify-between rounded-card bg-surface px-3 text-[15px] text-ink no-underline">
           <FormattedMessage id="recipes.drafts.row" values={{ count: draftCount }} />
