@@ -176,3 +176,14 @@ ANTHROPIC_API_KEY=... deno run --no-lock --no-config -A supabase/functions/ai/ex
 - 份量的單位都是公制或計數單位，`amount` 合理；步驟順、做得出來。
 - 快取：`stable` 第二組起要讀得到（快取讀 token 不為 0）。
 - 延遲：十幾秒內（不串流，整份寫完才顯示）；2,000 token 的輸出上限夠不夠（`truncated` 出現就要調）。
+
+## 09 下層頁轉場（M1a-09i）
+
+| 問題 | 結論 |
+|------|------|
+| 宣告式 `BrowserRouter` 能不能觸發 view transition？ | ❌ 不行。react-router 8.5 只有資料路由的 `<RouterProvider>` 會呼叫 `document.startViewTransition`，`BrowserRouter` 沒有這段。 |
+| 改 `createBrowserRouter` 有用嗎？ | ⚠️ 進入（PUSH）可以用 `viewTransition` 選項，但瀏覽器上一頁（POP）路由器不帶 `viewTransition`，不會播；改了還要換 `ScrollRestoration`、整份路由改寫。不划算。 |
+| 採用的做法 | 自己接 history：`UNSAFE_createBrowserHistory` 加公開的 `<Router>`（`TransitionRouter`），在 `history.listen` 裡把換畫面包進 `startViewTransition` ＋ `flushSync`。PUSH、REPLACE、POP 都由自己判斷；捲動位置自己記（`scrollRestoration = 'manual'`，依 `location.key`）。 |
+| 返回記號 | 包住 navigator 的 `go`：`navigate(-1)` 呼叫時記號，手勢與瀏覽器上一頁不經過它。所以 `TopBar` 和對話頁的返回都不用改。 |
+| 預覽（桌面 Chrome，本機）：進入、返回按鈕、`history.back/forward`、分頁切換、直接開網址、捲動還原 | ✅ 進入播 `vt-from-right`／`vt-to-left`、返回播 `vt-to-right`／`vt-from-left`；分頁切換沒有呼叫 `startViewTransition`；返回後捲動還原；放慢動畫截圖確認舊頁壓在上面往右滑出 |
+| iOS Safari 手勢返回不疊兩層、加到主畫面後返回按鈕有動畫 | ⏳ 這台 Mac 沒有完整 Xcode，模擬器用不了；要用 iPhone 確認 |
