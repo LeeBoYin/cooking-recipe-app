@@ -102,3 +102,79 @@
     animation: none !important;
   }
 }
+
+/* 下層頁轉場（View Transitions，TransitionRouter 在 <html> 設 data-vt）：
+   進入＝新頁從右滑入、舊頁左移 30% 並變暗；離開＝反向。只用 transform 與 opacity。 */
+::view-transition {
+  background: var(--color-bg);
+}
+::view-transition-group(root) {
+  animation-duration: 220ms;
+  animation-timing-function: ease-out;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+  animation-duration: 220ms;
+  animation-timing-function: ease-out;
+  animation-fill-mode: both;
+}
+html[data-vt='forward']::view-transition-old(root) {
+  animation-name: vt-to-left;
+}
+html[data-vt='forward']::view-transition-new(root) {
+  animation-name: vt-from-right;
+  z-index: 2;
+}
+html[data-vt='back']::view-transition-old(root) {
+  animation-name: vt-to-right;
+  z-index: 2;
+}
+html[data-vt='back']::view-transition-new(root) {
+  animation-name: vt-from-left;
+}
+@keyframes vt-to-left {
+  to {
+    transform: translateX(-30%);
+    opacity: 0.6;
+  }
+}
+@keyframes vt-from-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes vt-to-right {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes vt-from-left {
+  from {
+    transform: translateX(-30%);
+    opacity: 0.6;
+  }
+}
+/* 減少動態效果：改成很短的淡入淡出 */
+@media (prefers-reduced-motion: reduce) {
+  html[data-vt]::view-transition-old(root),
+  html[data-vt]::view-transition-new(root) {
+    animation-name: vt-fade-out;
+    animation-duration: 120ms;
+    animation-timing-function: linear;
+    z-index: auto;
+  }
+  html[data-vt]::view-transition-new(root) {
+    animation-name: vt-fade-in;
+  }
+}
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes vt-fade-in {
+  from {
+    opacity: 0;
+  }
+}
