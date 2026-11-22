@@ -54,6 +54,18 @@ export function createProtection(rpc: Rpc, sessionId: string | null): Pick<Deps,
   };
 }
 
+// 輸出檢查的結果（M1a-10b）：passed 第一次就過、rewritten 重寫後過、blocked 沒過（invalid_output）。
+// 只有代號；寫不進去不影響使用者拿到的回應，只留錯誤代號。
+export type OutputOutcome = 'passed' | 'rewritten' | 'blocked';
+export async function recordOutcome(rpc: Rpc, userId: string, task: 'chat' | 'home_ideas' | 'expand_steps', outcome: OutputOutcome): Promise<void> {
+  try {
+    const { error } = await rpc('ai_record_outcome', { p_user: userId, p_task: task, p_outcome: outcome });
+    if (error) console.error('ai: record outcome failed', error.code);
+  } catch {
+    console.error('ai: record outcome failed', 'exception');
+  }
+}
+
 // JWT 的 session_id（登入工作階段，代表一個裝置）；token 已經由 Auth 的 getUser 驗證過，這裡只解碼
 export function sessionIdOf(token: string): string | null {
   const part = token.split('.')[1];

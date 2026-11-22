@@ -1,6 +1,6 @@
 -- M1a-04：AI 用量保護——速率、合理使用上限、全站預算、異常偵測、後台函式
 begin;
-select plan(128);
+select plan(133);
 
 select tests.create_user('admin@zhusha.test');
 select tests.create_user('a@zhusha.test');
@@ -243,6 +243,21 @@ select is(public.admin_get_ai_usage((select admin from u), '2026-05-15 00:00:00+
 select is((public.admin_get_ai_usage((select admin from u), '2026-05-15 00:00:00+00') #>> '{console,spent_vs_cap_ratio}')::numeric, 0.905::numeric, '對照 Console 硬上限 20 的比例');
 select is((public.admin_get_ai_usage((select admin from u), '2026-05-15 00:00:00+00') -> 'top_users' -> 0 ->> 'display_name'), 'whale', '本月用量排行');
 select is((public.admin_get_ai_usage((select admin from u), '2026-05-15 00:00:00+00') -> 'by_task' -> 0 ->> 'task'), 'chat', '依任務與模型拆分');
+
+---------------------------------------------------------------------------
+-- 輸出檢查的結果（M1a-10b）：只記代號，補在最近一筆還沒有結果的紀錄上
+---------------------------------------------------------------------------
+select pg_temp.rec((select a from u), 0.01, now());
+select public.ai_record_outcome((select a from u), 'chat', 'rewritten');
+select is((select count(*)::int from public.ai_usage_records where user_id = (select a from u) and outcome = 'rewritten'), 1, '結果補在最近一筆');
+select pg_temp.rec((select a from u), 0.01, now());
+select public.ai_record_outcome((select a from u), 'chat', 'blocked');
+select is((select count(*)::int from public.ai_usage_records where user_id = (select a from u) and outcome = 'blocked'), 1, '下一筆記成被擋下，前一筆不被蓋掉');
+select is((select count(*)::int from public.ai_usage_records where user_id = (select a from u) and outcome = 'rewritten'), 1, '已經有結果的不會被改');
+select throws_ok($$select public.ai_record_outcome((select a from u), 'chat', 'whatever')$$, '22023', null, '結果代號只能是清單內的');
+set local role authenticated;
+select throws_ok($$select public.ai_record_outcome(gen_random_uuid(), 'chat', 'passed')$$, '42501', null, '使用者不能寫結果');
+reset role;
 
 ---------------------------------------------------------------------------
 -- 每日維護

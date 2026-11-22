@@ -4,7 +4,7 @@
 // 這時什麼都不存（使用者的話留在畫面上，可以再送一次）。紀錄只有數量與原因代號，不含內容。
 import { CHAT_MAX_TURNS, CHAT_MAX_USER_CHARS, type AiIdea, type ChatInput, type ChatMessage, type ChatResponse } from '../../../../packages/core/src/index.ts';
 import { type AiErrorCode, type Deps, runAi, type TaskDefinition } from '../pipeline.ts';
-import type { Rpc } from '../usage.ts';
+import { recordOutcome, type Rpc } from '../usage.ts';
 import type { HomeContextRow } from '../home/types.ts';
 import { withMergedTaste } from '../taste.ts';
 import { checkChatOutput, retryHint, type ChatCheck } from './check.ts';
@@ -88,6 +88,7 @@ export async function runChat(deps: ChatDeps, userId: string, rawInput: unknown)
   // 輸出沒守「至少 3 輪」或沒用到提到的食材時，整批重寫一次；重寫後食材還是用得少就照給，
   // 還是太早給點子就當作這一輪失敗（回 invalid_output，手機請使用者再送一次）
   let hint: string | undefined;
+  let rewrote = false;
   let checked: ChatCheck | null = null;
   let fallback: { checked: ChatCheck; result: Extract<Awaited<ReturnType<typeof runAi>>, { ok: true }> } | null = null; // 第一次其實可以用（只是食材用得少）
   let result: Extract<Awaited<ReturnType<typeof runAi>>, { ok: true }> | null = null;
@@ -101,7 +102,11 @@ export async function runChat(deps: ChatDeps, userId: string, rawInput: unknown)
       inputSize: () => ({ length: [...input.message].length, limit: CHAT_MAX_USER_CHARS }),
     };
     const res = await runAi({ ...deps.ai, tasks: { chat: def as never } }, userId, 'chat', { message: input.message });
-    if (!res.ok) return res;
+    if (!res.ok) {
+      if (res.error === 'invalid_output') await recordOutcome(deps.rpc, userId, 'chat', 'blocked');
+      return res;
+    }
+    rewrote = attempt > 0;
     result = res;
     checked = checkChatOutput(res.output as RawChatOutput, ce, { chefTurn, wantIdeas, carried, gaveBefore });
     console.log('ai: chat checked', JSON.stringify({ attempt, ok: checked.ok, ideas: checked.ok ? checked.ideas.length : 0, dropped: checked.dropped }));
@@ -110,7 +115,11 @@ export async function runChat(deps: ChatDeps, userId: string, rawInput: unknown)
     if (checked.ok) fallback = { checked, result: res };
   }
   if (fallback && (!checked || !checked.ok)) ({ checked, result } = fallback);
-  if (!checked || !checked.ok || !result) return { ok: false, error: 'invalid_output' };
+  if (!checked || !checked.ok || !result) {
+    await recordOutcome(deps.rpc, userId, 'chat', 'blocked');
+    return { ok: false, error: 'invalid_output' };
+  }
+  await recordOutcome(deps.rpc, userId, 'chat', rewrote ? 'rewritten' : 'passed');
 
   const saved = await deps.rpc('ai_chat_append', {
     p_user: userId,

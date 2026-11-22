@@ -1,12 +1,9 @@
-// 首頁點子卡片與抽屜要顯示的內容。兩種來源（規則評分、AI）先轉成同一個 IdeaView，畫面只認它。
+// 首頁點子卡片與抽屜要顯示的內容。AI 想的點子先轉成 IdeaView，畫面只認它。
 // 卡片不顯示槽位標籤（熟悉的、變化版、新挑戰）：由 why 自然說明（03）。
-import { formatTemperature, replaceTempMarks, type AiIdea, type Idea, type TasteProfile, type TemperaturePref } from '@zhusha/core';
-import type { IntlShape } from 'react-intl';
-import type { ChefLineFn } from '../../chef/useChef.ts';
+import { formatTemperature, replaceTempMarks, type AiIdea, type TemperaturePref } from '@zhusha/core';
 import { getIngredient } from '@zhusha/ingredients';
 import { techniques as techniqueDict } from '@zhusha/equipment';
 import { baseDishes } from '@zhusha/taste';
-import { reasonText } from './reason.ts';
 
 export interface IdeaView {
   key: string;
@@ -29,23 +26,6 @@ const techniqueById = new Map(techniqueDict.map((t) => [t.id, t.name['zh-TW']]))
 const dishById = new Map(baseDishes.map((d) => [d.id, d]));
 export const techniqueNames = (ids: readonly string[]): string[] => [...new Set(ids)].map((id) => techniqueById.get(id) ?? id);
 export const dishTechniques = (dishId: string | undefined): string[] => techniqueNames(dishId ? (dishById.get(dishId)?.techniques ?? []) : []);
-
-export function viewOfRuleIdea(idea: Idea, profile: TasteProfile, intl: IntlShape, chefLine: ChefLineFn): IdeaView {
-  const have = new Set(idea.haveIngredientIds);
-  return {
-    key: idea.key,
-    title: idea.title,
-    why: reasonText(idea.reason, profile, intl, chefLine, idea.key),
-    kitchenHas: idea.allInKitchen,
-    difficulty: idea.difficulty,
-    ingredients: idea.mainIngredientIds.map((id) => ({ id, name: nameOf(id), have: have.has(id) })),
-    others: [],
-    substitutions: [],
-    techniques: idea.source === 'dish' ? dishTechniques(idea.id) : [],
-    source: idea.source,
-    ...(idea.source === 'own' ? { recipeId: idea.id } : { baseDishId: idea.id }),
-  };
-}
 
 // 理由裡的 {{temp:180:C}} 依使用者的偏好轉成攝氏或華氏
 export function renderMarks(text: string, pref: TemperaturePref): string {

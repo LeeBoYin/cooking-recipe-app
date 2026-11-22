@@ -31,7 +31,7 @@ export interface AiIdeasPayload {
 export type HomeIdeasResponse =
   | { status: 'ok'; source: 'ai' | 'cache'; ideas: AiIdea[]; chefComment: string | null; createdAt: string; round: number; suggestionId: string | null } // suggestionId：這一組點子在快取裡的 id，收藏用
   | { status: 'not_enough' } // 新手門檻：口味不夠把握、又沒有自己的食譜
-  | { status: 'rules' }; // 這一輪不用 AI（換太多次）：手機用規則評分
+  | { status: 'unavailable'; reason: 'no_kitchen' | 'shuffle_limit' }; // 這一輪不給新點子：沒有廚房、或「換一組」換太多次（手機維持上一組並說想不出新的）
 
 // ---------------------------------------------------------------------------------------------
 // 展開做法（M1a-09）：`ai` 函式 expand_steps 任務的輸入與回傳。存進 ai_suggestion_cache.drafts 與 bookmarks.idea.recipeDraft 的格式

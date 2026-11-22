@@ -1,9 +1,9 @@
 // home_ideas（M1a-06）：首頁的大廚點子。
 // 流程（03〈第二階段〉）：讀資料 → L1 候選（core）→ 新手門檻 → 快取 → 呼叫 Claude → 驗證格式 → 程式再檢查 → 存快取 → 回傳。
 // 快取：輸入的雜湊沒變、或離上次不到 6 小時，就用上次的（重新檢查過）；「換一組」同一個 6 小時內最多 2 次。
-// AI 不能用、被擋下、或檢查後一個都不剩時回錯誤代號，手機改用 M0 的規則評分。紀錄只有數量與原因代號，不含內容。
+// AI 不能用、被擋下、或檢查後一個都不剩時回錯誤代號，手機顯示「現在想不出新點子」（不改用別的挑法）。紀錄只有數量與原因代號，不含內容。
 import { type AiErrorCode, type ClaudeResponse, type Deps, runAi, type TaskDefinition } from '../pipeline.ts';
-import type { Rpc } from '../usage.ts';
+import { recordOutcome, type Rpc } from '../usage.ts';
 import { checkHomeOutput, normalizeTitle, recheckCachedIdeas } from './check.ts';
 import { buildHomeEnv, type HomeEnv } from './env.ts';
 import { withMergedTaste } from '../taste.ts';
@@ -82,7 +82,7 @@ export async function runHomeIdeas(deps: HomeDeps, userId: string, rawInput: unk
     console.error('ai: ai_home_context failed', error.code);
     throw new Error('home_context');
   }
-  if (!data) return { ok: true, data: { status: 'rules' } }; // 沒有廚房：沒有東西可以算
+  if (!data) return { ok: true, data: { status: 'unavailable', reason: 'no_kitchen' } }; // 沒有廚房：沒有東西可以算
   const env = buildHomeEnv(await withMergedTaste(data as HomeContextRow, deps.rpc, userId, now), now);
 
   // 新手門檻（12）：口味不夠把握、又沒有自己的食譜，不叫 AI
@@ -107,7 +107,7 @@ export async function runHomeIdeas(deps: HomeDeps, userId: string, rawInput: unk
   const shownRefs = new Set<string>();
   const shownText: string[] = [];
   if (parsed.shuffle && latest && latestPayload) {
-    if (latest.round >= MAX_SHUFFLES) return { ok: true, data: { status: 'rules' } }; // 之後改用規則評分的候選
+    if (latest.round >= MAX_SHUFFLES) return { ok: true, data: { status: 'unavailable', reason: 'shuffle_limit' } }; // 換太多次：不再給新的
     round = latest.round + 1;
     for (const row of env.ctx.recent) {
       if (now.getTime() - Date.parse(row.created_at) >= REUSE_HOURS * HOUR_MS) continue;
@@ -128,11 +128,18 @@ export async function runHomeIdeas(deps: HomeDeps, userId: string, rawInput: unk
     outputSchema: buildHomeSchema(env),
   };
   const result = await runAi({ ...deps.ai, tasks: { home_ideas: def as never } }, userId, 'home_ideas', { hash, round });
-  if (!result.ok) return result;
+  if (!result.ok) {
+    if (result.error === 'invalid_output') await recordOutcome(deps.rpc, userId, 'home_ideas', 'blocked');
+    return result;
+  }
 
   const checked = checkHomeOutput(result.output as RawOutput, env, { shownTitles, shownRefs });
   console.log('ai: home_ideas checked', JSON.stringify({ kept: checked.ideas.length, dropped: checked.dropped }));
-  if (checked.ideas.length === 0) return { ok: false, error: 'invalid_output' }; // 一個都不剩：全部改用規則評分
+  if (checked.ideas.length === 0) {
+    await recordOutcome(deps.rpc, userId, 'home_ideas', 'blocked');
+    return { ok: false, error: 'invalid_output' }; // 一個都不剩：畫面說現在想不出新點子
+  }
+  await recordOutcome(deps.rpc, userId, 'home_ideas', 'passed');
 
   const payload: HomePayload = { schemaVersion: 1, ideas: checked.ideas, chefComment: checked.chefComment, model: result.model };
   const saved = await deps.rpc('ai_home_cache_save', {

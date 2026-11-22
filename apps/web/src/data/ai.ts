@@ -1,5 +1,5 @@
 // `ai` Edge Function 的呼叫（16 第六節）。前端不直接呼叫 Claude，也不自己判斷額度；
-// 失敗時只拿到錯誤代號，由各畫面依代號走退路（03〈AI 不能用時〉），不顯示次數。
+// 失敗時只拿到錯誤代號，由各畫面依代號顯示「目前無法使用」的說法（03〈AI 不能用時〉），不顯示次數，也不改用別的挑法。
 import type { AiIdea, AiIdeasPayload, ChatInput, ChatMention, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse } from '@zhusha/core';
 import { supabase } from './supabase.ts';
 
@@ -34,24 +34,9 @@ export function toAiError(body: unknown): AiError {
   return typeof code === 'string' && KNOWN.has(code) ? (code as AiError) : 'server_error';
 }
 
-// 畫面該走哪條路：
-// - slow_down：速率限制，大廚說「點子想太快，燈泡有點燙，等我一分鐘」，過一兩分鐘自動恢復
-// - daily_limit：合理使用上限，「今天點子想了好多，我先從你的食譜裡挑」
-// - use_rules：其他原因（預算、拒答、出錯、斷線…）一律退回不用 AI 的推薦
-export type AiFallback = 'slow_down' | 'daily_limit' | 'use_rules';
-
-export function aiFallbackOf(code: AiError): AiFallback {
-  if (code === 'rate_limited') return 'slow_down';
-  if (code === 'over_limit') return 'daily_limit';
-  return 'use_rules';
-}
-
 export class AiCallError extends Error {
   constructor(readonly code: AiError) {
     super(code);
-  }
-  get fallback(): AiFallback {
-    return aiFallbackOf(this.code);
   }
 }
 

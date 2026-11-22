@@ -86,7 +86,7 @@ export function costUsd(model: string, usage: TokenUsage): number {
 }
 
 // 全站預算用到提醒門檻（預設 80%）時的降級（03〈換模型的規則〉）。對話不降級。
-// config：覆寫這個任務的設定；rules：這個任務改用規則或模板，不呼叫 AI。
+// config：覆寫這個任務的設定；rules：這個任務不呼叫 AI（回 budget_exhausted，畫面顯示目前無法使用）。
 // 降級寫在這裡，由 ai 函式統一套用，不在各任務裡寫死。
 export const BUDGET_DEGRADE: Partial<Record<TaskName, { config: Partial<TaskConfig> } | { rules: true }>> = {
   home_ideas: { config: { model: 'claude-haiku-5-5', thinking: 'off' } },

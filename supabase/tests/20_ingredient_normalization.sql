@@ -1,6 +1,6 @@
 -- 食材正規化（M1a-05）：對應表與背景任務的權限、對應的優先順序、排隊與去重、完成後的回填、使用者手動修正、重試
 begin;
-select plan(55);
+select plan(63);
 
 create function tests.save(p jsonb)
 returns public.recipes
@@ -186,6 +186,29 @@ reset role;
 select is((select status from public.background_jobs where id = :'job_x'), 'dead', '次數用完就放棄');
 select private.enqueue_normalization(:'alice', '怪怪的詞');
 select is((select count(*)::int from public.background_jobs where dedupe_key = '怪怪的詞' and status = 'pending'), 0, '剛放棄的詞 7 天內不再排隊');
+select is((select count from public.error_logs where kind = 'background_job_dead' and location = 'normalize_ingredients:upstream_error'), 1, '放棄時寫一筆錯誤紀錄：任務種類與錯誤代號');
+select is((select count(*)::int from public.error_logs where kind = 'background_job_dead' and (location like '%怪%' or location !~ '^[a-z_]+:[a-z0-9_]+$')), 0, '錯誤紀錄不含食材原文');
+select is((select source from public.error_logs where kind = 'background_job_dead' limit 1), 'edge_function', '來源是後端函式');
+
+-- 卡在執行中超過 10 分鐘：還有次數就放回去再領；次數用完就放棄並記錄
+select private.enqueue_normalization(:'alice', '卡住的詞');
+set local role service_role;
+select public.claim_background_jobs('normalize_ingredients', 50);
+reset role;
+select id as job_stuck from public.background_jobs where dedupe_key = '卡住的詞' \gset
+select is((select status from public.background_jobs where id = :'job_stuck'), 'running', '領走後是執行中');
+update public.background_jobs set locked_at = now() - interval '11 minutes' where id = :'job_stuck';
+set local role service_role;
+select public.claim_background_jobs('normalize_ingredients', 50);
+reset role;
+select is((select attempts::int from public.background_jobs where id = :'job_stuck'), 2, '卡住超過 10 分鐘的任務放回佇列再被領走，次數加一');
+update public.background_jobs set locked_at = now() - interval '11 minutes', attempts = max_attempts where id = :'job_stuck';
+set local role service_role;
+select public.claim_background_jobs('normalize_ingredients', 50);
+reset role;
+select is((select status from public.background_jobs where id = :'job_stuck'), 'dead', '卡住又沒有次數了：放棄');
+select is((select count from public.error_logs where kind = 'background_job_dead' and location = 'normalize_ingredients:stalled'), 1, '卡住放棄也留紀錄');
+select is((select count(*)::int from public.error_logs where kind = 'background_job_dead'), 2, '兩種原因各一筆');
 
 ---------------------------------------------------------------------------
 -- 九、預算用完、AI 關閉時不排隊

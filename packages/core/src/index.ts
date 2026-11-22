@@ -22,7 +22,7 @@ export {
   buildIdeaPool, confidentLikeCount, isTasteEnough, violatesLimits, mainIngredientIds, tasteSimilarity, dishDimensionKeys,
   longAgoValue, scoreBaseDish, scoreOwnRecipe,
 } from './ideas/score.ts';
-export { ideaSet, hasNextIdeaSet, todayInTimeZone } from './ideas/pick.ts';
+export { todayInTimeZone } from './ideas/pick.ts';
 export {
   CHEF_PERSONAS, DEFAULT_CHEF_PERSONA, isChefPersona, timeBand, hourInTimeZone, buildChefCatalog, pickChefLine,
   type ChefPersona, type TimeBand, type ChefCatalog, type ChefLineInput,

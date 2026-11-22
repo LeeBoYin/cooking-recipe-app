@@ -230,6 +230,7 @@ function harness(caseId: string, opts: { account?: AiContext; reply?: (env: Home
   const env = buildHomeEnv(c.ctx, c.now ?? NOW);
   const calls: ClaudeRequest[] = [];
   const saved: Record<string, unknown>[] = [];
+  const outcomes: string[] = [];
   let recent = opts.recent ?? [];
   const ai: Deps = {
     getContext: () => Promise.resolve(opts.account ?? OK),
@@ -250,11 +251,15 @@ function harness(caseId: string, opts: { account?: AiContext; reply?: (env: Home
         recent = [{ id: `row${saved.length}`, input_hash: String(args.p_input_hash), round: Number(args.p_round), created_at: (c.now ?? NOW).toISOString(), expires_at: new Date((c.now ?? NOW).getTime() + CACHE_TTL_HOURS * 3600_000).toISOString(), payload: args.p_payload }, ...recent];
         return Promise.resolve({ data: 'row', error: null });
       }
+      if (fn === 'ai_record_outcome') {
+        outcomes.push(String(args.p_outcome));
+        return Promise.resolve({ data: null, error: null });
+      }
       if (fn === 'taste_profile_save') return Promise.resolve({ data: null, error: null });
       return Promise.resolve({ data: null, error: { code: 'unknown' } });
     },
   };
-  return { deps, calls, saved, env, c };
+  return { deps, calls, saved, env, c, outcomes };
 }
 
 Deno.test('流程：新手門檻不呼叫 Claude（案例 4）', async () => {
@@ -272,6 +277,7 @@ Deno.test('流程：第一次呼叫 Claude、檢查、存快取；再打開用�
   assertEquals([req.model, req.effort], ['claude-sonnet-5-5', 'low']);
   assertEquals(req.system[0]?.cache, true);
   assertEquals(h.saved.length, 1);
+  assertEquals(h.outcomes, ['passed']);
   assertEquals((h.saved[0]?.p_payload as HomePayload).ideas.length, 3);
 
   const again = await runHomeIdeas(h.deps, 'u1', {});
@@ -292,7 +298,7 @@ Deno.test('流程：輸入沒變就算超過 6 小時也用快取；改了輸入
   assertEquals(changed.calls.length, 1); // hash 不同、又超過 6 小時
 });
 
-Deno.test('流程：換一組最多 2 次，排除已出現過的；第 3 次改用規則評分', async () => {
+Deno.test('流程：換一組最多 2 次，排除已出現過的；第 3 次不再給新的', async () => {
   const h = harness('05');
   await runHomeIdeas(h.deps, 'u1', {});
   const second = await runHomeIdeas(h.deps, 'u1', { shuffle: true });
@@ -302,14 +308,15 @@ Deno.test('流程：換一組最多 2 次，排除已出現過的；第 3 次改
   const third = await runHomeIdeas(h.deps, 'u1', { shuffle: true });
   assert(third.ok && third.data.status === 'ok' && third.data.round === 2);
   const fourth = await runHomeIdeas(h.deps, 'u1', { shuffle: true });
-  assertEquals(fourth, { ok: true, data: { status: 'rules' } });
+  assertEquals(fourth, { ok: true, data: { status: 'unavailable', reason: 'shuffle_limit' } });
   assertEquals(h.calls.length, 3);
 });
 
-Deno.test('流程：檢查後一個都不剩，回錯誤讓手機改用規則評分；帳號狀態與輸入格式', async () => {
+Deno.test('流程：檢查後一個都不剩，回錯誤，手機說現在想不出新點子；帳號狀態與輸入格式', async () => {
   const bad = harness('02', { reply: (env) => ({ suggestions: [idea(env, { title: '蝦仁炒飯', uses_pantry_ids: ['shrimp'] })], chef_comment: '' }) });
   assertEquals(await runHomeIdeas(bad.deps, 'u1', {}), { ok: false, error: 'invalid_output' });
   assertEquals(bad.saved.length, 0);
+  assertEquals(bad.outcomes, ['blocked']);
   assertEquals((await runHomeIdeas(harness('05', { account: { ...OK, ai_enabled: false } }).deps, 'u1', {})), { ok: false, error: 'ai_disabled' });
   assertEquals((await runHomeIdeas(harness('05', { account: { ...OK, status: 'suspended' } }).deps, 'u1', {})), { ok: false, error: 'account_inactive' });
   assertEquals(parseHomeInput({ shuffle: 'yes' }), { ok: false });

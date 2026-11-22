@@ -107,14 +107,14 @@ isOneToOne: false
                   ]
                 },"ai_usage_records": {
                   Row: {
-                    "cache_read_tokens": number,"cache_write_tokens": number,"cost_usd": number,"created_at": string,"id": string,"input_hash": string | null,"input_ratio": number | null,"input_tokens": number,"latency_ms": number | null,"model": string,"ok": boolean,"output_tokens": number,"session_id": string | null,"task": string,"user_id": string
+                    "cache_read_tokens": number,"cache_write_tokens": number,"cost_usd": number,"created_at": string,"id": string,"input_hash": string | null,"input_ratio": number | null,"input_tokens": number,"latency_ms": number | null,"model": string,"ok": boolean,"outcome": string | null,"output_tokens": number,"session_id": string | null,"task": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "cache_read_tokens"?: number,"cache_write_tokens"?: number,"cost_usd": number,"created_at"?: string,"id"?: string,"input_hash"?: string | null,"input_ratio"?: number | null,"input_tokens"?: number,"latency_ms"?: number | null,"model": string,"ok": boolean,"output_tokens"?: number,"session_id"?: string | null,"task": string,"user_id": string
+                    "cache_read_tokens"?: number,"cache_write_tokens"?: number,"cost_usd": number,"created_at"?: string,"id"?: string,"input_hash"?: string | null,"input_ratio"?: number | null,"input_tokens"?: number,"latency_ms"?: number | null,"model": string,"ok": boolean,"outcome"?: string | null,"output_tokens"?: number,"session_id"?: string | null,"task": string,"user_id": string
                   }
                   Update: {
-                    "cache_read_tokens"?: number,"cache_write_tokens"?: number,"cost_usd"?: number,"created_at"?: string,"id"?: string,"input_hash"?: string | null,"input_ratio"?: number | null,"input_tokens"?: number,"latency_ms"?: number | null,"model"?: string,"ok"?: boolean,"output_tokens"?: number,"session_id"?: string | null,"task"?: string,"user_id"?: string
+                    "cache_read_tokens"?: number,"cache_write_tokens"?: number,"cost_usd"?: number,"created_at"?: string,"id"?: string,"input_hash"?: string | null,"input_ratio"?: number | null,"input_tokens"?: number,"latency_ms"?: number | null,"model"?: string,"ok"?: boolean,"outcome"?: string | null,"output_tokens"?: number,"session_id"?: string | null,"task"?: string,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -895,6 +895,9 @@ isOneToOne: false
                            },
 "ai_home_context":
 { Args: { "p_user": string }; Returns: Json
+                           },
+"ai_record_outcome":
+{ Args: { "p_outcome": string,"p_task": string,"p_user": string }; Returns: undefined
                            },
 "ai_record_usage":
 { Args: { "p_cache_read_tokens": number,"p_cache_write_tokens": number,"p_cost_usd": number,"p_input_hash"?: string,"p_input_ratio"?: number,"p_input_tokens": number,"p_latency_ms"?: number,"p_model": string,"p_now"?: string,"p_ok": boolean,"p_output_tokens": number,"p_session_id"?: string,"p_task": string,"p_user": string }; Returns: undefined

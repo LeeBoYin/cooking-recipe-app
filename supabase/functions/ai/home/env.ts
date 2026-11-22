@@ -1,6 +1,6 @@
 // 把 ai_home_context 的資料組成算首頁點子要用的一切：L1 候選、送給 AI 的食材與廚具、檢查要用的限制。
 // 純函式（沒有網路與資料庫），評估集與單元測試直接餵資料。
-// 組裝的做法和前端 apps/web/src/features/home/ideas.ts 一致（規則評分的輸入）；改規則時兩邊一起改。
+// 把資料庫讀到的資料組成 L1 候選評分的輸入（只在後端用）。
 import {
   buildIdeaPool, buildIngredientIndex, difficultyOverall, emptyProfile, hourInTimeZone, isChefPersona, isTasteEnough, DEFAULT_CHEF_PERSONA,
   timeBand, todayInTimeZone, violatesLimits, IDEA_TOP_POOL,
