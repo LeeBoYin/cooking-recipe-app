@@ -1,16 +1,15 @@
-import { useMemo, useState } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
-import { Link, useNavigate } from 'react-router';
-import { difficultyOverall, parseTemperaturePref, type RecipeDraft } from '@zhusha/core';
-import { getIngredient } from '@zhusha/ingredients';
+import { useMemo } from 'react';
+import { FormattedMessage } from 'react-intl';
+import { Link } from 'react-router';
+import { difficultyOverall } from '@zhusha/core';
 import { baseDishes } from '@zhusha/taste';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
 import { ideaOf, type Bookmark } from '../../data/bookmarks.ts';
-import { useCurrentKitchen, useMyBookmarks, useMySettings, useUnbookmark } from '../../data/hooks.ts';
-import { editorDraftOf, unitPrefs } from '../home/draft.ts';
-import { IdeaSheet } from '../home/IdeaSheet.tsx';
-import { dishTechniques, renderMarks, techniqueNames, type IdeaView } from '../home/ideaView.ts';
+import { useCurrentKitchen, useMyBookmarks, useMySettings, usePantryItems, useUnbookmark } from '../../data/hooks.ts';
+import { IdeaTags } from '../home/IdeaTags.tsx';
+import type { IdeaView } from '../home/ideaView.ts';
+import { viewOfBookmark } from './SavedIdeaPage.tsx';
 import { localDate, groupByMonth } from './timeline.ts';
 import { todayIn } from '../pantry/dates.ts';
 
@@ -25,8 +24,7 @@ function difficultyOf(baseDishId: string): number | null {
 }
 
 // 收藏：依收藏的月分組的時間軸。M0 只有大廚的點子（朋友的食譜 M2 才有）；
-// 打開收藏的點子就是點子抽屜：已經展開過的直接顯示做法，還沒有的第一次打開時由大廚寫並存進收藏。
-// 「做了，記錄一篇」在抽屜裡：開新食譜，帶入菜名、收藏的 ID，有做法的話也帶入食材與步驟
+// 點卡片打開收藏的完整頁（SavedIdeaPage）：已經展開過的直接顯示做法，還沒有的第一次打開時由大廚寫並存進收藏。
 export function SavedTab() {
   const chef = useChef();
   const { kitchen } = useCurrentKitchen();
@@ -37,6 +35,9 @@ export function SavedTab() {
     [bookmarks.data, timeZone],
   );
   const groups = groupByMonth(entries, todayIn(timeZone));
+  const settings = useMySettings();
+  const pantry = usePantryItems(kitchen?.id);
+  const pantryIds = useMemo(() => new Set((pantry.data ?? []).flatMap((p) => (p.ingredient_id ? [p.ingredient_id] : []))), [pantry.data]);
 
   if (bookmarks.isError) {
     return (
@@ -64,37 +65,14 @@ export function SavedTab() {
           <h2 className="m-0 font-round text-card-title">
             <FormattedMessage id={g.showYear ? 'recipes.monthYear' : 'recipes.month'} values={{ year: g.year, month: g.month }} />
           </h2>
-          {g.entries.map((e) => <SavedCard key={e.bookmark.id} bookmark={e.bookmark} />)}
+          {g.entries.map((e) => <SavedCard key={e.bookmark.id} bookmark={e.bookmark} view={viewOfBookmark(e.bookmark, settings.data?.temperature_unit, pantryIds)} />)}
         </section>
       ))}
     </div>
   );
 }
 
-// 收藏的點子轉成抽屜要顯示的內容（和首頁的卡片同一種形狀）
-function viewOfBookmark(b: Bookmark, tempUnit: string | null | undefined): IdeaView {
-  const idea = ideaOf(b);
-  const nameOf = (id: string) => getIngredient(id)?.name['zh-TW'] ?? id;
-  return {
-    key: b.id,
-    title: idea.title,
-    why: renderMarks(idea.why ?? '', parseTemperaturePref(tempUnit)),
-    kitchenHas: false,
-    ingredients: b.idea_ingredient_ids.map((id) => ({ id, name: nameOf(id), have: false })),
-    others: [],
-    substitutions: [],
-    techniques: idea.baseDishId ? dishTechniques(idea.baseDishId) : techniqueNames([]),
-    source: idea.baseDishId ? 'dish' : 'ai',
-    ...(idea.baseDishId ? { baseDishId: idea.baseDishId } : {}),
-    ...(idea.suggestionId ? { suggestionId: idea.suggestionId } : {}),
-  };
-}
-
-function SavedCard({ bookmark }: { bookmark: Bookmark }) {
-  const intl = useIntl();
-  const navigate = useNavigate();
-  const settings = useMySettings();
-  const [open, setOpen] = useState(false);
+function SavedCard({ bookmark, view }: { bookmark: Bookmark; view: IdeaView }) {
   const idea = ideaOf(bookmark);
   const cooked = bookmark.cooked_recipe_id;
   const difficulty = idea.baseDishId ? difficultyOf(idea.baseDishId) : null;
@@ -115,25 +93,11 @@ function SavedCard({ bookmark }: { bookmark: Bookmark }) {
           ) : (
             <span className={`${tag} bg-bg text-ink-muted`}><FormattedMessage id="recipes.saved.notCooked" /></span>
           )}
-          {!cooked && difficulty !== null && (
-            <span className={`${tag} bg-bg text-ink-muted`}>
-              <FormattedMessage id="recipes.saved.difficulty" values={{ value: difficulty }} />
-            </span>
-          )}
         </div>
-        {cooked ? (
-          <Link to={`/recipes/${cooked}`} className="text-small text-ink underline underline-offset-4 after:absolute after:inset-0">
-            <FormattedMessage id="recipes.saved.open" />
-          </Link>
-        ) : (
-          <button
-            type="button"
-            onClick={() => setOpen(true)}
-            className="self-start border-0 bg-transparent p-0 font-[inherit] text-small text-ink underline underline-offset-4 after:absolute after:inset-0"
-          >
-            <FormattedMessage id="idea.sheet.open" />
-          </button>
-        )}
+        <div className="flex"><IdeaTags view={{ ingredients: view.ingredients, difficulty: cooked ? undefined : (difficulty ?? undefined) }} tone="bg" /></div>
+        <Link to={`/recipes/saved/${bookmark.id}`} className="text-small text-ink underline underline-offset-4 after:absolute after:inset-0">
+          <FormattedMessage id="idea.sheet.open" />
+        </Link>
         <button
           type="button"
           disabled={unbookmark.isPending}
@@ -144,26 +108,6 @@ function SavedCard({ bookmark }: { bookmark: Bookmark }) {
         </button>
         {unbookmark.isError && <span role="alert" className="text-small text-error"><FormattedMessage id="recipes.saved.removeError" /></span>}
       </div>
-      {open && (
-        <IdeaSheet
-          view={viewOfBookmark(bookmark, settings.data?.temperature_unit)}
-          bookmarkId={bookmark.id}
-          onClose={() => setOpen(false)}
-          onRecord={(draft) => record(draft)}
-        />
-      )}
     </article>
   );
-
-  function record(draft: RecipeDraft | null) {
-    setOpen(false);
-    const prefs = unitPrefs(settings.data, intl);
-    void navigate('/recipes/new', {
-      state: {
-        title: idea.title,
-        bookmarkId: bookmark.id,
-        ...(draft ? { draft: editorDraftOf(draft, prefs, (minutes) => intl.formatMessage({ id: 'idea.sheet.method.timer' }, { minutes })) } : {}),
-      },
-    });
-  }
 }

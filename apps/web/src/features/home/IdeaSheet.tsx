@@ -9,22 +9,17 @@ import { ingredientLines, stepLines, tipsText, unitPrefs } from './draft.ts';
 import { ingredientBadges, type IdeaView } from './ideaView.ts';
 import { useIdeaBookmark } from './useIdeaBookmark.ts';
 
-// 點子抽屜（首頁、對話、收藏共用）：菜名、理由、食材標籤，接著直接是做法（沒有另外的「看做法」按鈕）。
+// 點子抽屜（首頁與對話共用；收藏的點子是完整頁 SavedIdeaPage，共用下面的 MethodSection）：菜名、理由、食材標籤，接著直接是做法（沒有另外的「看做法」按鈕）。
 // 第一次打開要等大廚寫：標籤先顯示，做法區塊放思考中的大廚；寫好、檢查過才一次顯示。寫不出來顯示「大廚需要再想想」。
 // 家常菜先顯示骨架（主要食材與手法）。自己的食譜不呼叫 AI，只有「打開食譜」。
 // 底部的「收藏／已收藏」和卡片右上角的收藏是同一個狀態（useIdeaBookmark）。從「食譜 → 收藏」打開時（有 bookmarkId），做法讀收藏的，底下是「做了，記錄一篇」，沒有收藏切換。
 // 外框是共用的 Sheet（可拖曳關閉）。
-export function IdeaSheet({ view, onClose, bookmarkId, onRecord }: {
-  view: IdeaView;
-  onClose: () => void;
-  bookmarkId?: string;
-  onRecord?: (draft: RecipeDraft | null) => void;
-}) {
+export function IdeaSheet({ view, onClose }: { view: IdeaView; onClose: () => void }) {
   const intl = useIntl();
   const navigate = useNavigate();
   const reason = view.why;
   const input: ExpandInput | null =
-    view.source === 'own' ? null : bookmarkId ? { bookmarkId } : view.suggestionId ? { suggestionId: view.suggestionId, ideaId: view.key } : null;
+    view.source === 'own' ? null : view.suggestionId ? { suggestionId: view.suggestionId, ideaId: view.key } : null;
   const expand = useExpandSteps(input);
   const draft = expand.data?.draft ?? null;
 
@@ -114,16 +109,7 @@ export function IdeaSheet({ view, onClose, bookmarkId, onRecord }: {
           <FormattedMessage id="idea.sheet.openRecipe" />
         </button>
       )}
-      {onRecord && (
-        <button
-          type="button"
-          onClick={() => onRecord(draft)}
-          className="h-12 rounded-card border-2 border-ink bg-bulb font-[inherit] text-body font-bold text-ink"
-        >
-          <FormattedMessage id="idea.sheet.record" />
-        </button>
-      )}
-      {can && !bookmarkId && (
+      {can && (
         <>
           <button
             type="button"
@@ -142,7 +128,7 @@ export function IdeaSheet({ view, onClose, bookmarkId, onRecord }: {
 }
 
 // 做法區塊：食材與步驟。三種狀態：思考中（大廚）、寫好了、需要再想想；沒有 AI 可問的家常菜只有骨架
-function MethodSection({ view, hasInput, pending, failed, retrying, draft, onRetry }: {
+export function MethodSection({ view, hasInput, pending, failed, retrying, draft, onRetry }: {
   view: IdeaView;
   hasInput: boolean;
   pending: boolean;
