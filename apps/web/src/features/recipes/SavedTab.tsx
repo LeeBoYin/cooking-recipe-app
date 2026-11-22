@@ -2,13 +2,14 @@ import { useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router';
 import { difficultyOverall } from '@zhusha/core';
-import { getIngredient } from '@zhusha/ingredients';
 import { baseDishes } from '@zhusha/taste';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
 import { ideaOf, type Bookmark } from '../../data/bookmarks.ts';
-import { useCurrentKitchen, useMyBookmarks, useUnbookmark } from '../../data/hooks.ts';
-import { mainIngredientTags } from '../home/mainIngredients.ts';
+import { useCurrentKitchen, useMyBookmarks, useMySettings, usePantryItems, useUnbookmark } from '../../data/hooks.ts';
+import { IdeaTags } from '../home/IdeaTags.tsx';
+import type { IdeaView } from '../home/ideaView.ts';
+import { viewOfBookmark } from './SavedIdeaPage.tsx';
 import { localDate, groupByMonth } from './timeline.ts';
 import { todayIn } from '../pantry/dates.ts';
 
@@ -34,6 +35,9 @@ export function SavedTab() {
     [bookmarks.data, timeZone],
   );
   const groups = groupByMonth(entries, todayIn(timeZone));
+  const settings = useMySettings();
+  const pantry = usePantryItems(kitchen?.id);
+  const pantryIds = useMemo(() => new Set((pantry.data ?? []).flatMap((p) => (p.ingredient_id ? [p.ingredient_id] : []))), [pantry.data]);
 
   if (bookmarks.isError) {
     return (
@@ -61,19 +65,18 @@ export function SavedTab() {
           <h2 className="m-0 font-round text-card-title">
             <FormattedMessage id={g.showYear ? 'recipes.monthYear' : 'recipes.month'} values={{ year: g.year, month: g.month }} />
           </h2>
-          {g.entries.map((e) => <SavedCard key={e.bookmark.id} bookmark={e.bookmark} />)}
+          {g.entries.map((e) => <SavedCard key={e.bookmark.id} bookmark={e.bookmark} view={viewOfBookmark(e.bookmark, settings.data?.temperature_unit, pantryIds)} />)}
         </section>
       ))}
     </div>
   );
 }
 
-function SavedCard({ bookmark }: { bookmark: Bookmark }) {
+function SavedCard({ bookmark, view }: { bookmark: Bookmark; view: IdeaView }) {
   const idea = ideaOf(bookmark);
   const cooked = bookmark.cooked_recipe_id;
   const difficulty = idea.baseDishId ? difficultyOf(idea.baseDishId) : null;
   const unbookmark = useUnbookmark();
-  const tags = mainIngredientTags(bookmark.idea_ingredient_ids.map((id) => getIngredient(id)?.name['zh-TW'] ?? id));
   const tag = 'rounded-tag px-2 py-0.5 text-small font-bold';
   return (
     <article className="relative flex gap-3 rounded-card bg-surface p-2.5">
@@ -90,14 +93,8 @@ function SavedCard({ bookmark }: { bookmark: Bookmark }) {
           ) : (
             <span className={`${tag} bg-bg text-ink-muted`}><FormattedMessage id="recipes.saved.notCooked" /></span>
           )}
-          {tags.shown.map((name) => <span key={name} className={`${tag} bg-bulb-soft`}>{name}</span>)}
-          {tags.more > 0 && <span className={`${tag} bg-bg text-ink-muted`}><FormattedMessage id="recipes.saved.more" values={{ count: tags.more }} /></span>}
-          {!cooked && difficulty !== null && tags.shown.length === 0 && (
-            <span className={`${tag} bg-bg text-ink-muted`}>
-              <FormattedMessage id="recipes.saved.difficulty" values={{ value: difficulty }} />
-            </span>
-          )}
         </div>
+        <IdeaTags view={{ ingredients: view.ingredients, difficulty: cooked ? undefined : (difficulty ?? undefined) }} tone="bg" />
         <Link to={`/recipes/saved/${bookmark.id}`} className="text-small text-ink underline underline-offset-4 after:absolute after:inset-0">
           <FormattedMessage id="idea.sheet.open" />
         </Link>
