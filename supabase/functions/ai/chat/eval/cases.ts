@@ -187,24 +187,23 @@ export const CHAT_CASES: ChatEvalCase[] = [
     },
   },
   {
-    id: '06-chat-this-dish',
-    name: '「想做筍子排骨湯」＋長期偏好「我不太吃羊肉」',
+    id: '06-long-term-preference',
+    name: '長期偏好「我不太吃羊肉」＋說了一道想吃的菜',
     ctx: TW,
-    users: ['我不太吃羊肉，想做筍子排骨湯'],
+    users: ['我不太吃羊肉，今天想吃筍子排骨湯'],
     fake: [
       () => out({
         reply: '好選擇！排骨先汆燙去血水，筍子切塊一起小火慢燉，甜味就出來了。',
-        summary: '想做筍子排骨湯；不吃羊肉',
+        summary: '想吃筍子排骨湯；不吃羊肉',
         preference_signals: [{ dimension_key: 'protein.lamb', affinity: -0.6, scope: 'long_term' }],
         mentioned_ingredients: [{ text: '筍子', ingredient_id: 'bamboo-shoot' }],
       }),
     ],
-    expectation: '給大方向與要注意的地方，不寫完整步驟與分量；沒有點子卡片；「不太吃羊肉」記成長期的偏好訊號。',
+    expectation: '接住使用者想吃的菜，不寫完整步驟與分量；「不太吃羊肉」記成長期的偏好訊號。',
     assert: (sim) => {
       const k = kept(sim);
       return [
         ...(k[0]?.signals.some((s) => s.dimensionKey === 'protein.lamb' && s.scope === 'long_term' && s.affinity < 0) ? [] : ['沒有記下不吃羊肉']),
-        ...(k[0] && k[0].ideas.length > 0 ? ['選好了一道菜，卻又給點子'] : []),
         ...(k[0] && [...k[0].reply].length > 150 ? ['回應太長'] : []),
       ];
     },

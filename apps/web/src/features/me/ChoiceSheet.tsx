@@ -1,23 +1,16 @@
 import { useState, type ReactNode } from 'react';
 import { FormattedMessage } from 'react-intl';
+import { Sheet } from '../../ui/Sheet.tsx';
 
 export type Choice = { id: string; label: string };
 
-// 從下方滑出的面板外框：點外面關閉，內容自己放
+// 從下方滑出的面板外框（可拖曳關閉，見 ui/Sheet）：標題加內容
 export function SheetFrame({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-ink/45" onClick={onClose}>
-      <div
-        role="dialog"
-        aria-label={title}
-        onClick={(e) => e.stopPropagation()}
-        className="mx-auto flex w-full max-w-[560px] flex-col gap-3 rounded-t-2xl bg-bg px-5 pt-2.5 pb-[calc(28px+env(safe-area-inset-bottom))]"
-      >
-        <span aria-hidden="true" className="h-[5px] w-10 self-center rounded-sm bg-line-strong" />
-        <b className="text-[20px]">{title}</b>
-        {children}
-      </div>
-    </div>
+    <Sheet label={title} onClose={onClose}>
+      <b className="text-[20px]">{title}</b>
+      {children}
+    </Sheet>
   );
 }
 
