@@ -94,7 +94,7 @@ function SavedCard({ bookmark, view }: { bookmark: Bookmark; view: IdeaView }) {
             <span className={`${tag} bg-bg text-ink-muted`}><FormattedMessage id="recipes.saved.notCooked" /></span>
           )}
         </div>
-        <IdeaTags view={{ ingredients: view.ingredients, difficulty: cooked ? undefined : (difficulty ?? undefined) }} tone="bg" />
+        <div className="flex"><IdeaTags view={{ ingredients: view.ingredients, difficulty: cooked ? undefined : (difficulty ?? undefined) }} tone="bg" /></div>
         <Link to={`/recipes/saved/${bookmark.id}`} className="text-small text-ink underline underline-offset-4 after:absolute after:inset-0">
           <FormattedMessage id="idea.sheet.open" />
         </Link>
