@@ -1,6 +1,6 @@
 // `ai` Edge Function 的呼叫（16 第六節）。前端不直接呼叫 Claude，也不自己判斷額度；
 // 失敗時只拿到錯誤代號，由各畫面依代號顯示「目前無法使用」的說法（03〈AI 不能用時〉），不顯示次數，也不改用別的挑法。
-import type { AiIdea, AiIdeasPayload, ChatInput, ChatMention, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse } from '@zhusha/core';
+import type { AiIdea, AiIdeasPayload, ChatInput, ChatMention, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse, ImportInput, ImportResponse } from '@zhusha/core';
 import { supabase } from './supabase.ts';
 import { trackAiError } from './trackError.ts';
 
@@ -20,6 +20,9 @@ export type AiError =
   | 'truncated'
   | 'invalid_output'
   | 'upstream_error'
+  | 'import_url_invalid'
+  | 'import_fetch_failed'
+  | 'import_no_recipe'
   | 'not_configured'
   | 'server_error'
   | 'network';
@@ -27,7 +30,7 @@ export type AiError =
 const KNOWN: ReadonlySet<string> = new Set<AiError>([
   'unauthorized', 'account_inactive', 'ai_paused', 'ai_disabled', 'unknown_task', 'task_not_available', 'invalid_input',
   'rate_limited', 'over_limit', 'budget_exhausted', 'refused', 'truncated', 'invalid_output', 'upstream_error', 'not_configured',
-  'server_error',
+  'import_url_invalid', 'import_fetch_failed', 'import_no_recipe', 'server_error',
 ]);
 
 export function toAiError(body: unknown): AiError {
@@ -141,4 +144,12 @@ export function isResumable(conv: ChatConversation | null | undefined, kitchenId
 // 第一次打開才叫 Claude（十幾秒），寫好的做法後端存起來，之後直接回；失敗時丟 AiCallError，什麼都沒存
 export async function expandSteps(input: ExpandInput): Promise<ExpandResponse> {
   return await callAi<ExpandResponse>('expand_steps', input);
+}
+
+// ---------------------------------------------------------------------------------------------
+// 從網址匯入（import_url，M1b-05）：後端抓網頁或讀貼上的文字，回傳預填編輯頁的食譜。
+// import_* 三個代號是匯入自己的失敗（網址不行、抓不到、找不到食譜），畫面請使用者貼上食譜文字；其他代號是 AI 不能用。
+// ---------------------------------------------------------------------------------------------
+export async function importRecipe(input: ImportInput): Promise<ImportResponse> {
+  return await callAi<ImportResponse>('import_url', input);
 }

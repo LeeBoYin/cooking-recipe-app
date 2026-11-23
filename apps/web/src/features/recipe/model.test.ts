@@ -9,6 +9,8 @@ import {
   overLimit,
   photosChanged,
   recordProgress,
+  startingForm,
+  toFields,
   toIngredient,
   toPhotoInputs,
   type EditorForm,
@@ -139,5 +141,18 @@ describe('recordProgress（放棄時做到哪）', () => {
     expect(recordProgress({ ...f, photos: [photo('a')] })).toBe('photo');
     expect(recordProgress({ ...f, photos: [photo('a')], title: '紅燒肉' })).toBe('text');
     expect(recordProgress({ ...f, title: '紅燒肉', tips: '小火' })).toBe('method');
+  });
+});
+
+describe('匯入的來源', () => {
+  const source = { type: 'url', url: 'https://example.com/r', name: 'Example' } as const;
+  it('新食譜帶來源：第一次存的變更裡有 source，之後不再重送', () => {
+    const saved = startingForm(2, undefined, undefined);
+    const current = startingForm(2, '烤雞', undefined, source);
+    expect(buildPatch(saved, current).source).toEqual(source);
+    expect(buildPatch(current, { ...current, title: '烤雞二號' }).source).toBeUndefined();
+  });
+  it('沒有來源的食譜 source 是 null', () => {
+    expect(toFields(emptyForm()).source).toBeNull();
   });
 });

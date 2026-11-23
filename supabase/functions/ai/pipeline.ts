@@ -21,6 +21,9 @@ export type AiErrorCode =
   | 'truncated' //           502 輸出被截斷（max_tokens）
   | 'invalid_output' //      502 輸出不是合法 JSON 或不符合 schema
   | 'upstream_error' //      502 Claude 服務出錯或逾時
+  | 'import_url_invalid' //  400 匯入：網址格式不對或不能抓（內部位址、非 http／https）
+  | 'import_fetch_failed' // 422 匯入：抓不到網頁（逾時、被擋、要登入、太大、不是網頁）
+  | 'import_no_recipe' //    422 匯入：網頁或文字裡找不到食譜（例如要執行 JavaScript 才有內容）
   | 'not_configured' //      500 沒有設定金鑰
   | 'server_error'; //       500
 
@@ -39,6 +42,9 @@ export const ERROR_STATUS: Record<AiErrorCode, number> = {
   truncated: 502,
   invalid_output: 502,
   upstream_error: 502,
+  import_url_invalid: 400,
+  import_fetch_failed: 422,
+  import_no_recipe: 422,
   not_configured: 500,
   server_error: 500,
 };

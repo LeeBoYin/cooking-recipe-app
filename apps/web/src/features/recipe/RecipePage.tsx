@@ -6,6 +6,7 @@ import { getIngredient } from '@zhusha/ingredients';
 import type { RecipeIngredient, RecipeStep, RecipeVisibility } from '@zhusha/shared-types';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
+import type { RecipeSource } from '@zhusha/shared-types';
 import { useCurrentKitchen, useMySettings, useMyRecipes, usePantryItems, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
 import { Icon } from '../shell/Icon.tsx';
 import { TopBar } from '../shell/SubPage.tsx';
@@ -228,6 +229,7 @@ export function RecipePage() {
           ))}
         </div>
         {r.story && <p className="m-0 whitespace-pre-wrap text-[15px] leading-[1.7]">{r.story}</p>}
+        <SourceLine source={r.source} />
         {r.status === 'draft' && <p className="m-0 text-small text-ink-muted"><FormattedMessage id="recipe.view.draftNote" /></p>}
       </article>
 
@@ -378,5 +380,27 @@ export function RecipePage() {
         />
       )}
     </div>
+  );
+}
+
+// 匯入的食譜標出來源：網站名稱（沒有就用網域）加連結。只有 http／https 才做成連結，新分頁開啟
+function SourceLine({ source: raw }: { source: unknown }) {
+  const source = raw as RecipeSource | null;
+  if (!source || source.type !== 'url' || !source.url || !/^https?:\/\//i.test(source.url)) return null;
+  let label = source.name;
+  if (!label) {
+    try {
+      label = new URL(source.url).hostname.replace(/^www\./, '');
+    } catch {
+      return null;
+    }
+  }
+  return (
+    <p className="m-0 text-small text-ink-muted">
+      <FormattedMessage id="recipe.source.label" />：
+      <a href={source.url} target="_blank" rel="noopener noreferrer" className="text-ink-muted underline">
+        {label}
+      </a>
+    </p>
   );
 }

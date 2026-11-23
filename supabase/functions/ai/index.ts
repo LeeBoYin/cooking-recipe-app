@@ -8,6 +8,7 @@ import { TASKS } from './tasks.ts';
 import { runHomeIdeas } from './home/handler.ts';
 import { runChat } from './chat/handler.ts';
 import { runExpandSteps } from './expand/handler.ts';
+import { runImportUrl } from './import/handler.ts';
 import { createProtection, sessionIdOf } from './usage.ts';
 
 const CORS = {
@@ -20,6 +21,12 @@ function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { ...CORS, 'content-type': 'application/json' } });
 }
 const error = (code: AiErrorCode) => json({ error: code }, ERROR_STATUS[code]);
+
+// DNS 解析：IPv4 與 IPv6 都查，兩種都沒有就丟出錯誤（視為不能連）
+async function resolveHost(hostname: string): Promise<string[]> {
+  const [a, aaaa] = await Promise.allSettled([Deno.resolveDns(hostname, 'A'), Deno.resolveDns(hostname, 'AAAA')]);
+  return [...(a.status === 'fulfilled' ? a.value : []), ...(aaaa.status === 'fulfilled' ? aaaa.value : [])];
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
@@ -88,6 +95,19 @@ Deno.serve(async (req) => {
         return error(expand.error);
       }
       return json({ data: expand.data });
+    }
+    // 從網址匯入：後端抓網頁、有結構化食譜資料由程式讀，沒有才叫 Claude（見 import/handler.ts）
+    if (body.task === 'import_url') {
+      const imported = await runImportUrl(
+        { ai: deps, net: { fetch: async (u, init) => await fetch(u, init), resolve: resolveHost } },
+        auth.user.id,
+        body.input,
+      );
+      if (!imported.ok) {
+        console.error('ai: rejected', imported.error);
+        return error(imported.error);
+      }
+      return json({ data: imported.data });
     }
     const result = await runAi(deps, auth.user.id, body.task, body.input);
     if (!result.ok) {

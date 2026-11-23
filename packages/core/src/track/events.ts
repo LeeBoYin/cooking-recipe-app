@@ -12,6 +12,7 @@ export const TRACK_SCREENS = [
   'recipes_drafts',
   'saved_idea',
   'record',
+  'record_import',
   'recipe',
   'recipe_edit',
   'kitchen',
@@ -60,6 +61,8 @@ export const TRACK_EVENTS = {
   'record.draft_published': {},
   // 還原食譜版本：只記操作，不記是哪一版、哪一篇
   'recipe.revision_restored': {},
+  // 從網址或貼上的文字匯入：只記輸入方式與結果（程式直接讀、AI 擷取、失敗），不記網址與內容
+  'import.finished': { input: e(['url', 'text']), result: e(['structured', 'ai', 'failed']) },
   'chat.start': {},
   'chat.message_sent': { turn: n(100) },
   'suggestion.shown': { source: e(SOURCES), slot: e(SLOTS) },
