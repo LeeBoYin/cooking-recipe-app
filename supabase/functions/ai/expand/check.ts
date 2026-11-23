@@ -59,6 +59,7 @@ export function checkDraft(raw: RawDraft, env: HomeEnv, opts: { servings: number
   const presets = sousVidePresetsFor(env.ctx.kitchen.region, { shortOnly: env.sousVideShortOnly });
   const usedPresets: SousVidePreset[] = [];
   const hardTexts: string[] = [];
+  const svSteps: RawDraft['steps'] = [];
 
   // 食材
   const ingredients: DraftIngredient[] = [];
@@ -66,8 +67,11 @@ export function checkDraft(raw: RawDraft, env: HomeEnv, opts: { servings: number
   for (const r of raw.ingredients) {
     if (!r || !isStr(r.name, 1, 40) || !UNITS.has(r.unit) || typeof r.optional !== 'boolean') { flag('format'); continue; }
     const noAmount = NO_AMOUNT_UNITS.includes(r.unit);
-    if (noAmount ? r.amount !== null : !(isNum(r.amount) && r.amount > 0 && r.amount <= 5000)) { flag('unit'); continue; }
-    if (r.amount_max !== null && !(isNum(r.amount_max) && r.amount !== null && r.amount_max > r.amount && r.amount_max <= 5000)) { flag('unit'); continue; }
+    // 份量單位（一撮、適量）不帶數字；AI 帶了數字就拿掉照收，不整篇擋
+    const amount = noAmount ? null : r.amount;
+    const amountMax = noAmount ? null : r.amount_max;
+    if (noAmount ? false : !(isNum(r.amount) && r.amount > 0 && r.amount <= 5000)) { flag('unit'); continue; }
+    if (amountMax !== null && !(isNum(amountMax) && amount !== null && amountMax > amount && amountMax <= 5000)) { flag('unit'); continue; }
     if (r.group !== null && !isStr(r.group, 1, 10)) { flag('format'); continue; }
     const name = r.name.trim();
     const ingredientId = matchIngredientExact(name, ingredientIndex) ?? null;
@@ -76,8 +80,8 @@ export function checkDraft(raw: RawDraft, env: HomeEnv, opts: { servings: number
     hardTexts.push(name);
     ingredients.push({
       id: makeId(), name, ingredientId,
-      ...(r.amount !== null ? { amount: r.amount } : {}),
-      ...(r.amount_max !== null ? { amountMax: r.amount_max } : {}),
+      ...(amount !== null ? { amount } : {}),
+      ...(amountMax !== null ? { amountMax } : {}),
       unit: r.unit as UnitCode,
       optional: r.optional,
       ...(r.group !== null ? { group: r.group.trim() } : {}),
@@ -94,19 +98,9 @@ export function checkDraft(raw: RawDraft, env: HomeEnv, opts: { servings: number
     hardTexts.push(s.text);
     for (const t of s.techniques) {
       if (!isKnownTechnique(t)) flag('technique');
-      // 舒肥：食材要是豬、牛、羊肉；溫度要是表裡某一組的中心溫度、維持時間不少於表上的（timer_seconds 是到達中心溫度之後的維持時間）；
-      // 文字要帶那一組的溫度標記。表裡沒有的（禽肉、海鮮、蛋，或對不上的溫度與時間）一律擋下
-      else if (t === 'sous-vide') {
-        const preset = presets.find((p) => s.target_temp_c === p.tempC);
-        const traits = ids.map((id) => [...(ideaIngredients.get(id)?.traits ?? [])]);
-        const ok =
-          preset !== undefined &&
-          sousVideIngredientsOk(ids, ingredients.map((i) => i.name), env.ctx.kitchen.region) &&
-          s.timer_seconds !== null && s.timer_seconds >= sousVideDwellSeconds(preset, traits) &&
-          s.text.includes(sousVideTempMark(preset));
-        if (!ok) flag('safety');
-        else if (!usedPresets.includes(preset)) usedPresets.push(preset);
-      } else if (!doable.has(t)) flag('technique');
+      // 舒肥：整篇一起檢查（見迴圈後），這裡先收集標了舒肥的步驟
+      else if (t === 'sous-vide') svSteps.push(s);
+      else if (!doable.has(t)) flag('technique');
     }
     if (s.equipment.some((e) => !equipmentIds.has(e))) flag('equipment');
     steps.push({
@@ -117,6 +111,26 @@ export function checkDraft(raw: RawDraft, env: HomeEnv, opts: { servings: number
       ...(s.target_temp_c !== null ? { targetTemp: { value: s.target_temp_c, unit: 'C' as const } } : {}),
     });
   });
+  checkSousVide(svSteps);
+  // 舒肥（07 SR-sous-vide）整篇一起看：食材要是豬、牛、羊肉；至少一步同時帶表裡的中心溫度、不少於表上的維持時間（timer_seconds 是到達中心溫度之後的維持時間）、
+  // 那一組的溫度標記；其他標了舒肥的步驟（加熱水、放入）沒寫溫度與時間就放行，寫了就要落在表上。表裡沒有的（禽肉、海鮮、蛋，或對不上的溫度與時間）一律擋下
+  function checkSousVide(list: RawDraft['steps']) {
+    if (list.length === 0) return;
+    const traits = ids.map((id) => [...(ideaIngredients.get(id)?.traits ?? [])]);
+    let holding = false;
+    let badStep = !sousVideIngredientsOk(ids, ingredients.map((i) => i.name), env.ctx.kitchen.region);
+    for (const st of list) {
+      if (st.target_temp_c === null && st.timer_seconds === null) continue;
+      const preset = presets.find((p) => st.target_temp_c === p.tempC);
+      if (preset === undefined) { badStep = true; continue; }
+      if (st.timer_seconds !== null) {
+        if (st.timer_seconds < sousVideDwellSeconds(preset, traits) || !st.text.includes(sousVideTempMark(preset))) { badStep = true; continue; }
+        holding = true;
+      }
+      if (!usedPresets.includes(preset)) usedPresets.push(preset);
+    }
+    if (badStep || !holding) flag('safety');
+  }
   const tips = typeof raw.tips === 'string' ? raw.tips.trim() : '';
   if (tips) {
     hardTexts.push(tips);

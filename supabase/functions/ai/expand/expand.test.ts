@@ -102,7 +102,6 @@ Deno.test('檢查擋得下違規：整份不用，不只刪掉違規的那一項
   bad(allergic, goodRaw({ ingredients: [ing('雞腿肉')], steps: [step('起鍋前撒上花生碎。')] }), 'keyword');
   bad(env05, goodRaw({ ingredients: [ing('雞蛋', { unit: 'oz' })] }), 'format');
   bad(env05, goodRaw({ ingredients: [ing('雞蛋', { amount: null, unit: 'piece' })] }), 'unit');
-  bad(env05, goodRaw({ ingredients: [ing('鹽', { amount: 1, unit: 'pinch' })] }), 'unit');
   bad(env05, goodRaw({ steps: [step('蒸十分鐘。')] }), 'wording');
   bad(env05, goodRaw({ steps: [step('蒸 10 分鐘。')] }), 'wording');
   bad(env05, goodRaw({ steps: [step('烤箱預熱到 180 度。')] }), 'wording');
@@ -147,7 +146,18 @@ Deno.test('舒肥：只能是豬、牛、羊肉，溫度與維持時間照預設
   bad(pork([svStep(`確認中心到達 ${MARK60}。`, { target_temp_c: 62 })]));
   bad(pork([svStep(`確認中心到達 ${MARK60}。`, { target_temp_c: 50 })]));
   bad(pork([svStep(`確認中心到達 ${MARK60}。`, { timer_seconds: 719 })]));
-  bad(pork([svStep(`確認中心到達 ${MARK60}。`, { timer_seconds: null })]));
+  bad(pork([svStep(`確認中心到達 ${MARK60}。`, { timer_seconds: null })])); // 整篇沒有任何一步帶維持時間
+  // 整篇檢查：準備步驟（加熱水、放入）也標了舒肥，沒寫溫度與時間就放行；寫了的要落在表上（評估 06 的輸出）
+  const prep = svStep('舒肥機放進水中，把水加熱到設定的溫度，再放入封好的豬里肌。', { timer_seconds: null, target_temp_c: null });
+  const prep60 = svStep('舒肥機放進水中，把水加熱到設定的溫度，再放入封好的豬里肌。', { timer_seconds: null });
+  const hold = svStep(`用溫度計確認肉最厚的地方中心到達 ${MARK60}，再開始計時。`);
+  assertEquals(checkDraft(pork([prep, hold]), env, opts).ok, true);
+  assertEquals(checkDraft(pork([prep60, hold]), env, opts).ok, true);
+  bad(pork([prep]));
+  bad(pork([svStep('加熱水。', { timer_seconds: null, target_temp_c: 62 }), hold]));
+  bad(pork([svStep('泡著。', { target_temp_c: null }), hold])); // 有時間沒溫度
+  bad(pork([prep, svStep(`確認中心到達 ${MARK60}。`, { timer_seconds: 719 })]));
+  bad(goodRaw({ ingredients: [ing('雞胸肉')], steps: [prep, hold] }));
   // 文字沒帶標記，或標記和溫度對不上
   bad(pork([svStep('用溫度計確認中心到達目標溫度。')]));
   bad(pork([svStep('確認中心到達 {{temp:145:F:min:62.8}}。')]));
@@ -163,6 +173,10 @@ Deno.test('舒肥：只能是豬、牛、羊肉，溫度與維持時間照預設
   const warm = { ...env, sousVideShortOnly: true };
   assertEquals(checkDraft(pork([svStep(`確認中心到達 ${MARK60}。`)]), warm, opts).ok, true);
   assertEquals(checkDraft(goodRaw({ ingredients: [ing('豬里肌')], steps: [svStep(`確認中心到達 ${MARK55}。`, { target_temp_c: 55, timer_seconds: 5820 })] }), warm, opts).ok, false);
+  // 份量單位（一撮、適量）帶了數字：拿掉數字照收（評估 01 的輸出）
+  const pinch = checkDraft(goodRaw({ ingredients: [ing('雞蛋'), ing('鹽', { amount: 1, unit: 'pinch' }), ing('黑胡椒', { amount: 2, amount_max: 3, unit: 'to_taste' })], steps: [step('煎到金黃。', { techniques: ['pan-fry'], equipment: ['frying-pan'] })] }), env, opts);
+  assert(pinch.ok, JSON.stringify(pinch));
+  if (pinch.ok) assert(pinch.draft.ingredients.slice(1).every((i) => i.amount === undefined && i.amountMax === undefined));
   // 一般的煎
   const pan = goodRaw({
     ingredients: [ing('雞胸肉'), ing('鹽', { amount: null, unit: 'pinch' })],
