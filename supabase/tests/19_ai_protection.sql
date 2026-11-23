@@ -1,6 +1,6 @@
 -- M1a-04：AI 用量保護——速率、合理使用上限、全站預算、異常偵測、後台函式
 begin;
-select plan(133);
+select plan(142);
 
 select tests.create_user('admin@zhusha.test');
 select tests.create_user('a@zhusha.test');
@@ -264,6 +264,26 @@ reset role;
 ---------------------------------------------------------------------------
 select pg_temp.rec((select a from u), 0.01, now() - interval '14 months');
 select private.purge_old_ai_usage();
+---------------------------------------------------------------------------
+-- 用量頁（M1a-13）：輸出檢查的結果依任務拆分、使用者清單帶出暫停與個人上限
+---------------------------------------------------------------------------
+create function pg_temp.chat_row(p_usage jsonb) returns jsonb
+language sql as $$ select e from jsonb_array_elements(p_usage -> 'by_task') e where e ->> 'task' = 'chat' limit 1 $$;
+select is((pg_temp.chat_row(public.admin_get_ai_usage((select admin from u))) ->> 'blocked')::int, 1, '本月 chat 被擋下 1 次');
+select is((pg_temp.chat_row(public.admin_get_ai_usage((select admin from u))) ->> 'rewritten')::int, 1, '本月 chat 重寫後通過 1 次');
+select is((pg_temp.chat_row(public.admin_get_ai_usage((select admin from u))) ->> 'passed')::int, 0, '本月 chat 沒有第一次就通過的');
+select is((pg_temp.chat_row(public.admin_get_ai_usage((select admin from u), '2026-05-15 00:00:00+00')) ->> 'blocked')::int, 0, '五月沒有結果代號');
+select is(public.admin_get_ai_usage((select admin from u), '2026-04-10 00:00:00+00') ->> 'month', '2026-04', '可以看指定的月份');
+select is(public.admin_get_ai_usage((select admin from u), '2026-04-10 00:00:00+00') -> 'by_task', '[]'::jsonb, '沒有用量的月份是空清單');
+
+select public.admin_set_user_ai_paused((select admin from u), (select a from u), true);
+select public.admin_set_user_fair_use((select admin from u), (select a from u), 2, null);
+select is((select e ->> 'ai_paused' from jsonb_array_elements(public.admin_list_users((select admin from u))) e where e ->> 'user_id' = (select a::text from u)), 'true', '使用者清單帶出 AI 暫停');
+select is((select e -> 'fair_use_override' ->> 'daily_usd' from jsonb_array_elements(public.admin_list_users((select admin from u))) e where e ->> 'user_id' = (select a::text from u)), '2', '使用者清單帶出個人每日上限');
+select is((select e -> 'fair_use_override' from jsonb_array_elements(public.admin_list_users((select admin from u))) e where e ->> 'user_id' = (select c::text from u)), 'null'::jsonb, '沒有覆寫的是 null');
+select public.admin_set_user_ai_paused((select admin from u), (select a from u), false);
+select public.admin_set_user_fair_use((select admin from u), (select a from u), null, null, true);
+
 select is((select count(*)::int from public.ai_usage_records where created_at < now() - interval '13 months'), 0, '13 個月前的明細被清掉');
 select is((select count(*)::int from public.ai_rate_counters where window_start < now() - interval '2 days'), 0, '過期的速率計數被清掉');
 

@@ -1,5 +1,6 @@
 // 管理後台 /admin（02 L、04 ADR-15）。程式碼分割成獨立的區塊，不放進 Service Worker 預先快取，一般使用者不會下載。
 // 進入前依序確認：是系統管理員（不是的人直接回首頁，看不到任何後台內容）→ 兩步驟驗證（aal2）。
+import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Navigate, NavLink, Outlet, Route, Routes } from 'react-router';
@@ -7,6 +8,7 @@ import { Chef } from '../../chef/Chef.tsx';
 import { adminApi, adminErrorOf, verifiedTotpFactorId } from '../../data/admin.ts';
 import { supabase } from '../../data/supabase.ts';
 import { AuthLayout, ErrorLine, linkButton } from '../auth/AuthLayout.tsx';
+import { AiUsagePage } from './AiUsagePage.tsx';
 import { InvitesPage } from './InvitesPage.tsx';
 import { LogsPage } from './LogsPage.tsx';
 import { MfaEnroll, MfaVerify } from './mfa.tsx';
@@ -42,9 +44,27 @@ function useGate(): [Gate, () => void] {
 const NAV = [
   { to: '/admin', end: true, id: 'admin.nav.invites' },
   { to: '/admin/users', end: false, id: 'admin.nav.users' },
+  { to: '/admin/ai', end: false, id: 'admin.nav.ai' },
   { to: '/admin/settings', end: false, id: 'admin.nav.settings' },
   { to: '/admin/logs', end: false, id: 'admin.nav.logs' },
 ];
+
+// 本月 AI 預算用到 80%（降級）或 100%（用完）時，每一頁的頂端都顯示醒目提示（02 L）。讀不到就不顯示。
+function BudgetBanner() {
+  const usage = useQuery({ queryKey: ['admin', 'ai-usage', 'current'], queryFn: () => adminApi.aiUsage(), retry: false });
+  const state = usage.data?.state;
+  if (!usage.data || state === undefined || state === 'ok') return null;
+  return (
+    <div role="alert" className={`mb-4 rounded-card border-2 px-4 py-3 ${state === 'exhausted' ? 'border-error' : 'border-bulb bg-bulb-soft'}`}>
+      <p className="m-0 font-bold">
+        <FormattedMessage id={`admin.ai.banner.${state}`} />
+      </p>
+      <NavLink to="/admin/ai" className="text-caption text-ink underline underline-offset-4">
+        <FormattedMessage id="admin.ai.banner.link" />
+      </NavLink>
+    </div>
+  );
+}
 
 function Layout() {
   const intl = useIntl();
@@ -78,6 +98,7 @@ function Layout() {
         </div>
       </nav>
       <main className="mx-auto w-full max-w-[960px] min-w-0 flex-1 px-4 py-4 md:px-8 md:py-6">
+        <BudgetBanner />
         <Outlet />
       </main>
     </div>
@@ -113,6 +134,7 @@ export function AdminApp() {
           <Route element={<Layout />}>
             <Route index element={<InvitesPage />} />
             <Route path="users" element={<UsersPage />} />
+            <Route path="ai" element={<AiUsagePage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="logs" element={<LogsPage />} />
             <Route path="*" element={<Navigate to="/admin" replace />} />
