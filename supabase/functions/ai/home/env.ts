@@ -7,7 +7,7 @@ import {
   type ChefPersona, type DimensionState, type Idea, type IdeaIngredient, type IdeaInput, type IdeaLimits, type IdeaOwnRecipe, type IdeaPool,
   type IngredientIndex, type TasteProfile, type TimeBand,
 } from '../../../../packages/core/src/index.ts';
-import { canDo, doableTechniques, equipmentTypes, getEquipmentType, onboardingModeFor, techniques, type OwnedEquipment } from '../../../../packages/equipment/src/index.ts';
+import { canDoOrSubstitute, doableTechniques, equipmentTypes, getEquipmentType, onboardingModeFor, techniques, type OwnedEquipment } from '../../../../packages/equipment/src/index.ts';
 import {
   allergenWithAncestors, allergens, dietaryRestrictions, ingredients as ingredientDict, type DietaryRestriction,
 } from '../../../../packages/ingredients/src/index.ts';
@@ -163,7 +163,7 @@ export function buildHomeEnv(ctx: HomeContextRow, now: Date): HomeEnv {
     profile,
     limits,
     pantry: ctx.pantry.map((p) => ({ ingredientId: p.ingredient_id, wantToUseSoon: p.want_to_use_soon, expiresOn: p.expires_at })),
-    canDoTechnique: (t) => (owned === null ? null : canDo(t, owned)),
+    canDoTechnique: (t) => (owned === null ? null : canDoOrSubstitute(t, owned)),
     ingredients: ideaIngredients,
     baseDishes: baseDishes.filter((d) => !d.deprecated).map((d) => ({
       id: d.id,
@@ -209,7 +209,7 @@ export function buildHomeEnv(ctx: HomeContextRow, now: Date): HomeEnv {
   // 沒過期的才算「有」；同一種食材如果有一份過期、一份沒過期，沒過期的那份會留下
   const pantryIds = new Set(pantry.map((p) => p.id));
 
-  // 廚具與手法的限定代碼：記了廚具就只有做得到的；沒記就用字典的基本選項（不含需要時間溫度的）
+  // 廚具與手法的限定代碼：記了廚具就只有廚具本身做得到的（替代做法只用在 L1 判斷候選做不做得到，點子寫出的手法要是真的用到的）；沒記就用字典的基本選項（不含需要時間溫度的）
   const doable = owned === null ? techniques.map((t) => t.id) : doableTechniques(owned);
   const techniqueEnum = doable.filter((t) => !bannedTechniqueIds.has(t));
   const equipmentEnum =
