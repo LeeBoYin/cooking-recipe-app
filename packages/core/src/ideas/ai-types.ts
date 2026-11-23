@@ -120,3 +120,26 @@ export interface ChatInput {
 export type ChatResponse =
   | { status: 'ok'; conversationId: string; turnCount: number; userMessage: ChatMessage; chefMessage: ChatMessage; ideas: AiIdea[]; hint: string | null }
   | { status: 'full' }; // 這一段已經滿 20 輪
+
+// ---------------------------------------------------------------------------------------------
+// 從網址匯入（M1b-05）：`ai` 函式 import_url 任務的輸入與回傳
+// ---------------------------------------------------------------------------------------------
+export const IMPORT_MAX_TEXT_CHARS = 10_000; // 貼上的食譜文字上限
+export const IMPORT_MAX_URL_CHARS = 2000;
+
+// 給網址或給貼上的文字，二選一
+export type ImportInput = { url: string } | { text: string };
+
+// 匯入的內容保留原文的數值與單位（350°F 就是 350°F），不換算、不翻譯；食材一行一個，步驟一步一段。
+// source：網址匯入才有（網址與網站名稱）；貼文字沒有
+export interface ImportedRecipe {
+  title: string;
+  servings: number | null;
+  ingredients: string[];
+  steps: string[];
+  tips: string;
+  source: { url: string | null; name: string | null };
+}
+
+// via：structured 是網頁有結構化的食譜資料、由程式直接讀；ai 是由 AI 從文字擷取
+export type ImportResponse = { status: 'ok'; via: 'structured' | 'ai'; recipe: ImportedRecipe };

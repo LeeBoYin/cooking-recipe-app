@@ -12,6 +12,7 @@ const SCREENS: [RegExp, TrackScreen][] = [
   [/^\/recipes\/drafts$/, 'recipes_drafts'],
   [/^\/recipes\/saved\/[^/]+$/, 'saved_idea'],
   [/^\/(record|recipes\/new)$/, 'record'],
+  [/^\/recipes\/import$/, 'record_import'],
   [/^\/recipes\/[^/]+\/edit$/, 'recipe_edit'],
   [/^\/recipes\/[^/]+$/, 'recipe'],
   [/^\/kitchen$/, 'kitchen'],

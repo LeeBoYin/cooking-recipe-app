@@ -23,6 +23,7 @@ import { MyRecipesTab } from './features/recipes/MyRecipesTab.tsx';
 import { RecipesPage } from './features/recipes/RecipesPage.tsx';
 import { SavedIdeaPage } from './features/recipes/SavedIdeaPage.tsx';
 import { SavedTab } from './features/recipes/SavedTab.tsx';
+import { ImportPage } from './features/recipe/ImportPage.tsx';
 import { NewRecipe } from './features/recipe/NewRecipe.tsx';
 import { RecipeEditPage } from './features/recipe/RecipeEditPage.tsx';
 import { RecipePage } from './features/recipe/RecipePage.tsx';
@@ -83,6 +84,7 @@ const signedInRoutes = (
             {/* 內頁：沒有分頁列，由 SubPage 提供返回 */}
             <Route element={<InnerLayout />} handle={{ inner: true }}>
               <Route path="recipes/new" element={<NewRecipe />} />
+              <Route path="recipes/import" element={<ImportPage />} />
               <Route path="recipes/drafts" element={<DraftsPage />} />
               <Route path="me/trash" element={<TrashPage />} />
               <Route path="recipes/deleted" element={<Navigate to="/me/trash" replace />} />
