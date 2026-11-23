@@ -8,7 +8,8 @@ import type { NewPantryItem, StorageZone } from '../../data/pantry.ts';
 import { Icon } from '../shell/Icon.tsx';
 import { SubPage } from '../shell/SubPage.tsx';
 import { todayIn } from './dates.ts';
-import { ExpiryFields, type Expiry } from './ExpiryFields.tsx';
+import type { Expiry } from './ExpiryFields.tsx';
+import { ItemOptions } from './ItemOptions.tsx';
 import { toggleIngredientDraft } from './draftToggle.ts';
 import { ZoneSelect } from './ZoneSelect.tsx';
 import { ItemIcon } from '../../icons/ItemIcon.tsx';
@@ -46,8 +47,8 @@ function Card({ draft, today, onChange, onRemove }: { draft: Draft; today: strin
   return (
     <li className="rounded-card bg-surface p-3">
       <div className="flex items-center justify-between">
-        <span className="text-card-title font-bold">
-          <ItemIcon kind="ingredient" id={draft.ingredient_id} size={32} /> {draft.name}
+        <span className="flex items-center gap-2 text-card-title font-bold">
+          <ItemIcon kind="ingredient" id={draft.ingredient_id} size={36} /> {draft.name}
         </span>
         <button
           type="button"
@@ -60,21 +61,13 @@ function Card({ draft, today, onChange, onRemove }: { draft: Draft; today: strin
       </div>
       <div className="mt-1 flex flex-col gap-3">
         <ZoneSelect value={draft.zone} onChange={(zone) => onChange({ ...draft, zone })} />
-        <label className="flex min-h-11 items-center gap-2 text-body">
-          <input
-            type="checkbox"
-            checked={draft.want_to_use_soon}
-            onChange={(e) => onChange({ ...draft, want_to_use_soon: e.target.checked })}
-            className="size-5 accent-bulb"
-          />
-          <FormattedMessage id="pantry.useSoon" />
-        </label>
-        <details>
-          <summary className="min-h-11 cursor-pointer text-caption font-bold leading-[44px]">
-            <FormattedMessage id="pantry.moreOptions" />
-          </summary>
-          <ExpiryFields value={draft} today={today} onChange={(e) => onChange({ ...draft, ...e })} />
-        </details>
+        <ItemOptions
+          soon={draft.want_to_use_soon}
+          onSoon={(want_to_use_soon) => onChange({ ...draft, want_to_use_soon })}
+          expiry={draft}
+          today={today}
+          onExpiry={(e) => onChange({ ...draft, ...e })}
+        />
       </div>
     </li>
   );

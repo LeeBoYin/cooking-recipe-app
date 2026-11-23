@@ -35,10 +35,13 @@ export function SortableList({ ids, onReorder, children }: { ids: string[]; onRe
   );
 }
 
-export function SortableItem({ id, handleLabel, className, children }: {
+export function SortableItem({ id, handleLabel, className, handleContent, handleClassName, children }: {
   id: string;
   handleLabel: string;
   className?: string;
+  // 預設是一個拖拉圖示；步驟列放「號碼加圖示」整塊
+  handleContent?: ReactNode;
+  handleClassName?: string;
   children: ReactNode;
 }) {
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id });
@@ -55,9 +58,9 @@ export function SortableItem({ id, handleLabel, className, children }: {
         {...attributes}
         {...listeners}
         style={{ touchAction: 'none' }}
-        className="flex size-11 shrink-0 cursor-grab items-center justify-center border-0 bg-transparent p-0 text-ink-muted"
+        className={handleClassName ?? 'flex size-11 shrink-0 cursor-grab items-center justify-center border-0 bg-transparent p-0 text-ink-muted'}
       >
-        <Icon name="grip" size={20} />
+        {handleContent ?? <Icon name="grip" size={20} />}
       </button>
       {children}
     </div>
