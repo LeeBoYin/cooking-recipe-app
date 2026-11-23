@@ -74,6 +74,10 @@ Deno.test('parseRequest：方案與 AI 設定', () => {
 
 Deno.test('parseRequest：AI 用量保護', () => {
   assertEquals(parseRequest({ action: 'get_ai_usage' }).ok, true);
+  assertEquals(parseRequest({ action: 'get_ai_usage', month: '2026-09' }), { ok: true, value: { action: 'get_ai_usage', month: '2026-09' } });
+  assertEquals(parseRequest({ action: 'get_ai_usage', month: '2026-13' }).ok, false);
+  assertEquals(parseRequest({ action: 'get_ai_usage', month: '2026-9' }).ok, false);
+  assertEquals(parseRequest({ action: 'get_ai_usage', month: 202609 }).ok, false);
   assertEquals(parseRequest({ action: 'get_ai_protection' }).ok, true);
   assertEquals(parseRequest({ action: 'update_ai_protection', protection: { perMinute: 6 } }).ok, true);
   assertEquals(parseRequest({ action: 'update_ai_protection', protection: [] }).ok, false);

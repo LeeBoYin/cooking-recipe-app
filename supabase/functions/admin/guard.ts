@@ -39,7 +39,8 @@ export function uuidV7(now = Date.now(), random: (n: number) => Uint8Array = (n)
 }
 
 export type AdminRequest =
-  | { action: 'get_config' | 'list_users' | 'list_invites' | 'get_ai_models' | 'get_ai_protection' | 'get_ai_usage' }
+  | { action: 'get_config' | 'list_users' | 'list_invites' | 'get_ai_models' | 'get_ai_protection' }
+  | { action: 'get_ai_usage'; month: string | null }
   | { action: 'update_ai_protection'; protection: Record<string, unknown> }
   | { action: 'set_user_fair_use'; userId: string; dailyUsd: number | null; monthlyUsd: number | null; clear: boolean }
   | { action: 'set_user_ai_paused'; userId: string; paused: boolean }
@@ -80,8 +81,12 @@ export function parseRequest(body: unknown): ParseResult {
     case 'list_invites':
     case 'get_ai_models':
     case 'get_ai_protection':
-    case 'get_ai_usage':
       return { ok: true, value: { action: b.action } };
+    case 'get_ai_usage': {
+      // month：'YYYY-MM'（UTC 的月份），不帶就是本月
+      const month = b.month === undefined || b.month === null ? null : typeof b.month === 'string' && /^20[0-9]{2}-(0[1-9]|1[0-2])$/.test(b.month) ? b.month : false;
+      return month === false ? bad : { ok: true, value: { action: 'get_ai_usage', month } };
+    }
     case 'update_ai_protection':
       // 格式與範圍由資料庫的 ai_protection_valid 檢查，這裡只確認是物件
       return typeof b.protection === 'object' && b.protection !== null && !Array.isArray(b.protection)

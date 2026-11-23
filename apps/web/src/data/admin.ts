@@ -16,6 +16,7 @@ export type AdminError =
   | 'cannot_target_self'
   | 'cannot_target_admin'
   | 'user_not_found'
+  | 'alert_not_found'
   | 'network'
   | 'server_error';
 
@@ -33,6 +34,7 @@ const KNOWN: ReadonlySet<string> = new Set<AdminError>([
   'cannot_target_self',
   'cannot_target_admin',
   'user_not_found',
+  'alert_not_found',
   'server_error',
 ]);
 
@@ -87,6 +89,9 @@ export interface AdminUser {
   created_at: string;
   last_active_at: string | null;
   accepted_via: 'password' | 'google' | null;
+  ai_paused: boolean;
+  // 管理員個別調整的合理使用上限；沒有覆寫是 null，只覆寫一邊時另一邊沒有欄位
+  fair_use_override: { daily_usd?: number; monthly_usd?: number } | null;
 }
 
 export type InviteState = 'pending' | 'accepted' | 'expired' | 'revoked';
@@ -124,6 +129,165 @@ export interface AuditLog {
   created_at: string;
 }
 
+// ── AI 用量與保護（M1a-04 的後端、M1a-13 的畫面）──
+
+export type BudgetState = 'ok' | 'degraded' | 'exhausted';
+
+export interface AiUsageTaskRow {
+  task: string;
+  model: string;
+  calls: number;
+  failures: number;
+  cost_usd: number;
+  input_tokens: number;
+  output_tokens: number;
+  cache_read_tokens: number;
+  cache_write_tokens: number;
+  // 輸出檢查的結果（只有首頁點子、對話、展開做法會記；其他任務三個都是 0）
+  passed: number;
+  rewritten: number;
+  blocked: number;
+}
+
+export interface AiUsageUser {
+  user_id: string;
+  display_name: string | null;
+  cost_usd: number;
+  calls: number;
+}
+
+export interface AiUsage {
+  month: string; // 'YYYY-MM'（UTC）
+  spent_usd: number;
+  budget_usd: number;
+  ratio: number;
+  state: BudgetState;
+  call_count: number;
+  console: { hard_cap_usd: number; budget_usd: number; margin_usd: number; spent_vs_cap_ratio: number | null };
+  open_alert_count: number;
+  paused_user_count: number;
+  by_task: AiUsageTaskRow[];
+  top_users: AiUsageUser[];
+}
+
+export type AiAlertKind =
+  | 'rate_limited'
+  | 'fair_use_daily'
+  | 'fair_use_monthly'
+  | 'repeated_input'
+  | 'oversized_input'
+  | 'multi_device_burst'
+  | 'budget_80'
+  | 'budget_100';
+
+export type AiAlertResolution = 'ok' | 'override_raised' | 'ai_paused';
+export type AiAlertStatus = 'open' | 'resolved';
+
+export interface AiAlert {
+  id: string;
+  user_id: string | null; // 空的是全站的提醒（預算 80%／100%）
+  display_name: string | null;
+  ai_paused: boolean | null;
+  kind: AiAlertKind;
+  detail: Record<string, unknown>;
+  created_at: string;
+  resolved_at: string | null;
+  resolved_by_name: string | null;
+  resolution: AiAlertResolution | null;
+}
+
+export interface FairUseLimit {
+  dailyUsd: number;
+  monthlyUsd: number;
+}
+
+export interface AiProtection {
+  schemaVersion: 1;
+  perMinute: number;
+  perHour: number;
+  fairUse: { free: FairUseLimit; plus: FairUseLimit };
+  anomaly: {
+    rateBlockAlerts: number;
+    repeatedInputCount: number;
+    oversizedStreak: number;
+    oversizedRatio: number;
+    burstCalls: number;
+    burstDevices: number;
+    burstWindowMinutes: number;
+  };
+  consoleHardCapUsd: number;
+}
+
+export interface AiProtectionInfo {
+  protection: AiProtection;
+  ai_monthly_budget_usd: number;
+  ai_budget_alert_ratio: number;
+  console: { hard_cap_usd: number; budget_usd: number; margin_usd: number; budget_within_cap: boolean };
+}
+
+// 前端先擋掉資料庫會拒絕的值（`ai_protection_valid`，見 16），回傳第一個不合格欄位的代號；都合格回 null。
+// 欄位的範圍和資料庫的 JSON Schema 一致；資料庫仍是最後一道。
+export type ProtectionIssue =
+  | 'perMinute'
+  | 'perHour'
+  | 'perHourBelowMinute'
+  | 'fairUse'
+  | 'fairUseMonthlyBelowDaily'
+  | 'anomaly'
+  | 'consoleHardCapUsd';
+
+function inRange(v: unknown, min: number, max: number, integer: boolean): v is number {
+  return typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max && (!integer || Number.isInteger(v));
+}
+
+export function protectionIssue(p: AiProtection): ProtectionIssue | null {
+  if (!inRange(p.perMinute, 1, 600, true)) return 'perMinute';
+  if (!inRange(p.perHour, 1, 6000, true)) return 'perHour';
+  if (p.perHour < p.perMinute) return 'perHourBelowMinute';
+  for (const plan of ['free', 'plus'] as const) {
+    const l = p.fairUse[plan];
+    if (!inRange(l.dailyUsd, 0, 100000, false) || !inRange(l.monthlyUsd, 0, 100000, false)) return 'fairUse';
+    if (l.monthlyUsd < l.dailyUsd) return 'fairUseMonthlyBelowDaily';
+  }
+  const a = p.anomaly;
+  if (
+    !inRange(a.rateBlockAlerts, 1, 10000, true) ||
+    !inRange(a.repeatedInputCount, 2, 10000, true) ||
+    !inRange(a.oversizedStreak, 2, 1000, true) ||
+    !inRange(a.oversizedRatio, 0.5, 1, false) ||
+    !inRange(a.burstCalls, 2, 10000, true) ||
+    !inRange(a.burstDevices, 2, 100, true) ||
+    !inRange(a.burstWindowMinutes, 1, 1440, true)
+  ) {
+    return 'anomaly';
+  }
+  if (!inRange(p.consoleHardCapUsd, 0, 100000, false)) return 'consoleHardCapUsd';
+  return null;
+}
+
+// 個人覆寫的檢查：至少填一邊、不能是負數；兩邊都填時每月不低於每日
+export type FairUseIssue = 'empty' | 'range' | 'monthlyBelowDaily';
+export function fairUseIssue(daily: number | null, monthly: number | null): FairUseIssue | null {
+  if (daily === null && monthly === null) return 'empty';
+  if ((daily !== null && !inRange(daily, 0, 100000, false)) || (monthly !== null && !inRange(monthly, 0, 100000, false))) return 'range';
+  if (daily !== null && monthly !== null && monthly < daily) return 'monthlyBelowDaily';
+  return null;
+}
+
+// 用量頁可選的月份：本月加前 12 個月，新的在前（UTC，和後端算月份的方式一樣）
+export function usageMonths(now: Date, count = 13): string[] {
+  return Array.from({ length: count }, (_, i) => {
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - i, 1));
+    return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+  });
+}
+
+// 被擋下的比率 = 被擋下 ÷（通過＋重寫後通過＋被擋下）；沒有檢查結果的任務是 null
+export function blockedRate(row: Pick<AiUsageTaskRow, 'passed' | 'rewritten' | 'blocked'>): number | null {
+  const checked = row.passed + row.rewritten + row.blocked;
+  return checked > 0 ? row.blocked / checked : null;
+}
+
 export interface LinkResult {
   token: string;
   expires_at: string;
@@ -143,6 +307,15 @@ export const adminApi = {
   updateInviteEmail: (inviteId: string, email: string) => adminCall<null>({ action: 'update_invite_email', inviteId, email }),
   setUserStatus: (userId: string, status: 'active' | 'suspended') => adminCall<null>({ action: 'set_user_status', userId, status }),
   createResetLink: (userId: string) => adminCall<{ link_id: string; token: string; expires_at: string }>({ action: 'create_reset_link', userId }),
+  aiUsage: (month?: string) => adminCall<AiUsage>({ action: 'get_ai_usage', month }),
+  aiAlerts: (status: AiAlertStatus, before?: string) =>
+    adminCall<AiAlert[]>({ action: 'list_ai_alerts', status, limit: 50, before }),
+  resolveAiAlert: (alertId: string, resolution: AiAlertResolution) => adminCall<null>({ action: 'resolve_ai_alert', alertId, resolution }),
+  setUserAiPaused: (userId: string, paused: boolean) => adminCall<null>({ action: 'set_user_ai_paused', userId, paused }),
+  setUserFairUse: (userId: string, input: { dailyUsd?: number | null; monthlyUsd?: number | null; clear?: boolean }) =>
+    adminCall<{ daily_usd?: number; monthly_usd?: number } | null>({ action: 'set_user_fair_use', userId, ...input }),
+  aiProtection: () => adminCall<AiProtectionInfo>({ action: 'get_ai_protection' }),
+  updateAiProtection: (protection: AiProtection) => adminCall<AiProtection>({ action: 'update_ai_protection', protection }),
   aiModels: () => adminCall<AiModelRow[]>({ action: 'get_ai_models' }),
   setUserPlan: (userId: string, plan: Plan) => adminCall<null>({ action: 'set_user_plan', userId, plan }),
   updateConfig: (input: { maxUsers?: number; softDeleteRetentionDays?: number; aiEnabled?: boolean; aiMonthlyBudgetUsd?: number }) =>

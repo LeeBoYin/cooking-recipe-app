@@ -41,7 +41,7 @@ async function run(client: SupabaseClient, admin: string, req: AdminRequest): Pr
     case 'get_ai_protection':
       return await rpc('admin_get_ai_protection', {});
     case 'get_ai_usage':
-      return await rpc('admin_get_ai_usage', {});
+      return await rpc('admin_get_ai_usage', req.month ? { p_now: `${req.month}-01T00:00:00Z` } : {});
     case 'update_ai_protection':
       return await rpc('admin_update_ai_protection', { p_protection: req.protection });
     case 'set_user_fair_use':
