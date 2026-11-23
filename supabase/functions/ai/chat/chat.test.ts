@@ -3,7 +3,7 @@ import { assert, assertEquals } from 'jsr:@std/assert@1';
 import { validate } from '../../_shared/json-schema.ts';
 import { type AiContext, type ClaudeRequest, type Deps } from '../pipeline.ts';
 import { checkChatOutput, retryHint } from './check.ts';
-import { buildChatEnv } from './env.ts';
+import { buildChatEnv, resolveIngredientId } from './env.ts';
 import { buildChatPrompt, buildChatSchema, CHAT_STABLE, HISTORY_TURNS } from './prompt.ts';
 import { parseChatInput, runChat } from './handler.ts';
 import { CHAT_CASES, idea, NOW } from './eval/cases.ts';
@@ -291,4 +291,26 @@ Deno.test('handler：第 1 輪就給點子、使用者沒要求：重寫一次�
   assertEquals(claude2.claude.length, 1);
   assertEquals(direct.calls.filter((x) => x.fn === 'ai_record_outcome').map((x) => x.args.p_outcome), ['passed']);
   assert((claude2.claude[0]?.messages.at(-1)?.content ?? '').includes('第 1 輪回應'));
+});
+
+Deno.test('提到的食材：ID 由程式用字典對（完全相同 → 別名 → 含有 → 模糊），不信任模型給的 ID', () => {
+  assertEquals(resolveIngredientId('高麗菜'), 'cabbage');
+  assertEquals(resolveIngredientId('筍子'), 'bamboo-shoot'); // 別名
+  assertEquals(resolveIngredientId('鄰居送的筍子'), 'bamboo-shoot'); // 話裡含有別名
+  assertEquals(resolveIngredientId('松露巧克力火鍋'), null); // 對不到就是 null
+  const c = CHAT_CASES[0];
+  assert(c);
+  const ce = buildChatEnv(c.ctx, NOW, null, '鄰居送了筍子，還有高麗菜');
+  const base: RawChatOutput = { reply: '好。', ask: null, hint: null, suggestions: [], mentioned_ingredients: [], preference_signals: [], user_wants_ideas: false, summary: '' };
+  // 模型回 null 或亂給 ID，程式都改用自己對到的
+  const out = checkChatOutput({ ...base, mentioned_ingredients: [{ text: '筍子', ingredient_id: null }, { text: '高麗菜', ingredient_id: 'egg' }] }, ce);
+  assert(out.ok);
+  assertEquals(out.mentioned.map((m) => m.ingredientId), ['bamboo-shoot', 'cabbage']);
+  // 「用到提到的食材」用程式對到的 ID：只寫在菜名以外的 ID 也算
+  const thin = checkChatOutput({ ...base, mentioned_ingredients: [{ text: '筍子', ingredient_id: null }, { text: '高麗菜', ingredient_id: null }, { text: '雞蛋', ingredient_id: null }], suggestions: [idea(ce, { title: '炒青菜', uses_pantry_ids: ['bamboo-shoot', 'cabbage', 'egg'] })] }, ce, { chefTurn: 3 });
+  assert(thin.ok && !thin.lowCoverage);
+});
+
+Deno.test('提示詞：「沒有了，就這些」＝只用剛剛提到的食材', () => {
+  assert(CHAT_STABLE.includes('沒有了，就這些') && CHAT_STABLE.includes('只用他剛剛提到的食材'));
 });

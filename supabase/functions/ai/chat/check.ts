@@ -6,7 +6,7 @@ import { checkHomeOutput } from '../home/check.ts';
 import { wordingProblems } from '../home/check.ts';
 import { dimensionKeys, ideaIngredients } from '../home/env.ts';
 import type { DropReason } from '../home/types.ts';
-import { norm, type ChatEnv } from './env.ts';
+import { norm, resolveIngredientId, type ChatEnv } from './env.ts';
 import type { ChatDropReason, ChatMention, ChatSignal, RawChatOutput } from './types.ts';
 
 export const MAX_REPLY = 150;
@@ -108,7 +108,7 @@ export function checkChatOutput(raw: RawChatOutput, ce: ChatEnv, opts: ChatCheck
     else hint = rawHint;
   }
 
-  // 使用者說了什麼食材：字要真的是他說過的話
+  // 使用者說了什麼食材：字要真的是他說過的話；ID 由程式對字典
   const mentioned: ChatMention[] = [];
   const newIds = new Set<string>();
   const seenText = new Set<string>();
@@ -117,13 +117,9 @@ export function checkChatOutput(raw: RawChatOutput, ce: ChatEnv, opts: ChatCheck
     const n = norm(text);
     if (!text || [...text].length > 40 || !ce.userText.includes(n) || seenText.has(n)) { drop('mention'); continue; }
     if (includesAny(text, env.hardTerms) || includesAny(text, env.dislikeTerms)) { drop('mention'); continue; }
-    let id: string | null = null;
-    if (typeof m.ingredient_id === 'string' && m.ingredient_id) {
-      // ID 要是字典裡的、不能是排除清單的。字和 ID 對不對得上不硬檢查（字典沒收「筍子」這種說法，但 AI 知道是竹筍）；
-      // 對錯了只是點子用錯食材，不影響安全（過敏原與排除清單照樣擋）
-      if (!ideaIngredients.has(m.ingredient_id) || violatesLimits([m.ingredient_id], {}, env.limits, ideaIngredients)) { drop('mention'); continue; }
-      id = m.ingredient_id;
-    }
+    // ID 一律由程式用字典對使用者說的字，不信任模型給的 ID；排除清單的食材不記
+    const id = resolveIngredientId(text);
+    if (id && violatesLimits([id], {}, env.limits, ideaIngredients)) { drop('mention'); continue; }
     seenText.add(n);
     mentioned.push({ text, ingredientId: id });
     if (id && !env.pantryIds.has(id)) newIds.add(id);
