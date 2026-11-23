@@ -38,8 +38,12 @@ export type EditorPhoto = {
   thumbPath?: string;
   storagePath?: string;
 };
-export type EditorStep = { id: string; text: string; photo?: EditorPhoto };
-export type EditorIngredient = { id: string; text: string };
+// isNew：這次用說的新加的項目（旁邊顯示「新的」小標記）；作者編輯過那一項就拿掉。只存在編輯頁，不存進資料庫
+export type EditorStep = { id: string; text: string; photo?: EditorPhoto; isNew?: boolean };
+export type EditorIngredient = { id: string; text: string; isNew?: boolean };
+
+// 難易度：source 是 author（作者動過拉桿，AI 不再覆寫）或 ai（大廚估的）；estimatedFrom 只有 AI 估的才有
+export type EditorDifficulty = { values: DifficultyValues; source: 'author' | 'ai'; estimatedFrom?: 'recipe' | 'text' };
 
 export type EditorForm = {
   title: string;
@@ -50,12 +54,18 @@ export type EditorForm = {
   steps: EditorStep[];
   tips: string;
   highlights: Highlight[];
-  difficulty: DifficultyValues | null; // 沒動過拉桿就是 null
+  difficulty: EditorDifficulty | null; // 還沒有難易度就是 null
   visibility: RecipeVisibility;
   source: RecipeSource | null; // 從網址匯入的來源；其他食譜是 null
 };
 
 export const DEFAULT_SERVINGS = 2;
+
+// 作者編輯過這一項：「新的」標記就消失
+export function edited<T extends { isNew?: boolean }>(item: T, patch: Partial<T>): T {
+  const { isNew: _isNew, ...rest } = item;
+  return { ...rest, ...patch } as T;
+}
 
 // 新食譜預先帶入的內容（從收藏的點子「做了，記錄一篇」進來）：大廚展開好的食材與步驟，已經依偏好轉成編輯頁的文字
 export type EditorDraft = { servings: number; ingredients: EditorIngredient[]; steps: { id: string; text: string }[]; tips: string };
@@ -97,7 +107,7 @@ function toEditorPhoto(p: Photo): EditorPhoto {
   };
 }
 
-function difficultyValues(d: unknown): DifficultyValues | null {
+function editorDifficulty(d: unknown): EditorDifficulty | null {
   const x = d as Partial<RecipeDifficulty> | null;
   if (!x || typeof x !== 'object') return null;
   const values = {
@@ -107,7 +117,12 @@ function difficultyValues(d: unknown): DifficultyValues | null {
     technique: x.technique,
     failure_risk: x.failure_risk,
   };
-  return Object.values(values).every((v) => typeof v === 'number') ? (values as DifficultyValues) : null;
+  if (!Object.values(values).every((v) => typeof v === 'number')) return null;
+  return {
+    values: values as DifficultyValues,
+    source: x.source === 'ai' ? 'ai' : 'author',
+    ...(x.source === 'ai' && x.estimated_from ? { estimatedFrom: x.estimated_from } : {}),
+  };
 }
 
 export function formFromRecipe(recipe: Recipe, photos: Photo[]): EditorForm {
@@ -124,7 +139,7 @@ export function formFromRecipe(recipe: Recipe, photos: Photo[]): EditorForm {
     }),
     tips: recipe.tips ?? '',
     highlights: knownHighlights(recipe.highlights),
-    difficulty: difficultyValues(recipe.difficulty),
+    difficulty: editorDifficulty(recipe.difficulty),
     visibility: recipe.visibility as RecipeVisibility,
     source: (recipe.source as RecipeSource | null) ?? null,
   };
@@ -170,7 +185,9 @@ export function toFields(form: EditorForm): RecipePatch {
     steps: form.steps.map((s, order): RecipeStep => ({ id: s.id, order, text: s.text })),
     tips: text(form.tips),
     highlights: form.highlights,
-    difficulty: form.difficulty ? { ...form.difficulty, source: 'author' } : null,
+    difficulty: form.difficulty
+      ? { ...form.difficulty.values, source: form.difficulty.source, ...(form.difficulty.source === 'ai' && form.difficulty.estimatedFrom ? { estimated_from: form.difficulty.estimatedFrom } : {}) }
+      : null,
     visibility: form.visibility,
     source: form.source,
   };

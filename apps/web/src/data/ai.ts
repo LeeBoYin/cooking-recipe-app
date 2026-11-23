@@ -1,6 +1,6 @@
 // `ai` Edge Function 的呼叫（16 第六節）。前端不直接呼叫 Claude，也不自己判斷額度；
 // 失敗時只拿到錯誤代號，由各畫面依代號顯示「目前無法使用」的說法（03〈AI 不能用時〉），不顯示次數，也不改用別的挑法。
-import type { AiIdea, AiIdeasPayload, ChatInput, ChatMention, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse, ImportInput, ImportResponse } from '@zhusha/core';
+import type { DictationInput, DictationResponse, AiIdea, AiIdeasPayload, ChatInput, ChatMention, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse, ImportInput, ImportResponse } from '@zhusha/core';
 import { supabase } from './supabase.ts';
 import { trackAiError } from './trackError.ts';
 
@@ -152,4 +152,12 @@ export async function expandSteps(input: ExpandInput): Promise<ExpandResponse> {
 // ---------------------------------------------------------------------------------------------
 export async function importRecipe(input: ImportInput): Promise<ImportResponse> {
   return await callAi<ImportResponse>('import_url', input);
+}
+
+// ---------------------------------------------------------------------------------------------
+// 用說的（dictation，M1b-03）：把口述整理進編輯頁的欄位，保留作者已經填的內容、只補新的。
+// 後端什麼都不存；失敗時丟 AiCallError，編輯頁把原話放進心得（之後可以按「讓大廚整理」再跑一次）。
+// ---------------------------------------------------------------------------------------------
+export async function dictateRecipe(input: DictationInput): Promise<DictationResponse> {
+  return await callAi<DictationResponse>('dictation', input);
 }

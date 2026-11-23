@@ -29,6 +29,8 @@ const PATHS = {
   zoneFridge: 'M7 3h10a1 1 0 011 1v16a1 1 0 01-1 1H7a1 1 0 01-1-1V4a1 1 0 011-1zM6 10h12M9 6.5v1.5M9 13v3',
   zoneFreezer: 'M6 5h12a1 1 0 011 1v12a1 1 0 01-1 1H6a1 1 0 01-1-1V6a1 1 0 011-1zM8.5 9.5l2-2M8.5 13l5-5',
   zonePantry: 'M5 4h14v16H5zM12 4v16M10 11v2M14 11v2',
+  // mic 取自 Lucide（ISC 授權）
+  mic: 'M12 2a3 3 0 00-3 3v7a3 3 0 006 0V5a3 3 0 00-3-3zM19 10v2a7 7 0 01-14 0v-2M12 19v3',
   pot: 'M4 10h16v6a3 3 0 01-3 3H7a3 3 0 01-3-3zM2 10h2M20 10h2M9 6.5c0-1 1-1.5 3-1.5s3 .5 3 1.5',
 } as const;
 

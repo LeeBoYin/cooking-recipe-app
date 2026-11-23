@@ -65,9 +65,10 @@ describe('buildPatch', () => {
     ]);
     expect(patch.ingredients).toEqual([{ id: 'i1', raw_text: '五花肉 600 克', name: '五花肉', ingredient_id: 'pork-belly', amount: 600, unit: 'g', optional: false }]);
   });
-  it('難易度由作者設定', () => {
+  it('難易度：作者設定的是 author，AI 估的帶 estimated_from', () => {
     const d = { ingredients: 2, equipment: 1, time: 4, technique: 2, failure_risk: 3 };
-    expect(buildPatch(base(), { ...base(), difficulty: d }).difficulty).toEqual({ ...d, source: 'author' });
+    expect(buildPatch(base(), { ...base(), difficulty: { values: d, source: 'author' } }).difficulty).toEqual({ ...d, source: 'author' });
+    expect(buildPatch(base(), { ...base(), difficulty: { values: d, source: 'ai', estimatedFrom: 'recipe' } }).difficulty).toEqual({ ...d, source: 'ai', estimated_from: 'recipe' });
   });
 });
 

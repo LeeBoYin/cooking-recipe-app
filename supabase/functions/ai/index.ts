@@ -9,6 +9,7 @@ import { runHomeIdeas } from './home/handler.ts';
 import { runChat } from './chat/handler.ts';
 import { runExpandSteps } from './expand/handler.ts';
 import { runImportUrl } from './import/handler.ts';
+import { runDictation } from './dictation/handler.ts';
 import { createProtection, sessionIdOf } from './usage.ts';
 
 const CORS = {
@@ -108,6 +109,15 @@ Deno.serve(async (req) => {
         return error(imported.error);
       }
       return json({ data: imported.data });
+    }
+    // 用說的：把口述整理進編輯頁的欄位，保留作者已經填的內容、只補新的（見 dictation/handler.ts）
+    if (body.task === 'dictation') {
+      const dictated = await runDictation({ ai: deps, rpc: async (fn, args) => await client.rpc(fn, args) }, auth.user.id, body.input);
+      if (!dictated.ok) {
+        console.error('ai: rejected', dictated.error);
+        return error(dictated.error);
+      }
+      return json({ data: dictated.data });
     }
     const result = await runAi(deps, auth.user.id, body.task, body.input);
     if (!result.ok) {

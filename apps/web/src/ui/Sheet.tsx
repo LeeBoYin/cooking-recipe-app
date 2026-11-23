@@ -9,6 +9,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, type ReactNode } from 
 // 打開：抽屜從下方滑上來、遮罩淡入（reduced-motion 直接出現）。
 // 關閉（按鈕、遮罩、Escape、拖曳）一律先滑下去、遮罩淡出，動畫結束才呼叫 onClose 讓上層卸載；
 // 內容裡的按鈕要關抽屜時，用 children 的函式形式拿到 requestClose，不要直接把上層的狀態清掉（那樣會沒有關閉動畫）。
+// locked：做事做到一半不能關（遮罩、Escape、拖曳都不會關）；內容裡的按鈕拿到的函式一定會關，做完自己關。
 // 內容放在可捲動的 body 裡，把手固定在上方。
 const CLOSE_RATIO = 0.25;
 const CLOSE_VELOCITY = 0.5; // px/ms
@@ -22,10 +23,12 @@ const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matc
 export function Sheet({
   label,
   onClose,
+  locked = false,
   children,
 }: {
   label: string;
   onClose: () => void;
+  locked?: boolean;
   children: ReactNode | ((requestClose: () => void) => ReactNode);
 }) {
   const backdrop = useRef<HTMLDivElement>(null);
@@ -34,6 +37,8 @@ export function Sheet({
   const handle = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   const closing = useRef(false);
+  const lockedRef = useRef(locked);
+  lockedRef.current = locked;
   const closeTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -51,7 +56,7 @@ export function Sheet({
   };
 
   // 先滑下去再呼叫 onClose；已經在關（含拖曳已經帶出去）就不重複
-  const requestClose = useCallback(() => {
+  const closeNow = useCallback(() => {
     if (closing.current) return;
     closing.current = true;
     const panelEl = panel.current;
@@ -62,6 +67,10 @@ export function Sheet({
     slideTo(panelEl.offsetHeight || 1, 0);
     closeTimer.current = window.setTimeout(() => closeRef.current(), ANIM_MS);
   }, []);
+  // 遮罩、Escape、拖曳用這個：鎖住的時候不關
+  const requestClose = useCallback(() => {
+    if (!lockedRef.current) closeNow();
+  }, [closeNow]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -104,7 +113,7 @@ export function Sheet({
     }
 
     function start(x: number, y: number, t: number, target: EventTarget | null) {
-      if (closing.current) return;
+      if (closing.current || lockedRef.current) return;
       drag = { x, y, decided: false, active: false, fromHandle: target instanceof Node && handleEl!.contains(target), samples: [{ t, y }], offset: 0 };
     }
 
@@ -202,7 +211,7 @@ export function Sheet({
           <span aria-hidden="true" className="h-[5px] w-10 rounded-sm bg-line-strong" />
         </div>
         <div ref={body} className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain px-5 pb-[calc(28px+env(safe-area-inset-bottom))]">
-          {typeof children === 'function' ? children(requestClose) : children}
+          {typeof children === 'function' ? children(closeNow) : children}
         </div>
       </div>
     </div>
