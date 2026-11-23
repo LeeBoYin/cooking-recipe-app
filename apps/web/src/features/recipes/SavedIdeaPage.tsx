@@ -4,7 +4,7 @@ import { Link, useNavigate, useParams } from 'react-router';
 import { parseTemperaturePref, type ExpandInput } from '@zhusha/core';
 import { getIngredient } from '@zhusha/ingredients';
 import { Chef } from '../../chef/Chef.tsx';
-import { ideaOf, type Bookmark } from '../../data/bookmarks.ts';
+import { cookedStateOf, ideaOf, type Bookmark } from '../../data/bookmarks.ts';
 import { useCurrentKitchen, useExpandSteps, useMyBookmarks, useMySettings, usePantryItems } from '../../data/hooks.ts';
 import { editorDraftOf, unitPrefs } from '../home/draft.ts';
 import { MethodSection } from '../home/IdeaSheet.tsx';
@@ -82,7 +82,7 @@ function Loaded({ bookmark, view, onBack }: { bookmark: Bookmark; view: IdeaView
   const draft = expand.data?.draft ?? null;
   const saved = useIdeaBookmark(view);
   const current = saved.bookmark;
-  const cooked = current?.cooked_recipe_id ?? bookmark.cooked_recipe_id;
+  const cooked = cookedStateOf(current ?? bookmark);
   const reason = view.why;
 
   function record() {
@@ -134,8 +134,9 @@ function Loaded({ bookmark, view, onBack }: { bookmark: Bookmark; view: IdeaView
       </div>
       <div className="fixed inset-x-0 bottom-0 z-10 mx-auto flex max-w-[560px] flex-col gap-1.5 border-t border-line bg-bg px-4 pt-2.5 pb-[calc(16px+env(safe-area-inset-bottom))]">
         {saved.failed && <span role="alert" className="text-small text-error"><FormattedMessage id="idea.card.bookmarkError" /></span>}
-        {cooked && (
-          <Link to={`/recipes/${cooked}`} className="text-center text-caption text-ink underline underline-offset-4">
+        {/* 已發佈：打開那一篇；草稿：繼續編輯；已刪除或不見了：和沒記錄過一樣 */}
+        {cooked.kind === 'published' && (
+          <Link to={`/recipes/${cooked.recipeId}`} className="text-center text-caption text-ink underline underline-offset-4">
             <FormattedMessage id="recipes.saved.open" />
           </Link>
         )}
@@ -149,13 +150,22 @@ function Loaded({ bookmark, view, onBack }: { bookmark: Bookmark; view: IdeaView
           >
             <FormattedMessage id={current ? 'home.ideas.bookmarked' : 'idea.sheet.bookmark'} />
           </button>
-          <button
-            type="button"
-            onClick={record}
-            className="h-12 flex-[1.4] rounded-card border-2 border-ink bg-bulb font-[inherit] text-body font-bold text-ink"
-          >
-            <FormattedMessage id="idea.sheet.record" />
-          </button>
+          {cooked.kind === 'draft' ? (
+            <Link
+              to={`/recipes/${cooked.recipeId}/edit`}
+              className="flex h-12 flex-[1.4] items-center justify-center rounded-card border-2 border-ink bg-bulb font-[inherit] text-body font-bold text-ink no-underline"
+            >
+              <FormattedMessage id="recipes.saved.continueDraft" />
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={record}
+              className="h-12 flex-[1.4] rounded-card border-2 border-ink bg-bulb font-[inherit] text-body font-bold text-ink"
+            >
+              <FormattedMessage id="idea.sheet.record" />
+            </button>
+          )}
         </div>
       </div>
     </section>

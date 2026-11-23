@@ -5,11 +5,15 @@ import { Sheet } from '../../ui/Sheet.tsx';
 export type Choice = { id: string; label: string };
 
 // 從下方滑出的面板外框（可拖曳關閉，見 ui/Sheet）：標題加內容
-export function SheetFrame({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
+export function SheetFrame({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode | ((requestClose: () => void) => ReactNode) }) {
   return (
     <Sheet label={title} onClose={onClose}>
-      <b className="text-[20px]">{title}</b>
-      {children}
+      {(requestClose) => (
+        <>
+          <b className="text-[20px]">{title}</b>
+          {typeof children === 'function' ? children(requestClose) : children}
+        </>
+      )}
     </Sheet>
   );
 }
@@ -33,6 +37,8 @@ export function ChoiceSheet({
   const [selected, setSelected] = useState(value);
   return (
     <SheetFrame title={title} onClose={onClose}>
+      {(requestClose) => (
+        <>
       <div role="radiogroup" aria-label={title} className="flex flex-col gap-3">
         {choices.map((c) => (
           <button
@@ -54,12 +60,16 @@ export function ChoiceSheet({
         type="button"
         disabled={!selected}
         onClick={() => {
-          if (selected) onPick(selected);
+          if (!selected) return;
+          onPick(selected);
+          requestClose();
         }}
         className="h-12 rounded-card border-2 border-ink bg-bulb font-[inherit] text-body font-bold text-ink disabled:opacity-50"
       >
         <FormattedMessage id="common.ok" />
       </button>
+        </>
+      )}
     </SheetFrame>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 
 // 底部抽屜的共用外框（點子抽屜、單選、列出要買的、安裝教學都用它）。
 // 可拖曳關閉：
@@ -6,32 +6,86 @@ import { useEffect, useRef, type ReactNode } from 'react';
 // - 跟手：抽屜位移等於手指位移，背景遮罩跟著變淡。
 // - 放開時位移超過抽屜高度的 25%，或往下速度超過 0.5px/ms 就關；沒過就彈回（拖到一半推回去也算沒過）。
 // - prefers-reduced-motion：不放動畫，直接關或回原位。
-// 點遮罩與 Escape 也能關。內容放在可捲動的 body 裡，把手固定在上方。
+// 打開：抽屜從下方滑上來、遮罩淡入（reduced-motion 直接出現）。
+// 關閉（按鈕、遮罩、Escape、拖曳）一律先滑下去、遮罩淡出，動畫結束才呼叫 onClose 讓上層卸載；
+// 內容裡的按鈕要關抽屜時，用 children 的函式形式拿到 requestClose，不要直接把上層的狀態清掉（那樣會沒有關閉動畫）。
+// 內容放在可捲動的 body 裡，把手固定在上方。
 const CLOSE_RATIO = 0.25;
 const CLOSE_VELOCITY = 0.5; // px/ms
 const SLOP = 6; // 手指移動超過這個距離才判斷是拖還是捲
-const ANIM_MS = 200;
+const ANIM_MS = 220; // 和下層頁轉場同一組：約 220ms、ease-out
 
 type Drag = { x: number; y: number; decided: boolean; active: boolean; fromHandle: boolean; samples: { t: number; y: number }[]; offset: number };
 
-export function Sheet({ label, onClose, children }: { label: string; onClose: () => void; children: ReactNode }) {
+const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+export function Sheet({
+  label,
+  onClose,
+  children,
+}: {
+  label: string;
+  onClose: () => void;
+  children: ReactNode | ((requestClose: () => void) => ReactNode);
+}) {
   const backdrop = useRef<HTMLDivElement>(null);
   const panel = useRef<HTMLDivElement>(null);
   const body = useRef<HTMLDivElement>(null);
   const handle = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
+  const closing = useRef(false);
+  const closeTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     closeRef.current = onClose;
   }, [onClose]);
 
+  const slideTo = (offset: number, fade: number) => {
+    const panelEl = panel.current;
+    const backdropEl = backdrop.current;
+    if (!panelEl || !backdropEl) return;
+    panelEl.style.transition = `transform ${ANIM_MS}ms ease-out`;
+    panelEl.style.transform = offset === 0 ? '' : `translateY(${offset}px)`;
+    backdropEl.style.transition = `opacity ${ANIM_MS}ms ease-out`;
+    backdropEl.style.opacity = String(fade);
+  };
+
+  // 先滑下去再呼叫 onClose；已經在關（含拖曳已經帶出去）就不重複
+  const requestClose = useCallback(() => {
+    if (closing.current) return;
+    closing.current = true;
+    const panelEl = panel.current;
+    if (reduced() || !panelEl) {
+      closeRef.current();
+      return;
+    }
+    slideTo(panelEl.offsetHeight || 1, 0);
+    closeTimer.current = window.setTimeout(() => closeRef.current(), ANIM_MS);
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') closeRef.current();
+      if (e.key === 'Escape') requestClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
+  }, [requestClose]);
+
+  // 打開：先放在畫面下方、遮罩全透明，下一個 frame 再滑上來
+  useLayoutEffect(() => {
+    const panelEl = panel.current;
+    const backdropEl = backdrop.current;
+    if (!panelEl || !backdropEl || reduced()) return;
+    panelEl.style.transition = 'none';
+    panelEl.style.transform = 'translateY(100%)';
+    backdropEl.style.transition = 'none';
+    backdropEl.style.opacity = '0';
+    void panelEl.offsetHeight; // 強制 reflow，讓起點生效
+    slideTo(0, 1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
 
   useEffect(() => {
     const panelEl = panel.current;
@@ -40,8 +94,6 @@ export function Sheet({ label, onClose, children }: { label: string; onClose: ()
     const handleEl = handle.current;
     if (!panelEl || !backdropEl || !bodyEl || !handleEl) return;
     let drag: Drag | null = null;
-    let timer: number | undefined;
-    const reduced = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     function place(offset: number, animate: boolean, fade: number) {
       const tr = animate ? `${ANIM_MS}ms ease-out` : 'none';
@@ -52,6 +104,7 @@ export function Sheet({ label, onClose, children }: { label: string; onClose: ()
     }
 
     function start(x: number, y: number, t: number, target: EventTarget | null) {
+      if (closing.current) return;
       drag = { x, y, decided: false, active: false, fromHandle: target instanceof Node && handleEl!.contains(target), samples: [{ t, y }], offset: 0 };
     }
 
@@ -86,12 +139,7 @@ export function Sheet({ label, onClose, children }: { label: string; onClose: ()
       const velocity = last.t > first.t ? (last.y - first.y) / (last.t - first.t) : 0;
       const h = panelEl!.offsetHeight || 1;
       if (d.offset > h * CLOSE_RATIO || velocity > CLOSE_VELOCITY) {
-        if (reduced()) {
-          closeRef.current();
-          return;
-        }
-        place(h, true, 0);
-        timer = window.setTimeout(() => closeRef.current(), ANIM_MS);
+        requestClose();
       } else if (reduced()) {
         place(0, false, 1);
       } else {
@@ -129,7 +177,6 @@ export function Sheet({ label, onClose, children }: { label: string; onClose: ()
     handleEl.addEventListener('pointerup', onPointerUp);
     handleEl.addEventListener('pointercancel', onPointerUp);
     return () => {
-      window.clearTimeout(timer);
       panelEl.removeEventListener('touchstart', onTouchStart);
       panelEl.removeEventListener('touchmove', onTouchMove);
       panelEl.removeEventListener('touchend', end);
@@ -139,11 +186,11 @@ export function Sheet({ label, onClose, children }: { label: string; onClose: ()
       handleEl.removeEventListener('pointerup', onPointerUp);
       handleEl.removeEventListener('pointercancel', onPointerUp);
     };
-  }, []);
+  }, [requestClose]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end">
-      <div ref={backdrop} aria-hidden="true" onClick={onClose} className="absolute inset-0 bg-ink/45" />
+      <div ref={backdrop} aria-hidden="true" onClick={requestClose} className="absolute inset-0 bg-ink/45" />
       <div
         ref={panel}
         role="dialog"
@@ -155,7 +202,7 @@ export function Sheet({ label, onClose, children }: { label: string; onClose: ()
           <span aria-hidden="true" className="h-[5px] w-10 rounded-sm bg-line-strong" />
         </div>
         <div ref={body} className="flex min-h-0 flex-col gap-3 overflow-y-auto overscroll-contain px-5 pb-[calc(28px+env(safe-area-inset-bottom))]">
-          {children}
+          {typeof children === 'function' ? children(requestClose) : children}
         </div>
       </div>
     </div>

@@ -92,6 +92,10 @@ function Fields({ initial, region, onDone, doneId }: { initial: Dietary; region:
           <span className="sr-only"><FormattedMessage id="diet.search.label" /></span>
           <input
             type="search"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            enterKeyHint="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={intl.formatMessage({ id: 'diet.search.placeholder' })}

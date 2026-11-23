@@ -29,6 +29,8 @@ export function IdeaSheet({ view, source, onClose }: { view: IdeaView; source: I
 
   return (
     <Sheet label={view.title} onClose={onClose}>
+      {(requestClose) => (
+        <>
       <div className="flex items-center gap-2">
         <span className="whitespace-nowrap rounded-tag bg-bulb-soft px-2 py-0.5 text-small font-bold">
           <FormattedMessage id={view.source === 'own' ? 'idea.sheet.ownBadge' : 'idea.sheet.badge'} />
@@ -36,7 +38,7 @@ export function IdeaSheet({ view, source, onClose }: { view: IdeaView; source: I
         <button
           type="button"
           aria-label={intl.formatMessage({ id: 'idea.sheet.close' })}
-          onClick={onClose}
+          onClick={requestClose}
           className="ml-auto h-11 w-11 border-0 bg-transparent text-[20px] text-ink-muted"
         >
           ×
@@ -122,6 +124,8 @@ export function IdeaSheet({ view, source, onClose }: { view: IdeaView; source: I
             <FormattedMessage id={saved ? 'home.ideas.bookmarked' : 'idea.sheet.bookmark'} />
           </button>
           {failed && <span role="alert" className="text-small text-error"><FormattedMessage id="idea.card.bookmarkError" /></span>}
+        </>
+      )}
         </>
       )}
     </Sheet>

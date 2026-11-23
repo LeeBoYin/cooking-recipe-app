@@ -3,7 +3,7 @@ import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
-import { ideaOf, type Bookmark } from '../../data/bookmarks.ts';
+import { cookedStateOf, ideaOf, type Bookmark } from '../../data/bookmarks.ts';
 import { useCurrentKitchen, useMyBookmarks, useMySettings, usePantryItems } from '../../data/hooks.ts';
 import { mainIngredientTags, type IdeaView } from '../home/ideaView.ts';
 import { viewOfBookmark } from './SavedIdeaPage.tsx';
@@ -77,7 +77,7 @@ export function SavedTab() {
 
 function SavedCard({ bookmark, view }: { bookmark: Bookmark; view: IdeaView }) {
   const idea = ideaOf(bookmark);
-  const cooked = bookmark.cooked_recipe_id;
+  const cooked = cookedStateOf(bookmark).kind === 'published';
   const { names, extra } = mainIngredientTags(view);
   const tag = 'whitespace-nowrap rounded-tag px-2 py-0.5 text-small font-bold';
   return (
