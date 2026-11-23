@@ -67,7 +67,7 @@ const history = (rounds: number): ChatConversationRow['messages'] =>
 const MIN_TURNS_FOR_IDEAS = 3;
 const earlyIdeas = (sim: Simulation) =>
   sim.turns.flatMap((t, i) => (t.checked?.ok && t.checked.ideas.length > 0 && t.chefTurn < MIN_TURNS_FOR_IDEAS && !wanted(sim, i) ? [`第 ${t.chefTurn} 輪就給了點子，使用者沒要求`] : []));
-const wanted = (sim: Simulation, i: number): boolean => sim.turns[i]?.prompt.messages.at(-1)?.content.includes('使用者是否按了「直接給我點子」：是') === true;
+const wanted = (sim: Simulation, i: number): boolean => sim.turns[i]?.raw?.user_wants_ideas === true;
 const tooManyIdeas = (sim: Simulation) => kept(sim).flatMap((r) => (r.ideas.length > 2 ? [`一次給了 ${r.ideas.length} 個點子`] : []));
 // hint：有反問時不該有；有的話不超過 20 字（程式檢查會拿掉不合格的，這裡看 AI 原始輸出有沒有照規矩）
 const badHints = (sim: Simulation) => sim.turns.flatMap((t) => (t.raw && typeof t.raw.hint === 'string' && ([...t.raw.hint].length > 20 || (t.raw.ask && t.raw.hint)) ? [`第 ${t.chefTurn} 輪的 hint 太長或和反問同時出現`] : []));
@@ -130,9 +130,9 @@ export const CHAT_CASES: ChatEvalCase[] = [
   },
   {
     id: '03-give-me-ideas-now',
-    name: '直接給我點子：第 1 輪就按了按鈕',
+    name: '直接給我點子：第 1 輪就明說要點子',
     ctx: TW,
-    users: [{ text: '直接給我點子', wantIdeas: true }],
+    users: ['直接給我點子'],
     fake: [
       (ce) => out({
         reply: '好，先來兩個簡單的。',
@@ -144,10 +144,10 @@ export const CHAT_CASES: ChatEvalCase[] = [
         ],
       }),
     ],
-    expectation: '使用者按了「直接給我點子」：不再追問，第 1 輪就給 1 到 2 個點子，沒有反問。',
+    expectation: '使用者明說要點子：不再追問，第 1 輪就給 1 到 2 個點子，沒有反問。',
     assert: (sim) => {
       const k = kept(sim);
-      return [...tooManyIdeas(sim), ...(k[0] && k[0].ideas.length === 0 ? ['按了「直接給我點子」卻沒有給點子'] : []), ...(k[0]?.ask ? ['按了「直接給我點子」卻還在反問'] : [])];
+      return [...tooManyIdeas(sim), ...(k[0] && k[0].ideas.length === 0 ? ['明說要點子卻沒有給點子'] : []), ...(k[0]?.ask ? ['明說要點子卻還在反問'] : [])];
     },
   },
   {
@@ -168,7 +168,7 @@ export const CHAT_CASES: ChatEvalCase[] = [
     id: '05-ingredients-dont-fit',
     name: '提了 4 樣食材、其中一樣搭不起來；點子要用到大部分，剩下的說留到下次',
     ctx: TW,
-    users: [{ text: '有高麗菜、雞蛋、豆腐，還有一包巧克力，直接給我點子', wantIdeas: true }],
+    users: ['有高麗菜、雞蛋、豆腐，還有一包巧克力，直接給我點子'],
     fake: [
       (ce, attempt) => {
         const mentioned = [
@@ -205,7 +205,7 @@ export const CHAT_CASES: ChatEvalCase[] = [
     id: '06-mentioned-not-in-kitchen',
     name: '說了沒記在廚房的食材：鄰居送的筍子',
     ctx: TW,
-    users: [{ text: '鄰居送了一些筍子，想煮湯，直接給我點子', wantIdeas: true }, '那筍子要先燙嗎？'],
+    users: ['鄰居送了一些筍子，想煮湯，直接給我點子', '那筍子要先燙嗎？'],
     fake: [
       (ce) => out({
         reply: '筍子煮湯最能吃出甜味！',
@@ -232,7 +232,7 @@ export const CHAT_CASES: ChatEvalCase[] = [
     id: '07-not-too-spicy',
     name: '給了點子之後，說「不要太辣、再簡單一點」：對話不結束，接著換點子',
     ctx: TW,
-    users: [{ text: '晚上想吃點熱的，有高麗菜和雞蛋，直接給我點子', wantIdeas: true }, '不要太辣，再簡單一點'],
+    users: ['晚上想吃點熱的，有高麗菜和雞蛋，直接給我點子', '不要太辣，再簡單一點'],
     fake: [
       (ce) => out({
         reply: '熱熱的炒一盤很剛好。', user_wants_ideas: true, summary: '想吃熱的；有高麗菜、雞蛋',

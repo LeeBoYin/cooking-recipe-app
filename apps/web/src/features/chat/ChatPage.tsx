@@ -115,7 +115,7 @@ export function ChatPage() {
     sendText(draft.trim());
   }
 
-  function sendText(text: string, wantIdeas = false) {
+  function sendText(text: string) {
     if (!text || send.isPending || loading || full) return;
     // 產品事件：新的一段第一則算開始；只記第幾輪，不記內容
     if (messages.length === 0) track('chat.start');
@@ -125,7 +125,7 @@ export function ChatPage() {
     setPending(text);
     setDraft('');
     send.mutate(
-      { message: text, ...(wantIdeas ? { wantIdeas: true } : {}), ...(convId ? { conversationId: convId } : carryFrom ? { continueFrom: carryFrom } : {}) },
+      { message: text, ...(convId ? { conversationId: convId } : carryFrom ? { continueFrom: carryFrom } : {}) },
       {
         onSuccess: (r) => {
           setPending(null);
@@ -148,12 +148,10 @@ export function ChatPage() {
     );
   }
 
-  // 最後一則是大廚的、沒有在等回應：選項按鈕（單選點了就送出，多選按「好了」）；還沒給過點子時另外有「直接給我點子」
+  // 最後一則是大廚的、沒有在等回應：選項按鈕（單選點了就送出，多選按「好了」）
   const last = messages.at(-1);
   const idle = !loading && !conv.isError && !pending && !failed && !send.isPending && !full;
   const lastAsk = idle && last?.role === 'chef' ? (last.ask ?? null) : null;
-  const gaveIdeas = messages.some((m) => m.role === 'chef' && m.suggestionId);
-  const showGiveIdeas = !loading && !conv.isError && !full && !gaveIdeas && (messages.length > 0 || !!pending || !!failed);
 
   const unavailableLine = failed ? intl.formatMessage({ id: failed.code === 'rate_limited' ? 'chat.slowDown' : 'chat.unavailable' }) : '';
 
@@ -239,19 +237,6 @@ export function ChatPage() {
         )}
         <div ref={bottom} />
       </div>
-
-      {showGiveIdeas && (
-        <div className="flex flex-none justify-end px-3 pt-2">
-          <button
-            type="button"
-            disabled={send.isPending || loading}
-            onClick={() => sendText(intl.formatMessage({ id: 'chat.giveIdeas' }), true)}
-            className="h-11 rounded-full border border-line bg-bg px-4 font-[inherit] text-[15px] text-ink disabled:opacity-50"
-          >
-            <FormattedMessage id="chat.giveIdeas" />
-          </button>
-        </div>
-      )}
 
       {!full && (
         <form onSubmit={submit} className="flex flex-none items-end gap-2 border-t border-line bg-bg px-3 pt-2 pb-[calc(8px+env(safe-area-inset-bottom))]">

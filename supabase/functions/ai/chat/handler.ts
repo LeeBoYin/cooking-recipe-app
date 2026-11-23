@@ -24,7 +24,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function parseChatInput(raw: unknown): { ok: true; value: ChatInput } | { ok: false } {
   if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return { ok: false };
-  const { message, conversationId, continueFrom, wantIdeas, ...rest } = raw as Record<string, unknown>;
+  const { message, conversationId, continueFrom, ...rest } = raw as Record<string, unknown>;
   if (Object.keys(rest).length > 0) return { ok: false };
   if (typeof message !== 'string') return { ok: false };
   const text = message.trim();
@@ -32,10 +32,9 @@ export function parseChatInput(raw: unknown): { ok: true; value: ChatInput } | {
   if (conversationId !== undefined && (typeof conversationId !== 'string' || !UUID.test(conversationId))) return { ok: false };
   if (continueFrom !== undefined && (typeof continueFrom !== 'string' || !UUID.test(continueFrom))) return { ok: false };
   if (conversationId !== undefined && continueFrom !== undefined) return { ok: false };
-  if (wantIdeas !== undefined && typeof wantIdeas !== 'boolean') return { ok: false };
   return {
     ok: true,
-    value: { message: text, ...(conversationId ? { conversationId } : {}), ...(continueFrom ? { continueFrom } : {}), ...(wantIdeas === true ? { wantIdeas } : {}) },
+    value: { message: text, ...(conversationId ? { conversationId } : {}), ...(continueFrom ? { continueFrom } : {}) },
   };
 }
 
@@ -82,7 +81,6 @@ export async function runChat(deps: ChatDeps, userId: string, rawInput: unknown)
   // 這是大廚在這段對話的第幾輪回應：看對話裡大廚已經回應了幾次，不靠模型自己數
   const chefTurn = (conv?.messages ?? []).filter((m) => m.role === 'chef').length + 1;
   const carried = carrySummary !== null;
-  const wantIdeas = input.wantIdeas === true;
   const gaveBefore = (conv?.suggestions.length ?? 0) > 0;
 
   // 輸出沒守「至少 3 輪」或沒用到提到的食材時，整批重寫一次；重寫後食材還是用得少就照給，
@@ -93,7 +91,7 @@ export async function runChat(deps: ChatDeps, userId: string, rawInput: unknown)
   let fallback: { checked: ChatCheck; result: Extract<Awaited<ReturnType<typeof runAi>>, { ok: true }> } | null = null; // 第一次其實可以用（只是食材用得少）
   let result: Extract<Awaited<ReturnType<typeof runAi>>, { ok: true }> | null = null;
   for (let attempt = 0; attempt < 2; attempt++) {
-    const prompt = buildChatPrompt(ce, conv, carrySummary, input.message, { chefTurn, wantIdeas, carried, gaveBefore, ...(hint ? { retryHint: hint } : {}) });
+    const prompt = buildChatPrompt(ce, conv, carrySummary, input.message, { chefTurn, carried, gaveBefore, ...(hint ? { retryHint: hint } : {}) });
     const def: TaskDefinition<Record<string, never>> = {
       parseInput: () => ({ ok: true, value: {} }),
       buildPrompt: () => prompt,
@@ -108,7 +106,7 @@ export async function runChat(deps: ChatDeps, userId: string, rawInput: unknown)
     }
     rewrote = attempt > 0;
     result = res;
-    checked = checkChatOutput(res.output as RawChatOutput, ce, { chefTurn, wantIdeas, carried, gaveBefore });
+    checked = checkChatOutput(res.output as RawChatOutput, ce, { chefTurn, carried, gaveBefore });
     console.log('ai: chat checked', JSON.stringify({ attempt, ok: checked.ok, ideas: checked.ok ? checked.ideas.length : 0, dropped: checked.dropped }));
     hint = attempt === 0 ? retryHint(checked, chefTurn) : undefined;
     if (!hint) break;

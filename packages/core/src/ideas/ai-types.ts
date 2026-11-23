@@ -84,11 +84,10 @@ export function replaceTempMarks(text: string, render: (value: number, unit: 'C'
 export const CHAT_MAX_USER_CHARS = 500; // 使用者每則上限
 export const CHAT_MAX_TURNS = 20; // 一段對話最多幾輪（使用者一句加大廚一句算一輪）
 
-export const CHAT_MIN_CHEF_TURNS = 3; // 大廚至少回應幾輪（含這一則）才給點子；使用者要求時不受限
+export const CHAT_MIN_CHEF_TURNS = 3; // 大廚至少回應幾輪（含這一則）才給點子；使用者明說要點子時不受限
 export const CHAT_MAX_IDEAS = 2; // 收斂後一次最多幾個點子
 export const CHAT_MIN_OPTIONS = 2;
 export const CHAT_MAX_OPTIONS = 4;
-export const CHAT_GIVE_IDEAS_TEXT = '直接給我點子'; // 「直接給我點子」按鈕代送的話
 
 // 大廚的反問：一個問題加 2 到 4 個選項（multi：可以複選）；使用者也可以自己打字
 export interface ChatAsk {
@@ -116,7 +115,6 @@ export interface ChatInput {
   message: string;
   conversationId?: string;
   continueFrom?: string;
-  wantIdeas?: boolean; // 按了「直接給我點子」：不受「至少 3 輪」限制
 }
 
 export type ChatResponse =

@@ -11,9 +11,9 @@ import type { HomeContextRow } from '../../home/types.ts';
 // attempt：0 是第一次，1 是程式請大廚重寫的那一次
 export type Responder = (prompt: PromptParts, turnIndex: number, ce: ChatEnv, attempt: number) => Promise<RawChatOutput | null> | RawChatOutput | null;
 
-// 劇本裡的一句使用者的話：wantIdeas 是按了「直接給我點子」
-export type ScriptedUser = string | { text: string; wantIdeas?: boolean };
-export const userText = (u: ScriptedUser): string => (typeof u === 'string' ? u : u.text);
+// 劇本裡的一句使用者的話
+export type ScriptedUser = string;
+export const userText = (u: ScriptedUser): string => u;
 
 export interface TurnResult {
   user: string;
@@ -40,7 +40,6 @@ export async function simulate(ctx: HomeContextRow, now: Date, users: ScriptedUs
   let n = 0;
   for (const scripted of users) {
     const user = userText(scripted);
-    const wantIdeas = typeof scripted !== 'string' && scripted.wantIdeas === true;
     const chefTurn = (conv?.messages ?? []).filter((m) => m.role === 'chef').length + 1;
     if (conv && conv.turn_count >= CHAT_MAX_TURNS) {
       turns.push({ user, chefTurn, attempts: 0, prompt: { stable: '', messages: [] }, raw: null, checked: null, full: true });
@@ -56,9 +55,9 @@ export async function simulate(ctx: HomeContextRow, now: Date, users: ScriptedUs
     // 和 handler.ts 同一套：太早給點子、或點子用到的提到食材太少時重寫一次
     for (let attempt = 0; attempt < 2; attempt++) {
       attempts++;
-      prompt = buildChatPrompt(ce, conv, null, user, { chefTurn, wantIdeas, carried: false, gaveBefore: (conv?.suggestions.length ?? 0) > 0, ...(hint ? { retryHint: hint } : {}) });
+      prompt = buildChatPrompt(ce, conv, null, user, { chefTurn, carried: false, gaveBefore: (conv?.suggestions.length ?? 0) > 0, ...(hint ? { retryHint: hint } : {}) });
       raw = await respond(prompt, n, ce, attempt);
-      checked = raw ? checkChatOutput(raw, ce, { makeId: () => `idea-${n}`, chefTurn, wantIdeas, gaveBefore: (conv?.suggestions.length ?? 0) > 0 }) : null;
+      checked = raw ? checkChatOutput(raw, ce, { makeId: () => `idea-${n}`, chefTurn, gaveBefore: (conv?.suggestions.length ?? 0) > 0 }) : null;
       hint = attempt === 0 && checked ? retryHint(checked, chefTurn) : undefined;
       if (!hint) break;
       if (checked?.ok && raw) fallback = { raw, checked };
