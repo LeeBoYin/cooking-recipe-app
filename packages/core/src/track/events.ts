@@ -65,6 +65,9 @@ export const TRACK_EVENTS = {
   'record.ai_filled': { fieldCount: n(10) },
   // 還原食譜版本：只記操作，不記是哪一版、哪一篇
   'recipe.revision_restored': {},
+  // 用說的改食譜：大廚列出「會改這些」（proposed）、沒聽出要改哪裡（empty）、AI 不能用（unavailable）、
+  // 作者確認套用（applied）、作者按取消（cancelled）；changeCount 是列出或套用的處數（其他結果是 0）。不記指令與內容
+  'recipe.refine_by_voice': { result: e(['proposed', 'empty', 'unavailable', 'applied', 'cancelled']), changeCount: n(30) },
   // 從網址或貼上的文字匯入：只記輸入方式與結果（程式直接讀、AI 擷取、失敗），不記網址與內容
   'import.finished': { input: e(['url', 'text']), result: e(['structured', 'ai', 'failed']) },
   'chat.start': {},

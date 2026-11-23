@@ -4,12 +4,12 @@
 // - 衝突由資料層自動用最新版重送，畫面上不處理。M0 不暫存文字。
 import { useQueryClient } from '@tanstack/react-query';
 import { arrayMove } from '@dnd-kit/sortable';
-import { newId } from '@zhusha/core';
+import { newId, type RefineChange } from '@zhusha/core';
 import type { Dictation, RecipeSource } from '@zhusha/shared-types';
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { queryKeys } from '../../data/hooks.ts';
 import { currentUserId } from '../../data/account.ts';
-import { dictateRecipe } from '../../data/ai.ts';
+import { dictateRecipe, refineRecipe } from '../../data/ai.ts';
 import { reportError } from '../../data/errors.ts';
 import { track } from '../../data/track.ts';
 import { trackErrorKind } from '../../data/trackError.ts';
@@ -25,6 +25,7 @@ import {
   subscribeUploads,
 } from '../../photos/uploadQueue.ts';
 import { applyResult, currentOf, withRawDictation } from './dictation.ts';
+import { applyChanges, refineCurrentOf } from './refine.ts';
 import {
   allPhotos,
   buildPatch,
@@ -74,7 +75,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
   const [dictation, setDictation] = useState<Dictation | null>(savedDictation ?? null);
   const dictationRef = useRef(dictation);
   const pendingDictation = useRef<Dictation | null>(null);
-  const aiFilledPending = useRef(false); // 這次存檔包含大廚填的內容：已發佈的食譜留的版本記成「用說的」
+  const aiFilledPending = useRef<'ai_dictation' | 'ai_refine' | null>(null); // 這次存檔包含大廚填或改的內容：已發佈的食譜留的版本記成「用說的」（整理）或「用說的改」
   const [privateDirty, setPrivateDirty] = useState(false);
   const [saveFailedOnServer, setSaveFailedOnServer] = useState(false); // 資料庫拒絕（不是網路問題）
   const [removed, setRemoved] = useState<Removed | null>(null);
@@ -122,7 +123,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
         const options = {
           ...(photosDiff ? { photos: toPhotoInputs(current, ready) } : {}),
           ...(priv ? { private: { dictation: priv } } : {}),
-          ...(changedBy ? { changedBy: 'ai_dictation' as const } : {}),
+          ...(changedBy ? { changedBy } : {}),
         };
         const firstSave = !savedRecipe.current;
         const result = savedRecipe.current
@@ -135,7 +136,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
           pendingDictation.current = null;
           setPrivateDirty(false);
         }
-        if (changedBy) aiFilledPending.current = false;
+        if (changedBy && aiFilledPending.current === changedBy) aiFilledPending.current = null;
         // 這次存進去的內容；還沒傳完的照片不算
         savedForm.current = {
           ...current,
@@ -349,7 +350,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
         const applied = applyResult(cur, res.result, previous?.text);
         setForm(() => applied.form);
         remember(record());
-        aiFilledPending.current = true;
+        aiFilledPending.current = 'ai_dictation';
         track('record.dictation_used', { entry, result: 'ok' });
         track('record.ai_filled', { fieldCount: Math.min(applied.fieldCount, 10) });
         return 'ok';
@@ -361,6 +362,27 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
         track('record.dictation_used', { entry, result: 'unavailable' });
         return 'unavailable';
       }
+    },
+    [setForm],
+  );
+
+  // ---- 用說的改食譜 ----
+  // 先問大廚要改哪些（不動表單）；作者在畫面上確認後才呼叫 applyRefine 套進還沒儲存的表單，按儲存才寫入
+  const proposeRefine = useCallback(async (text: string): Promise<{ status: 'ok'; changes: RefineChange[] } | { status: 'unavailable' }> => {
+    try {
+      const res = await refineRecipe({ text, lang: 'zh-TW', current: refineCurrentOf(formRef.current) });
+      track('recipe.refine_by_voice', { result: res.changes.length > 0 ? 'proposed' : 'empty', changeCount: res.changes.length });
+      return { status: 'ok', changes: res.changes };
+    } catch {
+      track('recipe.refine_by_voice', { result: 'unavailable', changeCount: 0 });
+      return { status: 'unavailable' };
+    }
+  }, []);
+  const applyRefine = useCallback(
+    (changes: RefineChange[]) => {
+      setForm((f) => applyChanges(f, changes).form);
+      aiFilledPending.current = 'ai_refine';
+      track('recipe.refine_by_voice', { result: 'applied', changeCount: Math.min(changes.length, 30) });
     },
     [setForm],
   );
@@ -425,5 +447,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
     retryUploads,
     dictation,
     runDictation,
+    proposeRefine,
+    applyRefine,
   };
 }

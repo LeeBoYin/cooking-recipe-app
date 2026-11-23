@@ -1,6 +1,6 @@
 // `ai` Edge Function 的呼叫（16 第六節）。前端不直接呼叫 Claude，也不自己判斷額度；
 // 失敗時只拿到錯誤代號，由各畫面依代號顯示「目前無法使用」的說法（03〈AI 不能用時〉），不顯示次數，也不改用別的挑法。
-import type { DictationInput, DictationResponse, AiIdea, AiIdeasPayload, ChatInput, ChatMention, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse, ImportInput, ImportResponse } from '@zhusha/core';
+import type { DictationInput, DictationResponse, RefineInput, RefineResponse, AiIdea, AiIdeasPayload, ChatInput, ChatMention, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse, ImportInput, ImportResponse } from '@zhusha/core';
 import { supabase } from './supabase.ts';
 import { trackAiError } from './trackError.ts';
 
@@ -160,4 +160,12 @@ export async function importRecipe(input: ImportInput): Promise<ImportResponse> 
 // ---------------------------------------------------------------------------------------------
 export async function dictateRecipe(input: DictationInput): Promise<DictationResponse> {
   return await callAi<DictationResponse>('dictation', input);
+}
+
+// ---------------------------------------------------------------------------------------------
+// 用說的改食譜（edit_by_voice，M1b-04a）：說一句要改的地方，後端只回要改的欄位與新值（驗證過的變更清單）。
+// 後端什麼都不存；作者確認後才套進編輯頁還沒儲存的狀態。失敗時丟 AiCallError，畫面顯示目前無法使用、改用手動編輯。
+// ---------------------------------------------------------------------------------------------
+export async function refineRecipe(input: RefineInput): Promise<RefineResponse> {
+  return await callAi<RefineResponse>('edit_by_voice', input);
 }

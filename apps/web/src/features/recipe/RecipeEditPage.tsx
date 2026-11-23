@@ -29,6 +29,7 @@ import {
 } from './model.ts';
 
 import { DictationSheet } from './DictationSheet.tsx';
+import { RefineSheet } from './RefineSheet.tsx';
 import { hasRawDictation } from './dictation.ts';
 import { PhotoStrip } from './PhotoStrip.tsx';
 import { SortableItem, SortableList } from './SortableList.tsx';
@@ -212,7 +213,7 @@ function Editor({ recipeId, recipe, photoRows, defaultServings, savedDictation, 
   const intl = useIntl();
   const navigate = useNavigate();
   const location = useLocation();
-  const fromState = location.state as { title?: string; bookmarkId?: string; draft?: EditorDraft; source?: { url: string; name: string | null } } | null;
+  const fromState = location.state as { title?: string; bookmarkId?: string; draft?: EditorDraft; source?: { url: string; name: string | null }; openRefine?: boolean } | null;
   const initialTitle = fromState?.title;
   const linkBookmark = useLinkBookmark();
   const ed = useRecipeEditor(recipeId, recipe, photoRows, initialTitle, defaultServings, fromState?.draft, fromState?.source ? { type: 'url', url: fromState.source.url, ...(fromState.source.name ? { name: fromState.source.name } : {}) } : null, savedDictation);
@@ -230,7 +231,8 @@ function Editor({ recipeId, recipe, photoRows, defaultServings, savedDictation, 
   const settings = useMySettings();
   const updateSettings = useUpdateSettings();
   const [speakOpen, setSpeakOpen] = useState(false);
-  const [notice, setNotice] = useState<'filled' | 'unavailable' | 'organizeFailed' | null>(null);
+  const [refineOpen, setRefineOpen] = useState(fromState?.openRefine === true); // 食譜頁的 🎙 跳進來時直接開「再跟大廚說」
+  const [notice, setNotice] = useState<'filled' | 'refined' | 'unavailable' | 'organizeFailed' | null>(null);
   const [organizing, setOrganizing] = useState(false);
   const [introOpen, setIntroOpen] = useState(!introSeen);
   const introMarked = useRef(false);
@@ -240,6 +242,8 @@ function Editor({ recipeId, recipe, photoRows, defaultServings, savedDictation, 
     updateSettings.mutate({ seen_hints: [...settings.data.seen_hints, DICTATION_INTRO_HINT] });
   }, [introSeen, settings.data, updateSettings]);
   const rawDictation = hasRawDictation(form, ed.dictation?.text);
+  // 已經用過一次用說的、或已經有食材或做法：同一個 🎙 變成「再跟大廚說」（只改要改的地方）
+  const canRefine = !!ed.dictation || form.ingredients.some((i) => i.text.trim() !== '') || form.steps.some((s) => s.text.trim() !== '');
 
   async function speak(text: string) {
     const result = await ed.runDictation(text, 'speak');
@@ -414,6 +418,9 @@ function Editor({ recipeId, recipe, photoRows, defaultServings, savedDictation, 
           </button>
         </div>
       )}
+      {notice === 'refined' && (
+        <p role="status" className="m-0 text-small text-ink-muted"><FormattedMessage id="refine.applied" /></p>
+      )}
       {notice === 'filled' && !rawDictation && (
         <p role="status" className="m-0 text-small text-ink-muted"><FormattedMessage id="dictation.filled" /></p>
       )}
@@ -579,13 +586,24 @@ function Editor({ recipeId, recipe, photoRows, defaultServings, savedDictation, 
 
       <button
         type="button"
-        onClick={() => setSpeakOpen(true)}
-        aria-label={intl.formatMessage({ id: 'dictation.open' })}
+        onClick={() => (canRefine ? setRefineOpen(true) : setSpeakOpen(true))}
+        aria-label={intl.formatMessage({ id: canRefine ? 'dictation.openAgain' : 'dictation.open' })}
         className="fixed right-4 bottom-[calc(132px+env(safe-area-inset-bottom))] z-10 flex size-14 items-center justify-center rounded-full border-2 border-ink bg-bulb text-ink shadow-[0_2px_12px_rgba(43,38,34,0.18)]"
       >
         <Icon name="mic" size={26} />
       </button>
       {speakOpen && <DictationSheet onSubmit={speak} onClose={() => setSpeakOpen(false)} />}
+      {refineOpen && (
+        <RefineSheet
+          onPropose={ed.proposeRefine}
+          onApply={(changes) => {
+            ed.applyRefine(changes);
+            setNotice('refined');
+            setMethodOpen(true);
+          }}
+          onClose={() => setRefineOpen(false)}
+        />
+      )}
 
       {ed.removed && (
         <div role="status" className="fixed inset-x-4 bottom-[calc(112px+env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-[528px] min-h-12 items-center justify-between rounded-card bg-ink pr-1 pl-3.5 text-body text-surface">
