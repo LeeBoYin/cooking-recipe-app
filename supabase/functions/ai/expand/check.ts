@@ -2,10 +2,11 @@
 // 任何一項不合格，整份不用（不只刪掉違規的食材，因為步驟裡可能還寫著它）。純函式：評估集與單元測試餵假的 AI 回應。
 // 紀錄只留原因與數量，不含內容。
 import { matchIngredient, newId, violatesLimits, type DraftIngredient, type DraftStep, type RecipeDraft, type UnitCode } from '../../../../packages/core/src/index.ts';
-import { donenessFor, sousVidePresetsFor } from '../../../../packages/equipment/src/index.ts';
+import { donenessFor, sousVideDwellSeconds, sousVidePresetsFor, sousVideRulesFor, sousVideTempMark, type SousVidePreset } from '../../../../packages/equipment/src/index.ts';
 import { resolveIngredientId } from '../../_shared/ingredient-resolve.ts';
 import { includesAny } from '../home/check.ts';
 import { ideaIngredients, ingredientIndex, type HomeEnv } from '../home/env.ts';
+import { sousVideIngredientsOk } from '../home/sous-vide.ts';
 import { isKnownTechnique } from './names.ts';
 import { DRAFT_UNITS, NO_AMOUNT_UNITS } from './prompt.ts';
 import type { DraftProblem, RawDraft } from './types.ts';
@@ -56,7 +57,8 @@ export function checkDraft(raw: RawDraft, env: HomeEnv, opts: { servings: number
   const equipmentIds = new Set(env.equipmentEnum);
   const doable = new Set(env.techniqueEnum);
   const hasAllergens = env.limits.allergenIds.length > 0;
-  const presets = sousVidePresetsFor(env.ctx.kitchen.region);
+  const presets = sousVidePresetsFor(env.ctx.kitchen.region, { shortOnly: env.sousVideShortOnly });
+  const usedPresets: SousVidePreset[] = [];
   const hardTexts: string[] = [];
 
   // 食材
@@ -93,11 +95,18 @@ export function checkDraft(raw: RawDraft, env: HomeEnv, opts: { servings: number
     hardTexts.push(s.text);
     for (const t of s.techniques) {
       if (!isKnownTechnique(t)) flag('technique');
-      // 舒肥：水溫與時間只能落在安全表的某一組裡；表是空的就一律擋下
+      // 舒肥：食材要是豬、牛、羊肉；溫度要是表裡某一組的中心溫度、維持時間不少於表上的（timer_seconds 是到達中心溫度之後的維持時間）；
+      // 文字要帶那一組的溫度標記。表裡沒有的（禽肉、海鮮、蛋，或對不上的溫度與時間）一律擋下
       else if (t === 'sous-vide') {
-        const inTable = presets.some((p) =>
-          s.target_temp_c === p.tempC && s.timer_seconds !== null && s.timer_seconds >= p.minMinutes * 60 && s.timer_seconds <= p.maxMinutes * 60);
-        if (!inTable) flag('safety');
+        const preset = presets.find((p) => s.target_temp_c === p.tempC);
+        const traits = ids.map((id) => [...(ideaIngredients.get(id)?.traits ?? [])]);
+        const ok =
+          preset !== undefined &&
+          sousVideIngredientsOk(ids, ingredients.map((i) => i.name), env.ctx.kitchen.region) &&
+          s.timer_seconds !== null && s.timer_seconds >= sousVideDwellSeconds(preset, traits) &&
+          s.text.includes(sousVideTempMark(preset));
+        if (!ok) flag('safety');
+        else if (!usedPresets.includes(preset)) usedPresets.push(preset);
       } else if (!doable.has(t)) flag('technique');
     }
     if (s.equipment.some((e) => !equipmentIds.has(e))) flag('equipment');
@@ -120,7 +129,7 @@ export function checkDraft(raw: RawDraft, env: HomeEnv, opts: { servings: number
   if (hardTexts.some((t) => includesAny(t, env.hardTerms) || includesAny(t, env.dislikeTerms))) flag('keyword');
   if (Object.keys(problems).length > 0) return bad();
 
-  const tipLines = [...(tips ? [tips] : []), ...donenessTips(ids, env)];
+  const tipLines = [...(tips ? [tips] : []), ...donenessTips(ids, env, usedPresets)];
   return {
     ok: true,
     dropped: {},
@@ -135,16 +144,21 @@ export function checkDraft(raw: RawDraft, env: HomeEnv, opts: { servings: number
   };
 }
 
-// 程式補上的安全提醒：用到禽肉、肉類、海鮮、蛋時，把當地標準的中心溫度寫進小提醒（來源是安全表，不靠 AI）
-export function donenessTips(ids: readonly string[], env: HomeEnv): string[] {
+// 程式補上的安全提醒：用到禽肉、肉類、海鮮、蛋時，把當地標準的中心溫度寫進小提醒（來源是安全表，不靠 AI）。
+// 有舒肥的步驟時，豬、牛、羊肉不再寫一般的中心溫度（那會和舒肥的溫度矛盾），改寫舒肥的規則（來源是舒肥預設組合表）
+export function donenessTips(ids: readonly string[], env: HomeEnv, sousVide: readonly SousVidePreset[] = []): string[] {
   const traits = new Set(ids.flatMap((id) => ideaIngredients.get(id)?.traits ?? []));
   const rows: [string, string][] = [];
   if (traits.has('poultry')) rows.push(['poultry', '雞、鴨等禽肉']);
   // 絞肉與整塊肉分不出來時用比較高的那個（ground-meat）
-  if (traits.has('pork') || traits.has('beef') || traits.has('lamb')) rows.push(['ground-meat', '豬、牛、羊肉']);
+  if ((traits.has('pork') || traits.has('beef') || traits.has('lamb')) && sousVide.length === 0) rows.push(['ground-meat', '豬、牛、羊肉']);
   if (traits.has('seafood')) rows.push(['fish-seafood', '魚與海鮮']);
   if (traits.has('egg')) rows.push(['egg', '蛋料理']);
   const region = env.ctx.kitchen.region;
+  return [...sousVideTips(region, sousVide), ...donenessRows(rows, region)];
+}
+
+function donenessRows(rows: [string, string][], region: string): string[] {
   return rows.flatMap(([id, label]) => {
     const row = donenessFor(region, id);
     if (!row) return [];
@@ -152,6 +166,17 @@ export function donenessTips(ids: readonly string[], env: HomeEnv): string[] {
     const mark = row.minTempF !== undefined ? `{{temp:${row.minTempF}:F:min:${row.minTempC}}}` : `{{temp:${row.minTempC}:C:min}}`;
     return [`${label}要煮到中心溫度 ${mark} 以上。`];
   });
+}
+
+// 舒肥的小提醒：照舒肥預設組合表的規則（溫度計確認、come-up time、做完盡快吃），再加上對孕婦、幼兒、年長者、免疫力較弱者的提醒
+function sousVideTips(region: string, used: readonly SousVidePreset[]): string[] {
+  if (used.length === 0) return [];
+  const marks = used.map(sousVideTempMark).join('、');
+  const lines = sousVideRulesFor(region).map((r) => r.text.replace('{preset}', marks));
+  const whole = donenessFor(region, 'whole-cut-meat');
+  const wholeMark = whole ? (whole.minTempF !== undefined ? `{{temp:${whole.minTempF}:F:min:${whole.minTempC}}}` : `{{temp:${whole.minTempC}:C:min}}`) : null;
+  lines.push(`孕婦、幼兒、年長者、免疫力較弱的人吃低溫烹調的肉風險比較高${wholeMark ? `，建議改用一般煮法，肉煮到中心溫度 ${wholeMark} 以上` : ''}。`);
+  return lines;
 }
 
 // 已經存下來的做法（收藏裡的、快取裡的）還能不能給這個人看：只重做會變的部分（過敏原、飲食限制、不吃的食物）

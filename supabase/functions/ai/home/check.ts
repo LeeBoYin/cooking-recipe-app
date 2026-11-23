@@ -2,6 +2,7 @@
 // 純函式：不碰網路與資料庫，評估集與單元測試用假的 AI 回應餵進來。紀錄只留原因與數量，不含內容。
 import { difficultyOverall, forbiddenWordingHits, matchIngredient, newId, violatesLimits } from '../../../../packages/core/src/index.ts';
 import { bannedTechniqueIds, ideaIngredients, ingredientIndex, type HomeEnv } from './env.ts';
+import { sousVideIngredientsOk } from './sous-vide.ts';
 import { SLOT_LIMITS, SLOTS, type DropReason, type HomeIdea, type RawIdea, type RawOutput, type Slot } from './types.ts';
 
 export const MAX_TITLE = 40;
@@ -117,9 +118,11 @@ export function checkHomeOutput(raw: RawOutput, env: HomeEnv, opts: CheckOptions
     const texts = [title, r.why, ...others.map((o) => o.name), ...r.substitutions.flatMap((s) => [s.need, s.use])];
     if (texts.some((t) => includesAny(t, env.hardTerms) || includesAny(t, env.dislikeTerms))) { drop('keyword'); continue; }
 
-    // 做得到嗎：手法要在可用的清單裡，不能是舒肥那類；廚具要是這個人有的
+    // 做得到嗎：手法要在可用的清單裡（舒肥另外看食材）；廚具要是這個人有的
     const doable = new Set(env.techniqueEnum);
     if (r.techniques.some((t) => bannedTechniqueIds.has(t) || !doable.has(t))) { drop('technique'); continue; }
+    // 舒肥：預設組合表只有豬、牛、羊肉；禽肉、海鮮、蛋或沒有這幾種肉的舒肥點子由程式拿掉
+    if (r.techniques.includes('sous-vide') && !sousVideIngredientsOk(usedIds, [title, ...others.map((o) => o.name)], env.ctx.kitchen.region)) { drop('technique'); continue; }
     if (r.equipment.some((e) => !equipmentIds.has(e))) { drop('equipment'); continue; }
 
     // 不催促、不數次數、不寫帶單位的數字

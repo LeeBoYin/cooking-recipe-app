@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { donenessFor, donenessRegions, donenessTableFor, strictestDoneness } from './index.ts';
+import fsisSource from '../safety/US/sources/FSIS_Sous_Vide_Meat_Cooking_Guidance.md?raw';
+import { donenessFor, donenessRegions, donenessTableFor, sousVideDwellSeconds, sousVideEligible, sousVidePresetsFor, sousVideRulesFor, sousVideTempMark, strictestDoneness } from './index.ts';
 
 describe('中心溫度表', () => {
   it('每份表都有來源網址與審查狀態；每一列都有溫度', () => {
@@ -45,5 +46,61 @@ describe('中心溫度表', () => {
     expect(whole.restMinutes).toBe(3); // 靜置時間取美國的
     expect(whole.holdSeconds).toBe(60); // 維持時間取日本的
     expect(whole.minTempF).toBeUndefined(); // 數值來自日本，沒有官方華氏值，不自己換算
+  });
+});
+
+describe('舒肥預設組合表（US，只有肉類）', () => {
+  // 來源文件 Table 2 的每一列都要和 JSON 對得上（數值照文件，不是憑記憶）
+  it('每一組都和來源文件 Table 2 的那一列一致', () => {
+    const table = fsisSource.split('### Table 2')[1]!.split('**Interpretation notes')[0]!;
+    const rows = [...table.matchAll(/^\s+(\d{3})\s+([\d.]+)\s+(\d+) (min|sec)\s+(\d+) (min|sec)\s*$/gm)];
+    expect(rows.length).toBe(31);
+    const secs = (v: string, u: string) => Number(v) * (u === 'min' ? 60 : 1);
+    const presets = sousVidePresetsFor('US');
+    const listed = rows.filter((r) => Number(r[1]) < 158); // 158 °F 以上維持 0 秒，不是舒肥，不列
+    expect(presets.length).toBe(listed.length);
+    for (const r of listed) {
+      const p = presets.find((x) => x.tempF === Number(r[1]))!;
+      expect(p, r[1]).toBeDefined();
+      expect([p.tempC, p.dwell65Seconds, p.dwell7Seconds]).toEqual([Number(r[2]), secs(r[3]!, r[4]!), secs(r[5]!, r[6]!)]);
+    }
+  });
+
+  it('7-log 一定不短於 6.5-log；短時間組合是 140°F（60°C）以上、維持 12 分鐘內', () => {
+    for (const p of sousVidePresetsFor('US')) {
+      expect(p.dwell7Seconds, p.id).toBeGreaterThanOrEqual(p.dwell65Seconds);
+      expect(p.short, p.id).toBe(p.tempF >= 140);
+      if (p.short) expect(p.dwell7Seconds, p.id).toBeLessThanOrEqual(720);
+    }
+    expect(sousVidePresetsFor('US', { shortOnly: true }).every((p) => p.short)).toBe(true);
+  });
+
+  it('台灣、日本沒有當地表，用美國的；不帶 short 時全部', () => {
+    expect(sousVidePresetsFor('TW')).toEqual(sousVidePresetsFor('US'));
+    expect(sousVidePresetsFor('JP')).toEqual(sousVidePresetsFor('US'));
+    expect(sousVidePresetsFor('US-CA').length).toBeGreaterThan(0);
+  });
+
+  it('只有豬、牛、羊肉能舒肥；禽肉、海鮮、蛋、沒有肉都不行，混在一起也不行', () => {
+    expect(sousVideEligible([['animal', 'meat', 'pork']])).toBe(true);
+    expect(sousVideEligible([['meat', 'beef'], ['vegetable']])).toBe(true);
+    expect(sousVideEligible([['meat', 'poultry']])).toBe(false);
+    expect(sousVideEligible([['meat', 'pork'], ['meat', 'poultry']])).toBe(false);
+    expect(sousVideEligible([['meat', 'pork'], ['egg']])).toBe(false);
+    expect(sousVideEligible([['seafood']])).toBe(false);
+    expect(sousVideEligible([[]])).toBe(false);
+  });
+
+  it('牛肉用 6.5-log 欄；豬、羊或混合用 7-log 欄', () => {
+    const p = sousVidePresetsFor('US').find((x) => x.tempF === 131)!;
+    expect(sousVideDwellSeconds(p, [['beef']])).toBe(89 * 60);
+    expect(sousVideDwellSeconds(p, [['pork']])).toBe(97 * 60);
+    expect(sousVideDwellSeconds(p, [['beef'], ['lamb']])).toBe(97 * 60);
+    expect(sousVideTempMark(p)).toBe('{{temp:131:F:min:55}}');
+  });
+
+  it('規則：溫度計確認、come-up time 的 6 小時、做完盡快吃', () => {
+    const ids = sousVideRulesFor('TW').map((r) => r.id);
+    expect(ids).toEqual(['core-temp', 'come-up-time', 'after-cooking']);
   });
 });

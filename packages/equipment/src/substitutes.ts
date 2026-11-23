@@ -58,3 +58,11 @@ export function canDoOrSubstitute(technique: TechniqueId, owned: OwnedEquipment[
 export function doableOrSubstitutedTechniques(owned: OwnedEquipment[], all: TechniqueId[]): TechniqueId[] {
   return all.filter((t) => canDoOrSubstitute(t, owned));
 }
+
+// 這個手法在這位使用者的廚房是怎麼做的：廚具本身能做、有可以完整取代的替代做法、只有「短時間」限定的替代做法，或做不到
+export function techniqueAccess(technique: TechniqueId, owned: OwnedEquipment[]): 'direct' | 'substitute' | 'short-only' | null {
+  if (canDo(technique, owned)) return 'direct';
+  const subs = findSubstitutes(technique, owned);
+  if (subs.length === 0) return null;
+  return subs.every((s) => s.shortOnly) ? 'short-only' : 'substitute';
+}

@@ -1,7 +1,7 @@
 // 靈感彩蛋（M1b-04c）：由程式挑「這一次提哪一樣」，AI 不挑。純函式。
 // 醬料：廚房裡沒過期的醬（category 是 sauce），最近的點子沒用過。
 // 廚具：使用者有、不是各地廚房都有的基本款（字典的新手盤點預設不是 default-on）、這個人做得到至少一種手法，最近的點子沒用過。
-// 舒肥與需要時間溫度的手法不算「做得到」（舒肥預設組合表還是空的，那類點子一律擋下），所以只能做舒肥的廚具不會被挑中。
+// 需要時間溫度的手法（time-temp）不算「做得到」。舒肥可以：點子用舒肥時，食材要是豬、牛、羊肉，由首頁同一套檢查（home/check.ts）把關。
 import type { EggKind } from '../../../../packages/core/src/index.ts';
 import { getEquipmentType, onboardingModeFor } from '../../../../packages/equipment/src/index.ts';
 import { bannedTechniqueIds, ideaIngredients, ingredientName, type HomeEnv } from '../home/env.ts';
@@ -17,8 +17,8 @@ export interface EggUsed {
   equipmentIds: ReadonlySet<string>;
 }
 
-// 彩蛋不用的手法：舒肥的預設組合表還是空的（時間溫度沒有可信的來源），舒肥的點子一律擋下；時間溫度類的手法（bannedTechniqueIds）也不用
-export const EGG_BLOCKED_TECHNIQUES: ReadonlySet<string> = new Set(['sous-vide', ...bannedTechniqueIds]);
+// 彩蛋不用的手法：時間溫度類的手法（bannedTechniqueIds）
+export const EGG_BLOCKED_TECHNIQUES: ReadonlySet<string> = new Set([...bannedTechniqueIds]);
 
 // 醬料裡太基本、當主角很無趣的（每個廚房都有的醬油、醋、酒、高湯）
 const STAPLE_SAUCES: ReadonlySet<string> = new Set([

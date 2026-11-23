@@ -41,9 +41,9 @@ Deno.test('挑一樣：醬料要是醬、廚具要是不基本又做得到的；
   assertEquals(pickEggFeature(envOf('e01'), { ...NONE_USED, ingredientIds: new Set(['doubanjiang']) }), null);
   assertEquals(eggCandidates(envOf('e02'), NONE_USED).map((f) => f.id), ['oven']); // 平底鍋是基本款
   assertEquals(eggCandidates(envOf('e02'), { ...NONE_USED, equipmentIds: new Set(['oven']) }), []);
-  // 只有舒肥機、溫度計、真空封口機：舒肥的手法一律擋下，所以舒肥機不會被挑中
+  // 只有舒肥機、溫度計：舒肥機做得到舒肥，會被挑中（點子的食材要不要是肉，由檢查把關）；溫度計是量測工具，不挑
   const sv = buildHomeEnv({ ...byId('e02').ctx, equipment: [{ equipment_type_id: 'sous-vide-circulator', enabled_optional_techniques: [] }, { equipment_type_id: 'thermometer', enabled_optional_techniques: [] }] }, NOW);
-  assertEquals(eggCandidates(sv, NONE_USED).some((f) => f.id === 'sous-vide-circulator' || f.id === 'thermometer'), false);
+  assertEquals(eggCandidates(sv, NONE_USED).map((f) => f.id), ['sous-vide-circulator']);
   // 沒記廚具：只挑醬料
   assertEquals(eggCandidates(buildHomeEnv({ ...byId('e01').ctx, equipment: [] }, NOW), NONE_USED).every((f) => f.kind === 'sauce'), true);
   // 固定的 rng 挑得到固定的一個；兩種都有時隨機
@@ -86,10 +86,13 @@ Deno.test('檢查：合格的過；沒用到主角、有過敏原、一句話太
   assertEquals(ok('e01', { why: '煮十分鐘就好。' }).idea, null);
   assertEquals(ok('e01', { why: '你有豆瓣醬，趕快用掉。' }).idea, null);
   assertEquals(ok('e01', { slot: 'familiar' }).idea, null); // 只收變化版
-  assertEquals(ok('e01', { techniques: ['sous-vide'] }).idea, null); // 舒肥一律擋下（沒有舒肥機是做不到，有舒肥機是 blocked_technique）
-  // 有舒肥機的人：舒肥的點子一律擋下（預設組合表還是空的）
+  assertEquals(ok('e01', { techniques: ['sous-vide'] }).idea, null); // 沒有舒肥機：做不到
+  // 有舒肥機的人：舒肥的點子只有主食材是豬、牛、羊肉才留下，禽肉與其他的由程式拿掉
   const svEnv = buildHomeEnv({ ...byId('e01').ctx, equipment: [{ equipment_type_id: 'sous-vide-circulator', enabled_optional_techniques: [] }] }, NOW);
-  assertEquals(checkEgg({ idea: rawFor(svEnv, 'e01', { techniques: ['sous-vide'] }) }, svEnv, byId('e01').feature).dropped, { blocked_technique: 1 });
+  const svCheck = (over: Partial<RawIdea>) => checkEgg({ idea: rawFor(svEnv, 'e01', { techniques: ['sous-vide'], equipment: ['sous-vide-circulator'], ...over }) }, svEnv, { kind: 'equipment', id: 'sous-vide-circulator', name: '舒肥機' });
+  assert(svCheck({ title: '舒肥豬里肌', other_ingredients: [{ name: '豬里肌' }] }).idea);
+  assertEquals(svCheck({ title: '舒肥雞胸', other_ingredients: [{ name: '雞胸肉' }] }).dropped, { technique: 1 });
+  assertEquals(svCheck({ title: '舒肥蔬菜', other_ingredients: [{ name: '花椰菜' }] }).dropped, { technique: 1 });
   assertEquals(checkEgg({}, envOf('e01'), byId('e01').feature).dropped, { no_idea: 1 });
   assertEquals(checkEgg(null, envOf('e01'), byId('e01').feature).idea, null);
   // 偶爾下廚的人：太難的不出現

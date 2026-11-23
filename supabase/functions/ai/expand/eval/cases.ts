@@ -104,7 +104,7 @@ export const EXPAND_CASES: ExpandCase[] = [
   },
   {
     id: '04-sous-vide',
-    name: '有舒肥棒；點子是舒肥雞胸（安全表是空的，程式要擋下舒肥）',
+    name: '有舒肥棒；點子是雞胸（雞胸沒有舒肥預設組合，程式要擋下舒肥）',
     ctx: ctx({
       taste: { dims: likes('cuisine.taiwan', 'protein.poultry'), context: FREQ },
       pantry: pantry('chicken-breast', 'salt', 'black-pepper'),
@@ -116,7 +116,7 @@ export const EXPAND_CASES: ExpandCase[] = [
         techniques: ['pan-fry'], equipment: ['frying-pan'],
       }),
     }),
-    expectation: '用煎的把雞胸煮熟，不寫舒肥；小提醒由程式附上雞肉的中心溫度。',
+    expectation: '用煎的把雞胸煮熟，不寫舒肥（禽肉的舒肥表要 FSIS Table 3、4，還沒有）；小提醒由程式附上雞肉的中心溫度。',
     assert: (d) => [
       ...d.steps.filter((s) => (s.techniques ?? []).includes('sous-vide') || /舒肥|低溫慢煮/.test(s.text)).map(() => '寫了舒肥'),
       ...(d.tips?.includes('{{temp:') ? [] : ['沒有附上雞肉的中心溫度提醒']),
@@ -143,5 +143,29 @@ export const EXPAND_CASES: ExpandCase[] = [
       ...d.steps.flatMap((s) => (s.techniques ?? []).filter((t) => !['steam', 'boil', 'toss'].includes(t)).map((t) => `電鍋做不到的手法 ${t}`)),
       ...(d.steps.length > 8 ? ['步驟太多'] : []),
     ],
+  },
+  {
+    id: '06-sous-vide-pork',
+    name: '有舒肥棒、溫度計；點子是舒肥豬里肌（豬肉有預設組合表，舒肥可以）',
+    ctx: ctx({
+      taste: { dims: likes('cuisine.western', 'protein.pork'), context: FREQ },
+      pantry: pantry('pork-tenderloin', 'salt', 'black-pepper'),
+      equipment: eq('gas-stove', 'frying-pan', 'sous-vide-circulator', 'thermometer', 'vacuum-sealer'),
+    }),
+    row: rowOf({
+      idea: aiIdea({
+        title: '舒肥豬里肌', why: '豬里肌慢慢泡熟，再煎一下就很嫩。', usesPantryIds: ['pork-tenderloin', 'salt', 'black-pepper'],
+        techniques: ['sous-vide', 'pan-fry'], equipment: ['sous-vide-circulator', 'frying-pan'],
+      }),
+    }),
+    expectation: '舒肥那一步的溫度與秒數照「舒肥預設組合」挑（不自己編）；文字帶預設組合給的溫度標記、寫「用溫度計確認中心到達…再開始計時」；小提醒由程式附上舒肥規則與對孕婦、幼兒、年長者、免疫力較弱者的提醒，不再寫一般的豬肉中心溫度。',
+    assert: (d) => {
+      const sv = d.steps.filter((s) => (s.techniques ?? []).includes('sous-vide'));
+      return [
+        ...(sv.length === 0 ? ['沒有舒肥的步驟'] : []),
+        ...(sv.some((s) => !/\{\{temp:\d+:F:min:[\d.]+\}\}/.test(s.text)) ? ['舒肥步驟沒有帶溫度標記'] : []),
+        ...(d.tips?.includes('孕婦') ? [] : ['沒有附上對孕婦、幼兒、年長者的提醒']),
+      ];
+    },
   },
 ];
