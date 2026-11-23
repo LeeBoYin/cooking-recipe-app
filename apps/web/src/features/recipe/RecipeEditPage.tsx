@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router';
-import type { RecipeVisibility } from '@zhusha/shared-types';
-import { useDeleteRecipe, useLinkBookmark, useMySettings, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
+import { DIFFICULTY_FACETS, difficultyOverall, type DifficultyFacet } from '@zhusha/core';
+import type { Dictation, RecipeVisibility } from '@zhusha/shared-types';
+import { useDeleteRecipe, useLinkBookmark, useMySettings, usePhotoUrls, useRecipe, useRecipePhotos, useRecipePrivate, useUpdateSettings } from '../../data/hooks.ts';
 import { recipeLimits, type Recipe } from '../../data/recipes.ts';
 import type { Photo } from '../../data/photos.ts';
 import { track } from '../../data/track.ts';
@@ -13,6 +14,7 @@ import { TopBar } from '../shell/SubPage.tsx';
 import {
   DEFAULT_SERVINGS,
   HIGHLIGHTS,
+  edited,
   canAddStep,
   hasContent,
   isBlank,
@@ -20,11 +22,14 @@ import {
   overLimit,
   recordProgress,
   textLimits,
+  type EditorDifficulty,
   type EditorDraft,
   type EditorPhoto,
   type EditorStep,
 } from './model.ts';
 
+import { DictationSheet } from './DictationSheet.tsx';
+import { hasRawDictation } from './dictation.ts';
 import { PhotoStrip } from './PhotoStrip.tsx';
 import { SortableItem, SortableList } from './SortableList.tsx';
 import { useRecipeEditor } from './useRecipeEditor.ts';
@@ -45,6 +50,18 @@ function FieldError({ id, values }: { id: string; values: { limit: number; over:
     </p>
   );
 }
+
+// 這次用說的新加的項目旁邊的小標記；作者編輯過那一項就消失
+function NewBadge() {
+  return (
+    <span className="mt-2.5 mr-1 shrink-0 self-start rounded-full bg-bulb-soft px-2 py-0.5 text-small font-bold text-ink">
+      <FormattedMessage id="dictation.new" />
+    </span>
+  );
+}
+
+// 第一次打開編輯頁，大廚用一句話介紹 🎙（只出現一次，記在 user_settings.seen_hints）
+const DICTATION_INTRO_HINT = 'dictation_intro';
 
 // 可以收合的區塊：新的一篇先收著，只顯示標題與一行摘要
 function Section({ title, hint, open, onToggle, children }: {
@@ -73,6 +90,50 @@ function Section({ title, hint, open, onToggle, children }: {
   );
 }
 
+// 「進階」：難易度五個面向的滑桿（選填）。作者一動就是作者的（AI 不再覆寫）；大廚估的在這裡也看得到、可以調整
+function DifficultySection({ difficulty, onChange }: { difficulty: EditorDifficulty | null; onChange: (d: EditorDifficulty | null) => void }) {
+  const intl = useIntl();
+  const [open, setOpen] = useState(false);
+  const values = difficulty?.values ?? null;
+  const overall = values ? difficultyOverall(values) : null;
+  const hint = !values
+    ? intl.formatMessage({ id: 'recipe.advanced.hint' })
+    : intl.formatMessage({ id: difficulty?.source === 'ai' ? 'recipe.advanced.summary.ai' : 'recipe.advanced.summary' }, { value: overall });
+  const set = (facet: DifficultyFacet, value: number) =>
+    onChange({ values: { ...(values ?? { ingredients: 3, equipment: 3, time: 3, technique: 3, failure_risk: 3 }), [facet]: value }, source: 'author' });
+  return (
+    <Section title={intl.formatMessage({ id: 'recipe.advanced' })} hint={hint} open={open} onToggle={() => setOpen((o) => !o)}>
+      <div className="flex flex-col gap-3">
+        <span className={LABEL}><FormattedMessage id="recipe.advanced.help" /></span>
+        {DIFFICULTY_FACETS.map((f) => (
+          <label key={f} className="flex items-center gap-3">
+            <span className="w-16 shrink-0 text-caption text-ink"><FormattedMessage id={`recipe.facet.${f}`} /></span>
+            <input
+              type="range"
+              min={1}
+              max={5}
+              step={1}
+              value={values?.[f] ?? 3}
+              aria-valuetext={String(values?.[f] ?? 3)}
+              onChange={(e) => set(f, Number(e.target.value))}
+              className="h-11 min-w-0 flex-1 accent-bulb"
+            />
+            <b className="w-4 text-center text-body">{values?.[f] ?? '–'}</b>
+          </label>
+        ))}
+        {values && (
+          <div className="flex items-center justify-between">
+            <b className="text-body"><FormattedMessage id="recipe.view.difficulty" values={{ value: overall }} /></b>
+            <button type="button" onClick={() => onChange(null)} className="h-11 border-0 bg-transparent px-2 text-small font-[inherit] text-ink-muted underline underline-offset-4">
+              <FormattedMessage id="recipe.advanced.clear" />
+            </button>
+          </div>
+        )}
+      </div>
+    </Section>
+  );
+}
+
 function StepRow({ step, index, thumb, onText, onPhoto, onRemovePhoto, onRemove, over, autoFocus }: {
   step: EditorStep;
   index: number;
@@ -89,6 +150,7 @@ function StepRow({ step, index, thumb, onText, onPhoto, onRemovePhoto, onRemove,
   return (
     <SortableItem id={step.id} handleLabel={intl.formatMessage({ id: 'recipe.step.drag' }, { n: index + 1 })} className="flex items-start gap-1">
       <span className="mt-2.5 mr-1 flex size-6 shrink-0 items-center justify-center rounded-full bg-ink text-small font-bold text-surface">{index + 1}</span>
+      {step.isNew && <NewBadge />}
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <textarea
           rows={2}
@@ -146,14 +208,14 @@ function StepRow({ step, index, thumb, onText, onPhoto, onRemovePhoto, onRemove,
   );
 }
 
-function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: string; recipe: Recipe | null; photoRows: Photo[]; defaultServings: number }) {
+function Editor({ recipeId, recipe, photoRows, defaultServings, savedDictation, introSeen }: { recipeId: string; recipe: Recipe | null; photoRows: Photo[]; defaultServings: number; savedDictation: Dictation | null; introSeen: boolean }) {
   const intl = useIntl();
   const navigate = useNavigate();
   const location = useLocation();
   const fromState = location.state as { title?: string; bookmarkId?: string; draft?: EditorDraft; source?: { url: string; name: string | null } } | null;
   const initialTitle = fromState?.title;
   const linkBookmark = useLinkBookmark();
-  const ed = useRecipeEditor(recipeId, recipe, photoRows, initialTitle, defaultServings, fromState?.draft, fromState?.source ? { type: 'url', url: fromState.source.url, ...(fromState.source.name ? { name: fromState.source.name } : {}) } : null);
+  const ed = useRecipeEditor(recipeId, recipe, photoRows, initialTitle, defaultServings, fromState?.draft, fromState?.source ? { type: 'url', url: fromState.source.url, ...(fromState.source.name ? { name: fromState.source.name } : {}) } : null, savedDictation);
   const remove = useDeleteRecipe();
   const { form, patchForm, setForm } = ed;
   const [methodOpen, setMethodOpen] = useState(
@@ -163,6 +225,35 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
   const [leaveAsk, setLeaveAsk] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [focusId, setFocusId] = useState<string | null>(null); // 剛新增的列，游標放進去
+
+  // 用說的
+  const settings = useMySettings();
+  const updateSettings = useUpdateSettings();
+  const [speakOpen, setSpeakOpen] = useState(false);
+  const [notice, setNotice] = useState<'filled' | 'unavailable' | 'organizeFailed' | null>(null);
+  const [organizing, setOrganizing] = useState(false);
+  const [introOpen, setIntroOpen] = useState(!introSeen);
+  const introMarked = useRef(false);
+  useEffect(() => {
+    if (introSeen || introMarked.current || !settings.data) return;
+    introMarked.current = true;
+    updateSettings.mutate({ seen_hints: [...settings.data.seen_hints, DICTATION_INTRO_HINT] });
+  }, [introSeen, settings.data, updateSettings]);
+  const rawDictation = hasRawDictation(form, ed.dictation?.text);
+
+  async function speak(text: string) {
+    const result = await ed.runDictation(text, 'speak');
+    setNotice(result === 'ok' ? 'filled' : 'unavailable');
+    if (result === 'ok') setMethodOpen(true);
+  }
+  async function organize() {
+    if (!ed.dictation || organizing) return;
+    setOrganizing(true);
+    const result = await ed.runDictation(ed.dictation.text, 'organize');
+    setOrganizing(false);
+    setNotice(result === 'ok' ? 'filled' : 'organizeFailed');
+    if (result === 'ok') setMethodOpen(true);
+  }
 
   // 產品事件：新的一篇開始記錄；離開時沒發佈就記放棄（做到哪一步）。只記步驟，不記內容。
   // 開發模式的 StrictMode 會假裝卸載再掛上，所以用 microtask 確認真的離開了才記
@@ -302,6 +393,31 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
         }
       />
 
+      {introOpen && (
+        <div className="flex items-start gap-2 rounded-card bg-chef-soft px-3 py-2.5">
+          <p className="m-0 flex-1 text-caption leading-normal"><FormattedMessage id="dictation.intro" /></p>
+          <button type="button" onClick={() => setIntroOpen(false)} className="h-11 shrink-0 border-0 bg-transparent px-2 text-caption font-[inherit] text-ink-muted">
+            <FormattedMessage id="dictation.intro.dismiss" />
+          </button>
+        </div>
+      )}
+      {rawDictation && (
+        <div className="flex flex-col gap-2 rounded-card bg-chef-soft px-3 py-2.5">
+          <p className="m-0 text-caption leading-normal"><FormattedMessage id={notice === 'organizeFailed' ? 'dictation.organizeFailed' : 'dictation.rawKept'} /></p>
+          <button
+            type="button"
+            disabled={organizing}
+            onClick={() => void organize()}
+            className="h-11 self-start rounded-full border-2 border-ink bg-bulb px-4 text-caption font-bold font-[inherit] text-ink disabled:opacity-50"
+          >
+            <FormattedMessage id={organizing ? 'dictation.working' : 'dictation.organize'} />
+          </button>
+        </div>
+      )}
+      {notice === 'filled' && !rawDictation && (
+        <p role="status" className="m-0 text-small text-ink-muted"><FormattedMessage id="dictation.filled" /></p>
+      )}
+
       <section className={`${CARD} flex flex-col gap-1.5`}>
         <label className="flex flex-col">
           <span className="sr-only"><FormattedMessage id="recipe.field.title" /></span>
@@ -364,13 +480,14 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
                   handleLabel={intl.formatMessage({ id: 'recipe.ingredient.drag' }, { n: i + 1 })}
                   className="flex items-center border-b border-line-soft"
                 >
+                  {ing.isNew && <span className="shrink-0 rounded-full bg-bulb-soft px-2 py-0.5 text-small font-bold text-ink"><FormattedMessage id="dictation.new" /></span>}
                   <input
                     type="text"
                     autoFocus={focusId === ing.id}
                     value={ing.text}
                     aria-label={intl.formatMessage({ id: 'recipe.ingredient.aria' }, { n: i + 1 })}
                     onChange={(e) =>
-                      setForm((f) => ({ ...f, ingredients: f.ingredients.map((x) => (x.id === ing.id ? { ...x, text: e.target.value } : x)) }))
+                      setForm((f) => ({ ...f, ingredients: f.ingredients.map((x) => (x.id === ing.id ? edited(x, { text: e.target.value }) : x)) }))
                     }
                     className="min-w-0 flex-1 border-0 bg-transparent py-2.5 text-body text-ink outline-none"
                   />
@@ -404,7 +521,7 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
               thumb={s.photo ? urlFor(s.photo) : undefined}
               over={overBy(s.text, textLimits.step)}
               autoFocus={focusId === s.id}
-              onText={(text) => setForm((f) => ({ ...f, steps: f.steps.map((x) => (x.id === s.id ? { ...x, text } : x)) }))}
+              onText={(text) => setForm((f) => ({ ...f, steps: f.steps.map((x) => (x.id === s.id ? edited(x, { text }) : x)) }))}
               onPhoto={(file) => void ed.addPhotos([file], s.id)}
               onRemovePhoto={() => s.photo && ed.removePhoto(s.photo.id)}
               onRemove={() => ed.removeStep(s.id)}
@@ -457,6 +574,18 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
           })}
         </div>
       </section>
+
+      <DifficultySection difficulty={form.difficulty} onChange={(difficulty) => patchForm({ difficulty })} />
+
+      <button
+        type="button"
+        onClick={() => setSpeakOpen(true)}
+        aria-label={intl.formatMessage({ id: 'dictation.open' })}
+        className="fixed right-4 bottom-[calc(132px+env(safe-area-inset-bottom))] z-10 flex size-14 items-center justify-center rounded-full border-2 border-ink bg-bulb text-ink shadow-[0_2px_12px_rgba(43,38,34,0.18)]"
+      >
+        <Icon name="mic" size={26} />
+      </button>
+      {speakOpen && <DictationSheet onSubmit={speak} onClose={() => setSpeakOpen(false)} />}
 
       {ed.removed && (
         <div role="status" className="fixed inset-x-4 bottom-[calc(112px+env(safe-area-inset-bottom))] z-20 mx-auto flex max-w-[528px] min-h-12 items-center justify-between rounded-card bg-ink pr-1 pl-3.5 text-body text-surface">
@@ -536,10 +665,11 @@ export function RecipeEditPage() {
   const recipe = useRecipe(id);
   const photos = useRecipePhotos(id);
   const settings = useMySettings();
+  const priv = useRecipePrivate(id);
   return (
     <section>
       <h1 className="sr-only">{intl.formatMessage({ id: 'recipe.edit.title' })}</h1>
-      {recipe.isPending || photos.isPending || settings.isPending ? (
+      {recipe.isPending || photos.isPending || settings.isPending || priv.isPending ? (
         <p className="m-0 text-caption text-ink-muted"><FormattedMessage id="common.loading" /></p>
       ) : recipe.isError || photos.isError ? (
         <p role="alert" className="m-0 text-caption text-error"><FormattedMessage id="recipe.loadError" /></p>
@@ -547,7 +677,7 @@ export function RecipeEditPage() {
         <Navigate to="/recipes" replace />
       ) : (
         // key：換一篇時整個重新開始；null 就是還沒存過的新草稿
-        <Editor key={id} recipeId={id as string} recipe={recipe.data ?? null} photoRows={photos.data ?? []} defaultServings={settings.data?.household_size ?? DEFAULT_SERVINGS} />
+        <Editor key={id} recipeId={id as string} recipe={recipe.data ?? null} photoRows={photos.data ?? []} defaultServings={settings.data?.household_size ?? DEFAULT_SERVINGS} savedDictation={(priv.data?.dictation as Dictation | null | undefined) ?? null} introSeen={settings.data?.seen_hints.includes(DICTATION_INTRO_HINT) ?? true} />
       )}
     </section>
   );

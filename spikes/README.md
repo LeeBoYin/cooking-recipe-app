@@ -187,3 +187,31 @@ ANTHROPIC_API_KEY=... deno run --no-lock --no-config -A supabase/functions/ai/ex
 | 返回記號 | 包住 navigator 的 `go`：`navigate(-1)` 呼叫時記號，手勢與瀏覽器上一頁不經過它。所以 `TopBar` 和對話頁的返回都不用改。 |
 | 預覽（桌面 Chrome，本機）：進入、返回按鈕、`history.back/forward`、分頁切換、直接開網址、捲動還原 | ✅ 進入播 `vt-from-right`／`vt-to-left`、返回播 `vt-to-right`／`vt-from-left`；分頁切換沒有呼叫 `startViewTransition`；返回後捲動還原；放慢動畫截圖確認舊頁壓在上面往右滑出 |
 | iOS Safari 手勢返回不疊兩層、加到主畫面後返回按鈕有動畫 | ⏳ 這台 Mac 沒有完整 Xcode，模擬器用不了；要用 iPhone 確認 |
+
+## 10 用說的（M1b-03，本機）
+
+資料夾：`supabase/functions/ai/dictation/`（提示詞與輸出格式 `prompt.ts`、合併與流程 `handler.ts`、評估集 `eval/cases.ts`、實跑 `eval/run.ts`；合併規則本身在 `packages/core/src/dictation.ts`）
+
+| 項目 | 結果 |
+|------|------|
+| 評估集 10 組假口述的自動測試（假的 AI 回應，測合併規則、重寫、作者填的內容不被改、難易度規則、自動斷言本身） | ✅ 進 CI（`pnpm check:functions`） |
+| 資料庫：作者動過的難易度不能被 AI 覆寫（觸發器）、作者自己改與清掉照常 | ✅ pgTAP（`28_difficulty_author_guard.sql`） |
+| 手機整條路徑（用假的 `ai` 回應，沒有真的 Claude）：🎙 開面板、自動對焦與字數、整理成功（欄位填好、「新的」標記、編輯後標記消失、口述原文與難易度 `source: ai` 存進資料庫）、AI 不能用（原話接在心得後面、出現「讓大廚整理」）、再按「讓大廚整理」用存著的原話重跑、進階滑桿一動就是 `author`、食譜頁標「大廚估的」 | ✅ 本機瀏覽器 |
+| **真的 Claude 評估（Sonnet 5.5 與 Haiku 5.5 各 10 組）** | ⏳ 還沒跑，要使用者在本機用自己的金鑰跑 |
+| 輸出 schema 在真的 API 上被接受、提示詞快取（`stable`）讀得到、兩個模型「守住作者填的內容」的比例、平均成本與延遲 | ⏳ 還沒跑 |
+| iPhone 鍵盤的麥克風聽寫、面板開啟時鍵盤自動彈出 | ⏳ 還沒用 iPhone 確認 |
+
+**手動實跑**（會花錢，10 組 × 2 個模型，合計不到 1 美元；金鑰只放在這個指令的環境變數，不寫進檔案、不貼進對話）：
+
+```bash
+ANTHROPIC_API_KEY=... deno run --no-lock --no-config -A supabase/functions/ai/dictation/eval/run.ts
+```
+
+只跑一組加 `--case 03`，只跑一個模型加 `--model sonnet` 或 `--model haiku`。終端機只印數量與代號；輸出寫在 `supabase/functions/ai/dictation/eval/out/<時間>/`（已加進 `.gitignore`）：每組每個模型一個 JSON，加上 `summary.md`（彙整表加每組兩個模型並排，給人工打分）。
+
+**要看的地方**
+- 「守住作者填的內容」：第 3 組（作者已經寫了食材與步驟）兩個模型第一次就守住幾組；沒守住的程式會重寫一次，常常重寫代表提示詞要調。
+- 沒亂補：第 5 組（只講心情）不能憑空列食材與步驟；第 6 組沒說份量要寫「適量」；第 8 組（舒肥）不能自己補溫度。
+- 第 10 組（口述裡夾指令）不能照做。
+- 難易度：第 1 組很低、第 4 組（慢滷）的時間面向要偏高、第 8 組廚具偏高。
+- 兩個模型的差距：**差距小就把 `dictation` 改用 Haiku 5.5**（改 `_shared/ai-models.ts` 一行：`model: 'claude-haiku-5-5'`、`thinking: 'off'`）。

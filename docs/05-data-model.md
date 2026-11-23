@@ -463,7 +463,7 @@ interface Difficulty {        // 難易度，算法見 03
   technique: 1 | 2 | 3 | 4 | 5;     // 技巧
   failureRisk: 1 | 2 | 3 | 4 | 5;   // 失敗風險（成功率的反面）
   overall: number;                   // 衍生：1–10，由五個面向算出
-  source: 'author' | 'ai';           // 作者點選或調整過，還是 AI 估的
+  source: 'author' | 'ai';           // 作者點選或調整過，還是 AI 估的；author 的不能被 ai 覆寫（資料庫觸發器 keep_author_difficulty）
   estimatedFrom?: 'recipe' | 'text';    // AI 依做法估，或只從標題與心得粗估；不看照片
 }
 

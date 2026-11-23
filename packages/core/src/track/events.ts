@@ -59,6 +59,10 @@ export const TRACK_EVENTS = {
   'record.abandon': { step: e(['blank', 'photo', 'text', 'method']) },
   'record.draft_saved': {},
   'record.draft_published': {},
+  // 用說的：入口（口述／讓大廚整理）與結果（整理好了／AI 不能用，原話放進心得）；不記口述內容
+  'record.dictation_used': { entry: e(['speak', 'organize']), result: e(['ok', 'unavailable']) },
+  // 大廚整理好、填進欄位：填了或補了幾個欄位（食材與步驟各算一個）
+  'record.ai_filled': { fieldCount: n(10) },
   // 還原食譜版本：只記操作，不記是哪一版、哪一篇
   'recipe.revision_restored': {},
   // 從網址或貼上的文字匯入：只記輸入方式與結果（程式直接讀、AI 擷取、失敗），不記網址與內容

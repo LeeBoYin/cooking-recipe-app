@@ -17,6 +17,7 @@ export { buildCard, EXPLORER_CODE, LIGHT_CODE, type TasteCard } from './taste/ca
 export * from './ideas/types.ts';
 export * from './ideas/constants.ts';
 export * from './ideas/ai-types.ts';
+export * from './dictation.ts';
 export { draftIngredientText, draftStepText } from './ideas/draft.ts';
 export {
   buildIdeaPool, confidentLikeCount, isTasteEnough, violatesLimits, mainIngredientIds, tasteSimilarity, dishDimensionKeys,

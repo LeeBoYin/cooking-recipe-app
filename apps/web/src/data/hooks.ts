@@ -12,7 +12,7 @@ import {
 } from '../photos/uploadQueue.ts';
 import { deletePhoto, getAvatar, listEquipmentPhotos, listMyRecipePhotos, listRecipePhotos, replaceAvatar, signPhotoUrls, type Photo } from './photos.ts';
 import { listRecipeRevisions, restoreRecipeRevision } from './recipeRevisions.ts';
-import { deleteRecipe, getRecipe, listMyDeletedRecipes, listMyRecipes, restoreRecipe, searchMyRecipes, type Recipe } from './recipes.ts';
+import { deleteRecipe, getRecipe, getRecipePrivate, listMyDeletedRecipes, listMyRecipes, restoreRecipe, searchMyRecipes, type Recipe } from './recipes.ts';
 import { currentUserId, getMyIdentity, getMySettings, updateDisplayName, updateMySettings, type UserSettings, type UserSettingsPatch } from './account.ts';
 import { bookmarkAiIdea, bookmarkIdea, linkBookmarkToRecipe, listMyBookmarks, unbookmark } from './bookmarks.ts';
 import { getMyDietary, saveMyDietary, type Dietary } from './dietary.ts';
@@ -57,6 +57,7 @@ export const queryKeys = {
   bookmarks: ['bookmarks'] as const,
   recipeSearch: (q: string) => ['recipes', 'search', q] as const,
   recipe: (id: string) => ['recipe', id] as const,
+  recipePrivate: (id: string) => ['recipe', id, 'private'] as const,
   recipePhotos: (id: string) => ['recipe', id, 'photos'] as const,
   recipeRevisions: (id: string) => ['recipe', id, 'revisions'] as const,
   avatar: (userId: string) => ['avatar', userId] as const,
@@ -247,6 +248,15 @@ export function useDeletePhoto(kitchenId: string | undefined) {
   return useMutation({
     mutationFn: (photo: Photo) => deletePhoto(photo),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.equipmentPhotos(kitchenId ?? '') }),
+  });
+}
+
+// 這篇食譜的私人資料（口述原文）；只有作者讀得到，還沒有就是 null
+export function useRecipePrivate(id: string | undefined) {
+  return useQuery({
+    queryKey: queryKeys.recipePrivate(id ?? ''),
+    queryFn: () => getRecipePrivate(id as string),
+    enabled: !!id,
   });
 }
 

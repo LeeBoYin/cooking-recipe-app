@@ -99,6 +99,7 @@ export function RecipePage() {
   const values = d && DIFFICULTY_FACETS.every((f) => typeof d[f] === 'number')
     ? { ingredients: d.ingredients!, equipment: d.equipment!, time: d.time!, technique: d.technique!, failure_risk: d.failure_risk! }
     : null;
+  const aiEstimated = (r.difficulty as { source?: string } | null)?.source === 'ai';
   const overall = values ? (d?.overall ?? difficultyOverall(values)) : null;
   const baseServings = r.servings ?? null;
   const shownServings = baseServings ? (servings ?? baseServings) : null;
@@ -244,7 +245,10 @@ export function RecipePage() {
           >
             <DifficultyRadar values={values} />
             <span className="flex flex-1 flex-col gap-0.5">
-              <b className="text-[15px]"><FormattedMessage id="recipe.view.difficulty" values={{ value: overall }} /></b>
+              <b className="text-[15px]">
+                <FormattedMessage id="recipe.view.difficulty" values={{ value: overall }} />
+                {aiEstimated && <span className="ml-1.5 text-small font-normal text-ink-muted"><FormattedMessage id="recipe.view.difficultyAi" /></span>}
+              </b>
               <span className="text-small text-ink-muted">
                 {DIFFICULTY_FACETS.map((f) => `${intl.formatMessage({ id: `recipe.facet.${f}` })} ${values[f]}`).join('・')}
               </span>
