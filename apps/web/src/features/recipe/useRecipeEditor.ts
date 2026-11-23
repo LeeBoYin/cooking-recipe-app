@@ -5,6 +5,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { arrayMove } from '@dnd-kit/sortable';
 import { newId } from '@zhusha/core';
+import type { RecipeSource } from '@zhusha/shared-types';
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import { queryKeys } from '../../data/hooks.ts';
 import { currentUserId } from '../../data/account.ts';
@@ -57,9 +58,9 @@ function failureKind(error: unknown): { kind: string; onServer: boolean } {
   return { kind: 'network', onServer: false };
 }
 
-export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRows: Photo[], initialTitle?: string, defaultServings?: number, initialDraft?: EditorDraft) {
+export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRows: Photo[], initialTitle?: string, defaultServings?: number, initialDraft?: EditorDraft, initialSource?: RecipeSource | null) {
   const queryClient = useQueryClient();
-  const initial = useMemo(() => (recipe ? formFromRecipe(recipe, photoRows) : startingForm(defaultServings, initialTitle, initialDraft)), []); // eslint-disable-line react-hooks/exhaustive-deps
+  const initial = useMemo(() => (recipe ? formFromRecipe(recipe, photoRows) : startingForm(defaultServings, initialTitle, initialDraft, initialSource ?? null)), []); // eslint-disable-line react-hooks/exhaustive-deps
   const [form, setFormState] = useState<EditorForm>(initial);
   const formRef = useRef(form);
   // 新食譜預填的菜名與做法（從大廚的點子或收藏帶進來）還沒存進資料庫，所以「上次存的」要當成空白，這樣第一次存才會把它們送出去

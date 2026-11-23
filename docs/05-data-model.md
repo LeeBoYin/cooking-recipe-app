@@ -444,14 +444,15 @@ interface Recipe extends UserEntity {
   source?: {
     type: 'original' | 'url' | 'friend' | 'share_link' | 'ai' | 'external_ai';
     shareLinkId?: string;       // type 為 share_link 時，從哪一個分享連結複製的
-    url?: string;
+    url?: string;               // type 為 url 時的來源網址；只允許 http／https（資料庫檢查），顯示成連結時一律 rel="noopener noreferrer"
+    name?: string;              // type 為 url 時的網站名稱（最多 60 字）；沒有就顯示網域
     fromUserId?: string;        // 改編自哪位朋友
     fromUserName?: string;      // 當時的名字快照；朋友改名後仍顯示當時的名字
   };
   safetyWarnings?: string[];  // 後端檢查未通過的項目（過敏原、舒肥組合不在表內等），App 中醒目顯示
   parentRecipeId?: string;    // 改編自哪一份（自己的或朋友的）；「記錄我做的版本」時填入
   version: number;            // 做法每次修改加一；舊版存在 RecipeRevision（M1b）
-  visibility: Visibility;     // 預設 'friends'；從網址匯入、外部 AI 建立的預設 'private'；草稿一律只有自己；household 進入家庭食譜本
+  visibility: Visibility;     // 預設 'friends'；外部 AI 建立的預設 'private'；從網址匯入的和一般食譜一樣（不鎖）；草稿一律只有自己；household 進入家庭食譜本
   // 季節不存：查詢時由 cookedOn 與廚房地區計算
 }
 

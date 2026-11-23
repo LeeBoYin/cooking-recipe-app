@@ -1,7 +1,7 @@
 // 編輯頁的資料模型（純函式，方便測試）：資料庫的一篇食譜 ⇄ 編輯中的表單 ⇄ 要送出的變更。
 import { buildIngredientIndex, difficultyOverall, newId, parseIngredientLineNamed, type DifficultyValues } from '@zhusha/core';
 import { ingredients as dictionaryIngredients } from '@zhusha/ingredients';
-import type { Highlight, RecipeDifficulty, RecipeIngredient, RecipeStep, RecipeVisibility } from '@zhusha/shared-types';
+import type { Highlight, RecipeDifficulty, RecipeIngredient, RecipeSource, RecipeStep, RecipeVisibility } from '@zhusha/shared-types';
 import type { Photo } from '../../data/photos.ts';
 import { recipeLimits, type Recipe, type RecipePatch, type RecipePhotoInput } from '../../data/recipes.ts';
 
@@ -52,6 +52,7 @@ export type EditorForm = {
   highlights: Highlight[];
   difficulty: DifficultyValues | null; // 沒動過拉桿就是 null
   visibility: RecipeVisibility;
+  source: RecipeSource | null; // 從網址匯入的來源；其他食譜是 null
 };
 
 export const DEFAULT_SERVINGS = 2;
@@ -60,10 +61,11 @@ export const DEFAULT_SERVINGS = 2;
 export type EditorDraft = { servings: number; ingredients: EditorIngredient[]; steps: { id: string; text: string }[]; tips: string };
 
 // 新食譜的起點：空白表單加上菜名與帶入的內容
-export function startingForm(servings: number | undefined, title: string | undefined, draft: EditorDraft | undefined): EditorForm {
+export function startingForm(servings: number | undefined, title: string | undefined, draft: EditorDraft | undefined, source: RecipeSource | null = null): EditorForm {
   return {
     ...emptyForm(servings),
     title: title ?? '',
+    source,
     ...(draft ? { servings: draft.servings, ingredients: draft.ingredients, steps: draft.steps, tips: draft.tips } : {}),
   };
 }
@@ -80,6 +82,7 @@ export function emptyForm(servings = DEFAULT_SERVINGS): EditorForm {
     highlights: [],
     difficulty: null,
     visibility: 'friends',
+    source: null,
   };
 }
 
@@ -123,6 +126,7 @@ export function formFromRecipe(recipe: Recipe, photos: Photo[]): EditorForm {
     highlights: knownHighlights(recipe.highlights),
     difficulty: difficultyValues(recipe.difficulty),
     visibility: recipe.visibility as RecipeVisibility,
+    source: (recipe.source as RecipeSource | null) ?? null,
   };
 }
 
@@ -168,6 +172,7 @@ export function toFields(form: EditorForm): RecipePatch {
     highlights: form.highlights,
     difficulty: form.difficulty ? { ...form.difficulty, source: 'author' } : null,
     visibility: form.visibility,
+    source: form.source,
   };
 }
 

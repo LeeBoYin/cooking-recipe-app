@@ -150,10 +150,10 @@ function Editor({ recipeId, recipe, photoRows, defaultServings }: { recipeId: st
   const intl = useIntl();
   const navigate = useNavigate();
   const location = useLocation();
-  const fromState = location.state as { title?: string; bookmarkId?: string; draft?: EditorDraft } | null;
+  const fromState = location.state as { title?: string; bookmarkId?: string; draft?: EditorDraft; source?: { url: string; name: string | null } } | null;
   const initialTitle = fromState?.title;
   const linkBookmark = useLinkBookmark();
-  const ed = useRecipeEditor(recipeId, recipe, photoRows, initialTitle, defaultServings, fromState?.draft);
+  const ed = useRecipeEditor(recipeId, recipe, photoRows, initialTitle, defaultServings, fromState?.draft, fromState?.source ? { type: 'url', url: fromState.source.url, ...(fromState.source.name ? { name: fromState.source.name } : {}) } : null);
   const remove = useDeleteRecipe();
   const { form, patchForm, setForm } = ed;
   const [methodOpen, setMethodOpen] = useState(

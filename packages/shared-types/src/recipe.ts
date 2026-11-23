@@ -68,7 +68,8 @@ export type RecipeAiTags = {
 export type RecipeSource = {
   type: 'original' | 'url' | 'friend' | 'share_link' | 'ai' | 'external_ai';
   share_link_id?: string;
-  url?: string;
+  url?: string; // type 為 url 時的來源網址，只有 http／https
+  name?: string; // type 為 url 時的網站名稱
   from_user_id?: string;
   from_user_name?: string;
 };
