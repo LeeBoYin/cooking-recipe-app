@@ -14,6 +14,17 @@ describe('手法', () => {
       expect(t.name['zh-TW'].trim()).not.toBe('');
     }
   });
+
+  it('每種手法都有 1–5 的整數技巧等級，且等級有分布', () => {
+    for (const t of techniques) {
+      expect(Number.isInteger(t.skillLevel), t.id).toBe(true);
+      expect(t.skillLevel, t.id).toBeGreaterThanOrEqual(1);
+      expect(t.skillLevel, t.id).toBeLessThanOrEqual(5);
+    }
+    const counts = [1, 2, 3, 4, 5].map((l) => techniques.filter((t) => t.skillLevel === l).length);
+    for (const c of counts) expect(c).toBeGreaterThan(0);
+    expect(Math.max(...counts)).toBeLessThanOrEqual(16); // 不超過一半擠在同一級
+  });
 });
 
 describe('廚具', () => {

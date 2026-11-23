@@ -20,10 +20,14 @@ export type DishwasherSafe = (typeof DISHWASHER_SAFE)[number];
 
 export type TechniqueId = string;
 
+export const SKILL_LEVELS = [1, 2, 3, 4, 5] as const;
+export type SkillLevel = (typeof SKILL_LEVELS)[number];
+
 export interface Technique {
   id: TechniqueId;
   name: LocalizedText;
   group: TechniqueGroup;
+  skillLevel: SkillLevel; // 技巧等級 1–5，難易度的「技巧」面向用（07 手法的技巧等級）
   safetyRuleId?: string; // 需要安全檢查的手法（舒肥、油炸、壓力烹調…）對應的規則
 }
 
