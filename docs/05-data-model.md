@@ -432,7 +432,7 @@ interface Recipe extends UserEntity {
   techniques?: TechniqueId[];   // 衍生：由步驟彙整
   ingredientIds: string[];      // 衍生：這道菜用了哪些食材，來源優先序見「衍生欄位」
   equipmentUsedIds?: string[];  // 這次用到的廚具（選填），裝備卡的「拿手菜」用；不計次數
-  // AI 補的標籤，使用者可修正
+  // AI 補的標籤（發佈後整理，背景寫入；只給口味檔案用，使用者修正的畫面之後再做）
   aiTags?: {
     cuisineKeys?: string[];
     mainIngredientIds?: string[];
@@ -519,7 +519,7 @@ interface RecipePrivate {             // 只有作者能讀寫（另開一張表
   recipeId: string;                   // 一對一
   userId: string;
   dictation?: { text: string; lang: LanguageTag; at: Instant };   // 「用說的」口述原文（只留最近一次），「讓大廚整理」、用說的改食譜時用
-  chefNote?: { text: string; at: Instant };   // 第一次發佈時大廚的一句話；只有作者看得到
+  chefNote?: { text: string; at: Instant };   // 草稿第一次發佈時大廚的一句話（最多 80 字）；只有作者看得到，使用者不能寫，只有 ai 函式經 save_chef_note 寫入一次
   diners?: Diner[];                   // 一起吃的人；只有作者看得到，用來合併過敏原、提醒「上次請小美吃過這道了」
   updatedAt: Instant;
 }
@@ -866,7 +866,7 @@ interface AiRateCounter {             // 速率限制的計數，只存在後端
 
 interface BackgroundJob {             // 背景任務佇列（發佈後整理、食材正規化、照片清理…），只存在後端
   id: string;
-  kind: 'normalize_ingredients' | 'post_publish' | 'import_retry' | 'storage_cleanup' | 'push';   // 現在只有 normalize_ingredients（M1a-05）；post_publish：發佈當下的整理失敗時，在背景重試標籤與難易度
+  kind: 'normalize_ingredients' | 'post_publish' | 'import_retry' | 'storage_cleanup' | 'push';   // post_publish：發佈或已發佈的食譜做法改了時由資料庫觸發器排隊（dedupe_key 是食譜 ID，payload 帶 mode：publish／edit），在背景補標籤與難易度，失敗退避重試
   dedupeKey: string;                  // 同一種任務、同一個鍵，排隊或執行中只會有一筆（食材正規化：詞的標準寫法）
   payload: unknown;                   // 例：{ text }（使用者輸入的原樣，最長 60 字）、{ recipeId }
   requestedBy?: string;               // 第一個排隊的人，AI 用量算在他身上；帳號刪除後為空
@@ -911,7 +911,7 @@ interface AiUsageAlert {              // 異常使用紀錄，只存在後端；
 interface AiUsageRecord {             // 每次呼叫 AI 一筆，只存在後端；保留 13 個月，之後只留 AiSpendMonthly 的月加總
   id: string;
   userId: string;
-  task: string;                       // 'home' | 'chat' | 'expand' | 'dictation' | 'refine' | 'import_url' | 'post_publish' | 'normalize' | 'easter_egg'
+  task: string;                       // 'home' | 'chat' | 'expand' | 'dictation' | 'refine' | 'import_url' | 'chef_note' | 'post_publish' | 'normalize' | 'easter_egg'
   model: string;                      // 'claude-haiku-5-5' | 'claude-sonnet-5-5' | 'claude-opus-5-5'（模型依任務，見 03）
   inputTokens: number;
   outputTokens: number;

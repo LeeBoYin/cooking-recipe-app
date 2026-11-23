@@ -51,7 +51,7 @@ Deno.test('快照超過 30 天沒重算：即使 stale 是 false 也重算', asy
   const { rpc, calls } = fakeRpc();
   const c = withInputs({ taste_snapshot: { stale: false, computed_at: '2026-10-01T00:00:00Z', data: snapshot() } });
   await withMergedTaste(c, rpc, 'u1', NOW);
-  assertEquals(calls.length, 1);
+  assertEquals(calls.filter((x) => x.fn === 'taste_profile_save').length, 1);
   const young = withInputs({ taste_snapshot: { stale: false, computed_at: '2026-11-10T00:00:00Z', data: snapshot() } });
   const { rpc: rpc2, calls: calls2 } = fakeRpc();
   await withMergedTaste(young, rpc2, 'u1', NOW);
@@ -59,10 +59,10 @@ Deno.test('快照超過 30 天沒重算：即使 stale 是 false 也重算', asy
 });
 
 Deno.test('沒有快照：重算並存回去（帶讀取時間），格式是 schemaVersion 1', async () => {
-  const { rpc, calls } = fakeRpc();
+  const { rpc, calls: all } = fakeRpc();
   const out = await withMergedTaste(withInputs(), rpc, 'u1', NOW);
-  assertEquals(calls.length, 1);
-  assertEquals(calls[0]?.fn, 'taste_profile_save');
+  assertEquals(all.map((c) => c.fn), ['taste_recorded_recipes', 'taste_profile_save']);
+  const calls = all.filter((c) => c.fn === 'taste_profile_save');
   assertEquals(calls[0]?.args.p_user, 'u1');
   assertEquals(calls[0]?.args.p_read_at, '2026-11-22T00:00:00Z');
   const data = calls[0]?.args.p_data as TasteSnapshotData;
@@ -76,7 +76,7 @@ Deno.test('沒有快照：重算並存回去（帶讀取時間），格式是 sc
 Deno.test('過期：重算；你設定的維度不被覆蓋', async () => {
   const { rpc, calls } = fakeRpc();
   const out = await withMergedTaste(withInputs({ taste_snapshot: { stale: true, data: snapshot() } }), rpc, 'u1', NOW);
-  assertEquals(calls.length, 1);
+  assertEquals(calls.filter((c) => c.fn === 'taste_profile_save').length, 1);
   assertEquals(out.merged_taste?.dims['protein.pork']?.affinity, -0.5);
   assertEquals(out.merged_taste?.dims['protein.pork']?.source, 'user_set');
 });
@@ -105,4 +105,28 @@ Deno.test('首頁快取的雜湊跟著合併後的口味變（夠把握的維度
   assertNotEquals(await hashHomeInputs(buildHomeEnv(learned, NOW)), plain);
   const weak = { ...c, merged_taste: fromSnapshotData(snapshot({ dims: { 'taste.spicy': { affinity: 0.8, confidence: 0.2, source: 'learned', updatedAt: 'x' } }, context: { adventure: 0.3, goals: [], festiveDishes: false } })) };
   assertEquals(await hashHomeInputs(buildHomeEnv(weak, NOW)), plain);
+});
+
+Deno.test('自己記錄、標籤寫好的食譜計入口味；標成家人最愛的比較重；沒標籤的不在清單裡（資料庫過濾）', async () => {
+  const rows = [
+    { cuisine_keys: ['cuisine.taiwan.home'], main_ingredient_ids: ['egg'], techniques: [], highlights: [], at: '2026-11-20T00:00:00Z' },
+    { cuisine_keys: ['cuisine.taiwan.home'], main_ingredient_ids: [], techniques: [], highlights: ['family_favorite'], at: '2026-11-20T00:00:00Z' },
+    { cuisine_keys: 'bad', highlights: [], at: 'not-a-date' },
+  ];
+  const calls: { fn: string; args: Record<string, unknown> }[] = [];
+  const rpc = ((fn: string, args: Record<string, unknown>) => {
+    calls.push({ fn, args });
+    return Promise.resolve({ data: fn === 'taste_recorded_recipes' ? rows : null, error: null });
+  }) as Rpc;
+  const out = await withMergedTaste(withInputs({ taste_inputs: { saved: [], signals: [] } }), rpc, 'u1', NOW);
+  assertEquals(out.merged_taste?.sources.recorded, 2); // 日期壞掉的那一列略過
+  assertEquals((calls.find((c) => c.fn === 'taste_profile_save')?.args.p_data as TasteSnapshotData).sources.recorded, 2);
+  assert((out.merged_taste?.dims['cuisine.taiwan.home']?.affinity ?? 0) > 0);
+});
+
+Deno.test('讀自己的食譜失敗：這一次不算，其他來源照算', async () => {
+  const rpc = ((fn: string) => (fn === 'taste_recorded_recipes' ? Promise.reject(new Error('x')) : Promise.resolve({ data: null, error: null }))) as Rpc;
+  const out = await withMergedTaste(withInputs(), rpc, 'u1', NOW);
+  assertEquals(out.merged_taste?.sources.recorded, 0);
+  assertEquals(out.merged_taste?.sources.cooked, 1);
 });

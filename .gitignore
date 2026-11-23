@@ -20,3 +20,4 @@ supabase/functions/ai/home/eval/out/
 supabase/functions/ai/chat/eval/out/
 supabase/functions/ai/expand/eval/out/
 supabase/functions/ai/dictation/eval/out/
+supabase/functions/ai/post-publish/eval/out/

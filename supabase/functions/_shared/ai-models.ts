@@ -27,6 +27,8 @@ export const AI_TASKS = {
   dictation: { model: 'claude-sonnet-5-5', effort: 'low', thinking: 'adaptive', maxOutputTokens: 2000 },
   import_url: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 2000 },
   edit_by_voice: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 1000 },
+  // 記錄時大廚的一句話：使用者在等，2 秒內回來才顯示；單獨一次呼叫、輸出很短
+  chef_note: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 150 },
   post_publish: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 600, background: true },
   normalize_ingredients: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 300, background: true },
   inspiration_egg: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 300 },

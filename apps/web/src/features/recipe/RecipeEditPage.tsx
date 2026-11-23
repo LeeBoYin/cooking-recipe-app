@@ -313,7 +313,7 @@ function Editor({ recipeId, recipe, photoRows, defaultServings, savedDictation, 
         track('suggestion.recorded');
         linkBookmark.mutate({ bookmarkId: fromState.bookmarkId, recipeId });
       }
-      void navigate(`/recipes/${recipeId}`, { replace: true, state: { published: true } });
+      void navigate(`/recipes/${recipeId}`, { replace: true, state: { published: true, firstPublish: ed.firstPublish.current } });
     }
   }
 

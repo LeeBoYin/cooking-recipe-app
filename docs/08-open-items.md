@@ -107,6 +107,8 @@
 | Google 登入設定 | 程式已完成（M1a-01b、M1a-02）。要使用者自己在 Google Cloud 建 OAuth 用戶端（授權的來源 `https://tsu-siann.today`，測試專案加 `https://staging.tsu-siann.today`），並在 Supabase Auth 開啟 Google、設定 Site URL 與重新導向網址，並啟用「建立使用者前」hook | 正式邀請前 |
 | 背景食材正規化的測試站驗證 | `background-jobs` 的 `normalize_ingredients` 任務真的呼叫 Claude（Haiku）還沒在測試站驗過；由使用者手動在測試站加一個字典對不到的食材、看對應是否寫進全站對應 | 隨時，越早越好 |
 | iPhone 實機確認 | 和大廚聊聊的鍵盤避開（M1a-09h）、頁面轉場與 Safari 手勢返回（M1a-09i）還沒用 iPhone 確認，使用者自己用的時候順便看 | 自己用的期間 |
+| 使用者修正 AI 補的標籤 | 發佈後整理寫的 `ai_tags`（菜系、主食材、手法、廚具）目前只給口味檔案用，沒有讓使用者修正的畫面（`confirmed_by_user` 欄位已預留，確認過的標籤背景任務不會覆蓋）。要不要做、放在哪，看標籤實際用在回顧、搜尋時準不準 | M2 之後，標籤開始顯示給人看時 |
+| 發佈後整理與一句話的真的 Claude 評估 | 評估集（`supabase/functions/ai/post-publish/eval/`）寫好了，還沒用真的 Claude 跑；跑法見 `run.ts` 開頭（金鑰只放在指令的環境變數）。看一句話具不具體、有沒有憑空加料，以及難易度總分在不在合理範圍 | 自己用的期間 |
 | 預設和邀請者成為好友 | 06 的 M1a 範圍提到，但好友關係要 M2 才有。M1a 只把 `befriendInviter` 旗標存在邀請上 | M2 建好友關係時照旗標補上 |
 | 產品事件的開關與匯總 | 已記在上方「專案建置」：「不參與使用統計」開關、每月匯總與刪除 | 正式邀請前、M2 |
 
