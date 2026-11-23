@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canDoOrSubstitute, equipmentTypes, findSubstitutes, substitutes, techniques } from './index.ts';
+import { canDoOrSubstitute, equipmentTypes, findSubstitutes, substitutes, techniqueAccess, techniques } from './index.ts';
 
 const own = (...ids: string[]) => ids.map((equipmentTypeId) => ({ equipmentTypeId }));
 
@@ -57,5 +57,14 @@ describe('canDoOrSubstitute', () => {
   it('都做不到：只有微波爐要烘焙', () => {
     expect(canDoOrSubstitute('bake', own('microwave'))).toBe(false);
     expect(canDoOrSubstitute('bake', own('toaster-oven'))).toBe(true);
+  });
+});
+
+describe('techniqueAccess', () => {
+  it('舒肥：舒肥機直接做；溫水加溫度計只能短時間；萬用鍋勾了低溫模式算直接做得到；都沒有是 null', () => {
+    expect(techniqueAccess('sous-vide', own('sous-vide-circulator'))).toBe('direct');
+    expect(techniqueAccess('sous-vide', own('stockpot', 'gas-stove', 'thermometer'))).toBe('short-only');
+    expect(techniqueAccess('sous-vide', [{ equipmentTypeId: 'multi-cooker', enabledOptionalTechniques: ['sous-vide'] }])).toBe('direct');
+    expect(techniqueAccess('sous-vide', own('stockpot', 'gas-stove'))).toBeNull();
   });
 });

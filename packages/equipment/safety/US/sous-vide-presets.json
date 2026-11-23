@@ -1,7 +1,347 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "region": "US",
-  "status": "待補",
-  "presets": [],
-  "note": "沒有找到可以直接引用於家庭舒肥的官方時間與溫度表。AI 不得自行產生舒肥的溫度與時間（SR-sous-vide），表是空的，所以任何舒肥建議都會被擋下。候選來源（給審查者參考）：美國 FDA Food Code、USDA FSIS 業者用的 lethality 指引；日本沒有對應的官方資料。"
+  "status": "已核對",
+  "source": {
+    "name": "USDA FSIS《Cooking Guideline for Meat and Poultry Products (Revised Appendix A)》2021-12",
+    "urls": [
+      "https://www.fsis.usda.gov/sites/default/files/media_file/2021-12/FSIS-GD-2021-14.pdf"
+    ],
+    "file": "sources/FSIS_Sous_Vide_Meat_Cooking_Guidance.md",
+    "table": "Table 2「Time-Temperature Combinations for Meat Products to Achieve Lethality」，第 35 頁",
+    "reviewStatus": "verified",
+    "note": "數值照 sources 裡的摘要文件 Table 2，攝氏與華氏都是文件列出的數值，不由程式換算。表的意思是：肉的每個部位中心溫度到達這個溫度之後，要維持這麼久（dwell time，不是泡水的總時間）。"
+  },
+  "categories": [
+    {
+      "id": "meat",
+      "name": {
+        "zh-TW": "豬、牛、羊的整塊肉（不含禽肉、海鮮、蛋）"
+      },
+      "traits": [
+        "pork",
+        "beef",
+        "lamb"
+      ],
+      "log": {
+        "beef": "6.5",
+        "other": "7"
+      },
+      "logNote": "文件第 3 節：烤牛肉、煮熟牛肉、醃牛肉（roast, cooked, corned beef）的標準是 6.5-log，所以只有牛肉用 6.5-log 欄；豬、羊，以及牛肉和其他肉混在一起時，沒有逐項標準，取比較長的 7-log 欄。"
+    }
+  ],
+  "excluded": [
+    {
+      "id": "poultry",
+      "note": "禽肉要用 Table 3（雞，第 37 頁）、Table 4（火雞，第 38 頁），來源文件沒有這兩張表的數值，所以雞、鴨、火雞的舒肥全部擋下（待補，見 08）。"
+    },
+    {
+      "id": "seafood-egg",
+      "note": "來源文件只有肉類，魚、海鮮、蛋的舒肥不在表裡，全部擋下。"
+    },
+    {
+      "id": "instant-rows",
+      "note": "Table 2 的 158～160°F（70.0～71.1°C）維持 0 秒，表示到溫度就達標，那是一般煮到熟、不是舒肥，所以不列進預設組合。"
+    }
+  ],
+  "shortRule": "short: true 的是 140°F（60.0°C）以上、維持時間不超過 12 分鐘的組合，給「大鍋溫水＋溫度計」替代做法用；低於 140°F 的組合要維持十幾分鐘到兩小時，手動控溫很難穩。",
+  "rules": [
+    {
+      "id": "core-temp",
+      "page": 35,
+      "text": "用溫度計量肉最厚的地方，每個部位的中心溫度都到 {preset} 之後，才開始算維持時間。"
+    },
+    {
+      "id": "come-up-time",
+      "page": 24,
+      "text": "中心溫度從 {{temp:50:F:min:10}} 升到 {{temp:130:F:min:54.4}} 的時間要在 6 小時內（FSIS 的 come-up time 限制）；肉太厚或一開始是冷凍的，要多留意。"
+    },
+    {
+      "id": "after-cooking",
+      "page": null,
+      "text": "舒肥好的肉盡快吃；FSIS 的文件沒有提供煮好之後長時間保存的規則，所以不建議長時間保存。要放冷藏的話，分裝成小份、不要在室溫放太久。"
+    }
+  ],
+  "presets": [
+    {
+      "id": "meat-130f",
+      "category": "meat",
+      "tempF": 130,
+      "tempC": 54.4,
+      "dwell65Seconds": 6720,
+      "dwell7Seconds": 7260,
+      "short": false,
+      "table": "Table 2，第 35 頁：130°F／54.4°C，6.5-log 112 min，7-log 121 min"
+    },
+    {
+      "id": "meat-131f",
+      "category": "meat",
+      "tempF": 131,
+      "tempC": 55,
+      "dwell65Seconds": 5340,
+      "dwell7Seconds": 5820,
+      "short": false,
+      "table": "Table 2，第 35 頁：131°F／55.0°C，6.5-log 89 min，7-log 97 min"
+    },
+    {
+      "id": "meat-132f",
+      "category": "meat",
+      "tempF": 132,
+      "tempC": 55.6,
+      "dwell65Seconds": 4260,
+      "dwell7Seconds": 4620,
+      "short": false,
+      "table": "Table 2，第 35 頁：132°F／55.6°C，6.5-log 71 min，7-log 77 min"
+    },
+    {
+      "id": "meat-133f",
+      "category": "meat",
+      "tempF": 133,
+      "tempC": 56.1,
+      "dwell65Seconds": 3360,
+      "dwell7Seconds": 3720,
+      "short": false,
+      "table": "Table 2，第 35 頁：133°F／56.1°C，6.5-log 56 min，7-log 62 min"
+    },
+    {
+      "id": "meat-134f",
+      "category": "meat",
+      "tempF": 134,
+      "tempC": 56.7,
+      "dwell65Seconds": 2700,
+      "dwell7Seconds": 2820,
+      "short": false,
+      "table": "Table 2，第 35 頁：134°F／56.7°C，6.5-log 45 min，7-log 47 min"
+    },
+    {
+      "id": "meat-135f",
+      "category": "meat",
+      "tempF": 135,
+      "tempC": 57.2,
+      "dwell65Seconds": 2160,
+      "dwell7Seconds": 2220,
+      "short": false,
+      "table": "Table 2，第 35 頁：135°F／57.2°C，6.5-log 36 min，7-log 37 min"
+    },
+    {
+      "id": "meat-136f",
+      "category": "meat",
+      "tempF": 136,
+      "tempC": 57.8,
+      "dwell65Seconds": 1680,
+      "dwell7Seconds": 1920,
+      "short": false,
+      "table": "Table 2，第 35 頁：136°F／57.8°C，6.5-log 28 min，7-log 32 min"
+    },
+    {
+      "id": "meat-137f",
+      "category": "meat",
+      "tempF": 137,
+      "tempC": 58.4,
+      "dwell65Seconds": 1380,
+      "dwell7Seconds": 1440,
+      "short": false,
+      "table": "Table 2，第 35 頁：137°F／58.4°C，6.5-log 23 min，7-log 24 min"
+    },
+    {
+      "id": "meat-138f",
+      "category": "meat",
+      "tempF": 138,
+      "tempC": 58.9,
+      "dwell65Seconds": 1080,
+      "dwell7Seconds": 1140,
+      "short": false,
+      "table": "Table 2，第 35 頁：138°F／58.9°C，6.5-log 18 min，7-log 19 min"
+    },
+    {
+      "id": "meat-139f",
+      "category": "meat",
+      "tempF": 139,
+      "tempC": 59.5,
+      "dwell65Seconds": 900,
+      "dwell7Seconds": 900,
+      "short": false,
+      "table": "Table 2，第 35 頁：139°F／59.5°C，6.5-log 15 min，7-log 15 min"
+    },
+    {
+      "id": "meat-140f",
+      "category": "meat",
+      "tempF": 140,
+      "tempC": 60,
+      "dwell65Seconds": 720,
+      "dwell7Seconds": 720,
+      "short": true,
+      "table": "Table 2，第 35 頁：140°F／60.0°C，6.5-log 12 min，7-log 12 min"
+    },
+    {
+      "id": "meat-141f",
+      "category": "meat",
+      "tempF": 141,
+      "tempC": 60.6,
+      "dwell65Seconds": 540,
+      "dwell7Seconds": 600,
+      "short": true,
+      "table": "Table 2，第 35 頁：141°F／60.6°C，6.5-log 9 min，7-log 10 min"
+    },
+    {
+      "id": "meat-142f",
+      "category": "meat",
+      "tempF": 142,
+      "tempC": 61.1,
+      "dwell65Seconds": 480,
+      "dwell7Seconds": 480,
+      "short": true,
+      "table": "Table 2，第 35 頁：142°F／61.1°C，6.5-log 8 min，7-log 8 min"
+    },
+    {
+      "id": "meat-143f",
+      "category": "meat",
+      "tempF": 143,
+      "tempC": 61.7,
+      "dwell65Seconds": 360,
+      "dwell7Seconds": 360,
+      "short": true,
+      "table": "Table 2，第 35 頁：143°F／61.7°C，6.5-log 6 min，7-log 6 min"
+    },
+    {
+      "id": "meat-144f",
+      "category": "meat",
+      "tempF": 144,
+      "tempC": 62.2,
+      "dwell65Seconds": 300,
+      "dwell7Seconds": 300,
+      "short": true,
+      "table": "Table 2，第 35 頁：144°F／62.2°C，6.5-log 5 min，7-log 5 min"
+    },
+    {
+      "id": "meat-145f",
+      "category": "meat",
+      "tempF": 145,
+      "tempC": 62.8,
+      "dwell65Seconds": 240,
+      "dwell7Seconds": 240,
+      "short": true,
+      "table": "Table 2，第 35 頁：145°F／62.8°C，6.5-log 4 min，7-log 4 min"
+    },
+    {
+      "id": "meat-146f",
+      "category": "meat",
+      "tempF": 146,
+      "tempC": 63.3,
+      "dwell65Seconds": 169,
+      "dwell7Seconds": 182,
+      "short": true,
+      "table": "Table 2，第 35 頁：146°F／63.3°C，6.5-log 169 sec，7-log 182 sec"
+    },
+    {
+      "id": "meat-147f",
+      "category": "meat",
+      "tempF": 147,
+      "tempC": 63.9,
+      "dwell65Seconds": 134,
+      "dwell7Seconds": 144,
+      "short": true,
+      "table": "Table 2，第 35 頁：147°F／63.9°C，6.5-log 134 sec，7-log 144 sec"
+    },
+    {
+      "id": "meat-148f",
+      "category": "meat",
+      "tempF": 148,
+      "tempC": 64.4,
+      "dwell65Seconds": 107,
+      "dwell7Seconds": 115,
+      "short": true,
+      "table": "Table 2，第 35 頁：148°F／64.4°C，6.5-log 107 sec，7-log 115 sec"
+    },
+    {
+      "id": "meat-149f",
+      "category": "meat",
+      "tempF": 149,
+      "tempC": 65,
+      "dwell65Seconds": 85,
+      "dwell7Seconds": 91,
+      "short": true,
+      "table": "Table 2，第 35 頁：149°F／65.0°C，6.5-log 85 sec，7-log 91 sec"
+    },
+    {
+      "id": "meat-150f",
+      "category": "meat",
+      "tempF": 150,
+      "tempC": 65.6,
+      "dwell65Seconds": 67,
+      "dwell7Seconds": 72,
+      "short": true,
+      "table": "Table 2，第 35 頁：150°F／65.6°C，6.5-log 67 sec，7-log 72 sec"
+    },
+    {
+      "id": "meat-151f",
+      "category": "meat",
+      "tempF": 151,
+      "tempC": 66.1,
+      "dwell65Seconds": 54,
+      "dwell7Seconds": 58,
+      "short": true,
+      "table": "Table 2，第 35 頁：151°F／66.1°C，6.5-log 54 sec，7-log 58 sec"
+    },
+    {
+      "id": "meat-152f",
+      "category": "meat",
+      "tempF": 152,
+      "tempC": 66.7,
+      "dwell65Seconds": 43,
+      "dwell7Seconds": 46,
+      "short": true,
+      "table": "Table 2，第 35 頁：152°F／66.7°C，6.5-log 43 sec，7-log 46 sec"
+    },
+    {
+      "id": "meat-153f",
+      "category": "meat",
+      "tempF": 153,
+      "tempC": 67.2,
+      "dwell65Seconds": 34,
+      "dwell7Seconds": 37,
+      "short": true,
+      "table": "Table 2，第 35 頁：153°F／67.2°C，6.5-log 34 sec，7-log 37 sec"
+    },
+    {
+      "id": "meat-154f",
+      "category": "meat",
+      "tempF": 154,
+      "tempC": 67.8,
+      "dwell65Seconds": 27,
+      "dwell7Seconds": 29,
+      "short": true,
+      "table": "Table 2，第 35 頁：154°F／67.8°C，6.5-log 27 sec，7-log 29 sec"
+    },
+    {
+      "id": "meat-155f",
+      "category": "meat",
+      "tempF": 155,
+      "tempC": 68.3,
+      "dwell65Seconds": 22,
+      "dwell7Seconds": 23,
+      "short": true,
+      "table": "Table 2，第 35 頁：155°F／68.3°C，6.5-log 22 sec，7-log 23 sec"
+    },
+    {
+      "id": "meat-156f",
+      "category": "meat",
+      "tempF": 156,
+      "tempC": 68.9,
+      "dwell65Seconds": 17,
+      "dwell7Seconds": 19,
+      "short": true,
+      "table": "Table 2，第 35 頁：156°F／68.9°C，6.5-log 17 sec，7-log 19 sec"
+    },
+    {
+      "id": "meat-157f",
+      "category": "meat",
+      "tempF": 157,
+      "tempC": 69.4,
+      "dwell65Seconds": 14,
+      "dwell7Seconds": 15,
+      "short": true,
+      "table": "Table 2，第 35 頁：157°F／69.4°C，6.5-log 14 sec，7-log 15 sec"
+    }
+  ]
 }

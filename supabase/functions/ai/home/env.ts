@@ -7,7 +7,7 @@ import {
   type ChefPersona, type DimensionState, type Idea, type IdeaIngredient, type IdeaInput, type IdeaLimits, type IdeaOwnRecipe, type IdeaPool,
   type IngredientIndex, type TasteProfile, type TimeBand,
 } from '../../../../packages/core/src/index.ts';
-import { canDoOrSubstitute, doableTechniques, equipmentTypes, getEquipmentType, onboardingModeFor, techniques, type OwnedEquipment } from '../../../../packages/equipment/src/index.ts';
+import { canDoOrSubstitute, doableTechniques, equipmentTypes, getEquipmentType, onboardingModeFor, techniqueAccess, techniques, type OwnedEquipment } from '../../../../packages/equipment/src/index.ts';
 import {
   allergenWithAncestors, allergens, dietaryRestrictions, ingredients as ingredientDict, type DietaryRestriction,
 } from '../../../../packages/ingredients/src/index.ts';
@@ -111,6 +111,8 @@ export interface HomeEnv {
   owned: OwnedEquipment[] | null;
   techniqueEnum: string[];
   equipmentEnum: string[];
+  // 舒肥只能靠「大鍋溫水＋溫度計」做時（沒有舒肥機也沒有低溫模式），只能用預設組合表裡標「短時間」的
+  sousVideShortOnly: boolean;
   // 程式檢查用：碰到就拿掉的字詞（過敏原、飲食限制、不用料理酒、不吃的食物）
   hardIds: string[];
   hardTerms: string[];
@@ -211,7 +213,9 @@ export function buildHomeEnv(ctx: HomeContextRow, now: Date): HomeEnv {
 
   // 廚具與手法的限定代碼：記了廚具就只有廚具本身做得到的（替代做法只用在 L1 判斷候選做不做得到，點子寫出的手法要是真的用到的）；沒記就用字典的基本選項（不含需要時間溫度的）
   const doable = owned === null ? techniques.map((t) => t.id) : doableTechniques(owned);
-  const techniqueEnum = doable.filter((t) => !bannedTechniqueIds.has(t));
+  // 舒肥：沒記廚具就不給（不知道有沒有）；只有替代做法（大鍋溫水＋溫度計）時也給，但只能用短時間的組合（07 SR-sous-vide）
+  const sousVideAccess = owned === null ? null : techniqueAccess('sous-vide', owned);
+  const techniqueEnum = [...new Set([...doable.filter((t) => !bannedTechniqueIds.has(t) && t !== 'sous-vide'), ...(sousVideAccess ? ['sous-vide'] : [])])];
   const equipmentEnum =
     owned === null
       ? equipmentTypes.filter((e) => !e.deprecated && onboardingModeFor(e, ctx.kitchen.region) === 'default-on').map((e) => e.id)
@@ -249,6 +253,7 @@ export function buildHomeEnv(ctx: HomeContextRow, now: Date): HomeEnv {
     notEnough: !isTasteEnough(profile) && !hasOwnRecipes,
     pantry, pantryIds, priorityIds,
     owned, techniqueEnum, equipmentEnum,
+    sousVideShortOnly: sousVideAccess === 'short-only',
     hardIds,
     hardTerms: [...hard].filter((t) => t.length > 0),
     dislikeTerms: [...dislike],

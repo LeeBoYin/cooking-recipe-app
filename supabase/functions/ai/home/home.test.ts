@@ -39,8 +39,8 @@ const ids = () => { let n = 0; return () => `id-${++n}`; };
 const check = (env: HomeEnv, suggestions: RawIdea[], comment = '好吃就好。') =>
   checkHomeOutput({ suggestions, chef_comment: comment }, env, { makeId: ids() });
 
-Deno.test('評估集：14 組資料都組得出來；只有新帳號被新手門檻擋下', () => {
-  assertEquals(EVAL_CASES.length, 14);
+Deno.test('評估集：15 組資料都組得出來；只有新帳號被新手門檻擋下', () => {
+  assertEquals(EVAL_CASES.length, 15);
   for (const c of EVAL_CASES) {
     const env = buildHomeEnv(c.ctx, c.now ?? NOW);
     assertEquals(env.notEnough, !c.callsAi, c.id);
@@ -375,7 +375,43 @@ Deno.test('換手法的程式檢查：點子用的手法與廚具要是使用者
 
 Deno.test('提示詞：換手法的策略只用在變化版與新挑戰；舒肥由提示詞禁止（時間溫度只在展開做法時由預設組合表帶入）', () => {
   assert(HOME_IDEAS_STABLE.includes('換手法（只用在 twist 與 adventure，familiar 不換）'));
-  assert(HOME_IDEAS_STABLE.includes('不要用舒肥或任何需要精準溫度與時間的做法'));
+  assert(HOME_IDEAS_STABLE.includes('舒肥只能用在豬、牛、羊的整塊肉'));
+  assert(HOME_IDEAS_STABLE.includes('點子不寫舒肥的溫度與時間'));
   const env = envOf('14');
-  assert(env.techniqueEnum.includes('sous-vide')); // 有舒肥機：手法在清單裡，是否推薦由提示詞決定
+  assert(env.techniqueEnum.includes('sous-vide')); // 有舒肥機：手法在清單裡，食材是不是肉由檢查把關
+  assertEquals(env.sousVideShortOnly, false);
+});
+
+Deno.test('舒肥：點子的食材要是豬、牛、羊肉；禽肉、海鮮、蛋、沒有肉的舒肥點子由程式拿掉', () => {
+  const c = byId('14');
+  const p = (id: string) => ({ ingredient_id: id, want_to_use_soon: false, expires_at: null });
+  const check = (pantryIds: string[], over: Partial<RawIdea> = {}) => {
+    const env = buildHomeEnv({ ...c.ctx, pantry: pantryIds.map(p) }, c.now ?? NOW);
+    assert(env.techniqueEnum.includes('sous-vide'));
+    const raw = idea(env, { uses_pantry_ids: pantryIds, techniques: ['sous-vide'], equipment: ['sous-vide-circulator'], ...over });
+    return checkHomeOutput({ suggestions: [raw], chef_comment: '' }, env, { makeId: ids() });
+  };
+  // 豬里肌可以
+  assertEquals(check(['pork-tenderloin', 'salt']).ideas.length, 1);
+  // 雞胸（評估 14「舒肥嫩雞胸」）被拿掉；豬肉和雞肉混在一起也不行
+  assertEquals(check(['chicken-breast', 'broccoli']).dropped.technique, 1);
+  assertEquals(check(['pork-tenderloin', 'chicken-breast']).dropped.technique, 1);
+  // 沒有肉、字典沒收的肉名稱（鴨胸）、菜名裡的禽肉
+  assertEquals(check(['broccoli']).dropped.technique, 1);
+  assertEquals(check(['pork-tenderloin'], { other_ingredients: [{ name: '鴨胸' }] }).dropped.technique, 1);
+  assertEquals(check(['pork-tenderloin'], { title: '舒肥雞肉' }).dropped.technique, 1);
+  // 不是舒肥的點子不受影響
+  assertEquals(check(['chicken-breast'], { techniques: ['pan-fry'], equipment: ['frying-pan'] }).ideas.length, 1);
+});
+
+Deno.test('舒肥：只有大鍋溫水＋溫度計（沒有舒肥機）時手法在清單裡，但標成只能用短時間的組合；沒記廚具不給舒肥', () => {
+  const c = byId('14');
+  const eq = (...ids: string[]) => ids.map((equipment_type_id) => ({ equipment_type_id, enabled_optional_techniques: [] as string[] }));
+  const warm = buildHomeEnv({ ...c.ctx, equipment: eq('gas-stove', 'stockpot', 'thermometer') }, NOW);
+  assert(warm.techniqueEnum.includes('sous-vide'));
+  assertEquals(warm.sousVideShortOnly, true);
+  const noThermo = buildHomeEnv({ ...c.ctx, equipment: eq('gas-stove', 'stockpot') }, NOW);
+  assertEquals(noThermo.techniqueEnum.includes('sous-vide'), false);
+  const none = buildHomeEnv({ ...c.ctx, equipment: [] }, NOW);
+  assertEquals(none.techniqueEnum.includes('sous-vide'), false);
 });

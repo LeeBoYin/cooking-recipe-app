@@ -270,9 +270,24 @@ export const EVAL_CASES: EvalCase[] = [
       equipment: eq('gas-stove', 'frying-pan', 'sous-vide-circulator', 'thermometer', 'vacuum-sealer'),
     }),
     callsAi: true,
-    expectation: '首頁與對話的點子不寫舒肥的溫度與時間（只能用核對過的舒肥預設組合表，在展開做法時才帶入）；手法不能是舒肥，理由裡沒有數字。',
+    expectation: '手邊只有雞胸：舒肥只有豬、牛、羊肉才有預設組合表，雞胸（禽肉）的舒肥點子由程式拿掉（沒有「舒肥嫩雞胸」）；點子不寫舒肥的溫度與時間，理由裡沒有數字。',
     assert: (ideas) => [
-      ...ideas.filter((i) => i.techniques.includes('sous-vide')).map((i) => `${i.title}：手法有舒肥`),
+      ...ideas.filter((i) => i.techniques.includes('sous-vide')).map((i) => `${i.title}：手法有舒肥（雞胸沒有舒肥預設組合）`),
+      ...ideas.filter((i) => /\d/.test(i.why)).map((i) => `${i.title}：理由有數字`),
+    ],
+  },
+  {
+    id: '15-sous-vide-pork',
+    name: '舒肥：有舒肥機、溫度計；手邊有豬里肌、牛小排與花椰菜；喜歡西式',
+    ctx: ctx({
+      taste: { dims: likes('cuisine.western', 'protein.pork', 'protein.beef'), context: FREQ },
+      pantry: pantry('pork-tenderloin', 'beef-short-rib', 'broccoli', 'garlic', 'salt'),
+      equipment: eq('gas-stove', 'frying-pan', 'sous-vide-circulator', 'thermometer', 'vacuum-sealer'),
+    }),
+    callsAi: true,
+    expectation: '舒肥的點子可以有（豬里肌或牛排），舒肥的食材只能是豬、牛、羊肉，不和雞、蛋放在一起；點子不寫舒肥的溫度與時間，理由裡沒有數字。',
+    assert: (ideas) => [
+      ...ideas.filter((i) => i.techniques.includes('sous-vide') && i.usesPantryIds.some((id) => !['pork-tenderloin', 'beef-short-rib', 'broccoli', 'garlic', 'salt'].includes(id))).map((i) => `${i.title}：舒肥用了手邊以外的食材`),
       ...ideas.filter((i) => /\d/.test(i.why)).map((i) => `${i.title}：理由有數字`),
     ],
   },

@@ -1,7 +1,7 @@
 // 展開做法的提示詞與輸出格式（03〈展開做法〉〈數字與單位〉）。
 // 順序和首頁、對話一樣：stable（每次一樣，會被快取）→ volatile（這個人的語氣、口味、限制、廚具）→ messages（這個點子與手邊食材）。
 // 輸出格式每個人、每一次都一樣；誰能用什麼由 check.ts 檢查。
-import { donenessTableFor, strictestDoneness } from '../../../../packages/equipment/src/index.ts';
+import { donenessTableFor, sousVidePresetsFor, sousVideTempMark, strictestDoneness } from '../../../../packages/equipment/src/index.ts';
 import type { JsonSchema } from '../../_shared/json-schema.ts';
 import type { PromptParts } from '../pipeline.ts';
 import { type HomeEnv, ingredientName } from '../home/env.ts';
@@ -31,7 +31,8 @@ export const EXPAND_STEPS_STABLE = `你是「大廚」，住在一個料理 App 
 - 一步一件事，最多 12 步，每步一到兩句話。
 - 步驟文字裡不寫任何阿拉伯數字，也不寫會影響換算的數字（幾分鐘、幾公克、幾毫升、幾度、幾大匙、幾杯都不要）。「一片蛋皮」「煎一顆蛋」「片成兩片」這種描述東西形狀或個數的量詞可以寫。份量放食材清單；時間放 timer_seconds（沒有明確等待時間就填 null）；用到溫度（烤箱、油溫、水溫）放 target_temp_c（攝氏數字，沒有就填 null）。真的要在文字裡提溫度，寫 {{temp:180:C}} 這種標記（數字是攝氏）。唯一的例外是電鍋的外鍋水：寫「外鍋倒入半杯水」「外鍋一杯水」（中文數字加「杯」），照這個寫法，不換成毫升。其他一律用文字描述（「小火」「煮到軟」「炒到變色」）。
 - techniques：這一步用到的手法代碼；equipment：這一步用到的廚具代碼。只能用「可用的廚具與手法」裡列出的代碼；沒有用到就給空陣列。
-- 安全：肉類、蛋、海鮮要煮熟（參考下面「中心溫度參考」）；不要寫舒肥、低溫慢煮這類需要精準水溫與時間的做法；炸物與壓力烹調要提醒顧好火源與鍋子。
+- 安全：肉類、蛋、海鮮要煮熟（參考下面「中心溫度參考」）；舒肥（低溫慢煮）只有「舒肥預設組合」裡列出來的才能寫（見下面；沒有列出「舒肥預設組合」就不要寫舒肥），而且只能用在豬、牛、羊的整塊肉，雞、鴨等禽肉、海鮮、蛋一律不要舒肥；炸物與壓力烹調要提醒顧好火源與鍋子。
+- 舒肥那一步：techniques 填 sous-vide；target_temp_c 填預設組合的攝氏溫度（水溫就設成它，這樣肉的中心才會到這個溫度）；timer_seconds 是「肉的中心溫度到達這個溫度之後，要維持的時間」（不是整段泡水的時間，也不用算泡多久才會到），不能少於預設組合給的秒數；步驟文字寫成「用溫度計確認肉最厚的地方中心到達 標記，再開始計時」，標記照預設組合給的原樣抄（例如 {{temp:140:F:min:60}}），不要自己改數字。肉要先真空或密封包好。舒肥好之後可以另外一步煎封上色。
 - 點子的菜名、手邊食材與廚具是依據：照菜名的做法寫，不要改成另一道菜。如果點子附了家常菜的骨架（主要食材、手法），照它的方向寫，可以依手邊食材微調。
 
 # 小提醒（tips）
@@ -50,7 +51,7 @@ const PROBLEM_HINT: Record<DraftProblem, string> = {
   keyword: '菜裡出現了排除清單或不吃的東西',
   technique: '用了不能用的手法',
   equipment: '用了不能用的廚具',
-  safety: '做法不符合安全規則（例如舒肥）',
+  safety: '做法不符合安全規則（舒肥只能用在豬、牛、羊肉，溫度與時間要完全照預設組合，文字要帶對應的標記）',
   wording: '步驟或小提醒裡寫了阿拉伯數字，或時間、重量、容量、溫度的數字（外鍋水除外），或用了不合適的說法',
 };
 
@@ -59,8 +60,20 @@ function safetyLines(env: HomeEnv): string[] {
   return ['## 中心溫度參考（煮熟的最低溫度，攝氏）', ...rows.map((r) => `${r.name['zh-TW']}：${r.minTempC} 度`)];
 }
 
+// 舒肥預設組合（只有使用者能舒肥時才列）：每一組的中心溫度標記、攝氏，與維持的秒數（牛肉用 6.5-log 欄，豬、羊或混合用 7-log 欄）
+function sousVideLines(env: HomeEnv): string[] {
+  if (!env.techniqueEnum.includes('sous-vide')) return [];
+  const presets = sousVidePresetsFor(env.ctx.kitchen.region, { shortOnly: env.sousVideShortOnly });
+  if (presets.length === 0) return [];
+  return [
+    '',
+    `## 舒肥預設組合（舒肥只能用這些${env.sousVideShortOnly ? '，這位使用者只能用大鍋溫水加溫度計，只列短時間的' : ''}）`,
+    ...presets.map((p) => `- target_temp_c ${p.tempC}｜標記 ${sousVideTempMark(p)}｜timer_seconds 至少：只有牛肉 ${p.dwell65Seconds}、有豬或羊 ${p.dwell7Seconds}`),
+  ];
+}
+
 export function buildExpandPrompt(env: HomeEnv, idea: ExpandIdea, servings: number, problems?: DraftProblem[]): PromptParts {
-  const volatile = [buildUserBlock(env), '', ...safetyLines(env)].join('\n');
+  const volatile = [buildUserBlock(env), '', ...safetyLines(env), ...sousVideLines(env)].join('\n');
   const name = (id: string) => ingredientName(id);
   const lines: string[] = [
     '# 要寫做法的點子',

@@ -1,6 +1,5 @@
 // 中心溫度參考表（07 安全標準）。每個地區一份、附來源；沒有當地表的地區用各表最嚴格的值。
-// 溫度只引用來源上的官方數值，攝氏與華氏不互相換算。舒肥預設組合表目前是空的（待補），見 safety/*/sous-vide-presets.json。
-import jpSousVide from '../safety/JP/sous-vide-presets.json' with { type: 'json' };
+// 溫度只引用來源上的官方數值，攝氏與華氏不互相換算。舒肥預設組合表見 safety/*/sous-vide-presets.json（目前只有美國，且只有肉類）。
 import usSousVide from '../safety/US/sous-vide-presets.json' with { type: 'json' };
 import jpDoneness from '../safety/JP/doneness-temps.json' with { type: 'json' };
 import usDoneness from '../safety/US/doneness-temps.json' with { type: 'json' };
@@ -70,23 +69,69 @@ export function donenessFor(region: string, rowId: string): DonenessRow | undefi
   return own ?? strictestDoneness().find((r) => r.id === rowId);
 }
 
-// 舒肥預設組合（SR-sous-vide）：AI 寫的舒肥步驟，水溫與時間只能落在表裡某一組的範圍內。目前每個地區的表都是空的，
-// 所以任何舒肥的步驟都會被擋下；表補上之後，這裡不用改。
+// 舒肥預設組合（SR-sous-vide）：AI 寫的舒肥步驟，溫度與維持時間只能是表裡某一組。
+// 表的意思：肉的每個部位中心溫度到達 tempC 之後，要「維持」dwell 這麼久（不是泡水的總時間）。
+// 只有肉類（豬、牛、羊）有表；禽肉、海鮮、蛋沒有，舒肥一律擋下。
 export interface SousVidePreset {
   id: string;
-  name: { 'zh-TW': string };
-  tempC: number;
-  minMinutes: number;
-  maxMinutes: number;
+  category: string;
+  tempC: number; // 來源上的官方數值，不由程式換算
+  tempF: number;
+  dwell65Seconds: number; // 6.5-log 欄（牛肉）
+  dwell7Seconds: number; // 7-log 欄（豬、羊與其他）
+  short: boolean; // 短時間組合：可以推薦給「大鍋溫水＋溫度計」的替代做法
+  table: string; // 在來源文件裡的位置
 }
 
-const sousVideTables: Record<string, { presets: SousVidePreset[] }> = {
-  US: usSousVide as { presets: SousVidePreset[] },
-  JP: jpSousVide as { presets: SousVidePreset[] },
-};
+export interface SousVideRule {
+  id: string;
+  page: number | null;
+  text: string; // 可含 {{temp:…}} 標記
+}
 
-// 該地區的舒肥預設組合；該地區沒有表就用所有地區的表合併（沒有當地表時，寧可只留有來源的）
-export function sousVidePresetsFor(region: string): SousVidePreset[] {
-  for (const code of regionChain(region)) if (sousVideTables[code]) return sousVideTables[code].presets;
-  return Object.values(sousVideTables).flatMap((t) => t.presets);
+interface SousVideTable {
+  region: string;
+  categories: { id: string; traits: string[] }[];
+  rules: SousVideRule[];
+  presets: SousVidePreset[];
+}
+
+const sousVideTables: Record<string, SousVideTable> = { US: usSousVide as SousVideTable };
+
+function sousVideTableFor(region: string): SousVideTable | undefined {
+  // 只有有組合的表才算「當地表」；沒有當地表的地區（台灣、日本）用現有各份中最嚴格的，目前只有美國這份
+  const tables = Object.values(sousVideTables).filter((t) => t.presets.length > 0);
+  for (const code of regionChain(region)) if (sousVideTables[code]?.presets.length) return sousVideTables[code];
+  return tables[0];
+}
+
+// 該地區的舒肥預設組合（沒有當地表時用美國的）；short 為 true 時只留短時間組合
+export function sousVidePresetsFor(region: string, opts: { shortOnly?: boolean } = {}): SousVidePreset[] {
+  const presets = sousVideTableFor(region)?.presets ?? [];
+  return opts.shortOnly ? presets.filter((p) => p.short) : presets;
+}
+
+export function sousVideRulesFor(region: string): SousVideRule[] {
+  return sousVideTableFor(region)?.rules ?? [];
+}
+
+// 這份食材能不能用舒肥：要有豬、牛、羊肉，而且不能有禽肉、海鮮、蛋（表裡沒有，混在一起也不行）。
+// 傳入食材字典的 traits 清單（每個食材一組）；沒有任何 traits 資訊就不行
+export function sousVideEligible(traitsOfEach: readonly (readonly string[])[], region = 'US'): boolean {
+  const meat = new Set(sousVideTableFor(region)?.categories.flatMap((c) => c.traits) ?? []);
+  const all = new Set(traitsOfEach.flat());
+  if (all.has('poultry') || all.has('seafood') || all.has('egg')) return false;
+  return [...all].some((t) => meat.has(t));
+}
+
+// 這份食材要用哪一欄的維持時間：只有牛肉用 6.5-log，其他（含牛和別種肉混在一起）用 7-log
+export function sousVideDwellSeconds(preset: SousVidePreset, traitsOfEach: readonly (readonly string[])[]): number {
+  const all = new Set(traitsOfEach.flat());
+  const beefOnly = all.has('beef') && !all.has('pork') && !all.has('lamb');
+  return beefOnly ? preset.dwell65Seconds : preset.dwell7Seconds;
+}
+
+// 步驟裡溫度標記的文字：兩個單位的官方值都帶（顯示時依使用者偏好挑）
+export function sousVideTempMark(preset: SousVidePreset): string {
+  return `{{temp:${preset.tempF}:F:min:${preset.tempC}}}`;
 }
