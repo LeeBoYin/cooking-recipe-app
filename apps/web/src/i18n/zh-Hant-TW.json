@@ -969,6 +969,7 @@
   "chat.mentioned.used": "這道有用到",
   "chat.mentioned.unused": "這道沒用到",
   "recipe.revisions.menu": "版本",
+  "recipe.view.delete": "刪除食譜",
   "recipe.revisions.title": "做法的版本",
   "recipe.revisions.empty": "還沒有留下的版本。改了做法、儲存之後，這裡就會出現。",
   "recipe.revisions.loadError": "讀不到版本，重新整理看看。",

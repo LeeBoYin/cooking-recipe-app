@@ -66,11 +66,35 @@ export function ingredientBadges(view: Pick<IdeaView, 'ingredients'>, ingredient
   return { said: !!hit?.said, have: !!hit?.have };
 }
 
-// 卡片上的主要食材標籤（首頁、對話、收藏共用）：點子用到的廚房食材與使用者提到的食材，最多 3 個，其餘算進 extra
+// 卡片上的主要食材：點子用到的廚房食材與使用者提到的食材（不重複）
+export function mainIngredientNames(view: Pick<IdeaView, 'ingredients'>): string[] {
+  return [...new Set(view.ingredients.filter((i) => i.have || i.said).map((i) => i.name))];
+}
+
+// 收藏列表的標籤列另有「煮過沒」，固定最多 3 個加「+N」
 export const MAX_INGREDIENT_TAGS = 3;
 export function mainIngredientTags(view: Pick<IdeaView, 'ingredients'>): { names: string[]; extra: number } {
-  const names = [...new Set(view.ingredients.filter((i) => i.have || i.said).map((i) => i.name))];
+  const names = mainIngredientNames(view);
   return { names: names.slice(0, MAX_INGREDIENT_TAGS), extra: Math.max(0, names.length - MAX_INGREDIENT_TAGS) };
+}
+
+// 一行放得下幾個標籤：widths 是每個標籤的寬度，moreWidth(n) 是「+n」標籤的寬度；
+// 放不下的算進「+N」，「+N」本身的寬度也要算進去；至少放 1 個（寬度不明或沒有標籤時回 0 或全部）。
+export function fitTagCount(widths: readonly number[], available: number, gap: number, moreWidth: (extra: number) => number): number {
+  const total = widths.length;
+  if (total === 0) return 0;
+  if (!(available > 0)) return total; // 還量不到寬度：先全放，量到再算
+  const sums: number[] = [];
+  let run = 0;
+  for (const [i, w] of widths.entries()) {
+    run += w + (i > 0 ? gap : 0);
+    sums.push(run);
+  }
+  if (sums[total - 1]! <= available) return total;
+  for (let n = total - 1; n >= 1; n--) {
+    if (sums[n - 1]! + gap + moreWidth(total - n) <= available) return n;
+  }
+  return 1;
 }
 
 // 對話裡的點子卡片「你提到的食材」：這道有沒有用到那一樣。ID 對得上，或字出現在菜名與其他材料裡
