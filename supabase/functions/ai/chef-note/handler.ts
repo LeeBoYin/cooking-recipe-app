@@ -17,7 +17,9 @@ export interface ChefNoteDeps {
 }
 
 // 不提次數、頻率、連續，也不催促或給建議（01 產品原則「偶爾用也完整」）
-const FORBIDDEN = /第\s*[0-9０-９一二三四五六七八九十兩]+\s*[次回道篇]|[0-9０-９一二三四五六七八九十兩]+\s*[次回]|幾次|多次|每\s*[天週周日月]|常常|經常|時常|總是|連續|又做|再做|習慣|最近|這陣子|下次|記得|別忘|快去|趕快|要不要|建議/;
+const FORBIDDEN = /第\s*[0-9０-９一二三四五六七八九十兩]+\s*[次回道篇]|[0-9０-９一二三四五六七八九十兩]+\s*[次回]|幾次|多次|每\s*[天週周日月]|常常|經常|時常|總是|連續|又做|再做|習慣|最近|這陣子|下次|記得|別忘|快去|趕快|要不要|建議|可以試|不妨/;
+// 一律用介面語言（目前是中文）：整句沒有中文字就不收（英文食譜也要用中文說）
+const HAS_CJK = /[\u4e00-\u9fff]/;
 
 export function checkChefNote(raw: unknown): string | null {
   if (typeof raw !== 'object' || raw === null) return null;
@@ -26,7 +28,7 @@ export function checkChefNote(raw: unknown): string | null {
   const text = note.trim();
   const len = [...text].length;
   if (len === 0 || len > CHEF_NOTE_MAX_CHARS) return null;
-  if (FORBIDDEN.test(text) || /[!！?？\n]/.test(text)) return null;
+  if (!HAS_CJK.test(text) || FORBIDDEN.test(text) || /[!！?？\n]/.test(text)) return null;
   return text;
 }
 

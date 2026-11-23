@@ -257,7 +257,11 @@
     "aliases": {
       "zh-TW": [
         "蒜頭",
-        "蒜"
+        "蒜",
+        "蒜泥",
+        "蒜末",
+        "蒜蓉",
+        "蒜碎"
       ],
       "ja": [
         "にんにく"
@@ -286,7 +290,10 @@
     "aliases": {
       "zh-TW": [
         "蔥",
-        "蔥花"
+        "蔥花",
+        "蔥末",
+        "蔥段",
+        "蔥絲"
       ],
       "ja": [
         "長ねぎ",
@@ -352,7 +359,11 @@
       "zh-TW": [
         "老薑",
         "嫩薑",
-        "生薑"
+        "生薑",
+        "薑末",
+        "薑絲",
+        "薑片",
+        "薑泥"
       ],
       "ja": [
         "しょうが",
@@ -3206,6 +3217,40 @@
     "category": "dried-goods",
     "defaultStorage": "pantry",
     "isPerishable": false,
+    "flavorTags": [
+      "umami"
+    ],
+    "allergenIds": [
+      "fish"
+    ]
+  },
+  {
+    "id": "dashi-stock",
+    "name": {
+      "zh-TW": "柴魚高湯"
+    },
+    "aliases": {
+      "zh-TW": [
+        "日式高湯",
+        "鰹魚高湯",
+        "昆布柴魚高湯"
+      ],
+      "ja": [
+        "だし",
+        "出汁"
+      ],
+      "en": [
+        "dashi"
+      ]
+    },
+    "family": "katsuobushi-family",
+    "traits": [
+      "animal",
+      "seafood"
+    ],
+    "category": "sauce",
+    "defaultStorage": "fridge",
+    "isPerishable": true,
     "flavorTags": [
       "umami"
     ],

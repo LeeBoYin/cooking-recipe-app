@@ -94,6 +94,11 @@ Deno.test('檢查：合格的過；沒用到主角、有過敏原、一句話太
   assertEquals(checkEgg(null, envOf('e01'), byId('e01').feature).idea, null);
   // 偶爾下廚的人：太難的不出現
   assertEquals(checkEgg({ idea: rawFor(envOf('e05'), 'e05', { difficulty: { ...DIFF, technique: 5, time: 5, failure_risk: 5 } }) }, envOf('e05'), byId('e05').feature).idea, null);
+  // 過敏的人：「蒜泥」「水」是字典別名／基本項，不能被當成對不到而整個擋下（真 Claude 評估 e03 的輸出）
+  assert(ok('e03', { other_ingredients: [{ name: '蒜泥' }, { name: '烏醋' }, { name: '糖' }] }).idea);
+  assert(ok('e03', { other_ingredients: [{ name: '水' }] }).idea);
+  // 蛋奶素：柴魚高湯是魚做的（評估 e04 的輸出），不能因為含「高湯」被當成雞高湯；字典對得到，也不靠「包含」
+  assertEquals(ok('e04', { other_ingredients: [{ name: '柴魚高湯' }] }).idea, null);
   // 不吃的食材與飲食限制
   assertEquals(ok('e04', { other_ingredients: [{ name: '豬絞肉' }] }).idea, null);
   assertEquals(ok('e06', { uses_pantry_ids: ['teriyaki-sauce', 'mirin'] }).idea, null);
