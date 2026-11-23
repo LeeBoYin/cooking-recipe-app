@@ -151,12 +151,12 @@ Deno.test('用字：標記格式要對，不談身材', () => {
 
 Deno.test('中心溫度提醒：依當地的表（美國帶 165°F 與 73.9°C、日本只帶 75°C）', () => {
   const tw = envOf(caseOf('04'));
-  assertEquals(donenessTips(['chicken-breast'], tw), ['雞、鴨等禽肉要煮到中心溫度 {{temp:75:C}} 以上。']); // 台灣沒有當地表：各表取最嚴格的
+  assertEquals(donenessTips(['chicken-breast'], tw), ['雞、鴨等禽肉要煮到中心溫度 {{temp:75:C:min}} 以上。']); // 台灣沒有當地表：各表取最嚴格的
   const ca = buildHomeEnv({ ...caseOf('04').ctx, kitchen: { ...caseOf('04').ctx.kitchen, region: 'US-CA' } }, NOW);
   assertEquals(donenessTips(['chicken-breast'], ca), ['雞、鴨等禽肉要煮到中心溫度 {{temp:165:F:min:73.9}} 以上。']);
   assertEquals(donenessTips(['cabbage'], tw), []);
   const jp = buildHomeEnv({ ...caseOf('04').ctx, kitchen: { ...caseOf('04').ctx.kitchen, region: 'JP' } }, NOW);
-  assertEquals(donenessTips(['chicken-breast'], jp), ['雞、鴨等禽肉要煮到中心溫度 {{temp:75:C}} 以上。']);
+  assertEquals(donenessTips(['chicken-breast'], jp), ['雞、鴨等禽肉要煮到中心溫度 {{temp:75:C:min}} 以上。']);
 });
 
 Deno.test('存下來的做法：過敏原改了就不能再用', () => {
