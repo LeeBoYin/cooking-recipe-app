@@ -1,6 +1,6 @@
 // `ai` Edge Function 的呼叫（16 第六節）。前端不直接呼叫 Claude，也不自己判斷額度；
 // 失敗時只拿到錯誤代號，由各畫面依代號顯示「目前無法使用」的說法（03〈AI 不能用時〉），不顯示次數，也不改用別的挑法。
-import type { DictationInput, DictationResponse, RefineInput, RefineResponse, AiIdea, AiIdeasPayload, ChatInput, ChatMention, ChatMessage, ChatResponse, ExpandInput, ExpandResponse, HomeIdeasResponse, ImportInput, ImportResponse } from '@zhusha/core';
+import type { DictationInput, DictationResponse, RefineInput, RefineResponse, AiIdea, AiIdeasPayload, ChatInput, ChatMention, ChatMessage, ChatResponse, EggResponse, ExpandInput, ExpandResponse, HomeIdeasResponse, ImportInput, ImportResponse } from '@zhusha/core';
 import { supabase } from './supabase.ts';
 import { trackAiError } from './trackError.ts';
 
@@ -82,6 +82,18 @@ export async function getLastHomeIdeas(): Promise<Extract<HomeIdeasResponse, { s
   const payload = data?.payload as unknown as AiIdeasPayload | undefined;
   if (!data || !payload || payload.schemaVersion !== 1 || !Array.isArray(payload.ideas) || payload.ideas.length === 0) return null;
   return { status: 'ok', source: 'cache', ideas: payload.ideas, chefComment: payload.chefComment, createdAt: data.created_at, round: data.round, suggestionId: data.id };
+}
+
+// ---------------------------------------------------------------------------------------------
+// 靈感彩蛋（inspiration_egg，M1b-04c）：首頁點子載好之後才另外問。每人滾動 7 天最多一次，剛出現的那一個 24 小時內還看得到；
+// 7 天內出現過、AI 不能用、預算用到 80%、沒有可挑的都是 none（什麼都不顯示）。任何失敗也一樣不顯示，不是錯誤畫面。
+// ---------------------------------------------------------------------------------------------
+export async function fetchEgg(): Promise<EggResponse> {
+  try {
+    return await callAi<EggResponse>('inspiration_egg', {});
+  } catch {
+    return { status: 'none' };
+  }
 }
 
 // ---------------------------------------------------------------------------------------------

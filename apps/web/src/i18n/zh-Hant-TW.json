@@ -673,6 +673,7 @@
   "idea.sheet.openRecipe": "打開食譜",
   "idea.sheet.close": "關閉",
   "home.ideas.thinking": "大廚正在想點子…",
+  "home.egg.label": "大廚忽然想到",
   "idea.sheet.others": "其他材料",
   "idea.sheet.substitute": "{need}可以換成{use}",
   "admin.title": "管理後台",

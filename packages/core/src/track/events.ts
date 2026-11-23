@@ -46,7 +46,7 @@ const e = <const V extends readonly string[]>(values: V) => ({ kind: 'enum', val
 const n = (max: number) => ({ kind: 'int', max }) as const;
 const b = { kind: 'bool' } as const;
 
-const SOURCES = ['home', 'chat'] as const;
+const SOURCES = ['home', 'chat', 'egg'] as const; // egg：首頁的靈感彩蛋
 const SLOTS = ['familiar', 'twist', 'adventure'] as const;
 
 // 每個事件的屬性：宣告的屬性一律必填、不能多給

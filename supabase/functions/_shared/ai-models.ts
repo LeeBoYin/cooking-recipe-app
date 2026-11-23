@@ -31,7 +31,8 @@ export const AI_TASKS = {
   chef_note: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 150 },
   post_publish: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 600, background: true },
   normalize_ingredients: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 300, background: true },
-  inspiration_egg: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 300 },
+  // 靈感彩蛋：一句話＋一道菜（和點子同一個格式，約 300 字元的 JSON），首頁點子載好之後才另外呼叫
+  inspiration_egg: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 700 },
   // 驗證整條路徑用，不做任何真正的事
   _selftest: { model: 'claude-haiku-5-5', effort: 'low', thinking: 'off', maxOutputTokens: 200, internal: true },
 } as const satisfies Record<string, TaskConfig>;
@@ -88,7 +89,7 @@ export function costUsd(model: string, usage: TokenUsage): number {
 }
 
 // 全站預算用到提醒門檻（預設 80%）時的降級（03〈換模型的規則〉）。對話不降級。
-// config：覆寫這個任務的設定；rules：這個任務不呼叫 AI（回 budget_exhausted，畫面顯示目前無法使用）。
+// config：覆寫這個任務的設定；rules：這個任務不呼叫 AI（回 budget_exhausted；首頁點子顯示目前無法使用，靈感彩蛋什麼都不顯示）。
 // 降級寫在這裡，由 ai 函式統一套用，不在各任務裡寫死。
 export const BUDGET_DEGRADE: Partial<Record<TaskName, { config: Partial<TaskConfig> } | { rules: true }>> = {
   home_ideas: { config: { model: 'claude-haiku-5-5', thinking: 'off' } },
