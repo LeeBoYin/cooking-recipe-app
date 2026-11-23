@@ -44,6 +44,10 @@ export function AddEquipmentPage() {
           <span className="sr-only"><FormattedMessage id="equipment.search.label" /></span>
           <input
             type="search"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            enterKeyHint="search"
             autoFocus
             maxLength={40}
             value={query}

@@ -69,7 +69,6 @@ export function TasteMapPage() {
 
   const levelLabel = (id: LevelId) => intl.formatMessage({ id: `tastemap.level.${id}` });
   const apply = (next: TasteProfile) => {
-    setEditing(null);
     track('settings.changed', { key: 'taste_map' });
     save.mutate({ profile: next, cardTitle: buildCard(next, preferenceDimensions).titleCode ?? null, previousContext: context });
   };

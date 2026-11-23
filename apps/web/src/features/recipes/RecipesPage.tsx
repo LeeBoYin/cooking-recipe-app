@@ -29,7 +29,10 @@ export function RecipesPage() {
           <Icon name="search" size={20} className="shrink-0 text-ink-muted" />
           <span className="sr-only"><FormattedMessage id="recipes.search.label" /></span>
           <input
-            type="text"
+            type="search"
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
             enterKeyHint="search"
             value={input}
             placeholder={intl.formatMessage({ id: 'recipes.search.placeholder' })}

@@ -112,6 +112,8 @@ export function AddPage() {
   );
   const have = new Set((pantry.data ?? []).map((i) => i.ingredient_id));
   const carded = new Set(drafts.map((d) => d.ingredient_id).filter(Boolean));
+  // 廚房已經有的不列；剛點了、下面有卡片的留著（才能再點一次取消）。一樣都沒有就整塊不顯示
+  const shownFrequent = frequent.filter((id) => !have.has(id) || carded.has(id));
   const trimmed = query.trim();
   const exact = results.some((r) => r.name['zh-TW'] === trimmed);
 
@@ -177,6 +179,10 @@ export function AddPage() {
                 <Icon name="search" size={20} className="pointer-events-none absolute top-3 left-3 text-ink-muted" />
                 <input
                   type="search"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  enterKeyHint="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={intl.formatMessage({ id: 'pantry.search.placeholder' })}
@@ -221,10 +227,11 @@ export function AddPage() {
           </ul>
         )}
 
+        {shownFrequent.length > 0 && (
         <section aria-labelledby="frequent">
           <h2 id="frequent" className="mx-0 mt-2 mb-2 text-card-title font-bold"><FormattedMessage id="pantry.frequent" /></h2>
           <div className="-mx-4 grid auto-cols-max grid-flow-col grid-rows-2 gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {frequent.map((id) => {
+            {shownFrequent.map((id) => {
               const used = carded.has(id);
               return (
                 <button
@@ -235,12 +242,12 @@ export function AddPage() {
                   className={`min-h-11 whitespace-nowrap rounded-full border px-3 text-caption ${used ? 'border-ink bg-bulb-soft font-bold' : 'border-line bg-surface'}`}
                 >
                   <ItemIcon kind="ingredient" id={id} size={24} /> {getIngredient(id)?.name['zh-TW']}
-                  {have.has(id) && !used && <span className="text-ink-muted"> ✓</span>}
                 </button>
               );
             })}
           </div>
         </section>
+        )}
 
         {drafts.length > 0 && (
           <ul className="m-0 flex list-none flex-col gap-2 p-0">

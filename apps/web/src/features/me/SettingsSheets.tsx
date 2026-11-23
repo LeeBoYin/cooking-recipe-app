@@ -49,6 +49,8 @@ export function SettingsSheet({ kind, onClose }: { kind: SettingsSheetKind; onCl
 
   return (
     <SheetFrame title={title} onClose={onClose}>
+      {(requestClose) => (
+        <>
       {kind === 'servings' && (
         <div className="flex items-center justify-between rounded-card bg-surface py-1.5 pr-1.5 pl-3">
           <span className="text-[15px] text-ink-muted"><FormattedMessage id="settings.servings.hint" /></span>
@@ -103,11 +105,13 @@ export function SettingsSheet({ kind, onClose }: { kind: SettingsSheetKind; onCl
       {update.isError && <p role="alert" className="m-0 text-caption text-error"><FormattedMessage id="settings.saveError" /></p>}
       <button
         type="button"
-        onClick={onClose}
+        onClick={requestClose}
         className="h-12 rounded-card border-2 border-ink bg-bulb font-[inherit] text-body font-bold text-ink"
       >
         <FormattedMessage id="common.ok" />
       </button>
+        </>
+      )}
     </SheetFrame>
   );
 }
