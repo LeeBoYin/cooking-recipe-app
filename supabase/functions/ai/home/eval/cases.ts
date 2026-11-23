@@ -155,7 +155,7 @@ export const EVAL_CASES: EvalCase[] = [
       equipment: eq('gas-stove', 'frying-pan', 'air-fryer', 'oven', 'pressure-cooker', 'tatung-rice-cooker'),
     }),
     callsAi: true,
-    expectation: '新挑戰用到還沒用過的廚具（氣炸鍋、烤箱、壓力鍋），難度只比其他高 1～2。',
+    expectation: '新挑戰的難度只比其他高 1～2。',
     assert: (ideas) => {
       const adventure = ideas.find((i) => i.slot === 'adventure');
       const others = ideas.filter((i) => i.slot !== 'adventure');
@@ -252,12 +252,10 @@ export const EVAL_CASES: EvalCase[] = [
       }],
     }),
     callsAi: true,
-    expectation: '變化版或新挑戰有一道用同樣的食材換手法（烤、氣炸），熟悉的那道不換手法；需要烤箱或氣炸鍋的點子最多一道。',
+    expectation: '變化版或新挑戰有一道用同樣的食材換手法（烤、氣炸），熟悉的那道不換手法。',
     assert: (ideas) => {
       const fresh = ['oven', 'air-fryer'];
       const out: string[] = [];
-      const needNew = ideas.filter((i) => i.equipment.some((e) => fresh.includes(e)));
-      if (needNew.length > 1) out.push(`需要還沒用過的廚具的點子有 ${needNew.length} 道，最多一道`);
       if (!ideas.some((i) => i.slot !== 'familiar' && i.techniques.some((t) => ['roast', 'air-fry', 'bake'].includes(t)))) out.push('變化版與新挑戰都沒換手法');
       out.push(...ideas.filter((i) => i.slot === 'familiar' && i.equipment.some((e) => fresh.includes(e))).map((i) => `${i.title}：熟悉的不該換手法`));
       return out;

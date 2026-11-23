@@ -111,9 +111,9 @@ Deno.test('檢查：過敏原（案例 2）——食材 ID、關鍵字、對不�
     idea(env, { title: '打拋雞', slot: 'twist', uses_pantry_ids: ['chicken-thigh', 'thai-basil'] }),
   ]);
   assertEquals(r.ideas.map((i) => i.title), ['打拋雞']);
-  assertEquals(r.dropped.allergen, 2); // 蝦仁、花生粉（比對到花生）
+  assertEquals(r.dropped.allergen, 1); // 蝦仁（名稱完全相同才對得到字典）
   assertEquals(r.dropped.keyword, 1); // 蝦醬：字典沒有，靠關鍵字
-  assertEquals(r.dropped.allergen_unknown_ingredient, 1);
+  assertEquals(r.dropped.allergen_unknown_ingredient, 2); // 花生粉、神祕香料包：字典沒收，一律擋下（不用「包含」去猜）
 });
 
 Deno.test('檢查：五辛素（案例 3）——蔥蒜與肉類拿掉', () => {

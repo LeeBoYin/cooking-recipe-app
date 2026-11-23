@@ -1,4 +1,4 @@
-import { assertEquals, assertStringIncludes } from 'jsr:@std/assert@1';
+import { assert, assertEquals, assertStringIncludes } from 'jsr:@std/assert@1';
 import { AI_TASKS } from '../../_shared/ai-models.ts';
 import type { AiContext, ClaudeRequest, ClaudeResponse } from '../pipeline.ts';
 import type { Rpc } from '../usage.ts';
@@ -61,6 +61,11 @@ Deno.test('檢查：長度、次數與頻率、催促、驚嘆號與問句都擋
   for (const bad of ['', '這是你第三次做這道菜了。', '你最近常做這道。', '下次記得少放鹽。', '好香！', '要不要加點胡椒？', '連續兩週都煮湯。', 'x'.repeat(61)]) {
     assertEquals(checkChefNote({ note: bad }), null, bad);
   }
+  // 一律用中文說：英文整句不收；給建議的（下次可以…、可以試試…）不收，只說觀察
+  assertEquals(checkChefNote({ note: 'Eight cloves of garlic is a bold call.' }), null);
+  assertEquals(checkChefNote({ note: '烤到硬梆梆還能笑翻全家，下次可以先看看時間。' }), null); // 評估 05 的輸出
+  assertEquals(checkChefNote({ note: '可以試試少放一點糖。' }), null);
+  assertEquals(checkChefNote({ note: '蒜放了八瓣 garlic，一定很香。' }), '蒜放了八瓣 garlic，一定很香。'); // 夾英文食材名可以
   assertEquals(checkChefNote(null), null);
   assertEquals(checkChefNote({ note: 3 }), null);
 });
@@ -103,4 +108,13 @@ Deno.test('帳號停用、AI 暫停或關閉：回錯誤代號；輸入不合法
 
 Deno.test('沒存成功（已經有一句話）：不顯示', async () => {
   assertEquals(await runChefNote(mk({ saved: false }), 'u1', { recipe_id: RID }), { ok: true, data: { status: 'none' } });
+});
+
+Deno.test('提示詞：一律用介面語言（中文）、不給建議；不再把食譜的語言交給 AI 決定', () => {
+  const en = { ...RECIPE, lang: 'en', title: 'Garlic butter shrimp' };
+  const p = buildChefNotePrompt(en);
+  assert(CHEF_NOTE_PROMPT_STABLE.includes('一律用介面語言') && CHEF_NOTE_PROMPT_STABLE.includes('台灣繁體中文'));
+  assert(CHEF_NOTE_PROMPT_STABLE.includes('不給建議') && CHEF_NOTE_PROMPT_STABLE.includes('只說觀察'));
+  assertEquals(CHEF_NOTE_PROMPT_STABLE.includes('語言用食譜的語言'), false);
+  assertEquals(p.messages[0]?.content.includes('語言：'), false);
 });

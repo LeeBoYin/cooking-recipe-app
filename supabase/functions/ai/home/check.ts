@@ -1,6 +1,6 @@
 // AI 輸出的程式再檢查（03〈安全與信任〉）：不合格的點子直接拿掉，不補；過敏原與安全規則不只靠 AI。
 // 純函式：不碰網路與資料庫，評估集與單元測試用假的 AI 回應餵進來。紀錄只留原因與數量，不含內容。
-import { difficultyOverall, forbiddenWordingHits, matchIngredient, newId, violatesLimits } from '../../../../packages/core/src/index.ts';
+import { difficultyOverall, forbiddenWordingHits, isPlainSafeIngredient, matchIngredientExact, newId, violatesLimits } from '../../../../packages/core/src/index.ts';
 import { bannedTechniqueIds, ideaIngredients, ingredientIndex, type HomeEnv } from './env.ts';
 import { SLOT_LIMITS, SLOTS, type DropReason, type HomeIdea, type RawIdea, type RawOutput, type Slot } from './types.ts';
 
@@ -107,8 +107,8 @@ export function checkHomeOutput(raw: RawOutput, env: HomeEnv, opts: CheckOptions
     if (r.uses_pantry_ids.some((id) => !env.pantryIds.has(id) && !extra?.has(id))) { drop('pantry_not_sent'); continue; }
 
     // 其他材料：用字典比對出 ID；有設過敏原，而且有對不到字典的，整個拿掉
-    const others = r.other_ingredients.map((o) => ({ name: o.name.trim(), ingredientId: matchIngredient(o.name, ingredientIndex) ?? null }));
-    if (hasAllergens && others.some((o) => o.ingredientId === null)) { drop('allergen_unknown_ingredient'); continue; }
+    const others = r.other_ingredients.map((o) => ({ name: o.name.trim(), ingredientId: matchIngredientExact(o.name, ingredientIndex) ?? null }));
+    if (hasAllergens && others.some((o) => o.ingredientId === null && !isPlainSafeIngredient(o.name))) { drop('allergen_unknown_ingredient'); continue; }
 
     // 過敏原、飲食限制、不用料理酒、不吃的食物：用到的食材 ID 查字典
     const usedIds = [...r.uses_pantry_ids, ...others.flatMap((o) => (o.ingredientId ? [o.ingredientId] : []))];

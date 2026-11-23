@@ -76,6 +76,20 @@ export function matchIngredient(name: string, index: IngredientIndex): string | 
   return undefined;
 }
 
+// 安全用途（過敏原、飲食限制檢查）的比對：只認名稱或別名「完全相同」，不用包含、不用模糊。
+// 包含的規則會錯：「柴魚高湯」含「高湯」會被當成雞高湯，對魚過敏的人就被放行。對不到就回 undefined，呼叫端照舊擋下
+export function matchIngredientExact(name: string, index: IngredientIndex): string | undefined {
+  const n = norm(name);
+  if (!n) return undefined;
+  return index.byName.get(n) ?? index.byAlias.get(n);
+}
+
+// 一定不含過敏原、葷素都可的基本項，字典不收：對不到字典也不算「不明食材」
+const PLAIN_SAFE_NAMES: ReadonlySet<string> = new Set(['水', '清水', '開水', '冷水', '熱水', '溫水', '冰水', '滾水', '冰塊', '礦泉水'].map(norm));
+export function isPlainSafeIngredient(name: string): boolean {
+  return PLAIN_SAFE_NAMES.has(norm(name));
+}
+
 const TO_TASTE = /適量|適當|隨意|隨喜好/;
 const PINCH = /少許|少量|一點點|些許/;
 
