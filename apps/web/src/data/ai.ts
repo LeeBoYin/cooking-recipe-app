@@ -85,6 +85,22 @@ export async function getLastHomeIdeas(): Promise<Extract<HomeIdeasResponse, { s
 }
 
 // ---------------------------------------------------------------------------------------------
+// 記錄時大廚的一句話（chef_note，M1b-04b）
+// ---------------------------------------------------------------------------------------------
+export const CHEF_NOTE_WAIT_MS = 2000;
+
+// 草稿第一次發佈成功後呼叫：等 2 秒，內容回來就回傳那句話；超過、AI 不能用、不是第一次發佈都回 null（不顯示，也不是錯誤）。
+// 後端自己也有 2 秒的限制，超過就不存。發佈本來就已經成功，這裡出任何錯都不影響。
+export async function fetchChefNote(recipeId: string, waitMs = CHEF_NOTE_WAIT_MS): Promise<string | null> {
+  const ask = callAi<{ status: 'ok'; note: string } | { status: 'none' }>('chef_note', { recipe_id: recipeId }).then(
+    (r) => (r.status === 'ok' ? r.note : null),
+    () => null,
+  );
+  const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), waitMs));
+  return await Promise.race([ask, timeout]);
+}
+
+// ---------------------------------------------------------------------------------------------
 // 和大廚聊聊（chat，M1a-07）
 // ---------------------------------------------------------------------------------------------
 // 送出一則話：後端用串流呼叫 Claude、整段收完才回；失敗時丟 AiCallError，這一則什麼都不會存

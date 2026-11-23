@@ -659,14 +659,14 @@ isOneToOne: false
                   ]
                 },"recipe_private": {
                   Row: {
-                    "created_at": string,"dictation": Json | null,"diners": NonNullable<Json>,"recipe_id": string,"updated_at": string,"user_id": string
+                    "chef_note": Json | null,"created_at": string,"dictation": Json | null,"diners": NonNullable<Json>,"recipe_id": string,"updated_at": string,"user_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"dictation"?: Json | null,"diners"?: NonNullable<Json>,"recipe_id": string,"updated_at"?: string,"user_id": string
+                    "chef_note"?: Json | null,"created_at"?: string,"dictation"?: Json | null,"diners"?: NonNullable<Json>,"recipe_id": string,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"dictation"?: Json | null,"diners"?: NonNullable<Json>,"recipe_id"?: string,"updated_at"?: string,"user_id"?: string
+                    "chef_note"?: Json | null,"created_at"?: string,"dictation"?: Json | null,"diners"?: NonNullable<Json>,"recipe_id"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -991,6 +991,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"chef_note_context":
+{ Args: { "p_recipe": string,"p_user": string }; Returns: Json
+                           },
 "claim_background_jobs":
 { Args: { "p_kind": string,"p_limit"?: number }; Returns: Json
                            },
@@ -1008,6 +1011,9 @@ isOneToOne: false
                            },
 "complete_normalization_jobs":
 { Args: { "p_results": Json }; Returns: number
+                           },
+"complete_post_publish":
+{ Args: { "p_difficulty": Json,"p_job": string,"p_read_at": string,"p_tags": Json }; Returns: boolean
                            },
 "create_invite":
 { Args: { "p_befriend_inviter"?: boolean,"p_email": string,"p_id": string,"p_invited_by"?: string,"p_kitchen_id"?: string,"p_note"?: string,"p_plan"?: string,"p_type"?: string }; Returns: {
@@ -1072,6 +1078,9 @@ isOneToOne: false
                            },
 "log_error":
 { Args: { "p_app_version"?: string,"p_kind": string,"p_location": string,"p_platform"?: string,"p_severity": string }; Returns: undefined
+                           },
+"post_publish_context":
+{ Args: { "p_job": string }; Returns: Json
                            },
 "publish_recipe":
 { Args: { "p_id": string }; Returns: {
@@ -1291,6 +1300,9 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"save_chef_note":
+{ Args: { "p_recipe": string,"p_text": string,"p_user": string }; Returns: boolean
+                           },
 "save_recipe":
 { Args: { "p_changed_by"?: string,"p_expected_updated_at"?: string,"p_photos"?: Json,"p_private"?: Json,"p_recipe": Json }; Returns: {
               "ai_tags": Json | null,
@@ -1355,6 +1367,9 @@ isOneToOne: false
                            },
 "taste_profile_save":
 { Args: { "p_data": Json,"p_read_at": string,"p_user": string }; Returns: undefined
+                           },
+"taste_recorded_recipes":
+{ Args: { "p_user": string }; Returns: Json
                            },
 "track_events":
 { Args: { "p_app_version": string,"p_dropped"?: number,"p_events": Json,"p_installed": boolean,"p_platform": string,"p_user_id": string }; Returns: number

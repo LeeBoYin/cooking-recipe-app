@@ -1,6 +1,6 @@
 // 口味檔案的多來源計算（03〈口味檔案〉、13 第六節）。純函式，不改傳進來的物件；Deno 與瀏覽器都能跑。
-// 輸入：口味地圖（探索與自己設定的）＋收藏的點子＋「做了」的點子＋對話裡說的長期偏好＋手邊的食材。
-// 自己記錄的食譜要等發佈後整理寫好標籤才算（M1b），這裡還沒有。
+// 輸入：口味地圖（探索與自己設定的）＋收藏的點子＋「做了」的點子＋自己記錄的食譜＋對話裡說的長期偏好＋手邊的食材。
+// 自己記錄的食譜要等「發佈後整理」寫好標籤才算（M1b-04b）：用標籤的菜系、主食材、手法換算成維度，標成「家人最愛」「值得再做」的加重。
 // 規則：
 //   • 「你設定的」（user_set）維度不會被隱含訊號覆蓋；探索來的（explored）也是明確的，只能調整強度與把握，喜好的正負號不會翻轉；
 //   • 隱含訊號隨時間變輕，一年後剩一半；
@@ -12,6 +12,8 @@ import type { DimensionState, TasteProfile } from './types.ts';
 
 export const SAVED_WEIGHT = 0.3; // 收藏的點子（中）
 export const COOKED_WEIGHT = 0.5; // 做了並記錄的點子（中，比收藏高）
+export const RECORDED_WEIGHT = 0.6; // 自己記錄的食譜（高，比做了的點子還高）
+export const RECORDED_LOVED_BONUS = 0.2; // 標成「家人最愛」「值得再做」的加重
 export const CHAT_SIGNAL_WEIGHT = 0.35; // 對話裡說的長期偏好（中）
 export const PANTRY_WEIGHT = 0.04; // 手邊常有的食材（很小）
 export const HALF_LIFE_DAYS = 365; // 隱含訊號一年後剩一半
@@ -28,6 +30,15 @@ export interface SavedIdeaSignal {
   cooked: boolean; // 已經從這個收藏記錄了自己的版本
 }
 
+// 自己記錄的食譜：發佈後整理寫好的標籤（菜系、主食材、手法）；highlights 是作者標的亮點
+export interface RecordedRecipeSignal {
+  dish: Pick<IdeaBaseDish, 'cuisineKeys' | 'ingredientIds' | 'techniques'>;
+  highlights: readonly string[];
+  at: string; // 做的時間（沒有就用發佈時間）
+}
+
+const LOVED_HIGHLIGHTS: readonly string[] = ['family_favorite', 'make_again']; // 翻車也好笑（funny_flop）不扣分，也不加分
+
 // 對話裡說的偏好。conversation：同一段對話裡對同一個維度只算最新的一次
 export interface ChatSignal {
   conversation: string;
@@ -40,6 +51,7 @@ export interface ChatSignal {
 export interface TasteInputs {
   base: TasteProfile; // 口味探索與口味地圖
   saved: SavedIdeaSignal[];
+  recorded?: RecordedRecipeSignal[]; // 自己記錄、而且標籤已經寫好的食譜
   chatSignals: ChatSignal[];
   pantryIngredientIds: string[];
   ingredients: ReadonlyMap<string, IdeaIngredient>;
@@ -52,6 +64,7 @@ export interface TasteSources {
   quiz: boolean;
   saved: number; // 收藏了、還沒記錄的點子
   cooked: number; // 做了並記錄的點子
+  recorded?: number; // 算進來的自己的食譜（標籤寫好的）
   signals: number; // 算進來的長期偏好
   pantry: number; // 算進來的手邊食材
 }
@@ -111,6 +124,16 @@ export function computeTasteProfile(input: TasteInputs): ComputedTaste {
     for (const key of keysOf(s.dish)) evidence.push({ key, sign: 1, weight: s.cooked ? COOKED_WEIGHT : SAVED_WEIGHT, at: s.at });
   }
 
+  // 自己記錄的食譜：標籤寫好才會在這裡；標成「家人最愛」「值得再做」的加重
+  let recorded = 0;
+  for (const r of input.recorded ?? []) {
+    const keys = keysOf(r.dish);
+    if (keys.length === 0) continue;
+    recorded += 1;
+    const loved = r.highlights.some((h) => LOVED_HIGHLIGHTS.includes(h));
+    for (const key of keys) evidence.push({ key, sign: 1, weight: Math.min(1, RECORDED_WEIGHT + (loved ? RECORDED_LOVED_BONUS : 0)), at: r.at });
+  }
+
   // 對話：只算長期的；同一段對話裡同一個維度只留最新的一次
   const latest = new Map<string, ChatSignal>();
   for (const c of input.chatSignals) {
@@ -142,7 +165,7 @@ export function computeTasteProfile(input: TasteInputs): ComputedTaste {
     context: base.context,
     answeredItemIds: [],
     ...(base.lastExploredAt !== undefined ? { lastExploredAt: base.lastExploredAt } : {}),
-    sources: { quiz, saved, cooked, signals: latest.size, pantry: pantryIds.length },
+    sources: { quiz, saved, cooked, recorded, signals: latest.size, pantry: pantryIds.length },
   };
 }
 
@@ -151,5 +174,5 @@ export function toSnapshotData(t: ComputedTaste): TasteSnapshotData {
 }
 
 export function fromSnapshotData(d: TasteSnapshotData): ComputedTaste {
-  return { dims: d.dims, context: d.context, answeredItemIds: [], sources: d.sources };
+  return { dims: d.dims, context: d.context, answeredItemIds: [], sources: { ...d.sources, recorded: d.sources.recorded ?? 0 } };
 }

@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, Navigate, useLocation, useParams } from 'react-router';
 import { DIFFICULTY_FACETS, difficultyOverall, formatRecipeText, formatTemperature, haveInKitchen, parseMeasurePref, parseTemperaturePref, renderIngredient, UNIT_CODES, type UnitLabels } from '@zhusha/core';
@@ -7,7 +8,9 @@ import type { RecipeIngredient, RecipeStep, RecipeVisibility } from '@zhusha/sha
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
 import type { RecipeSource } from '@zhusha/shared-types';
-import { useCurrentKitchen, useMySettings, useMyRecipes, usePantryItems, usePhotoUrls, useRecipe, useRecipePhotos } from '../../data/hooks.ts';
+import { fetchChefNote } from '../../data/ai.ts';
+import { queryKeys, useCurrentKitchen, useMySettings, useMyRecipes, usePantryItems, usePhotoUrls, useRecipe, useRecipePhotos, useRecipePrivate } from '../../data/hooks.ts';
+import { track } from '../../data/track.ts';
 import { Icon } from '../shell/Icon.tsx';
 import { TopBar } from '../shell/SubPage.tsx';
 import { useToast } from '../shell/Toast.tsx';
@@ -19,6 +22,30 @@ import { ShoppingSheet } from './ShoppingSheet.tsx';
 
 const TILT = ['-rotate-3', 'rotate-2'];
 const HEADING = 'm-0 font-round text-card-title';
+
+// 大廚的一句話（只有作者看得到，存在 recipe_private）：之後打開自己的食譜都在。
+// 第一次發佈後的這一次，等 2 秒內回來才顯示；超過或 AI 不能用就不顯示，也不留任何痕跡
+function ChefNote({ recipeId, firstPublish }: { recipeId: string; firstPublish: boolean }) {
+  const queryClient = useQueryClient();
+  const priv = useRecipePrivate(recipeId);
+  const asked = useRef(false);
+  useEffect(() => {
+    if (!firstPublish || asked.current) return;
+    asked.current = true;
+    void fetchChefNote(recipeId).then((note) => {
+      track('record.chef_note', { result: note ? 'shown' : 'none' });
+      if (note) void queryClient.invalidateQueries({ queryKey: queryKeys.recipePrivate(recipeId) });
+    });
+  }, [firstPublish, queryClient, recipeId]);
+  const text = (priv.data?.chef_note as { text?: string } | null | undefined)?.text;
+  if (!text) return null;
+  return (
+    <div className="flex items-start gap-2.5 rounded-card bg-chef-soft px-3 py-2.5">
+      <Chef size={40} mood="happy" />
+      <p className="m-0 font-round text-[15px] leading-normal">{text}</p>
+    </div>
+  );
+}
 
 // 剛發佈完，大廚回應一句；第一篇食譜用另一組句子（只用來挑句子，不顯示數字）
 function PublishedNote({ recipeId }: { recipeId: string }) {
@@ -40,7 +67,8 @@ function PublishedNote({ recipeId }: { recipeId: string }) {
 export function RecipePage() {
   const intl = useIntl();
   const { id } = useParams();
-  const justPublished = (useLocation().state as { published?: boolean } | null)?.published === true;
+  const navState = useLocation().state as { published?: boolean; firstPublish?: boolean } | null;
+  const justPublished = navState?.published === true;
   const recipe = useRecipe(id);
   const photos = useRecipePhotos(id);
   const [viewer, setViewer] = useState<{ list: ViewerPhoto[]; index: number } | null>(null);
@@ -216,6 +244,7 @@ export function RecipePage() {
       />
 
       {justPublished && id && <PublishedNote recipeId={id} />}
+      {r.status === 'published' && <ChefNote recipeId={r.id} firstPublish={justPublished && navState?.firstPublish === true} />}
 
       <article className="flex flex-col gap-2 rounded-card bg-surface p-3">
         <div className="flex items-center gap-2 text-caption">

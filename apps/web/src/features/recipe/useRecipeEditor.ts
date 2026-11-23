@@ -87,6 +87,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
   const uploaded = useSyncExternalStore(subscribeUploads, getUploadedPhotoIds);
 
   const isDraft = !recipeState || recipeState.status === 'draft';
+  const firstPublish = useRef(false);
   const startedAsDraft = useRef(recipe?.status === 'draft'); // 產品事件：打開時就是草稿，才算「草稿變成發佈」
 
   // 檔案已經在 Storage 裡：資料庫有的、或這次傳完的
@@ -389,6 +390,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
 
   // 發佈：先把最新的存好，再發佈
   const publish = useCallback(async (): Promise<Recipe | null> => {
+    firstPublish.current = startedAsDraft.current; // 打開時就是草稿 → 這次是第一次發佈（已發佈的再儲存不算）
     const saved = await save();
     // 存失敗、或有欄位超過長度（沒存進去）就不發佈
     if (!saved || Object.keys(buildPatch(savedForm.current, formRef.current)).length > 0) return null;
@@ -430,6 +432,7 @@ export function useRecipeEditor(recipeId: string, recipe: Recipe | null, photoRo
     saveFailedOnServer,
     save,
     publish,
+    firstPublish,
     previews,
     photoStatus,
     pendingCount,

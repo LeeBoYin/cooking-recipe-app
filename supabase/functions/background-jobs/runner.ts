@@ -34,11 +34,11 @@ export interface RunSummary {
 }
 
 // 這些代號是「這個人／這個時間點不行」，不是任務的錯：換人或晚點再試，不算一次嘗試
-const USER_BLOCKED: AiErrorCode[] = ['over_limit', 'ai_paused', 'account_inactive', 'rate_limited'];
-const PAUSE_ALL: AiErrorCode[] = ['budget_exhausted', 'ai_disabled'];
-const NO_RETRY: AiErrorCode[] = ['invalid_input', 'unknown_task', 'task_not_available'];
+export const USER_BLOCKED: AiErrorCode[] = ['over_limit', 'ai_paused', 'account_inactive', 'rate_limited'];
+export const PAUSE_ALL: AiErrorCode[] = ['budget_exhausted', 'ai_disabled'];
+export const NO_RETRY: AiErrorCode[] = ['invalid_input', 'unknown_task', 'task_not_available'];
 
-async function call<T>(rpc: Rpc, fn: string, args: Record<string, unknown>): Promise<T> {
+export async function call<T>(rpc: Rpc, fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await rpc(fn, args);
   if (error) {
     console.error('background-jobs: rpc failed', fn, error.code ?? 'unknown');

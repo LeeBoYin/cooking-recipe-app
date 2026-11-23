@@ -10,6 +10,7 @@ import { runChat } from './chat/handler.ts';
 import { runExpandSteps } from './expand/handler.ts';
 import { runImportUrl } from './import/handler.ts';
 import { runDictation } from './dictation/handler.ts';
+import { runChefNote } from './chef-note/handler.ts';
 import { runRefine } from './refine/handler.ts';
 import { createProtection, sessionIdOf } from './usage.ts';
 
@@ -119,6 +120,15 @@ Deno.serve(async (req) => {
         return error(dictated.error);
       }
       return json({ data: dictated.data });
+    }
+    // 記錄時大廚的一句話：第一次發佈後單獨呼叫一次，2 秒內做好才存與回傳（見 chef-note/handler.ts）
+    if (body.task === 'chef_note') {
+      const note = await runChefNote({ ai: deps, rpc: async (fn, args) => await client.rpc(fn, args) }, auth.user.id, body.input);
+      if (!note.ok) {
+        console.error('ai: rejected', note.error);
+        return error(note.error);
+      }
+      return json({ data: note.data });
     }
     // 用說的改食譜：只回要改的欄位與新值，手機列出「會改這些」讓作者確認（見 refine/handler.ts）
     if (body.task === 'edit_by_voice') {

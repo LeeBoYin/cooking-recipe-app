@@ -1,4 +1,4 @@
-// background-jobs（16 第三、九節）：執行背景任務佇列。目前只有食材正規化。
+// background-jobs（16 第三、九節）：執行背景任務佇列：食材正規化（M1a-05）、發佈後整理（M1b-04b）。
 // 只有資料庫排程（pg_cron + pg_net，每分鐘看有沒有該處理的）呼叫：要帶 BACKGROUND_JOBS_TOKEN，不開放給使用者。
 // 用量（費用、預算）照 M1a-04 的方式記在排隊的那位使用者身上；背景任務不算速率，預算用完就暫停。
 import { createClient } from 'npm:@supabase/supabase-js@2';
@@ -9,6 +9,8 @@ import { createProtection } from '../ai/usage.ts';
 import type { DictRow } from '../_shared/ingredient-candidates.ts';
 import { safeEqual } from '../_shared/safe-equal.ts';
 import { runNormalization } from './runner.ts';
+import { runPostPublish } from './post-publish.ts';
+import { postPublishTask } from '../ai/post-publish/prompt.ts';
 
 function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -50,8 +52,13 @@ Deno.serve(async (req) => {
       },
       ask: (userId, input) => runAi(aiDeps, userId, 'normalize_ingredients', input),
     });
+    // 發佈後整理：標籤與難易度。任務定義依這一篇的內容臨時組，不登記在 TASKS（使用者不能直接呼叫）
+    const postPublish = await runPostPublish({
+      rpc,
+      ask: (userId, input) => runAi({ ...aiDeps, tasks: { post_publish: postPublishTask(input) as never } }, userId, 'post_publish', {}),
+    });
     // 只回數量
-    return json(summary);
+    return json({ normalization: summary, post_publish: postPublish });
   } catch {
     console.error('background-jobs: server_error');
     return json({ error: 'server_error' }, 500);

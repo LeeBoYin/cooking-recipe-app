@@ -63,6 +63,8 @@ export const TRACK_EVENTS = {
   'record.dictation_used': { entry: e(['speak', 'organize']), result: e(['ok', 'unavailable']) },
   // 大廚整理好、填進欄位：填了或補了幾個欄位（食材與步驟各算一個）
   'record.ai_filled': { fieldCount: n(10) },
+  // 記錄時大廚的一句話：第一次發佈後有沒有顯示（沒顯示＝AI 不能用或超過 2 秒）；不記內容
+  'record.chef_note': { result: e(['shown', 'none']) },
   // 還原食譜版本：只記操作，不記是哪一版、哪一篇
   'recipe.revision_restored': {},
   // 用說的改食譜：大廚列出「會改這些」（proposed）、沒聽出要改哪裡（empty）、AI 不能用（unavailable）、

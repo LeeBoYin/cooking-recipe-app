@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { IdeaIngredient } from '../ideas/types.ts';
-import { CHAT_SIGNAL_WEIGHT, COOKED_WEIGHT, SAVED_WEIGHT, computeTasteProfile, fromSnapshotData, toSnapshotData, type ChatSignal, type SavedIdeaSignal, type TasteInputs } from './learn.ts';
+import { CHAT_SIGNAL_WEIGHT, COOKED_WEIGHT, RECORDED_WEIGHT, type RecordedRecipeSignal, SAVED_WEIGHT, computeTasteProfile, fromSnapshotData, toSnapshotData, type ChatSignal, type SavedIdeaSignal, type TasteInputs } from './learn.ts';
 import { emptyProfile, type DimensionState, type TasteProfile } from './types.ts';
 
 const NOW = '2026-11-22T00:00:00.000Z';
@@ -29,7 +29,7 @@ describe('computeTasteProfile', () => {
     const out = run({ base });
     expect(out.dims).toEqual(base.dims);
     expect(out.context).toEqual(base.context);
-    expect(out.sources).toEqual({ quiz: true, saved: 0, cooked: 0, signals: 0, pantry: 0 });
+    expect(out.sources).toEqual({ quiz: true, saved: 0, cooked: 0, recorded: 0, signals: 0, pantry: 0 });
   });
 
   it('沒有探索過：quiz 是 false', () => {
@@ -164,5 +164,43 @@ describe('computeTasteProfile', () => {
     const back = fromSnapshotData(data);
     expect(back.dims).toEqual(out.dims);
     expect(back.sources).toEqual(out.sources);
+  });
+});
+
+describe('自己記錄的食譜（M1b-04b）', () => {
+  const rec = (over: Partial<RecordedRecipeSignal> = {}): RecordedRecipeSignal => ({
+    dish: { cuisineKeys: ['cuisine.taiwan.home'], ingredientIds: ['pork'], techniques: ['stir-fry'] }, highlights: [], at: NOW, ...over,
+  });
+
+  it('標籤換算成維度，來源計數加一，權重比做了的點子高', () => {
+    const out = run({ recorded: [rec()] });
+    expect(out.sources.recorded).toBe(1);
+    expect(out.dims['cuisine.taiwan.home']?.source).toBe('learned');
+    const cooked = run({ saved: [porkDish(NOW, true)] });
+    expect(RECORDED_WEIGHT).toBeGreaterThan(COOKED_WEIGHT);
+    expect(out.dims['protein.pork']!.confidence).toBeGreaterThan(cooked.dims['protein.pork']!.confidence);
+  });
+
+  it('標成「家人最愛」「值得再做」的加重；「翻車也好笑」不扣分也不加分', () => {
+    const plain = run({ recorded: [rec()] }).dims['protein.pork']!.confidence;
+    expect(run({ recorded: [rec({ highlights: ['family_favorite'] })] }).dims['protein.pork']!.confidence).toBeGreaterThan(plain);
+    expect(run({ recorded: [rec({ highlights: ['make_again'] })] }).dims['protein.pork']!.confidence).toBeGreaterThan(plain);
+    const flop = run({ recorded: [rec({ highlights: ['funny_flop'] })] }).dims['protein.pork']!;
+    expect(flop.confidence).toBe(plain);
+    expect(flop.affinity).toBeGreaterThan(0);
+  });
+
+  it('你設定的維度不會被覆蓋；沒有可換算的標籤不算；沒給 recorded 當作沒有', () => {
+    const base = profile({ 'protein.pork': dim(-0.8, 0.9, 'user_set') });
+    expect(run({ base, recorded: [rec()] }).dims['protein.pork']).toEqual(base.dims['protein.pork']);
+    expect(run({ recorded: [rec({ dish: { cuisineKeys: [], ingredientIds: [], techniques: [] } })] }).sources.recorded).toBe(0);
+    expect(run().sources.recorded).toBe(0);
+  });
+
+  it('快照存取：舊快照沒有 recorded 時當作 0', () => {
+    const data = toSnapshotData(run({ recorded: [rec()] }));
+    expect(data.sources.recorded).toBe(1);
+    const { recorded: _r, ...old } = data.sources;
+    expect(fromSnapshotData({ ...data, sources: old }).sources.recorded).toBe(0);
   });
 });
