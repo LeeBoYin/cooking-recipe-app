@@ -3,6 +3,7 @@
 // 紀錄只留原因與數量，不含內容。
 import { matchIngredient, newId, violatesLimits, type DraftIngredient, type DraftStep, type RecipeDraft, type UnitCode } from '../../../../packages/core/src/index.ts';
 import { donenessFor, sousVidePresetsFor } from '../../../../packages/equipment/src/index.ts';
+import { resolveIngredientId } from '../../_shared/ingredient-resolve.ts';
 import { includesAny } from '../home/check.ts';
 import { ideaIngredients, ingredientIndex, type HomeEnv } from '../home/env.ts';
 import { isKnownTechnique } from './names.ts';
@@ -15,13 +16,17 @@ export const MAX_STEP_CHARS = 200;
 export const MAX_TIPS_CHARS = 300;
 
 const TEMP_MARK = /\{\{temp:\d{2,3}:[CF]\}\}/g;
-// 中文數字加時間、重量、容量、溫度、數量的單位（阿拉伯數字整個禁止，這裡抓「兩分鐘」「一大匙」）
-const UNIT_NUMBER = /[零一二兩三四五六七八九十百半]+\s*(分鐘|分|小時|秒|公克|克|公斤|毫升|公升|公分|度|大匙|小匙|茶匙|湯匙|匙|杯|斤|顆|個|瓣|片|根)/;
+// 只擋「會影響換算」的數字：時間、重量、容量、溫度（阿拉伯數字整個禁止，這裡抓「兩分鐘」「一大匙」）。
+// 量詞描述（一片蛋皮、一顆煎蛋、片開成兩片）不是份量，不擋
+const CN_NUM = '零一二兩三四五六七八九十百半';
+const UNIT_NUMBER = new RegExp(`[${CN_NUM}]+\\s*(分鐘|分|小時|秒|公克|克|公斤|毫升|公升|公分|度|大匙|小匙|茶匙|湯匙|匙|杯|斤)`);
+// 電鍋外鍋的水（外鍋半杯水、外鍋一杯水）：真的份量，但不隨人數變、電鍋量杯約 180 ml 也不是美式 cup，照寫、不換算
+const POT_WATER = new RegExp(`外鍋[^。，、；,;]{0,6}?[${CN_NUM}]+\\s*杯(?:的)?水`, 'g');
 const BODY_TALK = /罪惡|熱量|卡路里|減肥|瘦身|身材|發胖|不健康|變胖/;
 
 // 步驟與小提醒的用字：不寫數字（溫度用標記）、不談身材。步驟是祈使句，不套首頁「不要命令」的那套禁用字眼
 export function stepWordingProblems(text: string): boolean {
-  const stripped = text.replace(TEMP_MARK, '');
+  const stripped = text.replace(TEMP_MARK, '').replace(POT_WATER, '外鍋水');
   return stripped.includes('{{') || stripped.includes('}}') || /[0-9０-９]/.test(stripped) || UNIT_NUMBER.test(stripped) || BODY_TALK.test(stripped);
 }
 
@@ -64,7 +69,7 @@ export function checkDraft(raw: RawDraft, env: HomeEnv, opts: { servings: number
     if (r.amount_max !== null && !(isNum(r.amount_max) && r.amount !== null && r.amount_max > r.amount && r.amount_max <= 5000)) { flag('unit'); continue; }
     if (r.group !== null && !isStr(r.group, 1, 10)) { flag('format'); continue; }
     const name = r.name.trim();
-    const ingredientId = matchIngredient(name, ingredientIndex) ?? null;
+    const ingredientId = matchIngredient(name, ingredientIndex) ?? resolveIngredientId(name, { fuzzy: false });
     if (ingredientId === null && hasAllergens) { flag('allergen_unknown_ingredient'); continue; }
     if (ingredientId) ids.push(ingredientId);
     hardTexts.push(name);

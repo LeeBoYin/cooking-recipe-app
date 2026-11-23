@@ -1,5 +1,4 @@
 // 廚具字典、手法字典，以及「做不做得到」的判斷（見 07）。前端與 Edge Functions 共用，部署時也匯入資料庫的 dict_* 表。
-// 替代做法、安全規則等推薦功能要用時再加進來。
 import equipmentTypesData from '../data/equipment-types.json' with { type: 'json' };
 import techniquesData from '../data/techniques.json' with { type: 'json' };
 import { regionChain } from './region.ts';
@@ -9,6 +8,7 @@ export * from './types.ts';
 export * from './can-do.ts';
 export * from './region.ts';
 export * from './safety.ts';
+export * from './substitutes.ts';
 
 export const EQUIPMENT_VERSION = '0.1.0';
 

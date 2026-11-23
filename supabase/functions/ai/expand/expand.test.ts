@@ -1,6 +1,7 @@
 // 展開做法的測試（M1a-09）：用評估集的假使用者與假的 AI 回應，測「檢查擋得下違規的做法」與整條流程。
 import { assert, assertEquals, assertNotEquals } from 'jsr:@std/assert@1';
 import type { RecipeDraft } from '../../../../packages/core/src/index.ts';
+import { resolveIngredientId } from '../../_shared/ingredient-resolve.ts';
 import { validate } from '../../_shared/json-schema.ts';
 import { type AiContext, type ClaudeRequest, type Deps, UpstreamError } from '../pipeline.ts';
 import type { Rpc } from '../usage.ts';
@@ -103,6 +104,9 @@ Deno.test('檢查擋得下違規：整份不用，不只刪掉違規的那一項
   bad(env05, goodRaw({ steps: [step('蒸十分鐘。')] }), 'wording');
   bad(env05, goodRaw({ steps: [step('蒸 10 分鐘。')] }), 'wording');
   bad(env05, goodRaw({ steps: [step('烤箱預熱到 180 度。')] }), 'wording');
+  bad(env05, goodRaw({ steps: [step('加入兩大匙醬油。')] }), 'wording');
+  bad(env05, goodRaw({ steps: [step('倒入半杯水。')] }), 'wording');
+  bad(env05, goodRaw({ steps: [step('內鍋加水，外鍋倒入半杯水，蒸十分鐘。')] }), 'wording');
   bad(env05, goodRaw({ steps: [step('放進烤箱。', { equipment: ['oven'] })] }), 'equipment');
   bad(env05, goodRaw({ steps: [step('大火快炒。', { techniques: ['stir-fry'] })] }), 'technique');
   bad(env05, goodRaw({ steps: [step('這一步用了不存在的手法。', { techniques: ['teleport'] })] }), 'technique');
@@ -330,4 +334,26 @@ Deno.test('流程：和快取列對不上的 id 不會寫進別人的點子（�
   await runExpandSteps(h.deps, 'u1', { suggestionId: '0192f000-0000-7000-8000-0000000000aa', ideaId: '0192f000-0000-7000-8000-0000000000bb' });
   assertEquals(h.saves[0]?.p_cache, c.row.cache_id); // 不是手機送來的
   assertNotEquals(h.saves[0]?.p_cache, '0192f000-0000-7000-8000-0000000000aa');
+});
+
+Deno.test('量詞與刀工描述不算份量；外鍋水照寫；影響換算的數字照擋', () => {
+  for (const t of ['煎成一片蛋皮。', '再加一顆煎蛋蓋在飯上。', '把雞胸肉橫向片開成兩片。', '外鍋倒入半杯水，按下開關。', '外鍋一杯水，蒸到開關跳起。']) {
+    assertEquals(stepWordingProblems(t), false, t);
+  }
+  for (const t of ['蒸十分鐘。', '加入兩大匙醬油。', '倒入半杯水。', '煮到八十度。', '外鍋 1 杯水。', '放一百公克豆腐。']) {
+    assertEquals(stepWordingProblems(t), true, t);
+  }
+});
+
+Deno.test('過敏的人：食材名稱用字典比對（白米飯、白飯對得到），對不到仍整份不用', () => {
+  const env = envOf(caseOf('03'));
+  assertEquals(resolveIngredientId('白米飯'), 'rice');
+  assertEquals(resolveIngredientId('白飯'), 'rice');
+  const noSteps = { steps: [step('把雞腿肉煮熟，盛在飯旁。')] };
+  const r = checkDraft(goodRaw({ ingredients: [ing('雞腿肉'), ing('白米飯', { amount: 2, unit: 'piece' })], ...noSteps }), env, opts);
+  assertEquals(r.ok, true);
+  if (r.ok) assertEquals(r.draft.ingredients[1]?.ingredientId, 'rice');
+  const unknown = checkDraft(goodRaw({ ingredients: [ing('雞腿肉'), ing('神祕調味粉')], ...noSteps }), env, opts);
+  assertEquals(unknown.ok, false);
+  if (!unknown.ok) assert('allergen_unknown_ingredient' in unknown.problems);
 });
