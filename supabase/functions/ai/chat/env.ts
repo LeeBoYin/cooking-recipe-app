@@ -2,12 +2,13 @@
 import type { ChatMessage, Idea } from '../../../../packages/core/src/index.ts';
 import { IDEA_TOP_POOL, violatesLimits } from '../../../../packages/core/src/index.ts';
 import { ingredients as ingredientDict } from '../../../../packages/ingredients/src/index.ts';
-import { pickCandidates, type DictRow } from '../../_shared/ingredient-candidates.ts';
+import { norm, resolveIngredientId } from '../../_shared/ingredient-resolve.ts';
 import { buildHomeEnv, ideaIngredients, ingredientName, termsOf, type HomeEnv } from '../home/env.ts';
 import type { HomeContextRow } from '../home/types.ts';
 import type { ChatConversationRow, ChatMention } from './types.ts';
 
-export const norm = (t: string): string => t.normalize('NFKC').toLowerCase().replace(/\s+/g, '');
+// 對話與展開做法共用的字典比對，搬到 _shared；這裡原樣再匯出給既有的使用處
+export { norm, resolveIngredientId };
 
 export interface ChatEnv {
   env: HomeEnv; // 候選已依對話調整
@@ -19,29 +20,6 @@ export interface ChatEnv {
   allMentions: ChatMention[];
   // 這段對話使用者說過的全部話（含這一則），正規化後，驗證 AI 回報的「說了什麼食材」用
   userText: string;
-}
-
-const dictRows: DictRow[] = ingredientDict.map((i) => ({ id: i.id, name: i.name, aliases: i.aliases, deprecated: i.deprecated === true }));
-const activeRows = dictRows.filter((r) => !r.deprecated);
-
-// 把使用者說的字對到字典 ID（不信任模型給的 ID）：名稱完全相同 → 別名完全相同 → 話裡含有名稱或別名（取最長的，
-// 例：「鄰居送的筍子」含別名「筍子」）→ 模糊比對（只有一個候選才採用）。對不到回 null
-export function resolveIngredientId(text: string): string | null {
-  const t = norm(text);
-  if (!t) return null;
-  for (const r of activeRows) if (Object.values(r.name).some((n) => norm(n) === t)) return r.id;
-  for (const r of activeRows) if (Object.values(r.aliases).flat().some((a) => norm(a) === t)) return r.id;
-  let best: { id: string; len: number } | null = null;
-  for (const r of activeRows) {
-    for (const term of [...Object.values(r.name), ...Object.values(r.aliases).flat()]) {
-      const n = norm(term);
-      const len = [...n].length;
-      if (len >= 2 && t.includes(n) && (!best || len > best.len)) best = { id: r.id, len };
-    }
-  }
-  if (best) return best.id;
-  const fuzzy = pickCandidates(text, dictRows);
-  return fuzzy.length === 1 ? (fuzzy[0]?.id ?? null) : null;
 }
 
 // 字典裡名稱或別名（兩個字以上）出現在話裡的食材

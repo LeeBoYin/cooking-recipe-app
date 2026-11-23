@@ -74,7 +74,7 @@ export const EXPAND_CASES: ExpandCase[] = [
         techniques: ['pan-fry'], equipment: ['frying-pan'],
       }),
     }),
-    expectation: '食材大多取自手邊；步驟順；用平底鍋煎；小提醒（如果有）是失敗關鍵。',
+    expectation: '食材大多取自手邊；步驟順；用平底鍋煎；「煎成一片蛋皮」這類量詞描述可以寫；小提醒（如果有）是失敗關鍵。',
     assert: (d) => [
       ...(d.steps.length < 3 ? ['步驟太少'] : []),
       ...d.steps.flatMap((s) => (s.techniques ?? []).filter((t) => !['pan-fry', 'stir-fry', 'boil'].includes(t)).map((t) => `手法 ${t} 不在預期內`)),
@@ -95,7 +95,7 @@ export const EXPAND_CASES: ExpandCase[] = [
         techniques: ['stir-fry'], equipment: ['wok'],
       }),
     }),
-    expectation: '沒有蝦、花生（含蝦醬、花生粉、花生油）；食材名稱都對得到字典；雞肉要煮熟（小提醒由程式附上）。',
+    expectation: '沒有蝦、花生（含蝦醬、花生粉、花生油）；食材名稱都對得到字典（白米飯、白飯對到白米）；雞肉要煮熟（小提醒由程式附上）。',
     assert: (d) => [
       ...mentions(d, ['蝦', '花生']),
       ...d.ingredients.filter((i) => i.ingredientId === null).map((i) => `${i.name} 對不到字典`),
@@ -137,7 +137,7 @@ export const EXPAND_CASES: ExpandCase[] = [
         techniques: ['steam'], equipment: ['tatung-rice-cooker'],
       }),
     }),
-    expectation: '全部用電鍋做完；步驟少、語氣輕鬆；不用爐子、烤箱、平底鍋。',
+    expectation: '全部用電鍋做完；步驟少、語氣輕鬆；不用爐子、烤箱、平底鍋；外鍋水寫「外鍋倒入半杯水」這類中文數字（不換成毫升）。',
     assert: (d) => [
       ...d.steps.flatMap((s) => (s.equipmentTypeIds ?? []).filter((e) => e !== 'tatung-rice-cooker').map((e) => `用了沒有的廚具 ${e}`)),
       ...d.steps.flatMap((s) => (s.techniques ?? []).filter((t) => !['steam', 'boil', 'toss'].includes(t)).map((t) => `電鍋做不到的手法 ${t}`)),
