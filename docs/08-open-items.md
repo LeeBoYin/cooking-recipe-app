@@ -104,9 +104,6 @@
 | 項目 | 說明 | 何時做 |
 |------|------|--------|
 | 真的 Claude 評估：首頁點子、展開做法 | 兩組評估集（`spikes/README.md` 06、08）寫好了，但從來沒用真的 Claude 跑過。跑法見該檔 | M1b-01 開工前（當作改 L1 前的基準） |
-| 和大廚聊聊：「沒有了，就這些」被誤讀 | 食材那一問答「沒有了，就這些」時，大廚誤以為是「連廚房裡其他的也算進來」，最後的點子漏掉說過的高麗菜與蛋。處理：提示詞明寫這句話的意思（只用剛剛提到的） | M1b-06 |
-| 和大廚聊聊：別名沒對到字典 | 「筍子」是字典的別名，模型在 `mentioned_ingredients` 卻回 `ingredientId: null`，「用到提到的食材」的檢查就驗不了。處理：改由程式用字典（完全相同 → 別名 → 模糊比對）對提到的文字，不信任模型給的 ID | M1b-06 |
-| 真的 Claude 評估：用說的（M1b-03） | 口述評估集 10 組寫好了（`spikes/README.md` 10），Sonnet 5.5 與 Haiku 5.5 各跑一次，比「守住作者填的內容」「沒亂補」，差距小就把 `dictation` 改用 Haiku。使用者在本機用自己的金鑰跑 | M1b-03 合併前 |
 | Google 登入設定 | 程式已完成（M1a-01b、M1a-02）。要使用者自己在 Google Cloud 建 OAuth 用戶端（授權的來源 `https://tsu-siann.today`，測試專案加 `https://staging.tsu-siann.today`），並在 Supabase Auth 開啟 Google、設定 Site URL 與重新導向網址，並啟用「建立使用者前」hook | 正式邀請前 |
 | 背景食材正規化的測試站驗證 | `background-jobs` 的 `normalize_ingredients` 任務真的呼叫 Claude（Haiku）還沒在測試站驗過；由使用者手動在測試站加一個字典對不到的食材、看對應是否寫進全站對應 | 隨時，越早越好 |
 | iPhone 實機確認 | 和大廚聊聊的鍵盤避開（M1a-09h）、頁面轉場與 Safari 手勢返回（M1a-09i）還沒用 iPhone 確認，使用者自己用的時候順便看 | 自己用的期間 |
