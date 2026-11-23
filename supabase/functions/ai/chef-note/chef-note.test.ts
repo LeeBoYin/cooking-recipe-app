@@ -65,6 +65,9 @@ Deno.test('檢查：長度、次數與頻率、催促、驚嘆號與問句都擋
   assertEquals(checkChefNote({ note: 'Eight cloves of garlic is a bold call.' }), null);
   assertEquals(checkChefNote({ note: '烤到硬梆梆還能笑翻全家，下次可以先看看時間。' }), null); // 評估 05 的輸出
   assertEquals(checkChefNote({ note: '可以試試少放一點糖。' }), null);
+  for (const bad of ['要記得翻面。', '記得要關火。', '記得先熱鍋。', '別忘了關火。']) assertEquals(checkChefNote({ note: bad }), null, bad);
+  const e05 = '烤過頭變成石頭還能全家笑翻，這份手工餅乾的故事比味道更讓人記得。'; // 第二次評估 05 的輸出
+  assertEquals(checkChefNote({ note: e05 }), e05);
   assertEquals(checkChefNote({ note: '蒜放了八瓣 garlic，一定很香。' }), '蒜放了八瓣 garlic，一定很香。'); // 夾英文食材名可以
   assertEquals(checkChefNote(null), null);
   assertEquals(checkChefNote({ note: 3 }), null);

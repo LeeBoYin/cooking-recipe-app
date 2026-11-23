@@ -2,7 +2,7 @@
 // 1. 自動測試（expand.test.ts）：用假的 AI 回應，測「檢查擋得下違規的做法」與整條流程，進 CI。
 // 2. 手動實跑（run.ts）：真的呼叫 Claude，看步驟合不合理、口吻對不對；不進 CI（要花錢，也需要人打分）。
 // 全部是假的資料，沒有任何真實使用者的內容。
-import type { AiIdea, RecipeDraft } from '../../../../../packages/core/src/index.ts';
+import { isPlainSafeIngredient, type AiIdea, type RecipeDraft } from '../../../../../packages/core/src/index.ts';
 import { ctx, eq, FREQ, likes, NOW, pantry } from '../../home/eval/cases.ts';
 import type { HomeEnv } from '../../home/env.ts';
 import type { HomeContextRow } from '../../home/types.ts';
@@ -95,10 +95,10 @@ export const EXPAND_CASES: ExpandCase[] = [
         techniques: ['stir-fry'], equipment: ['wok'],
       }),
     }),
-    expectation: '沒有蝦、花生（含蝦醬、花生粉、花生油）；食材名稱都對得到字典（白米飯、白飯對到白米）；雞肉要煮熟（小提醒由程式附上）。',
+    expectation: '沒有蝦、花生（含蝦醬、花生粉、花生油）；食材名稱都對得到字典（水不用，在白名單；白米飯、白飯對到白米）；雞肉要煮熟（小提醒由程式附上）。',
     assert: (d) => [
       ...mentions(d, ['蝦', '花生']),
-      ...d.ingredients.filter((i) => i.ingredientId === null).map((i) => `${i.name} 對不到字典`),
+      ...d.ingredients.filter((i) => i.ingredientId === null && !isPlainSafeIngredient(i.name)).map((i) => `${i.name} 對不到字典`),
       ...(d.tips?.includes('{{temp:') ? [] : ['沒有附上雞肉的中心溫度提醒']),
     ],
   },
