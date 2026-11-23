@@ -96,6 +96,8 @@ Deno.test('檢查擋得下違規：整份不用，不只刪掉違規的那一項
   bad(allergic, goodRaw({ ingredients: [ing('雞腿肉'), ing('蝦仁')] }), 'allergen', 'allergen_unknown_ingredient');
   bad(allergic, goodRaw({ ingredients: [ing('雞腿肉'), ing('白蝦')] }), 'allergen', 'allergen_unknown_ingredient');
   bad(allergic, goodRaw({ ingredients: [ing('雞腿肉'), ing('神祕調味粉')] }), 'allergen_unknown_ingredient');
+  // 安全用途只認名稱或別名完全相同：「包含」會把沒收的說法對到不相干的食材
+  bad(allergic, goodRaw({ ingredients: [ing('雞腿肉'), ing('特調高湯')] }), 'allergen_unknown_ingredient'); // 含「高湯」不等於雞高湯
   // 食材清單乾淨，但步驟裡還寫著花生：整份不用
   bad(allergic, goodRaw({ ingredients: [ing('雞腿肉')], steps: [step('起鍋前撒上花生碎。')] }), 'keyword');
   bad(env05, goodRaw({ ingredients: [ing('雞蛋', { unit: 'oz' })] }), 'format');
@@ -396,4 +398,25 @@ Deno.test('過敏的人：食材名稱用字典比對（白米飯、白飯對得
   const unknown = checkDraft(goodRaw({ ingredients: [ing('雞腿肉'), ing('神祕調味粉')], ...noSteps }), env, opts);
   assertEquals(unknown.ok, false);
   if (!unknown.ok) assert('allergen_unknown_ingredient' in unknown.problems);
+});
+
+Deno.test('過敏原比對：只認名稱或別名完全相同；水與蒜泥照常通過；柴魚高湯是魚', () => {
+  const peanut = envOf(caseOf('03')); // 對蝦、花生過敏
+  // 評估 03 的實際輸出：「水」對不到字典，整篇被擋（修正前）
+  const evalIngredients = ['雞腿肉', '九層塔', '辣椒', '大蒜', '魚露', '醬油', '糖', '水', '食用油', '白米飯'];
+  const r = checkDraft(goodRaw({ ingredients: evalIngredients.map((n) => ing(n)), steps: [step('雞腿肉切丁，加魚露炒熟，拌進白米飯。')] }), peanut, { ...opts, makeId: ids() });
+  assert(r.ok, JSON.stringify(r.ok ? {} : r.problems));
+  assertEquals(r.ok && r.draft.ingredients.find((i) => i.name === '水')?.ingredientId, null);
+  for (const n of ['蒜泥', '蒜末', '冰塊', '清水']) assert(checkDraft(goodRaw({ ingredients: [ing(n)], steps: [step('拌勻。')] }), peanut, { ...opts, makeId: ids() }).ok, n);
+  // 對魚過敏：柴魚高湯要擋（修正前被當成雞高湯放行）
+  const fish = buildHomeEnv({ ...caseOf('03').ctx, dietary: { allergen_ids: ['fish'], restriction_ids: [], dislike_ingredient_ids: [], no_cooking_alcohol: false } }, NOW);
+  const dashi = checkDraft(goodRaw({ ingredients: [ing('柴魚高湯')], steps: [step('煮開。')] }), fish, { ...opts, makeId: ids() });
+  assertEquals(dashi.ok, false);
+  if (!dashi.ok) assert('allergen' in dashi.problems || 'keyword' in dashi.problems, JSON.stringify(dashi.problems));
+  // 蛋奶素：柴魚高湯要擋
+  const veg = buildHomeEnv({ ...caseOf('03').ctx, dietary: { allergen_ids: [], restriction_ids: ['vegetarian'], dislike_ingredient_ids: [], no_cooking_alcohol: false } }, NOW);
+  assertEquals(checkDraft(goodRaw({ ingredients: [ing('柴魚高湯')], steps: [step('煮開。')] }), veg, { ...opts, makeId: ids() }).ok, false);
+  // 字典：柴魚高湯是自己的項目、帶魚的過敏原
+  assertEquals(resolveIngredientId('柴魚高湯'), 'dashi-stock');
+  assertEquals(resolveIngredientId('蒜泥'), 'garlic');
 });

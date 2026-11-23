@@ -38,7 +38,7 @@ export {
   parseIngredient, renderIngredient, ingredientName, haveInKitchen, type QuantityToken, type IngredientSegment, type StoredQuantity,
 } from './units/ingredient-text.ts';
 export {
-  buildIngredientIndex, matchIngredient, parseIngredientLine, parseIngredientLineNamed, type DictIngredient, type IngredientIndex, type ParsedIngredient,
+  buildIngredientIndex, isPlainSafeIngredient, matchIngredient, matchIngredientExact, parseIngredientLine, parseIngredientLineNamed, type DictIngredient, type IngredientIndex, type ParsedIngredient,
 } from './units/ingredient-line.ts';
 export { formatRecipeText, type RecipeTextInput, type RecipeTextLabels } from './share/recipe-text.ts';
 export * from './track/events.ts';

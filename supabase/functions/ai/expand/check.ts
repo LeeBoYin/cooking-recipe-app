@@ -1,9 +1,8 @@
 // 展開好的做法的程式再檢查（03〈安全與信任〉）：過敏原、飲食限制、不吃的食材、安全規則、手法與廚具、單位與數字。
 // 任何一項不合格，整份不用（不只刪掉違規的食材，因為步驟裡可能還寫著它）。純函式：評估集與單元測試餵假的 AI 回應。
 // 紀錄只留原因與數量，不含內容。
-import { matchIngredient, newId, violatesLimits, type DraftIngredient, type DraftStep, type RecipeDraft, type UnitCode } from '../../../../packages/core/src/index.ts';
+import { isPlainSafeIngredient, matchIngredientExact, newId, violatesLimits, type DraftIngredient, type DraftStep, type RecipeDraft, type UnitCode } from '../../../../packages/core/src/index.ts';
 import { donenessFor, sousVideDwellSeconds, sousVidePresetsFor, sousVideRulesFor, sousVideTempMark, type SousVidePreset } from '../../../../packages/equipment/src/index.ts';
-import { resolveIngredientId } from '../../_shared/ingredient-resolve.ts';
 import { includesAny } from '../home/check.ts';
 import { ideaIngredients, ingredientIndex, type HomeEnv } from '../home/env.ts';
 import { sousVideIngredientsOk } from '../home/sous-vide.ts';
@@ -71,8 +70,8 @@ export function checkDraft(raw: RawDraft, env: HomeEnv, opts: { servings: number
     if (r.amount_max !== null && !(isNum(r.amount_max) && r.amount !== null && r.amount_max > r.amount && r.amount_max <= 5000)) { flag('unit'); continue; }
     if (r.group !== null && !isStr(r.group, 1, 10)) { flag('format'); continue; }
     const name = r.name.trim();
-    const ingredientId = matchIngredient(name, ingredientIndex) ?? resolveIngredientId(name, { fuzzy: false });
-    if (ingredientId === null && hasAllergens) { flag('allergen_unknown_ingredient'); continue; }
+    const ingredientId = matchIngredientExact(name, ingredientIndex) ?? null;
+    if (ingredientId === null && hasAllergens && !isPlainSafeIngredient(name)) { flag('allergen_unknown_ingredient'); continue; }
     if (ingredientId) ids.push(ingredientId);
     hardTexts.push(name);
     ingredients.push({
