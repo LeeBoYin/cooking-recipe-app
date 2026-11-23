@@ -39,8 +39,8 @@ const ids = () => { let n = 0; return () => `id-${++n}`; };
 const check = (env: HomeEnv, suggestions: RawIdea[], comment = '好吃就好。') =>
   checkHomeOutput({ suggestions, chef_comment: comment }, env, { makeId: ids() });
 
-Deno.test('評估集：10 組資料都組得出來；只有新帳號被新手門檻擋下', () => {
-  assertEquals(EVAL_CASES.length, 10);
+Deno.test('評估集：14 組資料都組得出來；只有新帳號被新手門檻擋下', () => {
+  assertEquals(EVAL_CASES.length, 14);
   for (const c of EVAL_CASES) {
     const env = buildHomeEnv(c.ctx, c.now ?? NOW);
     assertEquals(env.notEnough, !c.callsAi, c.id);
@@ -340,4 +340,42 @@ Deno.test('排除清單裡的食材不給 AI 看', () => {
   const ids = env.pantry.map((p) => p.id);
   for (const id of ['beef-slices', 'rice-wine', 'mirin']) assertEquals(ids.includes(id), false, id);
   assertEquals(ids.includes('pork-slices'), true);
+});
+
+Deno.test('L1 考慮廚具（M1b-01）：沒有炸鍋但有平底鍋，炸物有替代手法（半煎炸）；只有電鍋就排除', () => {
+  const titles = (env: HomeEnv) => env.pool.ideas.filter((i) => i.source === 'dish').map((i) => i.title);
+  const pan = envOf('12');
+  assertEquals(pan.owned?.some((o) => o.equipmentTypeId === 'frying-pan'), true);
+  // 12 的口味維度在字典裡不一定都有，所以直接檢查可行性判斷，而不是看分數
+  assertEquals(pan.input.canDoTechnique('deep-fry'), true);
+  assertEquals(pan.input.canDoTechnique('sous-vide'), false);
+  const cooker = envOf('01');
+  assertEquals(cooker.input.canDoTechnique('deep-fry'), false);
+  assertEquals(cooker.input.canDoTechnique('roast'), false);
+  assertEquals(cooker.input.canDoTechnique('knead'), true); // 手揉不需要廚具
+  assert(titles(cooker).every((t) => !['日式炸雞', '炸豬排', '烤雞腿與馬鈴薯'].includes(t)));
+  // 廚房沒記廚具時不檢查
+  const none = buildHomeEnv({ ...byId('09').ctx, equipment: [] }, NOW);
+  assertEquals(none.input.canDoTechnique('deep-fry'), null);
+});
+
+Deno.test('換手法的程式檢查：點子用的手法與廚具要是使用者做得到、有的（替代做法只管候選，不放寬點子）', () => {
+  const env = envOf('13');
+  const ok = check(env, [idea(env, { slot: 'twist', title: '烤箱烤雞胸', techniques: ['roast'], equipment: ['oven'] })]);
+  assertEquals(ok.ideas.length, 1);
+  const cooker = envOf('11');
+  const r = check(cooker, [
+    idea(cooker, { slot: 'twist', title: '烤雞腿', techniques: ['roast'], equipment: ['microwave'] }),
+    idea(cooker, { slot: 'adventure', title: '氣炸雞腿', techniques: ['steam'], equipment: ['air-fryer'] }),
+  ]);
+  assertEquals(r.ideas.length, 0);
+  assertEquals(r.dropped.technique, 1);
+  assertEquals(r.dropped.equipment, 1);
+});
+
+Deno.test('提示詞：換手法的策略只用在變化版與新挑戰；舒肥由提示詞禁止（時間溫度只在展開做法時由預設組合表帶入）', () => {
+  assert(HOME_IDEAS_STABLE.includes('換手法（只用在 twist 與 adventure，familiar 不換）'));
+  assert(HOME_IDEAS_STABLE.includes('不要用舒肥或任何需要精準溫度與時間的做法'));
+  const env = envOf('14');
+  assert(env.techniqueEnum.includes('sous-vide')); // 有舒肥機：手法在清單裡，是否推薦由提示詞決定
 });

@@ -70,7 +70,7 @@ export function photoInputs(rows: Photo[]): RecipePhotoInput[] {
 }
 
 // changedBy：這次存檔留下的版本是誰改的（已發佈的食譜才留版本）；不給就是作者自己
-export type SaveOptions = { private?: RecipePrivatePatch; photos?: RecipePhotoInput[]; changedBy?: 'author' | 'ai_dictation' };
+export type SaveOptions = { private?: RecipePrivatePatch; photos?: RecipePhotoInput[]; changedBy?: 'author' | 'ai_dictation' | 'ai_refine' };
 
 // 作者的私人資料：口述原文、一起吃的人
 export type RecipePrivatePatch = { dictation?: Dictation | null; diners?: Diner[] };

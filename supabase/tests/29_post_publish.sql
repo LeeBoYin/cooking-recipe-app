@@ -2,7 +2,7 @@
 -- 發佈與做法改了排隊 post_publish（發佈不受影響、背景回填不排隊）；回報標籤與難易度的規則（author 不蓋、使用者確認過的標籤不蓋、
 -- 讀取後又被改過就重排）；自己的食譜寫好標籤才計入口味；ai_suggestion_cache.kind 沒有 observation
 begin;
-select plan(38);
+select plan(40);
 
 create function tests.save(p jsonb, p_photos jsonb default null)
 returns public.recipes
@@ -164,6 +164,9 @@ reset role;
 -- 四、ai_suggestion_cache.kind
 ---------------------------------------------------------------------------
 select throws_ok(format($$insert into public.ai_suggestion_cache (id, user_id, kind, input_hash, payload, expires_at) values ('%s', '%s', 'observation', 'hhhhhhhh', '{}', now() + interval '1 day')$$, private.uuid_v7(), :'alice'), '23514', null, 'kind 沒有 observation');
+
+select ok(private.product_event_names() @> array['record.chef_note', 'recipe.refine_by_voice'], '事件白名單同時有 record.chef_note 與 recipe.refine_by_voice');
+select ok(private.product_event_names() @> array['record.dictation_used', 'record.ai_filled', 'recipe.revision_restored', 'import.finished'], '事件白名單沒有掉既有的事件');
 
 select * from finish();
 rollback;

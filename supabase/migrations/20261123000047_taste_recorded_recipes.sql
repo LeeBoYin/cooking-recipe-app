@@ -3,7 +3,7 @@
 -- 一、taste_profile_snapshots.sources 多一個選填的 recorded（算進來的自己的食譜數）。
 -- 二、recipes 的標籤、亮點、狀態、刪除一改，由觸發器把作者的口味檔案標成過期。
 -- 三、taste_recorded_recipes：重算口味時讀自己的食譜（只給 ai 函式）。
--- 四、產品事件白名單加 record.chef_note（大廚的一句話顯示了沒有，只記結果）。
+-- 四、產品事件白名單加 record.chef_note（大廚的一句話顯示了沒有，只記結果）；清單要包含 45 的 recipe.refine_by_voice 與其他既有事件。
 
 alter table public.taste_profile_snapshots drop constraint taste_profile_snapshots_data_check;
 alter table public.taste_profile_snapshots add constraint taste_profile_snapshots_data_check check (extensions.jsonb_matches_schema(
@@ -99,7 +99,7 @@ as $$
     'app.open', 'screen.view',
     'record.start', 'record.publish', 'record.abandon', 'record.draft_saved', 'record.draft_published',
     'record.dictation_used', 'record.ai_filled', 'record.chef_note',
-    'recipe.revision_restored', 'import.finished',
+    'recipe.revision_restored', 'recipe.refine_by_voice', 'import.finished',
     'chat.start', 'chat.message_sent',
     'suggestion.shown', 'suggestion.opened', 'suggestion.bookmarked', 'suggestion.recorded',
     'onboarding.step', 'taste.answered', 'settings.changed', 'error'

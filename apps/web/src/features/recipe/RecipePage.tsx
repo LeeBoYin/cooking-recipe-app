@@ -202,6 +202,14 @@ export function RecipePage() {
             </button>
             <Link
               to={`/recipes/${r.id}/edit`}
+              state={{ openRefine: true }}
+              aria-label={intl.formatMessage({ id: 'dictation.openAgain' })}
+              className="flex size-11 items-center justify-center rounded-card bg-transparent text-ink no-underline"
+            >
+              <Icon name="mic" />
+            </Link>
+            <Link
+              to={`/recipes/${r.id}/edit`}
               aria-label={intl.formatMessage({ id: 'recipe.view.edit' })}
               className="flex size-11 items-center justify-center rounded-card bg-transparent text-ink no-underline"
             >

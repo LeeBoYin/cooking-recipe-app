@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "source": "docs/07-equipment-techniques.md 三、替代做法",
+  "substitutes": [
+    {
+      "id": "sous-vide-warm-water",
+      "technique": "sous-vide",
+      "missing": "舒肥機",
+      "use": "大鍋溫水＋料理溫度計，持續監看、補熱水",
+      "limit": "必須有溫度計；控溫不穩，只推薦短時間的組合（見 SR-sous-vide）。電鍋保溫溫度無法掌握，不列為替代做法",
+      "needs": {
+        "allEquipment": [
+          "thermometer"
+        ],
+        "anyEquipment": [
+          "stockpot",
+          "dutch-oven",
+          "wok"
+        ]
+      },
+      "safetyRuleId": "SR-sous-vide",
+      "shortOnly": true
+    },
+    {
+      "id": "sous-vide-multi-cooker",
+      "technique": "sous-vide",
+      "missing": "舒肥機",
+      "use": "萬用鍋的低溫模式",
+      "limit": "只限使用者有勾選「低溫模式」的機型",
+      "needs": {
+        "anyEquipment": [
+          "multi-cooker"
+        ],
+        "enabledOptional": "sous-vide"
+      },
+      "safetyRuleId": "SR-sous-vide"
+    },
+    {
+      "id": "air-fry-oven",
+      "technique": "air-fry",
+      "missing": "氣炸鍋",
+      "use": "烤箱熱風模式，食材放烤網上墊高",
+      "limit": "時間稍長，口感接近",
+      "needs": {
+        "anyEquipment": [
+          "oven"
+        ],
+        "enabledOptional": "air-fry"
+      }
+    },
+    {
+      "id": "air-fry-toaster-oven",
+      "technique": "air-fry",
+      "missing": "氣炸鍋",
+      "use": "小烤箱",
+      "limit": "只適合小份量，上色較不均",
+      "needs": {
+        "anyEquipment": [
+          "toaster-oven"
+        ]
+      }
+    },
+    {
+      "id": "deep-fry-pot",
+      "technique": "deep-fry",
+      "missing": "電炸鍋",
+      "use": "炒鍋或鑄鐵燉鍋",
+      "limit": "須遵守 SR-deep-fry",
+      "needs": {
+        "anyEquipment": [
+          "wok",
+          "dutch-oven"
+        ]
+      },
+      "safetyRuleId": "SR-deep-fry"
+    },
+    {
+      "id": "deep-fry-lighter",
+      "technique": "deep-fry",
+      "missing": "炸鍋類全無",
+      "use": "改成氣炸或半煎炸",
+      "limit": "口感不同，推薦時要說明",
+      "needs": {
+        "anyTechnique": [
+          "air-fry",
+          "pan-fry"
+        ]
+      }
+    },
+    {
+      "id": "steam-pot",
+      "technique": "steam",
+      "missing": "蒸籠",
+      "use": "電鍋；或炒鍋、湯鍋加蒸架",
+      "limit": "無",
+      "needs": [
+        {
+          "anyEquipment": [
+            "tatung-rice-cooker"
+          ]
+        },
+        {
+          "allEquipment": [
+            "steaming-rack"
+          ],
+          "anyEquipment": [
+            "wok",
+            "stockpot"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "steam-microwave",
+      "technique": "steam",
+      "missing": "蒸具全無",
+      "use": "微波爐，容器加少量水、蓋上可微波的蓋子",
+      "limit": "只適合少量蔬菜、蛋類",
+      "needs": {
+        "anyEquipment": [
+          "microwave"
+        ]
+      },
+      "safetyRuleId": "SR-microwave"
+    },
+    {
+      "id": "blend-machine",
+      "technique": "blend",
+      "missing": "調理機",
+      "use": "手持攪拌棒、食物處理機、果汁機",
+      "limit": "果汁機打濃稠的東西較吃力",
+      "needs": {
+        "anyEquipment": [
+          "immersion-blender",
+          "food-processor",
+          "juicer-blender"
+        ]
+      }
+    },
+    {
+      "id": "blend-manual",
+      "technique": "blend",
+      "missing": "機器全無",
+      "use": "研磨缽、手拉切碎器或刀剁",
+      "limit": "只適合少量",
+      "needs": {
+        "anyEquipment": [
+          "mortar-pestle",
+          "pull-chopper",
+          "chef-knife",
+          "cleaver"
+        ]
+      }
+    },
+    {
+      "id": "whip-whisk",
+      "technique": "whip",
+      "missing": "電動打蛋器",
+      "use": "手動打蛋器",
+      "limit": "很費力；大廚會在旁邊幫你加油",
+      "needs": {
+        "anyEquipment": [
+          "whisk"
+        ]
+      }
+    },
+    {
+      "id": "knead-hand",
+      "technique": "knead",
+      "missing": "麵包機、攪拌機",
+      "use": "手揉",
+      "limit": "無",
+      "needs": {}
+    },
+    {
+      "id": "torch-sear-oven",
+      "technique": "torch-sear",
+      "missing": "噴槍",
+      "use": "烤箱上火；或鑄鐵鍋大火快速煎表面",
+      "limit": "效果較不集中",
+      "needs": {
+        "anyEquipment": [
+          "oven",
+          "cast-iron-skillet"
+        ]
+      }
+    },
+    {
+      "id": "grill-pan",
+      "technique": "grill",
+      "missing": "烤肉架、電烤盤",
+      "use": "橫紋煎鍋、鑄鐵平底鍋",
+      "limit": "沒有炭火香",
+      "needs": {
+        "anyEquipment": [
+          "grill-pan",
+          "cast-iron-skillet"
+        ]
+      }
+    },
+    {
+      "id": "smoke-wok-tea",
+      "technique": "smoke",
+      "missing": "煙燻槍",
+      "use": "炒鍋茶燻：鍋底鋪鋁箔，放糖、茶葉、米，架上食材加蓋",
+      "limit": "須遵守 SR-smoke",
+      "needs": {
+        "anyEquipment": [
+          "wok"
+        ]
+      },
+      "safetyRuleId": "SR-smoke"
+    },
+    {
+      "id": "bake-small",
+      "technique": "bake",
+      "missing": "烤箱",
+      "use": "氣炸鍋、電子鍋蛋糕模式、小烤箱",
+      "limit": "只適合小份量；成品口感不同",
+      "needs": [
+        {
+          "anyEquipment": [
+            "air-fryer",
+            "toaster-oven"
+          ]
+        },
+        {
+          "anyEquipment": [
+            "electric-rice-cooker"
+          ],
+          "enabledOptional": "bake"
+        }
+      ]
+    },
+    {
+      "id": "dehydrate-oven",
+      "technique": "dehydrate",
+      "missing": "乾果機",
+      "use": "烤箱最低溫；或氣炸鍋烘乾模式",
+      "limit": "耗電、時間長",
+      "needs": {
+        "anyEquipment": [
+          "oven",
+          "air-fryer"
+        ]
+      }
+    },
+    {
+      "id": "ferment-warm-box",
+      "technique": "ferment",
+      "missing": "發酵模式",
+      "use": "關機的烤箱或微波爐裡放一杯熱水，把麵團放進去",
+      "limit": "溫度較不穩，時間要靠觀察",
+      "needs": {
+        "anyEquipment": [
+          "oven",
+          "microwave"
+        ]
+      }
+    },
+    {
+      "id": "vacuum-water-displacement",
+      "technique": "vacuum-seal",
+      "missing": "真空封口機",
+      "use": "排水法：夾鏈袋裝好後慢慢壓進水裡，把空氣擠出再封口",
+      "limit": "真空度較低",
+      "needs": {}
+    },
+    {
+      "id": "pressure-cook-long-simmer",
+      "technique": "pressure-cook",
+      "missing": "壓力鍋、萬用鍋",
+      "use": "鑄鐵燉鍋、砂鍋或電鍋長時間燉煮",
+      "limit": "時間會拉長很多",
+      "needs": {
+        "anyEquipment": [
+          "dutch-oven",
+          "clay-pot",
+          "tatung-rice-cooker"
+        ]
+      }
+    }
+  ]
+}
