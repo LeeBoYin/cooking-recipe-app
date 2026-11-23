@@ -1,23 +1,64 @@
+import { useLayoutEffect, useRef, useState } from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
 import type { ChatMention } from '@zhusha/core';
-import { mainIngredientTags, mentionUsed, type IdeaView } from './ideaView.ts';
+import { fitTagCount, mainIngredientNames, mentionUsed, type IdeaView } from './ideaView.ts';
 
-// 點子卡片的標籤列（首頁、對話、收藏共用）：主要食材最多 3 個加「+N」；沒有食材時放難易度
+// 點子卡片的標籤列（首頁、對話、收藏共用）：主要食材只排一行、不換行，依實際寬度放得下幾個放幾個，其餘算進「+N」；沒有食材時放難易度
+const TAG = 'whitespace-nowrap rounded-tag bg-green-soft px-2 py-0.5 text-small font-bold text-green';
+const GAP = 4; // gap-1
+
 export function IdeaTags({ view, tone = 'surface' }: { view: Pick<IdeaView, 'ingredients' | 'difficulty'>; tone?: 'surface' | 'bg' }) {
-  const { names, extra } = mainIngredientTags(view);
+  const names = mainIngredientNames(view);
+  const key = names.join('\u0000');
+  const wrap = useRef<HTMLSpanElement>(null);
+  const measure = useRef<HTMLSpanElement>(null);
+  const [count, setCount] = useState(names.length);
+
+  useLayoutEffect(() => {
+    const w = wrap.current;
+    const m = measure.current;
+    if (!w || !m) return;
+    const calc = () => {
+      const kids = [...m.children] as HTMLElement[];
+      const moreEl = kids.pop();
+      const widths = kids.map((k) => k.getBoundingClientRect().width);
+      const moreW = moreEl?.getBoundingClientRect().width ?? 0;
+      setCount(fitTagCount(widths, w.clientWidth, GAP, () => moreW));
+    };
+    calc();
+    const ro = new ResizeObserver(calc);
+    ro.observe(w);
+    return () => ro.disconnect();
+  }, [key]);
+
   if (names.length > 0) {
+    const shown = Math.min(count, names.length);
+    const extra = names.length - shown;
     return (
-      <span className="mt-0.5 flex flex-wrap gap-1">
-        {names.map((name) => (
-          <span key={name} className="whitespace-nowrap rounded-tag bg-green-soft px-2 py-0.5 text-small font-bold text-green">
-            {name}
+      <span ref={wrap} className="relative mt-0.5 block min-w-0 max-w-full">
+        <span className="flex flex-nowrap gap-1 overflow-hidden">
+          {names.slice(0, shown).map((name) => (
+            <span key={name} className={`${TAG} min-w-0 flex-none`}>
+              {name}
+            </span>
+          ))}
+          {extra > 0 && (
+            <span className={`${TAG} flex-none`}>
+              <FormattedMessage id="home.ideas.tagMore" values={{ count: extra }} />
+            </span>
+          )}
+        </span>
+        {/* 量寬度用：全部的標籤加上最寬的「+N」，看不見也不佔位 */}
+        <span ref={measure} aria-hidden="true" className="pointer-events-none invisible absolute top-0 left-0 flex h-0 gap-1 overflow-hidden">
+          {names.map((name) => (
+            <span key={name} className={`${TAG} flex-none`}>
+              {name}
+            </span>
+          ))}
+          <span className={`${TAG} flex-none`}>
+            <FormattedMessage id="home.ideas.tagMore" values={{ count: names.length }} />
           </span>
-        ))}
-        {extra > 0 && (
-          <span className="whitespace-nowrap rounded-tag bg-green-soft px-2 py-0.5 text-small font-bold text-green">
-            <FormattedMessage id="home.ideas.tagMore" values={{ count: extra }} />
-          </span>
-        )}
+        </span>
       </span>
     );
   }

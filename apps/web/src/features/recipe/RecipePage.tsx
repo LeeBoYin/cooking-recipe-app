@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { FormattedMessage, useIntl } from 'react-intl';
-import { Link, Navigate, useLocation, useParams } from 'react-router';
+import { Link, Navigate, useLocation, useNavigate, useParams } from 'react-router';
 import { DIFFICULTY_FACETS, difficultyOverall, formatRecipeText, formatTemperature, haveInKitchen, parseMeasurePref, parseTemperaturePref, renderIngredient, UNIT_CODES, type UnitLabels } from '@zhusha/core';
 import { getIngredient } from '@zhusha/ingredients';
 import type { RecipeIngredient, RecipeStep, RecipeVisibility } from '@zhusha/shared-types';
@@ -9,7 +9,7 @@ import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
 import type { RecipeSource } from '@zhusha/shared-types';
 import { fetchChefNote } from '../../data/ai.ts';
-import { queryKeys, useCurrentKitchen, useMySettings, useMyRecipes, usePantryItems, usePhotoUrls, useRecipe, useRecipePhotos, useRecipePrivate } from '../../data/hooks.ts';
+import { queryKeys, useCurrentKitchen, useDeleteRecipe, useMySettings, useMyRecipes, usePantryItems, usePhotoUrls, useRecipe, useRecipePhotos, useRecipePrivate } from '../../data/hooks.ts';
 import { track } from '../../data/track.ts';
 import { Icon } from '../shell/Icon.tsx';
 import { TopBar } from '../shell/SubPage.tsx';
@@ -80,6 +80,8 @@ export function RecipePage() {
   const [buyOpen, setBuyOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [revisionsOpen, setRevisionsOpen] = useState(false);
+  const navigate = useNavigate();
+  const remove = useDeleteRecipe();
   const toast = useToast();
   const settings = useMySettings();
   const { kitchen } = useCurrentKitchen();
@@ -215,7 +217,7 @@ export function RecipePage() {
             >
               <Icon name="edit" />
             </Link>
-            {r.status === 'published' && (
+            {(
               <div className="relative">
                 <button
                   type="button"
@@ -228,12 +230,26 @@ export function RecipePage() {
                 </button>
                 {menuOpen && (
                   <div className="absolute top-12 right-0 z-20 w-40 rounded-card bg-surface px-3 shadow-[0_2px_12px_rgba(43,38,34,0.12)]">
+                    {r.status === 'published' && (
+                      <button
+                        type="button"
+                        onClick={() => { setMenuOpen(false); setRevisionsOpen(true); }}
+                        className="h-12 w-full border-0 bg-transparent p-0 text-left text-body font-[inherit] text-ink"
+                      >
+                        <FormattedMessage id="recipe.revisions.menu" />
+                      </button>
+                    )}
+                    {/* 軟刪除，「我的 → 最近刪除」可以復原（版本紀錄跟著回來），所以不再確認 */}
                     <button
                       type="button"
-                      onClick={() => { setMenuOpen(false); setRevisionsOpen(true); }}
-                      className="h-12 w-full border-0 bg-transparent p-0 text-left text-body font-[inherit] text-ink"
+                      disabled={remove.isPending}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        remove.mutate(r.id, { onSuccess: () => void navigate('/recipes', { replace: true }) });
+                      }}
+                      className="h-12 w-full border-0 bg-transparent p-0 text-left text-body font-[inherit] text-error"
                     >
-                      <FormattedMessage id="recipe.revisions.menu" />
+                      <FormattedMessage id="recipe.view.delete" />
                     </button>
                   </div>
                 )}

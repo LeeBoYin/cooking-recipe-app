@@ -48,6 +48,42 @@ function useVisualViewportFit(root: React.RefObject<HTMLDivElement | null>): num
   return height;
 }
 
+// 手指在畫面上滑：只有「往那個方向還能捲」的區塊（訊息區、變高的輸入框）才放行，其餘一律擋下，不讓滑動傳到整個網頁。
+// 對話頁是 position: fixed、又每一格追著 visualViewport，網頁一被拉動，iOS 的橡皮筋與 visual viewport 位移就讓整頁看起來反向移動。
+// 打開時 html、body 也關掉 overscroll，離開時還原。
+function useContainTouchScroll(root: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    const html = document.documentElement;
+    const prev = [html.style.overscrollBehavior, document.body.style.overscrollBehavior] as const;
+    html.style.overscrollBehavior = 'none';
+    document.body.style.overscrollBehavior = 'none';
+    let startY = 0;
+    const onStart = (e: TouchEvent) => {
+      startY = e.touches[0]?.clientY ?? 0;
+    };
+    const onMove = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      const dy = (e.touches[0]?.clientY ?? 0) - startY; // >0：手指往下，內容要往上捲（看更早的）
+      for (let n = e.target as HTMLElement | null; n && n !== el.parentElement; n = n.parentElement) {
+        if (n.scrollHeight <= n.clientHeight + 1) continue;
+        const oy = getComputedStyle(n).overflowY;
+        if (oy !== 'auto' && oy !== 'scroll') continue;
+        if (dy > 0 ? n.scrollTop > 0 : n.scrollTop + n.clientHeight < n.scrollHeight - 1) return; // 還捲得動：放行
+      }
+      if (e.cancelable) e.preventDefault();
+    };
+    el.addEventListener('touchstart', onStart, { passive: true });
+    el.addEventListener('touchmove', onMove, { passive: false });
+    return () => {
+      el.removeEventListener('touchstart', onStart);
+      el.removeEventListener('touchmove', onMove);
+      html.style.overscrollBehavior = prev[0];
+      document.body.style.overscrollBehavior = prev[1];
+    };
+  }, [root]);
+}
 
 export function ChatPage() {
   const intl = useIntl();
@@ -73,6 +109,7 @@ export function ChatPage() {
   const [hint, setHint] = useState<string | null>(null); // 這一輪大廚給的「接著說」提示；只留在這個畫面，重開就沒有
   const rootRef = useRef<HTMLDivElement>(null);
   const vv = useVisualViewportFit(rootRef);
+  useContainTouchScroll(rootRef);
 
   useEffect(() => {
     if (convId !== undefined || kitchenPending || !latest.isFetched) return;
@@ -177,7 +214,7 @@ export function ChatPage() {
         </button>
       </header>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-4">
+      <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto overscroll-contain px-3 py-4">
         {conv.isError ? (
           <p role="alert" className="m-0 text-caption text-ink-muted">
             <FormattedMessage id="chat.loadError" />
@@ -257,7 +294,7 @@ export function ChatPage() {
                 el.style.height = `${Math.min(el.scrollHeight, 144)}px`;
               }}
               placeholder={hint && !lastAsk ? intl.formatMessage({ id: 'chat.placeholderHint' }, { hint }) : intl.formatMessage({ id: 'chat.placeholder' })}
-              className="block max-h-36 min-h-11 w-full resize-none rounded-card border-0 bg-surface px-3 py-[11px] font-[inherit] text-[16px] leading-normal text-ink placeholder:text-ink-muted read-only:opacity-60"
+              className="block max-h-36 min-h-11 w-full resize-none overscroll-contain rounded-card border-0 bg-surface px-3 py-[11px] font-[inherit] text-[16px] leading-normal text-ink placeholder:text-ink-muted read-only:opacity-60"
             />
           </label>
           <button

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { replaceTempMarks, type AiIdea } from '@zhusha/core';
-import { ingredientBadges, mainIngredientTags, mentionUsed, renderMarks, viewOfAiIdea } from './ideaView.ts';
+import { fitTagCount, ingredientBadges, mainIngredientNames, mainIngredientTags, mentionUsed, renderMarks, viewOfAiIdea } from './ideaView.ts';
 
 const idea = (over: Partial<AiIdea> = {}): AiIdea => ({
   id: 'i1', slot: 'twist', title: '豆瓣醬燒茄子', why: '用{{temp:180:C}}煎到金黃。', candidateRef: null, usesPantryIds: ['eggplant', 'doubanjiang'], usesPriorityIds: ['eggplant'],
@@ -83,6 +83,38 @@ describe('主要食材標籤', () => {
   it('AI 點子：用到的廚房食材加上使用者說的', () => {
     const v = viewOfAiIdea(idea({ usesMentionedIds: ['tofu'] }), { unit: 'C', both: false });
     expect(mainIngredientTags(v).names).toHaveLength(3);
+  });
+});
+
+describe('fitTagCount（標籤一行放得下幾個）', () => {
+  const more = (n: number) => (n >= 10 ? 30 : 24);
+  it('全部放得下就全放，不留「+N」', () => {
+    expect(fitTagCount([40, 40, 40], 128, 4, more)).toBe(3);
+  });
+  it('放不下時，「+N」的寬度也要算進去', () => {
+    // 3 個 40：全放要 128；放 2 個＋「+1」= 84+4+24 = 112
+    expect(fitTagCount([40, 40, 40], 120, 4, more)).toBe(2);
+    expect(fitTagCount([40, 40, 40], 111, 4, more)).toBe(1);
+  });
+  it('至少放 1 個，就算一個都塞不下', () => {
+    expect(fitTagCount([200, 40], 100, 4, more)).toBe(1);
+  });
+  it('「+N」依剩下的個數取寬度', () => {
+    const w = Array.from({ length: 12 }, () => 20);
+    // 放 n 個：n*20+(n-1)*4+4+more(12-n)；n=1 時剩 11 個→30
+    expect(fitTagCount(w, 80, 4, more)).toBe(2); // 2 個=44，+4+30=78 ≤ 80
+    expect(fitTagCount(w, 77, 4, more)).toBe(1);
+  });
+  it('沒有標籤回 0；量不到寬度時先全放', () => {
+    expect(fitTagCount([], 100, 4, more)).toBe(0);
+    expect(fitTagCount([40, 40], 0, 4, more)).toBe(2);
+  });
+});
+
+describe('mainIngredientNames', () => {
+  it('不設上限、去重', () => {
+    const ingredients = ['a', 'b', 'c', 'd', 'a'].map((n) => ({ id: n, name: n, have: true }));
+    expect(mainIngredientNames({ ingredients })).toEqual(['a', 'b', 'c', 'd']);
   });
 });
 
