@@ -5,7 +5,8 @@ import { useCurrentKitchen, usePantryItems, useRemovePantryItem, useUpdatePantry
 import type { PantryItem } from '../../data/pantry.ts';
 import { SubPage } from '../shell/SubPage.tsx';
 import { todayIn } from './dates.ts';
-import { ExpiryFields, type Expiry } from './ExpiryFields.tsx';
+import type { Expiry } from './ExpiryFields.tsx';
+import { ItemOptions } from './ItemOptions.tsx';
 import { displayName } from './labels.ts';
 import { ZoneSelect } from './ZoneSelect.tsx';
 import { ItemIcon } from '../../icons/ItemIcon.tsx';
@@ -35,32 +36,21 @@ function Form({ item, today, kitchenId }: { item: PantryItem; today: string; kit
 
   return (
     <div className="flex flex-col gap-4 pb-24">
-      <h2 className="m-0 font-round text-heading font-bold">
-        <ItemIcon kind="ingredient" id={item.ingredient_id} size={32} /> {name}
+      <h2 className="m-0 flex items-center gap-2 font-round text-heading font-bold">
+        <ItemIcon kind="ingredient" id={item.ingredient_id} size={36} /> {name}
       </h2>
       <ZoneSelect value={zone} onChange={setZone} />
-      <label className="flex min-h-11 items-center gap-2 text-body">
-        <input type="checkbox" checked={soon} onChange={(e) => setSoon(e.target.checked)} className="size-5 accent-bulb" />
-        <FormattedMessage id="pantry.useSoon" />
+      <ItemOptions soon={soon} onSoon={setSoon} expiry={expiry} today={today} onExpiry={setExpiry} />
+      <label className="flex flex-col gap-1">
+        <span className="text-caption font-bold"><FormattedMessage id="pantry.note" /></span>
+        <input
+          type="text"
+          maxLength={200}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          className="h-12 rounded-card border border-line bg-surface px-3 text-body text-ink"
+        />
       </label>
-      <details open={!!item.expires_at || !!item.note}>
-        <summary className="min-h-11 cursor-pointer text-caption font-bold leading-[44px]">
-          <FormattedMessage id="pantry.moreOptions" />
-        </summary>
-        <div className="flex flex-col gap-3">
-          <ExpiryFields value={expiry} today={today} onChange={setExpiry} />
-          <label className="flex flex-col gap-1">
-            <span className="text-caption font-bold"><FormattedMessage id="pantry.note" /></span>
-            <input
-              type="text"
-              maxLength={200}
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              className="h-12 rounded-card border border-line bg-surface px-3 text-body text-ink"
-            />
-          </label>
-        </div>
-      </details>
       <button
         type="button"
         disabled={remove.isPending}

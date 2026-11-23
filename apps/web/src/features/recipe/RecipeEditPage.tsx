@@ -149,8 +149,18 @@ function StepRow({ step, index, thumb, onText, onPhoto, onRemovePhoto, onRemove,
   const intl = useIntl();
   const input = useRef<HTMLInputElement>(null);
   return (
-    <SortableItem id={step.id} handleLabel={intl.formatMessage({ id: 'recipe.step.drag' }, { n: index + 1 })} className="flex items-start gap-1">
-      <span className="mt-2.5 mr-1 flex size-6 shrink-0 items-center justify-center rounded-full bg-ink text-small font-bold text-surface">{index + 1}</span>
+    <SortableItem
+      id={step.id}
+      handleLabel={intl.formatMessage({ id: 'recipe.step.drag' }, { n: index + 1 })}
+      className="flex items-start gap-1"
+      handleClassName="flex min-h-11 w-11 shrink-0 cursor-grab flex-col items-center justify-start gap-0.5 border-0 bg-transparent px-0 pt-2 pb-1 text-ink-muted"
+      handleContent={
+        <>
+          <span className="flex size-6 items-center justify-center rounded-full bg-ink text-small font-bold text-surface">{index + 1}</span>
+          <Icon name="grip" size={20} />
+        </>
+      }
+    >
       {step.isNew && <NewBadge />}
       <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         <textarea
@@ -174,37 +184,40 @@ function StepRow({ step, index, thumb, onText, onPhoto, onRemovePhoto, onRemove,
             if (file) onPhoto(file);
           }}
         />
-        {step.photo ? (
-          <div className="flex items-center gap-1.5">
-            <div className="flex size-14 items-center justify-center overflow-hidden rounded-card bg-photo-empty">
-              {thumb && <img src={thumb} alt="" className="max-h-full max-w-full object-contain" />}
+        <div className="flex items-center justify-between gap-2">
+          {step.photo ? (
+            <div className="flex min-w-0 items-center gap-1.5">
+              <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-card bg-photo-empty">
+                {thumb && <img src={thumb} alt="" className="max-h-full max-w-full object-contain" />}
+              </div>
+              <button type="button" onClick={() => input.current?.click()} className="h-9 border-0 bg-transparent px-2 text-small text-ink-muted underline underline-offset-4">
+                <FormattedMessage id="recipe.step.replacePhoto" />
+              </button>
+              <button type="button" onClick={onRemovePhoto} className="h-9 border-0 bg-transparent px-2 text-small text-ink-muted underline underline-offset-4">
+                <FormattedMessage id="recipe.step.removePhoto" />
+              </button>
             </div>
-            <button type="button" onClick={() => input.current?.click()} className="h-9 border-0 bg-transparent px-2 text-small text-ink-muted underline underline-offset-4">
-              <FormattedMessage id="recipe.step.replacePhoto" />
+          ) : (
+            <button
+              type="button"
+              onClick={() => input.current?.click()}
+              className="flex h-11 items-center gap-1 rounded-card border border-dashed border-[#b9a88f] bg-surface px-2.5 text-small font-[inherit] text-ink"
+            >
+              <Icon name="camera" size={16} />
+              <FormattedMessage id="recipe.step.addPhoto" />
             </button>
-            <button type="button" onClick={onRemovePhoto} className="h-9 border-0 bg-transparent px-2 text-small text-ink-muted underline underline-offset-4">
-              <FormattedMessage id="recipe.step.removePhoto" />
-            </button>
-          </div>
-        ) : (
+          )}
           <button
             type="button"
-            onClick={() => input.current?.click()}
-            className="flex h-9 items-center gap-1 self-start rounded-card border border-dashed border-[#b9a88f] bg-surface px-2.5 text-small font-[inherit] text-ink"
+            onClick={onRemove}
+            aria-label={intl.formatMessage({ id: 'recipe.step.remove' }, { n: index + 1 })}
+            className="ml-auto flex h-11 shrink-0 items-center gap-1 border-0 bg-transparent px-2 text-small font-[inherit] text-ink-muted"
           >
-            <Icon name="camera" size={16} />
-            <FormattedMessage id="recipe.step.addPhoto" />
+            <Icon name="trash" size={20} />
+            <FormattedMessage id="recipe.step.removeText" />
           </button>
-        )}
+        </div>
       </div>
-      <button
-        type="button"
-        onClick={onRemove}
-        aria-label={intl.formatMessage({ id: 'recipe.step.remove' }, { n: index + 1 })}
-        className="flex size-11 shrink-0 items-center justify-center border-0 bg-transparent p-0 text-ink-muted"
-      >
-        <Icon name="trash" size={20} />
-      </button>
     </SortableItem>
   );
 }
