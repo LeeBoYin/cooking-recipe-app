@@ -186,3 +186,16 @@ Deno.test('評估集：10 組，每組的假回應都過自己的自動斷言，
     assertEquals(c.assert(buildResult(c.input.current, c.fake)), [], c.id);
   }
 });
+
+Deno.test('份量的說法跟著口述的語言：提示詞寫明英文用 to taste；英文口述輸出「適量」會被評估集的斷言抓到', () => {
+  assertStringIncludes(DICTATION_PROMPT_STABLE, 'to taste');
+  assertStringIncludes(DICTATION_PROMPT_STABLE, '不要因為口述是別種語言就寫成中文的「適量」');
+  const c = DICTATION_CASES.find((x) => x.id === '09-english')!;
+  assertEquals(c.assert(buildResult(c.input.current, c.fake)), []);
+  const bad = buildResult(c.input.current, { ...c.fake, ingredients: ['3 eggs', '吐司 適量'] });
+  assertEquals(c.assert(bad).length > 0, true);
+  // 01 組的技巧面向斷言依字典：炒是 3，給 3 要過、給 4 不過
+  const c1 = DICTATION_CASES[0]!;
+  assertEquals(c1.assert(buildResult(c1.input.current, { ...c1.fake, difficulty: { ...c1.fake.difficulty, technique: 3 } })), []);
+  assertEquals(c1.assert(buildResult(c1.input.current, { ...c1.fake, difficulty: { ...c1.fake.difficulty, technique: 4 } })).length, 1);
+});

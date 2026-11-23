@@ -3,6 +3,7 @@
 // 2. 手動實跑（run.ts）：真的呼叫 Claude（Sonnet 5.5 與 Haiku 5.5 各跑一次），看整理得準不準、有沒有亂補；不進 CI。
 // 全部是假的資料，沒有任何真實使用者的內容。
 import type { DictationCurrent, DictationInput, DictationResult } from '../../../../../packages/core/src/index.ts';
+import { techniques } from '../../../../../packages/equipment/src/index.ts';
 import type { RawDictation } from '../prompt.ts';
 
 export interface DictationCase {
@@ -20,6 +21,8 @@ export interface DictationCase {
 const EMPTY: DictationCurrent = { title: '', story: '', tips: '', ingredients: [], steps: [], highlights: [], difficultySource: null };
 const input = (text: string, current: Partial<DictationCurrent> = {}, lang = 'zh-TW'): DictationInput => ({ text, lang, current: { ...EMPTY, ...current } });
 const D = (ingredients: number, equipment: number, time: number, technique: number, failure_risk: number) => ({ ingredients, equipment, time, technique, failure_risk });
+// 字典裡「炒」的技巧等級（07）：難易度的技巧面向不該比它高太多
+const STIR_FRY_LEVEL = techniques.find((t) => t.id === 'stir-fry')?.skillLevel ?? 3;
 const texts = (r: DictationResult) => [r.title, r.story, r.tips, ...r.ingredients.map((i) => i.text), ...r.steps.map((s) => s.text)].join('\n');
 const has = (r: DictationResult, term: string) => texts(r).includes(term);
 // 作者原本的項目原樣、依序都在（from 對得上）
@@ -38,7 +41,7 @@ export const DICTATION_CASES: DictationCase[] = [
       ...(r.ingredients.every((i) => i.from === null) ? [] : ['空白欄位卻出現作者的項目']),
       ...(r.tips.includes('鹹') ? [] : ['料理筆記沒挑出「太鹹」']),
       ...(r.highlights.includes('make_again') ? [] : ['值得記住沒選「想再做」']),
-      ...(r.difficulty && r.difficulty.technique <= 2 ? [] : ['難易度的技巧面向應該很低']),
+      ...(r.difficulty && r.difficulty.technique <= STIR_FRY_LEVEL ? [] : [`只有煎與炒，技巧面向不該高過字典裡炒的等級（${STIR_FRY_LEVEL}）`]),
     ],
     fake: {
       title: '培根高麗菜', story: '培根先煎出油再炒高麗菜，很下飯。', tips: '培根本身很鹹，下次少放鹽。',
@@ -138,9 +141,9 @@ export const DICTATION_CASES: DictationCase[] = [
     id: '09-english',
     name: '口述是英文',
     input: input('Made scrambled eggs with toast. Three eggs, a bit of butter, whisk them and cook on low heat, stir constantly. Pretty creamy this time.', {}, 'en'),
-    expectation: '輸出用英文，不翻成中文；食材「3 eggs」等照說；步驟順暢。',
-    assert: (r) => [...(/[一-鿿]/.test(texts(r)) ? ['輸出不該翻成中文'] : []), ...(r.ingredients.some((i) => i.text.includes('3') || i.text.toLowerCase().includes('three')) ? [] : ['沒保留「三顆蛋」'])],
-    fake: { title: 'Creamy Scrambled Eggs', story: 'Pretty creamy this time.', tips: 'Stir constantly on low heat.', ingredients: ['3 eggs', 'butter, a bit', 'toast'], steps: ['Whisk the eggs.', 'Cook on low heat with butter, stirring constantly.'], highlights: [], difficulty: D(1, 1, 1, 2, 2) },
+    expectation: '輸出用英文，不翻成中文；食材「3 eggs」等照說；沒說份量的食材用英文寫（to taste 之類），不能寫成中文的「適量」；步驟順暢。',
+    assert: (r) => [...(/[一-鿿]/.test(texts(r)) ? ['輸出不該翻成中文（含沒說份量時的「適量」）'] : []), ...(r.ingredients.some((i) => i.text.includes('3') || i.text.toLowerCase().includes('three')) ? [] : ['沒保留「三顆蛋」'])],
+    fake: { title: 'Creamy Scrambled Eggs', story: 'Pretty creamy this time.', tips: 'Stir constantly on low heat.', ingredients: ['3 eggs', 'butter, a bit', 'toast, to taste'], steps: ['Whisk the eggs.', 'Cook on low heat with butter, stirring constantly.'], highlights: [], difficulty: D(1, 1, 1, 2, 2) },
   },
   {
     id: '10-prompt-injection',
