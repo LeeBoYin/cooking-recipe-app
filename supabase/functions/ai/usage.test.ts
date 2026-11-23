@@ -17,7 +17,7 @@ Deno.test('費用：用價格表算，改價格不用改程式', () => {
   assertEquals(priceOf('something-new'), MODEL_PRICES['claude-opus-5-5']);
 });
 
-Deno.test('降級：首頁點子改 Haiku（關思考）、靈感彩蛋改模板、其他不動', () => {
+Deno.test('降級：首頁點子改 Haiku（關思考）、靈感彩蛋不出現、其他不動', () => {
   const home = degradeConfig('home_ideas', AI_TASKS.home_ideas);
   assertEquals(typeof home === 'object' && [home.model, home.thinking, home.maxOutputTokens], ['claude-haiku-5-5', 'off', 2000]);
   assertEquals(degradeConfig('inspiration_egg', AI_TASKS.inspiration_egg), 'use_rules');

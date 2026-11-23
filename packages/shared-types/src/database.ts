@@ -135,14 +135,14 @@ isOneToOne: false
                   ]
                 },"app_config": {
                   Row: {
-                    "ai_budget_alert_ratio": number,"ai_enabled": boolean,"ai_monthly_budget_usd": number,"ai_protection": NonNullable<Json>,"id": boolean,"max_steps": number,"max_users": number,"photo_limits": NonNullable<Json>,"registration_mode": string,"soft_delete_retention_days": number,"text_limits": NonNullable<Json>,"updated_at": string
+                    "ai_budget_alert_ratio": number,"ai_enabled": boolean,"ai_monthly_budget_usd": number,"ai_protection": NonNullable<Json>,"id": boolean,"inspiration_egg_per_week": number,"max_steps": number,"max_users": number,"photo_limits": NonNullable<Json>,"registration_mode": string,"soft_delete_retention_days": number,"text_limits": NonNullable<Json>,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "ai_budget_alert_ratio"?: number,"ai_enabled"?: boolean,"ai_monthly_budget_usd"?: number,"ai_protection"?: NonNullable<Json>,"id"?: boolean,"max_steps"?: number,"max_users"?: number,"photo_limits"?: NonNullable<Json>,"registration_mode"?: string,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
+                    "ai_budget_alert_ratio"?: number,"ai_enabled"?: boolean,"ai_monthly_budget_usd"?: number,"ai_protection"?: NonNullable<Json>,"id"?: boolean,"inspiration_egg_per_week"?: number,"max_steps"?: number,"max_users"?: number,"photo_limits"?: NonNullable<Json>,"registration_mode"?: string,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Update: {
-                    "ai_budget_alert_ratio"?: number,"ai_enabled"?: boolean,"ai_monthly_budget_usd"?: number,"ai_protection"?: NonNullable<Json>,"id"?: boolean,"max_steps"?: number,"max_users"?: number,"photo_limits"?: NonNullable<Json>,"registration_mode"?: string,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
+                    "ai_budget_alert_ratio"?: number,"ai_enabled"?: boolean,"ai_monthly_budget_usd"?: number,"ai_protection"?: NonNullable<Json>,"id"?: boolean,"inspiration_egg_per_week"?: number,"max_steps"?: number,"max_users"?: number,"photo_limits"?: NonNullable<Json>,"registration_mode"?: string,"soft_delete_retention_days"?: number,"text_limits"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Relationships: [
                     
@@ -925,6 +925,12 @@ isOneToOne: false
                            },
 "ai_chat_get":
 { Args: { "p_conversation": string,"p_user": string }; Returns: Json
+                           },
+"ai_egg_save":
+{ Args: { "p_input_hash": string,"p_kitchen": string,"p_payload": Json,"p_ttl_hours"?: number,"p_user": string }; Returns: string
+                           },
+"ai_egg_state":
+{ Args: { "p_user": string }; Returns: Json
                            },
 "ai_expand_get":
 { Args: { "p_bookmark": string,"p_idea": string,"p_suggestion": string,"p_user": string }; Returns: Json

@@ -25,7 +25,15 @@ export interface AiIdeasPayload {
   ideas: AiIdea[];
   chefComment: string | null; // 檢查沒過就是 null，手機改用情境句子
   model: string;
+  // 靈感彩蛋才有：程式挑的醬料或廚具（字典 ID）
+  egg?: { kind: EggKind; id: string };
 }
+
+// 靈感彩蛋（M1b-04c）：`ai` 函式 inspiration_egg 任務的回傳。none ＝ 這次不出現（7 天內出現過、AI 不能用、預算 80%、沒有可挑的…），不是錯誤
+export type EggKind = 'sauce' | 'equipment';
+export type EggResponse =
+  | { status: 'ok'; source: 'ai' | 'cache'; idea: AiIdea; kind: EggKind; createdAt: string; suggestionId: string }
+  | { status: 'none' };
 
 // `ai` 函式的 home_ideas 回傳
 export type HomeIdeasResponse =

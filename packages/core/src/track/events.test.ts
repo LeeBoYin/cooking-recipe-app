@@ -12,6 +12,12 @@ describe('validateEvent', () => {
     expect(validateEvent(ev('record.publish', { props: { photoCount: 3, hasSteps: true, visibility: 'private', highlightCount: 0 } }), NOW)).not.toBeNull();
   });
 
+  it('靈感彩蛋用 suggestion 事件、來源是 egg；沒見過的來源被擋', () => {
+    expect(validateEvent(ev('suggestion.shown', { props: { source: 'egg', slot: 'twist' } }), NOW)).not.toBeNull();
+    expect(validateEvent(ev('suggestion.opened', { props: { source: 'egg', slot: 'twist' } }), NOW)).not.toBeNull();
+    expect(validateEvent(ev('suggestion.shown', { props: { source: 'push', slot: 'twist' } }), NOW)).toBeNull();
+  });
+
   it('不在白名單的名稱、已拿掉的事件被擋', () => {
     expect(validateEvent(ev('app.hack'), NOW)).toBeNull();
     expect(validateEvent(ev('suggestion.dismissed', { props: { source: 'home', slot: 'familiar' } }), NOW)).toBeNull();

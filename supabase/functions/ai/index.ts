@@ -12,6 +12,7 @@ import { runImportUrl } from './import/handler.ts';
 import { runDictation } from './dictation/handler.ts';
 import { runChefNote } from './chef-note/handler.ts';
 import { runRefine } from './refine/handler.ts';
+import { runInspirationEgg } from './egg/handler.ts';
 import { createProtection, sessionIdOf } from './usage.ts';
 
 const CORS = {
@@ -138,6 +139,15 @@ Deno.serve(async (req) => {
         return error(refined.error);
       }
       return json({ data: refined.data });
+    }
+    // 靈感彩蛋：首頁點子載好之後才呼叫；7 天內出現過、AI 不能用、預算用到 80% 都回 none（不出現，不是錯誤）（見 egg/handler.ts）
+    if (body.task === 'inspiration_egg') {
+      const egg = await runInspirationEgg({ ai: deps, rpc: async (fn, args) => await client.rpc(fn, args) }, auth.user.id, body.input);
+      if (!egg.ok) {
+        console.error('ai: rejected', egg.error);
+        return error(egg.error);
+      }
+      return json({ data: egg.data });
     }
     const result = await runAi(deps, auth.user.id, body.task, body.input);
     if (!result.ok) {

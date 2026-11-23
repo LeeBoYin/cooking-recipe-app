@@ -6,14 +6,14 @@ import { parseTemperaturePref } from '@zhusha/core';
 import { Chef } from '../../chef/Chef.tsx';
 import { useChef } from '../../chef/useChef.ts';
 import { useCurrentKitchen, useMySettings } from '../../data/hooks.ts';
-import { AiCallError, fetchHomeIdeas, getLastHomeIdeas } from '../../data/ai.ts';
+import { AiCallError, fetchEgg, fetchHomeIdeas, getLastHomeIdeas } from '../../data/ai.ts';
 import { renderMarks, viewOfAiIdea, type IdeaView } from './ideaView.ts';
 import { IdeaCard } from './IdeaCard.tsx';
 import { IdeaCarousel } from './IdeaCarousel.tsx';
 import { IdeaSkeletons } from './IdeaSkeletons.tsx';
 import { IdeaSheet } from './IdeaSheet.tsx';
 import { useResumableChat } from '../chat/useChat.ts';
-import { trackIdea, trackIdeaShown } from './trackIdea.ts';
+import { trackIdea, trackIdeaShown, type IdeaSource } from './trackIdea.ts';
 
 // 登入後的首頁：大廚區塊＋大廚的點子。先顯示上次的點子，再問後端（後端決定用快取或重新想，見 03〈第二階段〉）。
 // AI 不能用時不退回別的挑法：有上次的點子就繼續顯示並說想不出新的，沒有就只說現在想不出來；朋友的動態之後再做
@@ -21,7 +21,7 @@ export function HomePage() {
   const navigate = useNavigate();
   const intl = useIntl();
   const { kitchen, isPending: kitchenPending, error: kitchenError } = useCurrentKitchen();
-  const [open, setOpen] = useState<IdeaView | null>(null);
+  const [open, setOpen] = useState<{ view: IdeaView; source: IdeaSource } | null>(null);
   const settings = useMySettings();
   const queryClient = useQueryClient();
   const chef = useChef();
@@ -44,6 +44,16 @@ export function HomePage() {
   });
 
   const aiOk = ai.data?.status === 'ok' ? ai.data : null;
+
+  // 靈感彩蛋：首頁點子載好（後端回了 ok）之後才另外問，不拖慢首頁；AI 不能用或這一輪沒有就什麼都不顯示
+  const egg = useQuery({
+    queryKey: ['home-egg', kitchen?.id ?? ''],
+    queryFn: fetchEgg,
+    enabled: !!kitchen && !!aiOk,
+    staleTime: 30 * 60_000,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
   // 新手門檻：口味不夠把握、又沒有自己的食譜，後端不叫 AI（12）
   const notEnough = ai.data?.status === 'not_enough';
   const aiShown = notEnough ? null : (aiOk ?? last.data ?? null);
@@ -57,6 +67,14 @@ export function HomePage() {
   useEffect(() => {
     for (const view of views) trackIdeaShown(view, 'home');
   }, [views]);
+
+  const eggView: IdeaView | null = useMemo(
+    () => (egg.data?.status === 'ok' ? viewOfAiIdea(egg.data.idea, tempPref, egg.data.suggestionId) : null),
+    [egg.data, tempPref],
+  );
+  useEffect(() => {
+    if (eggView) trackIdeaShown(eggView, 'egg');
+  }, [eggView]);
 
   // AI 現在不能用：問後端失敗、後端說這一輪不給新的，或「換一組」失敗。原因只分「太快」「今天用多了」和其他
   const shuffleDown = shuffleAi.isError || shuffleAi.data?.status === 'unavailable';
@@ -145,7 +163,7 @@ export function HomePage() {
             {downLine && <p className="m-0 mb-1.5 font-round text-caption text-ink-muted">{downLine}</p>}
             <IdeaCarousel count={views.length + (hasNext ? 1 : 0)} resetKey={views.map((v) => v.key).join('|')}>
               {views.map((view, i) => (
-                <IdeaCard key={view.key} index={i} view={view} source="home" onOpen={() => { trackIdea('suggestion.opened', view, 'home'); setOpen(view); }} />
+                <IdeaCard key={view.key} index={i} view={view} source="home" onOpen={() => { trackIdea('suggestion.opened', view, 'home'); setOpen({ view, source: 'home' }); }} />
               ))}
               {hasNext && (
                 <li data-index={views.length} className="w-full flex-none snap-center snap-always">
@@ -162,9 +180,20 @@ export function HomePage() {
             </IdeaCarousel>
           </>
         )}
+        {/* 靈感彩蛋：偶爾才有，不放次數、不催促；點開和大廚的點子一樣 */}
+        {eggView && views.length > 0 && !down && (
+          <section aria-labelledby="home-egg-label" className="mt-3">
+            <h2 id="home-egg-label" className="m-0 mb-1.5 font-round text-caption text-ink-muted">
+              <FormattedMessage id="home.egg.label" />
+            </h2>
+            <ul className="m-0 flex list-none p-0">
+              <IdeaCard view={eggView} source="egg" onOpen={() => { trackIdea('suggestion.opened', eggView, 'egg'); setOpen({ view: eggView, source: 'egg' }); }} />
+            </ul>
+          </section>
+        )}
       </div>
 
-      {open && <IdeaSheet view={open} source="home" onClose={() => setOpen(null)} />}
+      {open && <IdeaSheet view={open.view} source={open.source} onClose={() => setOpen(null)} />}
     </div>
   );
 }
