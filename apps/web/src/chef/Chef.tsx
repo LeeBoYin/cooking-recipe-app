@@ -3,10 +3,9 @@
 import {
   BULB_PATH,
   CHEF_VIEWBOX,
-  HAT_BRIM_PATH,
-  HAT_CROWN_PATH,
   STAND_PATH,
   SURPRISE_LINES_PATH,
+  hatPaths,
   hatTransform,
   type ChefMood,
 } from './chef-shape.ts';
@@ -86,6 +85,7 @@ function Face({ mood }: { mood: ChefMood }) {
 export function Chef({ size = 56, mood = 'normal', blink = false, className }: Props) {
   const { x, y, width, height: vbHeight } = CHEF_VIEWBOX;
   const height = Math.round((size * vbHeight) / width);
+  const hat = hatPaths(mood);
   const line = { stroke: INK, strokeWidth: 2.6, strokeLinejoin: 'round' as const };
   return (
     <svg
@@ -103,8 +103,8 @@ export function Chef({ size = 56, mood = 'normal', blink = false, className }: P
         <path d={SURPRISE_LINES_PATH} fill="none" stroke={INK} strokeWidth={2} strokeLinecap="round" />
       ) : null}
       <g transform={hatTransform(mood)}>
-        <path d={HAT_CROWN_PATH} fill="#FFFFFF" {...line} />
-        <path d={HAT_BRIM_PATH} fill="#FFFFFF" {...line} />
+        <path d={hat.crown} fill="#FFFFFF" {...line} />
+        <path d={hat.brim} fill="#FFFFFF" {...line} />
       </g>
     </svg>
   );

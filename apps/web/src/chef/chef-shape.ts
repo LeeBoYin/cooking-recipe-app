@@ -10,6 +10,17 @@ export const BULB_PATH =
 export const HAT_CROWN_PATH =
   'M22 26C14 26 11 18 16 13.5C19 11 22.5 11.5 24.5 13.5C25.5 7 33 5 37 9.5C40.5 6.5 47 8 47.5 13.5C52 14 53 21.5 46 26Z';
 export const HAT_BRIM_PATH = 'M20 26Q32 21.5 44 26L44 32Q32 27 20 32Z';
+
+// 驚喜時換一頂比較小的帽子，刻意彈起來；其他表情都戴上面那頂
+export const SMALL_HAT_CROWN_PATH =
+  'M25.5 25.5C19 25.5 17 18.5 21 15C23 13 26 13.5 27.5 15C28.5 10 35.5 9 38 13.5C42 11.5 46.5 15.5 44 20.5C43 23.5 41 25.5 38.5 25.5Z';
+export const SMALL_HAT_BRIM_PATH = 'M24 25.5Q32 22.5 40 25.5L40 31Q32 28 24 31Z';
+
+export function hatPaths(mood: ChefMood): { crown: string; brim: string } {
+  return mood === 'surprised'
+    ? { crown: SMALL_HAT_CROWN_PATH, brim: SMALL_HAT_BRIM_PATH }
+    : { crown: HAT_CROWN_PATH, brim: HAT_BRIM_PATH };
+}
 export const STAND_PATH = 'M22.5 67.5h19M24.5 71.5h15';
 
 // 帽子沿著頭頂滑動：以燈泡圓心為中心旋轉
