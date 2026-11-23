@@ -18,9 +18,12 @@
     "db:reset": "pnpm db:dict && supabase db reset",
     "db:test": "supabase test db",
     "gen:types": "supabase gen types typescript > packages/shared-types/src/database.ts",
-    "db:dict": "node scripts/dictionaries-sql.ts > supabase/seeds/dictionaries.sql"
+    "db:dict": "node scripts/dictionaries-sql.ts > supabase/seeds/dictionaries.sql",
+    "chef:assets": "node scripts/chef-assets.ts",
+    "check:chef": "node scripts/chef-assets.ts --check"
   },
   "devDependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "typescript": "^7.0.2",
     "vitest": "^5.1.1"
   },
