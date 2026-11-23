@@ -4,14 +4,16 @@
     "name": {
       "zh-TW": "煎"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 2
   },
   {
     "id": "stir-fry",
     "name": {
       "zh-TW": "炒"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 3
   },
   {
     "id": "deep-fry",
@@ -19,84 +21,96 @@
       "zh-TW": "炸"
     },
     "group": "heat",
-    "safetyRuleId": "SR-deep-fry"
+    "safetyRuleId": "SR-deep-fry",
+    "skillLevel": 4
   },
   {
     "id": "boil",
     "name": {
       "zh-TW": "煮"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 1
   },
   {
     "id": "blanch",
     "name": {
       "zh-TW": "汆燙"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 2
   },
   {
     "id": "steam",
     "name": {
       "zh-TW": "蒸"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 2
   },
   {
     "id": "braise",
     "name": {
       "zh-TW": "燉"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 2
   },
   {
     "id": "soy-braise",
     "name": {
       "zh-TW": "滷"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 2
   },
   {
     "id": "red-braise",
     "name": {
       "zh-TW": "燒"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 3
   },
   {
     "id": "roast",
     "name": {
       "zh-TW": "烤"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 3
   },
   {
     "id": "grill",
     "name": {
       "zh-TW": "燒烤"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 3
   },
   {
     "id": "gratin",
     "name": {
       "zh-TW": "焗"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 3
   },
   {
     "id": "bake",
     "name": {
       "zh-TW": "烘焙"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 4
   },
   {
     "id": "air-fry",
     "name": {
       "zh-TW": "氣炸"
     },
-    "group": "heat"
+    "group": "heat",
+    "skillLevel": 2
   },
   {
     "id": "microwave",
@@ -104,7 +118,8 @@
       "zh-TW": "微波"
     },
     "group": "heat",
-    "safetyRuleId": "SR-microwave"
+    "safetyRuleId": "SR-microwave",
+    "skillLevel": 1
   },
   {
     "id": "pressure-cook",
@@ -112,7 +127,8 @@
       "zh-TW": "壓力烹調"
     },
     "group": "heat",
-    "safetyRuleId": "SR-pressure"
+    "safetyRuleId": "SR-pressure",
+    "skillLevel": 3
   },
   {
     "id": "sous-vide",
@@ -120,7 +136,8 @@
       "zh-TW": "舒肥"
     },
     "group": "heat",
-    "safetyRuleId": "SR-sous-vide"
+    "safetyRuleId": "SR-sous-vide",
+    "skillLevel": 4
   },
   {
     "id": "torch-sear",
@@ -128,7 +145,8 @@
       "zh-TW": "炙燒"
     },
     "group": "heat",
-    "safetyRuleId": "SR-torch"
+    "safetyRuleId": "SR-torch",
+    "skillLevel": 4
   },
   {
     "id": "smoke",
@@ -136,14 +154,16 @@
       "zh-TW": "煙燻"
     },
     "group": "heat",
-    "safetyRuleId": "SR-smoke"
+    "safetyRuleId": "SR-smoke",
+    "skillLevel": 4
   },
   {
     "id": "toss",
     "name": {
       "zh-TW": "拌"
     },
-    "group": "no-heat"
+    "group": "no-heat",
+    "skillLevel": 1
   },
   {
     "id": "blend",
@@ -151,42 +171,48 @@
       "zh-TW": "打碎／打泥"
     },
     "group": "no-heat",
-    "safetyRuleId": "SR-blend-hot"
+    "safetyRuleId": "SR-blend-hot",
+    "skillLevel": 1
   },
   {
     "id": "grind",
     "name": {
       "zh-TW": "研磨"
     },
-    "group": "no-heat"
+    "group": "no-heat",
+    "skillLevel": 2
   },
   {
     "id": "whip",
     "name": {
       "zh-TW": "打發"
     },
-    "group": "no-heat"
+    "group": "no-heat",
+    "skillLevel": 4
   },
   {
     "id": "emulsify",
     "name": {
       "zh-TW": "乳化"
     },
-    "group": "no-heat"
+    "group": "no-heat",
+    "skillLevel": 4
   },
   {
     "id": "knead",
     "name": {
       "zh-TW": "揉麵"
     },
-    "group": "no-heat"
+    "group": "no-heat",
+    "skillLevel": 5
   },
   {
     "id": "shred-slice",
     "name": {
       "zh-TW": "刨絲切片"
     },
-    "group": "no-heat"
+    "group": "no-heat",
+    "skillLevel": 2
   },
   {
     "id": "freeze",
@@ -194,7 +220,8 @@
       "zh-TW": "冷凍"
     },
     "group": "time-temp",
-    "safetyRuleId": "SR-thaw"
+    "safetyRuleId": "SR-thaw",
+    "skillLevel": 1
   },
   {
     "id": "chill-set",
@@ -202,34 +229,39 @@
       "zh-TW": "冷藏定型"
     },
     "group": "time-temp",
-    "safetyRuleId": "SR-cooling"
+    "safetyRuleId": "SR-cooling",
+    "skillLevel": 1
   },
   {
     "id": "marinate",
     "name": {
       "zh-TW": "醃漬"
     },
-    "group": "time-temp"
+    "group": "time-temp",
+    "skillLevel": 1
   },
   {
     "id": "ferment",
     "name": {
       "zh-TW": "發酵"
     },
-    "group": "time-temp"
+    "group": "time-temp",
+    "skillLevel": 4
   },
   {
     "id": "vacuum-seal",
     "name": {
       "zh-TW": "真空保存"
     },
-    "group": "time-temp"
+    "group": "time-temp",
+    "skillLevel": 2
   },
   {
     "id": "dehydrate",
     "name": {
       "zh-TW": "烘乾"
     },
-    "group": "time-temp"
+    "group": "time-temp",
+    "skillLevel": 2
   }
 ]
