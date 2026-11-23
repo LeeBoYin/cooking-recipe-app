@@ -203,4 +203,79 @@ export const EVAL_CASES: EvalCase[] = [
     expectation: '不用那包絞肉，也完全不提醒它過期。',
     assert: (ideas) => [...usesId(ideas, ['ground-pork']), ...mentions(ideas, ['過期', '壞掉', '絞肉'])],
   },
+  {
+    id: '11-no-oven-cant-do',
+    name: '廚具做不到：只有微波爐和電鍋，喜歡烤的東西；有雞腿、馬鈴薯',
+    ctx: ctx({
+      taste: { dims: likes('cuisine.taiwan.home', 'cuisine.western', 'protein.chicken'), context: FREQ },
+      pantry: pantry('chicken-thigh', 'potato', 'onion', 'soy-sauce', 'rice'),
+      equipment: eq('microwave', 'tatung-rice-cooker'),
+    }),
+    callsAi: true,
+    expectation: '不能出現烤箱、氣炸、煎、炒；手法與廚具只能是微波爐、電鍋做得到的。',
+    assert: (ideas, env) => [
+      ...ideas.flatMap((i) => i.techniques.filter((t) => !env.techniqueEnum.includes(t)).map((t) => `${i.title}：手法 ${t} 做不到`)),
+      ...ideas.flatMap((i) => i.equipment.filter((e) => !env.equipmentEnum.includes(e)).map((e) => `${i.title}：廚具 ${e} 沒有`)),
+      ...mentions(ideas, ['烤箱', '氣炸', '平底鍋', '炒鍋']),
+    ],
+  },
+  {
+    id: '12-substitute-fry',
+    name: '替代手法：日本廚房，只有平底鍋和瓦斯爐（沒有炸鍋）；喜歡日式炸物；有雞腿、豬肉',
+    ctx: ctx({
+      kitchen: { id: '0192f000-0000-7000-8000-000000000012', region: 'JP', timezone: 'Asia/Tokyo' },
+      taste: { dims: likes('cuisine.japan', 'cuisine.japan.washoku', 'seasoning.soy_sauce', 'form.deep_fried'), context: FREQ },
+      pantry: pantry('chicken-thigh', 'pork-slices', 'cabbage', 'egg', 'flour', 'soy-sauce', 'rice'),
+      equipment: eq('gas-stove', 'frying-pan'),
+    }),
+    callsAi: true,
+    expectation: '炸物類的家常菜（日式炸雞、炸豬排）可以進候選，點子寫成半煎炸，不寫炸鍋；手法與廚具只用平底鍋做得到的。',
+    assert: (ideas, env) => [
+      ...ideas.flatMap((i) => i.techniques.filter((t) => !env.techniqueEnum.includes(t)).map((t) => `${i.title}：手法 ${t} 做不到`)),
+      ...ideas.flatMap((i) => i.equipment.filter((e) => !env.equipmentEnum.includes(e)).map((e) => `${i.title}：廚具 ${e} 沒有`)),
+      ...mentions(ideas, ['炸鍋', '氣炸鍋', '烤箱']),
+    ],
+  },
+  {
+    id: '13-change-technique',
+    name: '換手法：常煎雞胸，有烤箱和氣炸鍋；願意嘗試',
+    ctx: ctx({
+      adventure: 0.8,
+      taste: { dims: likes('cuisine.taiwan.home', 'form.stir_fry', 'protein.chicken'), context: { ...FREQ, adventure: 0.8 } },
+      pantry: pantry('chicken-breast', 'cabbage', 'broccoli', 'garlic', 'soy-sauce', 'rice'),
+      equipment: eq('gas-stove', 'frying-pan', 'oven', 'air-fryer'),
+      recipes: [{
+        id: '0192f000-0000-7000-8000-0000000000b1', title: '香煎雞胸',
+        ingredient_ids: ['chicken-breast', 'garlic', 'soy-sauce'], ingredients: [], highlights: ['make_again'],
+        cooked_dates: ['2026-10-01'], cooked_at: '2026-10-01T10:00:00Z', published_at: '2026-10-01T10:00:00Z',
+        difficulty: { ingredients: 1, equipment: 1, time: 1, technique: 2, failure_risk: 1 },
+      }],
+    }),
+    callsAi: true,
+    expectation: '變化版或新挑戰有一道用同樣的食材換手法（烤、氣炸），熟悉的那道不換手法；需要烤箱或氣炸鍋的點子最多一道。',
+    assert: (ideas) => {
+      const fresh = ['oven', 'air-fryer'];
+      const out: string[] = [];
+      const needNew = ideas.filter((i) => i.equipment.some((e) => fresh.includes(e)));
+      if (needNew.length > 1) out.push(`需要還沒用過的廚具的點子有 ${needNew.length} 道，最多一道`);
+      if (!ideas.some((i) => i.slot !== 'familiar' && i.techniques.some((t) => ['roast', 'air-fry', 'bake'].includes(t)))) out.push('變化版與新挑戰都沒換手法');
+      out.push(...ideas.filter((i) => i.slot === 'familiar' && i.equipment.some((e) => fresh.includes(e))).map((i) => `${i.title}：熟悉的不該換手法`));
+      return out;
+    },
+  },
+  {
+    id: '14-sous-vide-owner',
+    name: '舒肥：有舒肥機、溫度計與真空封口機；喜歡牛排和雞胸',
+    ctx: ctx({
+      taste: { dims: likes('cuisine.western', 'protein.chicken', 'protein.beef'), context: FREQ },
+      pantry: pantry('chicken-breast', 'broccoli', 'garlic', 'salt'),
+      equipment: eq('gas-stove', 'frying-pan', 'sous-vide-circulator', 'thermometer', 'vacuum-sealer'),
+    }),
+    callsAi: true,
+    expectation: '首頁與對話的點子不寫舒肥的溫度與時間（只能用核對過的舒肥預設組合表，在展開做法時才帶入）；手法不能是舒肥，理由裡沒有數字。',
+    assert: (ideas) => [
+      ...ideas.filter((i) => i.techniques.includes('sous-vide')).map((i) => `${i.title}：手法有舒肥`),
+      ...ideas.filter((i) => /\d/.test(i.why)).map((i) => `${i.title}：理由有數字`),
+    ],
+  },
 ];

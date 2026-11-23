@@ -4,7 +4,7 @@
 
 **規模**：32 種手法、70 種廚具、20 組替代做法、10 條安全規則，以及每種廚具的清洗標記。
 
-**怎麼判斷「做得到」**：廚房裡有一件對到字典的廚具，它的手法清單（加上使用者確認有的選配功能，例如烤箱的熱風）裡有這個手法，就算做得到。手法由類型決定，使用者不能手動改；自訂的廚具不算。如果這件廚具需要爐火（例如炒鍋），使用者還要有至少一個可用的爐具。都做不到時，查[替代做法](#三替代做法)。
+**怎麼判斷「做得到」**：廚房裡有一件對到字典的廚具，它的手法清單（加上使用者確認有的選配功能，例如烤箱的熱風）裡有這個手法，就算做得到。手法由類型決定，使用者不能手動改；自訂的廚具不算。如果這件廚具需要爐火（例如炒鍋），使用者還要有至少一個可用的爐具。都做不到時，查[替代做法](#三替代做法)；替代做法也要符合 `substitutes.json` 的廚具條件（鍋具類同樣要有爐具）。替代做法只用來判斷候選做不做得到；點子寫出的手法與廚具仍然只能是使用者的廚具本身做得到、有的。
 
 ---
 
@@ -355,7 +355,7 @@ packages/equipment/
 ├── data/
 │   ├── techniques.json       # 手法（32 種，含技巧等級 skillLevel）
 │   └── equipment-types.json  # 廚具（70 種，含洗碗機標記）
-├── substitutes.json          # 替代做法（做推薦時加）
+├── substitutes.json          # 替代做法（20 組：想做的手法、改用的做法、限制、需要的廚具條件）
 ├── safety/
 │   ├── US/                   # 每個地區一個資料夾（美國加州看 US）；目前有 US、JP，TW 待補
 │   │   ├── doneness-temps.json     # 中心溫度參考表（附來源與審查狀態）
@@ -363,7 +363,7 @@ packages/equipment/
 │   └── JP/
 │       └── …
 │   （safety-rules.json：安全規則的提醒文案，做 checkSafety 時再加）
-└── src/                      # 型別與查詢函式：canDo(technique, myEquipment)、donenessFor(region, 類別)、strictestDoneness()（沒有當地表時，由程式在執行時取各地區表中最嚴格的值）、findSubstitutes(...)、checkSafety(...)（後兩者還沒做）
+└── src/                      # 型別與查詢函式：canDo(technique, myEquipment)、donenessFor(region, 類別)、strictestDoneness()（沒有當地表時，由程式在執行時取各地區表中最嚴格的值）、findSubstitutes(手法, 廚具)、canDoOrSubstitute(手法, 廚具)（L1 用：做得到，或有符合條件的替代做法；`needs` 陣列代表任一組成立即可，空物件代表不需要廚具，例如手揉）、checkSafety(...)（還沒做）
 ```
 
 一筆廚具資料的範例：
