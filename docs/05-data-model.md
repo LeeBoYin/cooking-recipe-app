@@ -518,7 +518,7 @@ interface RecipeStep {
 interface RecipePrivate {             // 只有作者能讀寫（另開一張表，因為 RLS 以列為單位）
   recipeId: string;                   // 一對一
   userId: string;
-  dictation?: { text: string; lang: LanguageTag; at: Instant };   // 「用說的」口述原文（只留最近一次），「讓大廚整理」、用說的改食譜時用
+  dictation?: { text: string; lang: LanguageTag; at: Instant };   // 「用說的」口述原文（只留最近一次），「讓大廚整理」時用
   chefNote?: { text: string; at: Instant };   // 第一次發佈時大廚的一句話；只有作者看得到
   diners?: Diner[];                   // 一起吃的人；只有作者看得到，用來合併過敏原、提醒「上次請小美吃過這道了」
   updatedAt: Instant;

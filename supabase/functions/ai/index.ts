@@ -10,6 +10,7 @@ import { runChat } from './chat/handler.ts';
 import { runExpandSteps } from './expand/handler.ts';
 import { runImportUrl } from './import/handler.ts';
 import { runDictation } from './dictation/handler.ts';
+import { runRefine } from './refine/handler.ts';
 import { createProtection, sessionIdOf } from './usage.ts';
 
 const CORS = {
@@ -118,6 +119,15 @@ Deno.serve(async (req) => {
         return error(dictated.error);
       }
       return json({ data: dictated.data });
+    }
+    // 用說的改食譜：只回要改的欄位與新值，手機列出「會改這些」讓作者確認（見 refine/handler.ts）
+    if (body.task === 'edit_by_voice') {
+      const refined = await runRefine({ ai: deps, rpc: async (fn, args) => await client.rpc(fn, args) }, auth.user.id, body.input);
+      if (!refined.ok) {
+        console.error('ai: rejected', refined.error);
+        return error(refined.error);
+      }
+      return json({ data: refined.data });
     }
     const result = await runAi(deps, auth.user.id, body.task, body.input);
     if (!result.ok) {

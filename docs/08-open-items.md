@@ -104,6 +104,7 @@
 | 項目 | 說明 | 何時做 |
 |------|------|--------|
 | 真的 Claude 評估：首頁點子、展開做法 | 兩組評估集（`spikes/README.md` 06、08）寫好了。展開做法跑過一次，5 組只過 1 組，修正在 M1b-07，修完要再用真的 Claude 重跑；首頁點子還沒跑。跑法見該檔 | M1b-01 開工前（當作改 L1 前的基準） |
+| 真的 Claude 評估：用說的改食譜 | 評估集 8 組（`functions/ai/refine/eval/`）寫好了，還沒用真的 Claude 跑（Haiku 5.5）；跑法見 `spikes/README.md` 11。結果不好就改用 Sonnet 5.5 | M1b 收尾前 |
 | Google 登入設定 | 程式已完成（M1a-01b、M1a-02）。要使用者自己在 Google Cloud 建 OAuth 用戶端（授權的來源 `https://tsu-siann.today`，測試專案加 `https://staging.tsu-siann.today`），並在 Supabase Auth 開啟 Google、設定 Site URL 與重新導向網址，並啟用「建立使用者前」hook | 正式邀請前 |
 | 背景食材正規化的測試站驗證 | `background-jobs` 的 `normalize_ingredients` 任務真的呼叫 Claude（Haiku）還沒在測試站驗過；由使用者手動在測試站加一個字典對不到的食材、看對應是否寫進全站對應 | 隨時，越早越好 |
 | iPhone 實機確認 | 和大廚聊聊的鍵盤避開（M1a-09h）、頁面轉場與 Safari 手勢返回（M1a-09i）還沒用 iPhone 確認，使用者自己用的時候順便看 | 自己用的期間 |

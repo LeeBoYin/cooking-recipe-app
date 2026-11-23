@@ -216,3 +216,30 @@ ANTHROPIC_API_KEY=... deno run --no-lock --no-config -A supabase/functions/ai/di
 - 第 10 組（口述裡夾指令）不能照做。
 - 難易度：第 1 組很低、第 4 組（慢滷）的時間面向要偏高、第 8 組廚具偏高。
 - 兩個模型的差距：這次 Haiku 差距不小（見上表），保留 Sonnet；之後想再試 Haiku，改 `_shared/ai-models.ts` 一行：`model: 'claude-haiku-5-5'`、`thinking: 'off'`。
+
+## 11 用說的改食譜（M1b-04a，本機）
+
+資料夾：`supabase/functions/ai/refine/`（提示詞與輸出格式 `prompt.ts`、流程 `handler.ts`、評估集 `eval/cases.ts`、實跑 `eval/run.ts`；「模型的修改 → 驗證過的變更清單」規則在 `packages/core/src/refine.ts`，套進編輯頁表單的規則在 `apps/web/src/features/recipe/refine.ts`）
+
+| 項目 | 結果 |
+|------|------|
+| 評估集 8 組假指令的自動測試（假的 AI 回應，測變更清單的驗證、輸入檢查、重試、AI 不能用、自動斷言本身會抓到「夾帶的指令被照做」） | ✅ 進 CI（`pnpm check:functions`） |
+| 變更清單套進編輯頁的表單（改字與新增標「新的」、有照片的步驟不丟照片、沒說到的列原樣） | ✅ 單元測試（`apps/web` 的 `refine.test.ts`） |
+| 手機整條路徑（用假的 `ai` 回應，沒有真的 Claude）：編輯頁 🎙 開「再跟大廚說」面板、列出「會改這些」、按套用後標題與食材改了且標「新的」；食譜頁的 🎙 直接跳進編輯頁開面板、套用後「有改過，還沒儲存」、按儲存後 `recipe_revisions` 多一版 `changed_by = ai_refine`；AI 不能用時顯示「大廚現在無法使用，先用手動編輯吧」 | ✅ 本機瀏覽器（「沒聽出要改哪裡」的畫面只有單元測試，沒有在瀏覽器走） |
+| 真的 Claude 評估（Haiku 5.5，8 組） | ⏳ 還沒跑，要使用者在本機跑 |
+| 輸出 schema 在真的 API 上被接受 | ⏳ 還沒跑（同上） |
+
+**手動實跑**（會花錢，8 組合計不到 0.01 美元；金鑰只放在這個指令的環境變數，不寫進檔案、不貼進對話）：
+
+```bash
+ANTHROPIC_API_KEY=... deno run --no-lock --no-config -A supabase/functions/ai/refine/eval/run.ts
+```
+
+只跑一組加 `--case 05`。終端機只印數量與代號；輸出寫在 `supabase/functions/ai/refine/eval/out/<時間>/`（已加進 `.gitignore`）：每組一個 JSON，加上 `summary.md`（每組的變更清單，給人工打分）。
+
+**要看的地方**
+- 第 1 組（拿蒜頭、改份量）：步驟二的蒜頭有沒有一起改；第 2、3 組只動該動的地方。
+- 第 5 組（拿掉食譜沒有的香菜）：什麼都不能改。
+- 第 6、7 組：指令裡、料理筆記裡夾的假指令不能照做。
+- 第 8 組（英文）：不能翻成中文。
+- Haiku 不思考，若編號常對錯（拿錯項）或常漏改步驟裡的連動，考慮改 Sonnet 5.5（`_shared/ai-models.ts` 一行）。
