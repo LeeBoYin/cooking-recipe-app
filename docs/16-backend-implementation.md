@@ -136,7 +136,7 @@
 
 - 唯一來源是程式碼庫裡的字典檔；每次部署由 GitHub Actions 匯入（整批取代），使用者與 App 都不能寫。
 - 匯入：`scripts/dictionaries-sql.ts` 把字典檔轉成一行 `select private.import_dictionaries(…)`，在同一個交易裡更新所有字典表並記下版本（字典內容的雜湊，存在 `dict_version`）。部署時先套用 migration，再用 `psql` 經連線池執行；本機的 `pnpm db:reset` 會一起匯入。
-- 舊食譜的食材回填：食材沒有解析欄位的舊食譜，部署時在匯入字典之後，由 `scripts/unparsed-recipes.sql` 查出、`scripts/backfill-ingredients-sql.ts` 用 `core` 的解析器算好，再逐篇呼叫 `backfill_recipe_ingredients`（只有 `service_role` 能呼叫；同樣先檢查，原文在中間被改過就不回填）。解析結果沒變的食譜不會被改，所以可以重複執行。
+- 舊食譜的食材：M0 做完時已用 `core` 的解析器回填過（`backfill_recipe_ingredients`，只有 `service_role` 能呼叫；原文在中間被改過就不回填，只留給維護用，部署流程不再執行）。之後的新食譜在 `save_recipe` 存檔時就解析，對不到字典的名字交給背景食材正規化。
 - 匯入時再檢查一次：ID 不能從字典檔消失、陣列裡參照的 ID（例：食材的過敏原）都要存在、名稱一定要有繁中。
 - ID 與 key 的格式：一般字典用小寫英文加連字號（`soy-sauce`）；口味維度的 key 用點分層（`cuisine.southeast_asia.thai`，第一段是群組，上層可以跨群組）；題目 ID 用底線（`card_tom_yum`）；地區代碼用 ISO（`TW`、`US-CA`），`kitchens.region` 不加外鍵，只檢查格式。
 - 匯入時再檢查：題目的 `mapping` 只能指向存在的維度；題目與菜色的地區、後續題目、排除的過敏原與飲食限制、菜色的菜系／食材／手法／廚具、地區的常見食材都要存在。
