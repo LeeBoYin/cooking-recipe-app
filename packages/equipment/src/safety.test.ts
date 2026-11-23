@@ -7,7 +7,7 @@ describe('中心溫度表', () => {
       const t = donenessTableFor(region)!;
       expect(t.source.urls.length, region).toBeGreaterThan(0);
       for (const u of t.source.urls) expect(u).toMatch(/^https:\/\//);
-      expect(t.source.reviewStatus).toBe('pending-review');
+      expect(['pending-review', 'verified'], region).toContain(t.source.reviewStatus);
       for (const r of t.rows) expect(r.minTempC, `${region}/${r.id}`).toBeGreaterThan(0);
     }
   });
@@ -21,6 +21,14 @@ describe('中心溫度表', () => {
   it('美國：禽肉 165°F、整塊肉 145°F 並靜置 3 分鐘', () => {
     expect(donenessFor('US-CA', 'poultry')?.minTempF).toBe(165);
     expect(donenessFor('US-CA', 'whole-cut-meat')).toMatchObject({ minTempF: 145, restMinutes: 3 });
+  });
+
+  it('美國的攝氏與華氏都是 USDA 公布的數值（73.9／71.1／62.8）', () => {
+    const us = donenessTableFor('US')!;
+    expect(us.source.reviewStatus).toBe('verified');
+    const row = (id: string) => us.rows.find((r) => r.id === id)!;
+    expect([row('poultry').minTempC, row('ground-meat').minTempC, row('whole-cut-meat').minTempC]).toEqual([73.9, 71.1, 62.8]);
+    expect([row('fish-seafood').minTempC, row('egg').minTempC, row('leftovers').minTempC]).toEqual([62.8, 71.1, 73.9]);
   });
 
   it('沒有當地表的地區用最嚴格的：每一類都不低於各地區的表', () => {

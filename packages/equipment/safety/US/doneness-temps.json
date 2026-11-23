@@ -7,8 +7,8 @@
       "https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/safe-temperature-chart",
       "https://www.foodsafety.gov/food-safety-charts/safe-minimum-internal-temperatures"
     ],
-    "reviewStatus": "pending-review",
-    "note": "華氏為來源上的官方數值；攝氏欄沿用 07 原有的表（74／71／63），尚未逐項對照來源。"
+    "reviewStatus": "verified",
+    "note": "2026-11-23 對照 USDA FSIS 官方頁面原文：華氏與攝氏（73.9／71.1／62.8）都是來源公布的數值，不由程式換算。"
   },
   "rows": [
     {
@@ -17,7 +17,7 @@
         "zh-TW": "禽肉（全雞、雞胸、雞腿、絞肉、火雞）"
       },
       "minTempF": 165,
-      "minTempC": 74
+      "minTempC": 73.9
     },
     {
       "id": "ground-meat",
@@ -25,7 +25,7 @@
         "zh-TW": "絞肉（豬、牛、羊）"
       },
       "minTempF": 160,
-      "minTempC": 71,
+      "minTempC": 71.1,
       "note": "絞肉的禽肉歸在 poultry（165°F）"
     },
     {
@@ -34,7 +34,7 @@
         "zh-TW": "豬、牛、羊的肉排與整塊肉"
       },
       "minTempF": 145,
-      "minTempC": 63,
+      "minTempC": 62.8,
       "restMinutes": 3,
       "note": "起鍋後靜置至少 3 分鐘"
     },
@@ -44,7 +44,7 @@
         "zh-TW": "魚類與海鮮"
       },
       "minTempF": 145,
-      "minTempC": 63
+      "minTempC": 62.8
     },
     {
       "id": "egg",
@@ -52,7 +52,7 @@
         "zh-TW": "蛋料理"
       },
       "minTempF": 160,
-      "minTempC": 71
+      "minTempC": 71.1
     },
     {
       "id": "leftovers",
@@ -60,7 +60,7 @@
         "zh-TW": "剩菜、焗烤料理再加熱"
       },
       "minTempF": 165,
-      "minTempC": 74
+      "minTempC": 73.9
     }
   ]
 }
