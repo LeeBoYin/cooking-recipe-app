@@ -166,6 +166,6 @@ Deno.test('normalize_ingredients：輸入檢查與提示', async () => {
   assertEquals(d.calls[0].messages[0].content.includes('1) 辣椒'), true);
   assertEquals(d.calls[0].model, 'claude-haiku-5-5');
   assertEquals(d.calls[0].maxTokens, 300);
-  assertEquals(validate(def.outputSchema, { choices: [9] }).length > 0, true);
+  assertEquals(validate(def.outputSchema, { choices: ['x'] }).length > 0, true); // 範圍與長度由 runner 檢查，不在 schema
   assertEquals(validate(def.outputSchema, { choices: [0, 3] }).length, 0);
 });

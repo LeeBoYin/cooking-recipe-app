@@ -71,9 +71,10 @@ const normalizeIngredients: TaskDefinition<NormalizeInput> = {
       messages: [{ role: 'user', content: lines.join('\n') }],
     };
   },
+  // 結構化輸出不支援 maxItems、minimum、maximum：長度與範圍（0 到候選數）由 background-jobs 的 runner 檢查
   outputSchema: {
     type: 'object',
-    properties: { choices: { type: 'array', maxItems: NORMALIZE_MAX_TERMS, items: { type: 'integer', minimum: 0, maximum: NORMALIZE_MAX_CANDIDATES } } },
+    properties: { choices: { type: 'array', items: { type: 'integer' } } },
     required: ['choices'],
     additionalProperties: false,
   },

@@ -40,7 +40,7 @@ Deno.test('評估集：太早給點子、或點子用到的提到食材太少，
   const fit = await attemptsOf('05');
   assertEquals(fit.turns[0]?.attempts, 2);
   const direct = await attemptsOf('03');
-  assertEquals(direct.turns[0]?.attempts, 1); // 按了「直接給我點子」：第 1 輪就給，不用重寫
+  assertEquals(direct.turns[0]?.attempts, 1); // 明說要點子：第 1 輪就給，不用重寫
 });
 
 Deno.test('提示詞：角色與規則每次一樣（可快取），schema 每次都一樣；只送最近 10 輪', async () => {
@@ -133,10 +133,9 @@ Deno.test('檢查：至少 3 輪才給點子（按了按鈕或明說要點子例
   ];
   const base: RawChatOutput = { reply: '好。', ask: null, hint: null, suggestions: [], mentioned_ingredients: mentioned, preference_signals: [], user_wants_ideas: false, summary: '' };
   const one = idea(ce, { uses_pantry_ids: ['cabbage', 'egg', 'tofu'] });
-  const early = checkChatOutput({ ...base, suggestions: [one] }, ce, { chefTurn: 2, wantIdeas: false });
+  const early = checkChatOutput({ ...base, suggestions: [one] }, ce, { chefTurn: 2 });
   assert(!early.ok && early.reason === 'too_early');
   assert(checkChatOutput({ ...base, suggestions: [one] }, ce, { chefTurn: 3 }).ok);
-  assert(checkChatOutput({ ...base, suggestions: [one] }, ce, { chefTurn: 1, wantIdeas: true }).ok); // 按了「直接給我點子」
   assert(checkChatOutput({ ...base, suggestions: [one], user_wants_ideas: true }, ce, { chefTurn: 1 }).ok); // 明說要點子
   assert(checkChatOutput({ ...base, suggestions: [one] }, ce, { chefTurn: 1, carried: true }).ok); // 接著上一段聊
   assert(checkChatOutput({ ...base, suggestions: [] }, ce, { chefTurn: 1 }).ok); // 沒給點子不受限
@@ -164,8 +163,7 @@ Deno.test('輸入：每則上限 500 字、不能同時給兩種 ID、不認得�
   assertEquals(parseChatInput({ message: 'x', conversationId: u, continueFrom: u }).ok, false);
   assertEquals(parseChatInput({ message: 'x', continueFrom: u }).ok, true);
   assertEquals(parseChatInput({ message: 'x', extra: 1 }).ok, false);
-  assertEquals(parseChatInput({ message: 'x', wantIdeas: true }).ok, true);
-  assertEquals(parseChatInput({ message: 'x', wantIdeas: 'yes' }).ok, false);
+  assertEquals(parseChatInput({ message: 'x', wantIdeas: true }).ok, false); // 已經沒有這個欄位
   assertEquals(parseChatInput(null).ok, false);
 });
 
@@ -284,10 +282,11 @@ Deno.test('handler：第 1 輪就給點子、使用者沒要求：重寫一次�
   assertEquals(stubborn.calls.some((x) => x.fn === 'ai_chat_append'), false);
   assertEquals(stubborn.calls.filter((x) => x.fn === 'ai_record_outcome').map((x) => x.args.p_outcome), ['blocked']);
 
-  // 按了「直接給我點子」：不用重寫，第 1 輪就存點子
+  // 明說要點子（user_wants_ideas）：不用重寫，第 1 輪就存點子
   const direct = fakeRpc();
   const claude2 = { claude: [] as ClaudeRequest[] };
-  const ok = await runChat({ ai: deps(() => withIdea, {}, claude2), rpc: direct.rpc, now: () => NOW }, 'u1', { message: '直接給我點子', wantIdeas: true });
+  const wantedIdea = withIdea.replace('"user_wants_ideas":false', '"user_wants_ideas":true');
+  const ok = await runChat({ ai: deps(() => wantedIdea, {}, claude2), rpc: direct.rpc, now: () => NOW }, 'u1', { message: '直接給我點子' });
   assert(ok.ok && ok.data.status === 'ok' && ok.data.ideas.length === 1);
   assertEquals(claude2.claude.length, 1);
   assertEquals(direct.calls.filter((x) => x.fn === 'ai_record_outcome').map((x) => x.args.p_outcome), ['passed']);

@@ -30,7 +30,7 @@ export interface RawChatOutput {
   mentioned_ingredients: { text: string; ingredient_id: string | null }[];
   preference_signals: { dimension_key: string; affinity: number; scope: 'long_term' | 'today' }[];
   summary: string;
-  user_wants_ideas: boolean; // 使用者這一則是不是明說要點子（按了「直接給我點子」由程式另外帶）
+  user_wants_ideas: boolean; // 使用者這一則是不是明說要點子
 }
 
 export type ChatDropReason = 'reply_wording' | 'reply_excluded' | 'ask_wording' | 'ask_excluded' | 'ask_options' | 'hint' | 'mention' | 'signal' | 'too_early' | 'low_coverage' | 'summary';

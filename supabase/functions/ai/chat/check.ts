@@ -51,8 +51,6 @@ export interface ChatCheckOpts {
   makeId?: () => string;
   // 這是大廚在這段對話的第幾輪回應（含這一則），由程式算；沒給就不設「至少幾輪」的門檻
   chefTurn?: number;
-  // 使用者按了「直接給我點子」（模型判斷使用者明說要點子，也算）
-  wantIdeas?: boolean;
   // 開新的一段、從舊的摘要接著聊：條件已經問過，不用再問滿 3 輪
   carried?: boolean;
   // 這段對話已經給過點子：之後想換、想調整都照常給，不受「至少 3 輪」限制
@@ -138,7 +136,7 @@ export function checkChatOutput(raw: RawChatOutput, ce: ChatEnv, opts: ChatCheck
   let lowCoverage = false;
   if (!ask && gave > 0) {
     // 至少 3 輪才給點子；使用者要求時不受限（程式數輪數，不靠模型自己數）
-    const wants = opts.wantIdeas === true || raw.user_wants_ideas === true;
+    const wants = raw.user_wants_ideas === true;
     if (opts.chefTurn !== undefined && opts.chefTurn < CHAT_MIN_CHEF_TURNS && !wants && !opts.carried && !opts.gaveBefore) {
       drop('too_early');
       return { ok: false, reason: 'too_early', dropped };
