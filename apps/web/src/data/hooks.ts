@@ -11,7 +11,8 @@ import {
   subscribeUploads,
 } from '../photos/uploadQueue.ts';
 import { deletePhoto, getAvatar, listEquipmentPhotos, listMyRecipePhotos, listRecipePhotos, replaceAvatar, signPhotoUrls, type Photo } from './photos.ts';
-import { deleteRecipe, getRecipe, listMyDeletedRecipes, listMyRecipes, restoreRecipe, searchMyRecipes } from './recipes.ts';
+import { listRecipeRevisions, restoreRecipeRevision } from './recipeRevisions.ts';
+import { deleteRecipe, getRecipe, listMyDeletedRecipes, listMyRecipes, restoreRecipe, searchMyRecipes, type Recipe } from './recipes.ts';
 import { currentUserId, getMyIdentity, getMySettings, updateDisplayName, updateMySettings, type UserSettings, type UserSettingsPatch } from './account.ts';
 import { bookmarkAiIdea, bookmarkIdea, linkBookmarkToRecipe, listMyBookmarks, unbookmark } from './bookmarks.ts';
 import { getMyDietary, saveMyDietary, type Dietary } from './dietary.ts';
@@ -57,6 +58,7 @@ export const queryKeys = {
   recipeSearch: (q: string) => ['recipes', 'search', q] as const,
   recipe: (id: string) => ['recipe', id] as const,
   recipePhotos: (id: string) => ['recipe', id, 'photos'] as const,
+  recipeRevisions: (id: string) => ['recipe', id, 'revisions'] as const,
   avatar: (userId: string) => ['avatar', userId] as const,
   tasteProfile: ['me', 'taste', 'profile'] as const,
   hardLimits: ['me', 'taste', 'hard-limits'] as const,
@@ -263,6 +265,22 @@ export function useRecipePhotos(id: string | undefined) {
     queryKey: queryKeys.recipePhotos(id ?? ''),
     queryFn: () => listRecipePhotos(id as string),
     enabled: !!id,
+  });
+}
+
+export function useRecipeRevisions(id: string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: queryKeys.recipeRevisions(id ?? ''),
+    queryFn: () => listRecipeRevisions(id as string),
+    enabled: !!id && enabled,
+  });
+}
+
+export function useRestoreRecipeRevision() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ recipe, version }: { recipe: Recipe; version: number }) => restoreRecipeRevision(recipe, version),
+    onSuccess: () => Promise.all([queryClient.invalidateQueries({ queryKey: ['recipe'] }), queryClient.invalidateQueries({ queryKey: ['recipes'] })]),
   });
 }
 

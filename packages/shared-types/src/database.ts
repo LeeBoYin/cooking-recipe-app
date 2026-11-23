@@ -677,6 +677,26 @@ isOneToOne: true
       referencedColumns: ["id"]
     }
                   ]
+                },"recipe_revisions": {
+                  Row: {
+                    "changed_by": string,"created_at": string,"id": string,"recipe_id": string,"snapshot": NonNullable<Json>,"user_id": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "changed_by": string,"created_at"?: string,"id"?: string,"recipe_id": string,"snapshot": NonNullable<Json>,"user_id": string,"version": number
+                  }
+                  Update: {
+                    "changed_by"?: string,"created_at"?: string,"id"?: string,"recipe_id"?: string,"snapshot"?: NonNullable<Json>,"user_id"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "recipe_revisions_recipe_id_fkey"
+      columns: ["recipe_id"]
+isOneToOne: false
+      referencedRelation: "recipes"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"recipes": {
                   Row: {
                     "ai_tags": Json | null,"cook_notes": NonNullable<Json>,"cooked_at": string | null,"cooked_dates": (string)[],"cooked_on": string | null,"created_at": string,"created_via": string,"deleted_at": string | null,"difficulty": Json | null,"equipment_type_ids": (string)[],"equipment_used_ids": (string)[],"highlights": (string)[],"id": string,"ingredient_ids": (string)[],"ingredients": NonNullable<Json>,"kitchen_id": string | null,"lang": string,"parent_recipe_id": string | null,"published_at": string | null,"safety_warnings": (string)[],"schema_version": number,"servings": number | null,"source": Json | null,"status": string,"steps": NonNullable<Json>,"story": string | null,"techniques": (string)[],"tips": string | null,"title": string | null,"updated_at": string,"user_id": string,"version": number,"visibility": string
@@ -1229,8 +1249,50 @@ isOneToOne: false
         isOneToOne: true
         isSetofReturn: false
       } },
+"restore_recipe_revision":
+{ Args: { "p_expected_updated_at": string,"p_recipe_id": string,"p_version": number }; Returns: {
+              "ai_tags": Json | null,
+"cook_notes": NonNullable<Json>,
+"cooked_at": string | null,
+"cooked_dates": (string)[],
+"cooked_on": string | null,
+"created_at": string,
+"created_via": string,
+"deleted_at": string | null,
+"difficulty": Json | null,
+"equipment_type_ids": (string)[],
+"equipment_used_ids": (string)[],
+"highlights": (string)[],
+"id": string,
+"ingredient_ids": (string)[],
+"ingredients": NonNullable<Json>,
+"kitchen_id": string | null,
+"lang": string,
+"parent_recipe_id": string | null,
+"published_at": string | null,
+"safety_warnings": (string)[],
+"schema_version": number,
+"servings": number | null,
+"source": Json | null,
+"status": string,
+"steps": NonNullable<Json>,
+"story": string | null,
+"techniques": (string)[],
+"tips": string | null,
+"title": string | null,
+"updated_at": string,
+"user_id": string,
+"version": number,
+"visibility": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "recipes"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "save_recipe":
-{ Args: { "p_expected_updated_at"?: string,"p_photos"?: Json,"p_private"?: Json,"p_recipe": Json }; Returns: {
+{ Args: { "p_changed_by"?: string,"p_expected_updated_at"?: string,"p_photos"?: Json,"p_private"?: Json,"p_recipe": Json }; Returns: {
               "ai_tags": Json | null,
 "cook_notes": NonNullable<Json>,
 "cooked_at": string | null,

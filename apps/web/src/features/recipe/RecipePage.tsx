@@ -13,6 +13,7 @@ import { useToast } from '../shell/Toast.tsx';
 import { DifficultyRadar } from './DifficultyRadar.tsx';
 import { knownHighlights } from './model.ts';
 import { PhotoViewer, type ViewerPhoto } from './PhotoViewer.tsx';
+import { RevisionsSheet } from './RevisionsSheet.tsx';
 import { ShoppingSheet } from './ShoppingSheet.tsx';
 
 const TILT = ['-rotate-3', 'rotate-2'];
@@ -48,6 +49,8 @@ export function RecipePage() {
   const [servingsOpen, setServingsOpen] = useState(false);
   const [flipUnits, setFlipUnits] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [revisionsOpen, setRevisionsOpen] = useState(false);
   const toast = useToast();
   const settings = useMySettings();
   const { kitchen } = useCurrentKitchen();
@@ -174,6 +177,30 @@ export function RecipePage() {
             >
               <Icon name="edit" />
             </Link>
+            {r.status === 'published' && (
+              <div className="relative">
+                <button
+                  type="button"
+                  aria-label={intl.formatMessage({ id: 'recipe.more' })}
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen((o) => !o)}
+                  className="flex size-11 items-center justify-center rounded-card border-0 bg-transparent text-ink"
+                >
+                  <Icon name="more" />
+                </button>
+                {menuOpen && (
+                  <div className="absolute top-12 right-0 z-20 w-40 rounded-card bg-surface px-3 shadow-[0_2px_12px_rgba(43,38,34,0.12)]">
+                    <button
+                      type="button"
+                      onClick={() => { setMenuOpen(false); setRevisionsOpen(true); }}
+                      className="h-12 w-full border-0 bg-transparent p-0 text-left text-body font-[inherit] text-ink"
+                    >
+                      <FormattedMessage id="recipe.revisions.menu" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </>
         }
       />
@@ -339,6 +366,7 @@ export function RecipePage() {
       )}
 
 
+      {revisionsOpen && <RevisionsSheet recipe={r} onClose={() => setRevisionsOpen(false)} />}
       {buyOpen && <ShoppingSheet title={title} lines={ingredientLines} onClose={() => setBuyOpen(false)} />}
 
       {viewer && (

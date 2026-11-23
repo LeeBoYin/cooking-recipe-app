@@ -58,6 +58,8 @@ export const TRACK_EVENTS = {
   'record.abandon': { step: e(['blank', 'photo', 'text', 'method']) },
   'record.draft_saved': {},
   'record.draft_published': {},
+  // 還原食譜版本：只記操作，不記是哪一版、哪一篇
+  'recipe.revision_restored': {},
   'chat.start': {},
   'chat.message_sent': { turn: n(100) },
   'suggestion.shown': { source: e(SOURCES), slot: e(SLOTS) },

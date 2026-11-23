@@ -51,8 +51,15 @@ Deno.test('空的一批不呼叫資料庫', async () => {
 });
 
 Deno.test('資料庫的 private.product_event_names() 和 TypeScript 的白名單一致', async () => {
-  const sql = await Deno.readTextFile(new URL('../../migrations/20261122000038_product_events.sql', import.meta.url));
-  const body = /select array\[([\s\S]*?)\]\s*\$\$/.exec(sql)?.[1] ?? '';
+  // 白名單用 create or replace 逐次更新：取最後一個定義它的 migration
+  const dir = new URL('../../migrations/', import.meta.url);
+  const files = [...Deno.readDirSync(dir)].map((f) => f.name).filter((n) => n.endsWith('.sql')).sort();
+  let sql = '';
+  for (const f of files) {
+    const text = await Deno.readTextFile(new URL(f, dir));
+    if (text.includes('function private.product_event_names()')) sql = text;
+  }
+  const body = /function private\.product_event_names\(\)[\s\S]*?select array\[([\s\S]*?)\]\s*\$\$/.exec(sql)?.[1] ?? '';
   const names = [...body.matchAll(/'([a-z_.]+)'/g)].map((m) => m[1]).sort();
   assertEquals(names, [...TRACK_EVENT_NAMES].sort());
 });
