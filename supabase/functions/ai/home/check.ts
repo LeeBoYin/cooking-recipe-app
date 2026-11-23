@@ -14,7 +14,7 @@ export const OCCASIONAL_MAX_DIFFICULTY = 4;
 // 帶單位的數字（阿拉伯數字已經整個禁止；這裡抓中文數字加時間、重量、容量、溫度的單位）
 const UNIT_NUMBER = /[零一二兩三四五六七八九十百半]+\s*(分鐘|分|小時|秒|公克|克|公斤|毫升|公升|公分|度|大匙|小匙|茶匙|湯匙|匙|杯|斤)/;
 
-const TEMP_MARK = /\{\{temp:\d{2,3}:[CF]\}\}/g;
+const TEMP_MARK = /\{\{temp:\d{2,3}(?:\.\d)?:[CF]\}\}/g;
 
 // 自由文字的檢查：先把合法的溫度標記拿掉，再用語系檔同一套禁用字眼掃（也抓得到帶單位的數字：任何數字都不行）
 export function wordingProblems(text: string): string[] {

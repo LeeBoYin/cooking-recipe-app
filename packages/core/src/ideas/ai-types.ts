@@ -80,8 +80,8 @@ export type ExpandInput = { suggestionId: string; ideaId: string } | { bookmarkI
 
 export type ExpandResponse = { status: 'ok'; source: 'ai' | 'cache'; draft: RecipeDraft };
 
-// 自由文字裡的標記：{{temp:180:C}}（數字用攝氏或華氏，由手機依偏好轉換）
-const TEMP_MARK = /\{\{temp:(\d{2,3}):([CF])\}\}/g;
+// 自由文字裡的標記：{{temp:180:C}}、{{temp:165:F}}、{{temp:73.9:C}}（攝氏或華氏，可到一位小數；單位和偏好相同就照原樣顯示，不同才換算）
+const TEMP_MARK = /\{\{temp:(\d{2,3}(?:\.\d)?):([CF])\}\}/g;
 export function replaceTempMarks(text: string, render: (value: number, unit: 'C' | 'F') => string): string {
   return text.replace(TEMP_MARK, (_m, v: string, u: string) => render(Number(v), u as 'C' | 'F'));
 }

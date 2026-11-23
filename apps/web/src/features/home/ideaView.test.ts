@@ -12,6 +12,9 @@ describe('AI 點子的顯示內容', () => {
   it('理由裡的溫度標記依偏好換成攝氏或華氏', () => {
     expect(renderMarks('用{{temp:180:C}}煎', { unit: 'C', both: false })).toBe('用180°C煎');
     expect(renderMarks('用{{temp:180:C}}煎', { unit: 'F', both: false })).toBe('用355°F煎');
+    // 標記的單位和偏好相同：照原樣顯示、不換算（含一位小數）
+    expect(renderMarks('煮到{{temp:165:F}}以上', { unit: 'F', both: false })).toBe('煮到165°F以上');
+    expect(renderMarks('煮到{{temp:73.9:C}}以上', { unit: 'C', both: false })).toBe('煮到73.9°C以上');
     expect(replaceTempMarks('沒有標記', () => 'x')).toBe('沒有標記');
   });
 
