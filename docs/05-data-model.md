@@ -518,7 +518,8 @@ interface RecipeStep {
 interface RecipePrivate {             // 只有作者能讀寫（另開一張表，因為 RLS 以列為單位）
   recipeId: string;                   // 一對一
   userId: string;
-  dictation?: { text: string; lang: LanguageTag; at: Instant };   // 「用說的」口述原文，重新整理、用說的改食譜時用
+  dictation?: { text: string; lang: LanguageTag; at: Instant };   // 「用說的」口述原文（只留最近一次），「讓大廚整理」、用說的改食譜時用
+  chefNote?: { text: string; at: Instant };   // 第一次發佈時大廚的一句話；只有作者看得到
   diners?: Diner[];                   // 一起吃的人；只有作者看得到，用來合併過敏原、提醒「上次請小美吃過這道了」
   updatedAt: Instant;
 }
@@ -743,7 +744,7 @@ interface AiSuggestionCache {       // 存在後端，換手機也看得到上�
   userId: string;
   kitchenId?: string;                 // 產生時所在的廚房
   conversationId?: string;            // kind 為 chat 時，屬於哪段對話（M1a-07 加）
-  kind: 'home' | 'chat' | 'easter_egg' | 'observation';   // 首頁大廚點子、對話中的點子、靈感彩蛋、記錄時的一句話；M1a-06 只用 home
+  kind: 'home' | 'chat' | 'easter_egg';   // 首頁大廚點子、對話中的點子、靈感彩蛋（記錄時的一句話存在 RecipePrivate.chefNote）
   inputHash: string;                  // 食材狀態、口味、廚具、地區與月份、時段與日期、語言，加上飲食限制與大廚的語氣的雜湊；沒變（或離上次不到 6 小時）就不重算
   round: number;                      // home：同一個 6 小時內的第幾輪，0 是第一次產生，「換一組」加一，最多 2
   createdAt: string;
@@ -836,7 +837,7 @@ interface AppConfig {                 // 後端設定，在管理後台的「系
   };
   aiEnabled: boolean;                 // AI 總開關，預設 true；關閉後所有 AI 功能顯示目前無法使用
   aiMonthlyBudgetUsd: number;         // AI 每月預算，預設 18（每月營運總額 US$20）；100% 所有 AI 功能顯示目前無法使用
-  aiBudgetAlertRatio: number;         // 提醒門檻，預設 0.8：提醒管理員，並把首頁點子降級成 Haiku 5.5、靈感彩蛋改用模板
+  aiBudgetAlertRatio: number;         // 提醒門檻，預設 0.8：提醒管理員，並把首頁點子降級成 Haiku 5.5、靈感彩蛋不出現
   aiProtection: {                     // 用量保護；使用者看不到這些數值；資料庫用 pg_jsonschema 檢查（M1a-04）
     schemaVersion: 1;
     perMinute: number;                // 每人每分鐘呼叫上限，預設 6
