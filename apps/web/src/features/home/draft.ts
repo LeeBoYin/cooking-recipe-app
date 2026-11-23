@@ -1,6 +1,6 @@
 // 展開好的做法（RecipeDraft）在畫面上的文字：單位與溫度依使用者的偏好顯示。純函式。
 import {
-  draftIngredientText, draftStepText, newId, parseMeasurePref, parseTemperaturePref, replaceTempMarks, formatTemperature, UNIT_CODES,
+  draftIngredientText, draftStepText, newId, parseMeasurePref, parseTemperaturePref, renderTempMarks, formatTemperature, UNIT_CODES,
   type MeasurePref, type RecipeDraft, type TemperaturePref, type UnitLabels,
 } from '@zhusha/core';
 import type { IntlShape } from 'react-intl';
@@ -34,14 +34,14 @@ export function ingredientLines(draft: RecipeDraft, prefs: UnitPrefs): { id: str
 export function stepLines(draft: RecipeDraft, prefs: UnitPrefs): { id: string; text: string; timerMinutes?: number; temp?: string }[] {
   return draft.steps.map((s) => ({
     id: s.id,
-    text: replaceTempMarks(s.text, (value, unit) => formatTemperature({ value, unit }, prefs.temperature)),
+    text: renderTempMarks(s.text, prefs.temperature),
     ...(s.timerSeconds ? { timerMinutes: Math.max(1, Math.round(s.timerSeconds / 60)) } : {}),
     ...(s.targetTemp ? { temp: formatTemperature(s.targetTemp, prefs.temperature) } : {}),
   }));
 }
 
 export function tipsText(draft: RecipeDraft, prefs: UnitPrefs): string | undefined {
-  return draft.tips ? replaceTempMarks(draft.tips, (value, unit) => formatTemperature({ value, unit }, prefs.temperature)) : undefined;
+  return draft.tips ? renderTempMarks(draft.tips, prefs.temperature) : undefined;
 }
 
 // 「做了，記錄一篇」帶進編輯頁的內容：食材轉成編輯頁的一列文字（存檔時由 save_recipe 的解析器拆成食材 ID、數量、單位）；
@@ -51,6 +51,6 @@ export function editorDraftOf(draft: RecipeDraft, prefs: UnitPrefs, timerLabel: 
     servings: draft.servings,
     ingredients: draft.ingredients.map((i) => ({ id: newId(), text: draftIngredientText(i, prefs.measure, prefs.labels) })),
     steps: draft.steps.map((s) => ({ id: newId(), text: draftStepText(s, prefs.temperature, timerLabel) })),
-    tips: draft.tips ? replaceTempMarks(draft.tips, (value, unit) => formatTemperature({ value, unit }, prefs.temperature)) : '',
+    tips: draft.tips ? renderTempMarks(draft.tips, prefs.temperature) : '',
   };
 }

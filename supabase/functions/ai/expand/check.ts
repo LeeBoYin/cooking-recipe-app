@@ -15,7 +15,7 @@ export const MAX_STEPS = 15;
 export const MAX_STEP_CHARS = 200;
 export const MAX_TIPS_CHARS = 300;
 
-const TEMP_MARK = /\{\{temp:\d{2,3}(?:\.\d)?:[CF]\}\}/g;
+const TEMP_MARK = /\{\{temp:\d{2,3}(?:\.\d)?:[CF](?::min(?::\d{2,3}(?:\.\d)?)?)?\}\}/g;
 // 只擋「會影響換算」的數字：時間、重量、容量、溫度（阿拉伯數字整個禁止，這裡抓「兩分鐘」「一大匙」）。
 // 量詞描述（一片蛋皮、一顆煎蛋、片開成兩片）不是份量，不擋
 const CN_NUM = '零一二兩三四五六七八九十百半';
@@ -148,8 +148,8 @@ export function donenessTips(ids: readonly string[], env: HomeEnv): string[] {
   return rows.flatMap(([id, label]) => {
     const row = donenessFor(region, id);
     if (!row) return [];
-    // 用該地區官方公布的單位與數值，不由程式換算：有官方華氏值（美國）寫華氏，其他寫攝氏
-    const mark = row.minTempF !== undefined ? `{{temp:${row.minTempF}:F}}` : `{{temp:${row.minTempC}:C}}`;
+    // 只用該地區官方公布的數值，不由程式換算：有官方華氏值（美國）兩個單位都帶（顯示時依使用者偏好挑），只有攝氏的只帶攝氏（偏好華氏時由顯示端無條件進位換算）
+    const mark = row.minTempF !== undefined ? `{{temp:${row.minTempF}:F:min:${row.minTempC}}}` : `{{temp:${row.minTempC}:C:min}}`;
     return [`${label}要煮到中心溫度 ${mark} 以上。`];
   });
 }

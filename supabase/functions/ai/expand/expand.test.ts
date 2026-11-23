@@ -140,17 +140,20 @@ Deno.test('用字：標記格式要對，不談身材', () => {
   assertEquals(stepWordingProblems('預熱到 {{temp:180:C}}，煎到金黃。'), false);
   assertEquals(stepWordingProblems('預熱到 {{temp:180}}。'), true);
   assertEquals(stepWordingProblems('煮到 {{temp:73.9:C}} 以上。'), false); // 一位小數的標記放行
+  assertEquals(stepWordingProblems('煮到 {{temp:165:F:min:73.9}} 以上。'), false);
+  assertEquals(stepWordingProblems('煮到 {{temp:75:C:min}} 以上。'), false);
+  assertEquals(stepWordingProblems('煮到 {{temp:75:C:max}} 以上。'), true);
   assertEquals(stepWordingProblems('煮到 {{temp:73.95:C}} 以上。'), true);
   assertEquals(stepWordingProblems('熱量很低。'), true);
   assertEquals(stepWordingProblems('一大匙醬油。'), true);
   assertEquals(stepWordingProblems('立刻翻面。'), false); // 步驟是祈使句，不套首頁的禁用字眼
 });
 
-Deno.test('中心溫度提醒：依當地的表（美國寫華氏 165、日本寫攝氏 75）', () => {
+Deno.test('中心溫度提醒：依當地的表（美國帶 165°F 與 73.9°C、日本只帶 75°C）', () => {
   const tw = envOf(caseOf('04'));
   assertEquals(donenessTips(['chicken-breast'], tw), ['雞、鴨等禽肉要煮到中心溫度 {{temp:75:C}} 以上。']); // 台灣沒有當地表：各表取最嚴格的
   const ca = buildHomeEnv({ ...caseOf('04').ctx, kitchen: { ...caseOf('04').ctx.kitchen, region: 'US-CA' } }, NOW);
-  assertEquals(donenessTips(['chicken-breast'], ca), ['雞、鴨等禽肉要煮到中心溫度 {{temp:165:F}} 以上。']);
+  assertEquals(donenessTips(['chicken-breast'], ca), ['雞、鴨等禽肉要煮到中心溫度 {{temp:165:F:min:73.9}} 以上。']);
   assertEquals(donenessTips(['cabbage'], tw), []);
   const jp = buildHomeEnv({ ...caseOf('04').ctx, kitchen: { ...caseOf('04').ctx.kitchen, region: 'JP' } }, NOW);
   assertEquals(donenessTips(['chicken-breast'], jp), ['雞、鴨等禽肉要煮到中心溫度 {{temp:75:C}} 以上。']);

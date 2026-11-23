@@ -15,6 +15,16 @@ describe('AI 點子的顯示內容', () => {
     // 標記的單位和偏好相同：照原樣顯示、不換算（含一位小數）
     expect(renderMarks('煮到{{temp:165:F}}以上', { unit: 'F', both: false })).toBe('煮到165°F以上');
     expect(renderMarks('煮到{{temp:73.9:C}}以上', { unit: 'C', both: false })).toBe('煮到73.9°C以上');
+    // 安全標記：有官方值就直接用，不換算；沒有才換算並無條件進位
+    const us = '{{temp:165:F:min:73.9}}';
+    expect(renderMarks(us, { unit: 'C', both: false })).toBe('73.9°C');
+    expect(renderMarks(us, { unit: 'F', both: false })).toBe('165°F');
+    expect(renderMarks(us, { unit: 'C', both: true })).toBe('73.9°C（165°F）');
+    expect(renderMarks('{{temp:160:F:min:71.1}}', { unit: 'C', both: false })).toBe('71.1°C');
+    expect(renderMarks('{{temp:62.8:C:min}}', { unit: 'F', both: false })).toBe('146°F'); // 沒有官方華氏：62.8°C = 145.04°F，往上進位到整數華氏
+    expect(renderMarks('{{temp:75:C:min}}', { unit: 'F', both: false })).toBe('167°F'); // 75°C = 167°F
+    expect(renderMarks('{{temp:75.1:C:min}}', { unit: 'F', both: false })).toBe('168°F'); // 167.18°F 往上進位
+    expect(renderMarks('{{temp:180:C}}', { unit: 'F', both: false })).toBe('355°F'); // 一般標記照舊
     expect(replaceTempMarks('沒有標記', () => 'x')).toBe('沒有標記');
   });
 

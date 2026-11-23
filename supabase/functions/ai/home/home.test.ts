@@ -168,7 +168,7 @@ Deno.test('檢查：不催促、不數次數、不寫帶單位的數字；chef_c
     '熱量很低', '你應該多吃菜', '用{{temp:abc}}烤',
   ];
   for (const w of bad) assert(wordingProblems(w).length > 0, w);
-  for (const ok of ['手邊的茄子剛好，今天換個煮法。', '用{{temp:180:C}}烤到金黃。', '煮到{{temp:73.9:C}}以上。', '煮到{{temp:165:F}}以上。', '你愛的豆瓣味，這次換茄子當主角。']) assertEquals(wordingProblems(ok), [], ok);
+  for (const ok of ['手邊的茄子剛好，今天換個煮法。', '用{{temp:180:C}}烤到金黃。', '煮到{{temp:73.9:C}}以上。', '煮到{{temp:165:F:min:73.9}}以上。', '煮到{{temp:75:C:min}}以上。', '你愛的豆瓣味，這次換茄子當主角。']) assertEquals(wordingProblems(ok), [], ok);
   const r = check(env, bad.map((why, i) => idea(env, { title: `菜${i}`, why })).concat(idea(env, { title: '合格', why: '用{{temp:180:C}}烤到金黃。' })), '你好久沒煮了');
   assertEquals(r.ideas.map((i) => i.title), ['合格']);
   assertEquals(r.chefComment, null);

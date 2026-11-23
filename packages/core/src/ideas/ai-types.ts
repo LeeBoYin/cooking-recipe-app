@@ -1,6 +1,6 @@
 // 大廚的 AI 點子（M1a-06）：後端存進快取、回給手機的格式。後端（ai 函式）與手機共用同一份型別。
 // 卡片不含做法；做法與回饋之後用點子的 id 對應（05 AiSuggestionCache）。
-import type { Temperature, UnitCode } from '../units/units.ts';
+import { convertTemperature, formatTemperature, type Temperature, type TemperaturePref, type UnitCode } from '../units/units.ts';
 
 export type IdeaSlot = 'familiar' | 'twist' | 'adventure';
 
@@ -80,10 +80,29 @@ export type ExpandInput = { suggestionId: string; ideaId: string } | { bookmarkI
 
 export type ExpandResponse = { status: 'ok'; source: 'ai' | 'cache'; draft: RecipeDraft };
 
-// 自由文字裡的標記：{{temp:180:C}}、{{temp:165:F}}、{{temp:73.9:C}}（攝氏或華氏，可到一位小數；單位和偏好相同就照原樣顯示，不同才換算）
-const TEMP_MARK = /\{\{temp:(\d{2,3}(?:\.\d)?):([CF])\}\}/g;
-export function replaceTempMarks(text: string, render: (value: number, unit: 'C' | 'F') => string): string {
-  return text.replace(TEMP_MARK, (_m, v: string, u: string) => render(Number(v), u as 'C' | 'F'));
+// 自由文字裡的標記：{{temp:180:C}}、{{temp:73.9:C}}（攝氏或華氏，可到一位小數）。
+// 安全溫度（中心溫度，只能高不能低）多帶 :min，可再帶另一個單位的官方值：{{temp:165:F:min:73.9}}。
+// 一般標記：單位和偏好相同就照原樣顯示，不同才換算（照一般規則進位到 5）。
+// 安全標記：偏好的單位就是標記的單位，或有另一個單位的官方值，就直接用、不換算；都沒有才換算，並且無條件進位（不低於官方值）。
+const TEMP_MARK = /\{\{temp:(\d{2,3}(?:\.\d)?):([CF])(?::(min)(?::(\d{2,3}(?:\.\d)?))?)?\}\}/g;
+export interface TempMarkInfo {
+  min: boolean;
+  alt?: number; // 另一個單位的官方值
+}
+export function replaceTempMarks(text: string, render: (value: number, unit: 'C' | 'F', info: TempMarkInfo) => string): string {
+  return text.replace(TEMP_MARK, (_m, v: string, u: string, min: string | undefined, alt: string | undefined) =>
+    render(Number(v), u as 'C' | 'F', { min: min === 'min', ...(alt === undefined ? {} : { alt: Number(alt) }) }),
+  );
+}
+
+// 文字裡的溫度標記依偏好顯示（見上方規則）
+export function renderTempMarks(text: string, pref: TemperaturePref): string {
+  return replaceTempMarks(text, (value, unit, info) => {
+    if (!info.min) return formatTemperature({ value, unit }, pref);
+    const inUnit = (target: 'C' | 'F'): number => (target === unit ? value : (info.alt ?? convertTemperature({ value, unit }, target, true)));
+    const show = (target: 'C' | 'F') => `${Number(inUnit(target).toFixed(1))}°${target}`;
+    return pref.both ? `${show(pref.unit)}（${show(pref.unit === 'C' ? 'F' : 'C')}）` : show(pref.unit);
+  });
 }
 
 // ---------------------------------------------------------------------------------------------

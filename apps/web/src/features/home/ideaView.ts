@@ -1,6 +1,6 @@
 // 首頁點子卡片與抽屜要顯示的內容。AI 想的點子先轉成 IdeaView，畫面只認它。
 // 卡片不顯示槽位標籤（熟悉的、變化版、新挑戰）：由 why 自然說明（03）。
-import { formatTemperature, replaceTempMarks, type AiIdea, type IdeaSlot, type TemperaturePref } from '@zhusha/core';
+import { renderTempMarks, type AiIdea, type IdeaSlot, type TemperaturePref } from '@zhusha/core';
 import { getIngredient } from '@zhusha/ingredients';
 import { techniques as techniqueDict } from '@zhusha/equipment';
 import { baseDishes } from '@zhusha/taste';
@@ -30,7 +30,7 @@ export const dishTechniques = (dishId: string | undefined): string[] => techniqu
 
 // 理由裡的 {{temp:180:C}} 依使用者的偏好轉成攝氏或華氏
 export function renderMarks(text: string, pref: TemperaturePref): string {
-  return replaceTempMarks(text, (value, unit) => formatTemperature({ value, unit }, pref));
+  return renderTempMarks(text, pref);
 }
 
 export function viewOfAiIdea(idea: AiIdea, pref: TemperaturePref, suggestionId?: string | null): IdeaView {
